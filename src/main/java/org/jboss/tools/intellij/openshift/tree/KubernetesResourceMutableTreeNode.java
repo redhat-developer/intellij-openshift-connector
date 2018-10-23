@@ -4,7 +4,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 
-public class KubernetesResourceMutableTreeNode extends LazyMutableTreeNode{
+public class KubernetesResourceMutableTreeNode extends LazyMutableTreeNode implements IconTreeNode {
   public KubernetesResourceMutableTreeNode() {
   }
 
@@ -25,5 +25,10 @@ public class KubernetesResourceMutableTreeNode extends LazyMutableTreeNode{
     } else {
       return metadata.getName();
     }
+  }
+
+  @Override
+  public String getIconName() {
+    return null;
   }
 }

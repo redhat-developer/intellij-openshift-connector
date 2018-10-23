@@ -34,4 +34,8 @@ public class DeploymentConfigNode extends KubernetesResourceMutableTreeNode {
       .build();
   }
 
+  @Override
+  public String getIconName() {
+    return "/images/component.png";
+  }
 }

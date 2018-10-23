@@ -5,12 +5,13 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.client.ServiceCatalogClient;
+import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.OdoConfig;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class ApplicationNode extends LazyMutableTreeNode {
+public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode {
   public ApplicationNode(OdoConfig.Application application) {
     super(application);
   }
@@ -41,5 +42,10 @@ public class ApplicationNode extends LazyMutableTreeNode {
   @Override
   public String toString() {
     return ((OdoConfig.Application) userObject).getName();
+  }
+
+  @Override
+  public String getIconName() {
+    return "/images/application.png";
   }
 }

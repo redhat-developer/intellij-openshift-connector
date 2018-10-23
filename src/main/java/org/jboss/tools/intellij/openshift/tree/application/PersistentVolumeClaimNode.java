@@ -13,4 +13,8 @@ public class PersistentVolumeClaimNode extends KubernetesResourceMutableTreeNode
   public void loadOnce() {
   }
 
+  @Override
+  public String getIconName() {
+    return "/images/storage.png";
+  }
 }

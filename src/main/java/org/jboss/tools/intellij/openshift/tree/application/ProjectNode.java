@@ -26,4 +26,9 @@ public class ProjectNode extends KubernetesResourceMutableTreeNode {
       this.add(new DefaultMutableTreeNode("Failed to load Odo config file"));
     }
   }
+
+  @Override
+  public String getIconName() {
+    return "/images/project.png";
+  }
 }

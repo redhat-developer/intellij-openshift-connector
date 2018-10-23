@@ -12,6 +12,7 @@ import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.tree.ClustersTreeModel;
 import org.jboss.tools.intellij.openshift.tree.ClustersTreeNodeCellRenderer;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeNodeCellRenderer;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -30,6 +31,7 @@ public class WindowToolFactory implements ToolWindowFactory {
         panel.add(new JBScrollPane(tree), BorderLayout.PAGE_START);
 
         tree = new Tree(new ApplicationTreeModel());
+        tree.setCellRenderer(new ApplicationTreeNodeCellRenderer());
         PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
         panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
         toolWindow.getContentManager().addContent(contentFactory.createContent(panel, "", false));

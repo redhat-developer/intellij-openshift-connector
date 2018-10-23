@@ -1,0 +1,205 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jboss.tools.intellij</groupId>
+  <artifactId>org.jboss.tools.intellij.openshift</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>IntelliJ OpenShift plugin</name>
+  <description>Plugins that integrates OpenShift3 to IntelliJ.</description>
+
+  <properties>
+    <!-- Plugin meta information -->
+    <vendor.url>http://www.redhat.com</vendor.url>
+    <vendor.email>info@redhat.com</vendor.email>
+    <vendor.name>Red Hat</vendor.name>
+    <ij.plugin>true</ij.plugin>
+
+    <!-- IntelliJ distribution related properties-->
+    <intellij.version>13.0.2</intellij.version>
+    <intellij.distribution.extract.path>${project.build.directory}/intellij</intellij.distribution.extract.path>
+
+    <!-- Plugins version -->
+    <antrun.plugin.version>1.7</antrun.plugin.version>
+    <comipler.plugin.version>2.5.1</comipler.plugin.version>
+    <dependency.plugin.version>2.3</dependency.plugin.version>
+    <javadoc.plugin.version>2.8.1</javadoc.plugin.version>
+    <source.plugin.version>2.2</source.plugin.version>
+    <download.plugin.version>1.4.1</download.plugin.version>
+
+    <!-- Miscellaneous -->
+    <jdk.version>1.8.0</jdk.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <fabric8.client.version>3.2.0</fabric8.client.version>
+    <me.snowdrop.servicecatalog-client.version>1.0.1</me.snowdrop.servicecatalog-client.version>
+
+    <!-- Dependency for Maven integration-->
+    <extraClasspath>${intellij.distribution.extract.path}/plugins/maven/lib</extraClasspath>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+    </dependency>
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>openshift-client</artifactId>
+      <version>${fabric8.client.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>me.snowdrop</groupId>
+      <artifactId>servicecatalog-client</artifactId>
+      <version>${me.snowdrop.servicecatalog-client.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.googlecode.maven-download-plugin</groupId>
+          <artifactId>download-maven-plugin</artifactId>
+          <version>1.4.1</version>
+          <executions>
+            <execution>
+              <id>install-intellij</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>wget</goal>
+              </goals>
+              <configuration>
+                <url>https://download.jetbrains.com/idea/ideaIC-2018.2.4.win.zip</url>
+                <unpack>true</unpack>
+                <outputDirectory>${project.build.directory}/intellij</outputDirectory>
+                <sha1>86b9a5a777426d35fe3da88d793c65c78a8c03d7</sha1>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${comipler.plugin.version}</version>
+          <configuration>
+            <compilerArguments>
+              <extdirs>${intellij.distribution.extract.path}/lib/;${extraClasspath}</extdirs>
+            </compilerArguments>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${antrun.plugin.version}</version>
+          <executions>
+            <execution>
+              <id>generate-forms</id>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <path id="maven.plugin.complete.classpath">
+                    <path refid="maven.plugin.classpath"/>
+                    <fileset dir="${intellij.distribution.extract.path}/lib">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                  </path>
+                  <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions"
+                           classpathref="maven.plugin.complete.classpath"/>
+                  <path id="sourcepath">
+                    <dirset dir="${project.basedir}">
+                      <include name="src/main/java"/>
+                      <include name="src/main/resources"/>
+                    </dirset>
+                  </path>
+                  <instrumentIdeaExtensions destdir="${project.build.outputDirectory}"
+                                            extdirs="${intellij.distribution.extract.path}/lib/;${extraClasspath}">
+                    <classpath refid="maven.compile.classpath"/>
+                    <src refid="sourcepath"/>
+                  </instrumentIdeaExtensions>
+                </target>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>com.sun</groupId>
+              <artifactId>tools</artifactId>
+              <version>1.8.0</version>
+              <scope>system</scope>
+              <systemPath>${env.JAVA_HOME}/lib/tools.jar</systemPath>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${javadoc.plugin.version}</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${source.plugin.version}</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>com.googlecode.maven-download-plugin</groupId>
+        <artifactId>download-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.7.2</version>
+        <configuration>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${intellij.distribution.extract.path}/lib/util.jar</additionalClasspathElement>
+            <additionalClasspathElement>${intellij.distribution.extract.path}/lib/trove4j.jar</additionalClasspathElement>
+          </additionalClasspathElements>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

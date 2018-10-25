@@ -31,9 +31,11 @@
 
   <actions>
     <group id="org.jboss.tools.intellij.tree" popup="true">
-      <action class="org.jboss.tools.intellij.openshift.actions.RefreshAction" id="org.jboss.tools.intellij.refresh" text="Refresh"></action>
-      <action class="org.jboss.tools.intellij.openshift.actions.SetCurrentClusterAction" id="org.jboss.tools.intellij.currentcluster" text="Set current"></action>
-      <action class="org.jboss.tools.intellij.openshift.actions.DeleteFromKubeConfigAction" id="org.jboss.tools.intellij.delete" text="Delete from kubeconfig"></action>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.refresh" text="Refresh"></action>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.currentcluster" text="Set current"></action>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.DeleteFromKubeConfigAction" id="org.jboss.tools.intellij.delete" text="Delete from kubeconfig"></action>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.application.CreateComponentAction" text="New component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" id="CreateApplicationAction" text="New application"/>
     </group>
     <!-- Add your actions here -->
   </actions>

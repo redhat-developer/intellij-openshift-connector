@@ -40,8 +40,8 @@ public abstract class TreeAction extends AnAction {
         Tree tree = getTree(anActionEvent);
         TreePath selectedPath = tree.getSelectionModel().getSelectionPath();
         Object selected = selectedPath.getLastPathComponent();
-        actionPerformed(anActionEvent, selected);
+        actionPerformed(anActionEvent, selectedPath, selected);
     }
 
-    abstract void actionPerformed(AnActionEvent anActionEvent, Object selected);
+    public abstract void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected);
 }

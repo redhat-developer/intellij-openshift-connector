@@ -6,6 +6,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
+import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 
@@ -15,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener {
+public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel {
     private LazyMutableTreeNode ROOT;
 
     private static final String ERROR = "Please login to cluster first";
@@ -57,8 +58,29 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
 
     @Override
     public void onUpdate(ConfigWatcher source) {
-            client = loadClient();
-            ROOT = new ApplicationsRootNode(client);
-            this.treeNodesChanged(new TreePath(ROOT), new int[0], new Object[0]);
+        refresh();
+    }
+
+    @Override
+    public void refresh() {
+        TreePath path = new TreePath(ROOT);
+        client = loadClient();
+        ROOT = new ApplicationsRootNode(client);
+        this.treeStructureChanged(path, new int[0], new Object[0]);
+    }
+
+    @Override
+    public void treeNodesChanged(TreePath path, int[] indices, Object[] children) {
+        super.treeNodesChanged(path, indices, children);
+    }
+
+    @Override
+    public void treeNodesInserted(TreePath path, int[] indices, Object[] children) {
+        super.treeNodesInserted(path, indices, children);
+    }
+
+    @Override
+    public void treeNodesRemoved(TreePath path, int[] indices, Object[] children) {
+        super.treeNodesRemoved(path, indices, children);
     }
 }

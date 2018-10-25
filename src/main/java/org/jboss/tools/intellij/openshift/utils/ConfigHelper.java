@@ -47,4 +47,9 @@ public class ConfigHelper {
     public static void saveOdoConfig(OdoConfig config) throws IOException {
         mapper.writeValue(new File(getOdoConfigPath()), config);
     }
+
+    public static ToolsConfig loadToolsConfig() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(ConfigHelper.class.getResource("/tools.json"), ToolsConfig.class);
+    }
 }

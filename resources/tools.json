@@ -3,19 +3,19 @@
     "odo": {
       "platforms": {
         "win": {
-          "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.14/odo-windows-amd64.exe",
+          "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.14/odo-windows-amd64.exe.gz",
           "cmdFileName": "odo.exe",
-          "dlFileName": "odo-windows-amd64.exe"
+          "dlFileName": "odo-windows-amd64.exe.gz"
         },
         "osx": {
-          "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.14/odo-darwin-amd64",
+          "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.14/odo-darwin-amd64.gz",
           "cmdFileName": "odo",
-          "dlFileName": "odo"
+          "dlFileName": "odo-darwin-amd64.gz"
         },
         "lnx": {
-          "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.14/odo-linux-amd64",
+          "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.14/odo-linux-amd64.gz",
           "cmdFileName": "odo",
-          "dlFileName": "odo"
+          "dlFileName": "odo-linux-amd64.gz"
         }
       }
     }

@@ -7,6 +7,13 @@ import com.twelvemonkeys.lang.Platform;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -41,6 +48,7 @@ public class OdoHelper {
       } catch (IOException e) {
         command = System.getProperty("user.home") + File.separatorChar + ".vs-openshift" + File.separatorChar + command;
         if (!Files.exists(Paths.get(command))) {
+          final String dlFileName = System.getProperty("user.home") + File.separatorChar + ".vs-openshift" + File.separatorChar + platform.getDlFileName();
           final String cmd = command;
           if (JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION) {
             ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
@@ -49,10 +57,11 @@ public class OdoHelper {
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder().url(platform.getUrl()).build();
                 Response response = client.newCall(request).execute();
-                downloadFile(response.body().byteStream(), cmd, progressIndicator, response.body().contentLength());
+                downloadFile(response.body().byteStream(), dlFileName, progressIndicator, response.body().contentLength());
                 if (progressIndicator.isCanceled()) {
                   throw new IOException("Interrupted");
                 } else {
+                  uncompress(dlFileName, cmd);
                   return cmd;
                 }
               }
@@ -65,6 +74,17 @@ public class OdoHelper {
     } catch (IOException e) {
       CompletableFuture<String> future = CompletableFuture.completedFuture(null);
       return future.thenApply(s -> {throw new CompletionException(e);});
+    }
+  }
+
+  private void uncompress(String dlFileName, String cmd) throws IOException {
+    try (InputStream input = new BufferedInputStream(new FileInputStream(dlFileName))) {
+      CompressorInputStream stream = new CompressorStreamFactory().createCompressorInputStream(input);
+      try (OutputStream output = new FileOutputStream(cmd)) {
+        IOUtils.copy(stream, output);
+      }
+    } catch (CompressorException e) {
+      throw new IOException(e);
     }
   }
 

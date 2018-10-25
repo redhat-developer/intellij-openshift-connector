@@ -33,6 +33,7 @@
 
     <fabric8.client.version>3.2.0</fabric8.client.version>
     <me.snowdrop.servicecatalog-client.version>1.0.1</me.snowdrop.servicecatalog-client.version>
+    <commons.compress.version>1.18</commons.compress.version>
 
     <!-- Dependency for Maven integration-->
     <extraClasspath>${intellij.distribution.extract.path}/plugins/maven/lib</extraClasspath>
@@ -59,6 +60,11 @@
       <groupId>me.snowdrop</groupId>
       <artifactId>servicecatalog-client</artifactId>
       <version>${me.snowdrop.servicecatalog-client.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>${commons.compress.version}</version>
     </dependency>
   </dependencies>
 

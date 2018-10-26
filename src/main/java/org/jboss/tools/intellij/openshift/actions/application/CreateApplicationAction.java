@@ -26,7 +26,7 @@ public class CreateApplicationAction extends OdoAction {
     if ((appName != null) && appName.trim().length() > 0) {
       CompletableFuture.runAsync(() -> {
         try {
-          Runtime.getRuntime().exec(new String[] {odo, "project", "set", ((ProjectNode)selected).toString()});
+          Runtime.getRuntime().exec(new String[] {odo, "project", "set", selected.toString()});
         } catch (IOException e) {
           throw new CompletionException(e);
         }
@@ -46,11 +46,9 @@ public class CreateApplicationAction extends OdoAction {
           projectNode.add(new ApplicationNode(application));
           ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeNodesInserted(path, new int[] {projectNode.getChildCount() -1}, new Object[0]);
         })
-        .handle((r,t) -> {
-          if (t != null) {
-            t.printStackTrace();
-          }
-          return r;
+        .exceptionally((t) -> {
+          JOptionPane.showMessageDialog(null, "Error: " + t.getLocalizedMessage(), "Create application", JOptionPane.ERROR_MESSAGE);
+          return null;
         });
     }
   }

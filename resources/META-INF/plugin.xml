@@ -36,6 +36,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.DeleteFromKubeConfigAction" id="org.jboss.tools.intellij.delete" text="Delete from kubeconfig"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.application.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.application.CreateComponentAction" text="New component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" id="CreateApplicationAction" text="New application"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="DeleteApplicationAction" text="Delete application"/>
     </group>
     <!-- Add your actions here -->
   </actions>

@@ -70,8 +70,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     }
 
     @Override
-    public void treeNodesChanged(TreePath path, int[] indices, Object[] children) {
-        super.treeNodesChanged(path, indices, children);
+    public void treeStructureChanged(TreePath path, int[] indices, Object[] children) {
+        super.treeStructureChanged(path, indices, children);
     }
 
     @Override

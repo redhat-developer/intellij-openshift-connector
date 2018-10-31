@@ -3,6 +3,7 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,8 @@ public class CreateComponentAction extends OdoAction {
         .thenCompose(dialog -> {
           return createComponent(odo, applicationNode.toString(), dialog);
         })
+        .thenAccept(s -> applicationNode.reload())
+        .thenAccept(v -> ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]))
         .exceptionally(t -> {
           JOptionPane.showMessageDialog(null, "Error: " + t.getLocalizedMessage(), "Create component", JOptionPane.ERROR_MESSAGE);
           return null;

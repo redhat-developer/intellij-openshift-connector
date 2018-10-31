@@ -29,6 +29,13 @@ public class LazyMutableTreeNode extends DefaultMutableTreeNode implements LazyT
         return false;
     }
 
+    @Override
+    public void reload() {
+        needsLoading.set(true);
+        removeAllChildren();
+        load();
+    }
+
     public void loadOnce() {
     }
 }

@@ -1,12 +1,12 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
-import sun.reflect.generics.tree.Tree;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
-import java.awt.*;
+import java.awt.Component;
 
 public class ApplicationTreeNodeCellRenderer extends DefaultTreeCellRenderer {
   @Override

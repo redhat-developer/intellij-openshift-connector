@@ -2,10 +2,11 @@ package org.jboss.tools.intellij.openshift.tree;
 
 import io.fabric8.kubernetes.api.model.NamedContext;
 
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Font;
 
 public class ClustersTreeNodeCellRenderer extends DefaultTreeCellRenderer {
     @Override

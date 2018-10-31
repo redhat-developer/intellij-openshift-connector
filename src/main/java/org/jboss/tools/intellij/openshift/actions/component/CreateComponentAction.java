@@ -8,7 +8,7 @@ import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.BufferedReader;
 import java.io.IOException;

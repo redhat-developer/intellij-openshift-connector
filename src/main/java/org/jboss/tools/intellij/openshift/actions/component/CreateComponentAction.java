@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CreateComponentAction extends OdoAction {
   public CreateComponentAction() {
@@ -53,7 +52,7 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @Nullable
-  protected CompletionStage<String> createComponent(String odo, String appName, CreateComponentDialog dialog) {
+  protected CompletionStage<Void> createComponent(String odo, String appName, CreateComponentDialog dialog) {
     if (dialog.isOK()) {
       return ExecHelper.execute(odo, "app", "set", appName)
         .thenCompose(s -> createComponent(odo, dialog));
@@ -61,12 +60,12 @@ public class CreateComponentAction extends OdoAction {
     return CompletableFuture.completedFuture(null);
   }
 
-  private CompletableFuture<String> createComponent(String odo, CreateComponentDialog dialog) {
+  private CompletableFuture<Void> createComponent(String odo, CreateComponentDialog dialog) {
     if (dialog.getSourceType() == 0) {
-      return ExecHelper.execute(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
+      return ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
         "--local", dialog.getSource());
     } else {
-      return ExecHelper.execute(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
+      return ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
         "--git", dialog.getSource());
 
     }

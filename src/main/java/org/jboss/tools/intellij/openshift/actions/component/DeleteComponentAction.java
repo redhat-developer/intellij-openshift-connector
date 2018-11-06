@@ -1,7 +1,6 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.*;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;

@@ -11,6 +11,8 @@ cache:
 
 build:
   stage: build
+  tags:
+    - docker
   script:
   - ./gradlew assemble
   artifacts:
@@ -22,6 +24,8 @@ build:
 
 test:
   stage: test
+  tags:
+    - docker
   script:
   - ./gradlew check
 

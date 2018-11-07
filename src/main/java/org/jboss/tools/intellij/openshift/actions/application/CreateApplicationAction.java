@@ -7,7 +7,9 @@ import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.OdoConfig;
+import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
@@ -26,30 +28,19 @@ public class CreateApplicationAction extends OdoAction {
     if ((appName != null) && appName.trim().length() > 0) {
       CompletableFuture.runAsync(() -> {
         try {
-          Runtime.getRuntime().exec(new String[] {odo, "project", "set", selected.toString()});
-        } catch (IOException e) {
-          throw new CompletionException(e);
-        }
-      }).thenRun(() -> {
-        try {
-          Runtime.getRuntime().exec(new String[] {odo, "app", "create", appName});
-        } catch (IOException e) {
-          throw new CompletionException(e);
-        }
-      }).
-        thenRun(() -> {
+          ExecHelper.execute(odo, "project", "set", selected.toString());
+          ExecHelper.execute(odo, "app", "create", appName);
           ProjectNode projectNode = (ProjectNode) selected;
           OdoConfig.Application application = new OdoConfig.Application();
           application.setActive(true);
           application.setName(appName);
           application.setProject(projectNode.toString());
           projectNode.add(new ApplicationNode(application));
-          ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeNodesInserted(path, new int[] {projectNode.getChildCount() -1}, new Object[0]);
-        })
-        .exceptionally((t) -> {
-          JOptionPane.showMessageDialog(null, "Error: " + t.getLocalizedMessage(), "Create application", JOptionPane.ERROR_MESSAGE);
-          return null;
-        });
+          ((ApplicationTreeModel) getTree(anActionEvent).getModel()).treeNodesInserted(path, new int[]{projectNode.getChildCount() - 1}, new Object[0]);
+        } catch (IOException e) {
+          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create application", JOptionPane.ERROR_MESSAGE));
+        }
+      });
     }
   }
 }

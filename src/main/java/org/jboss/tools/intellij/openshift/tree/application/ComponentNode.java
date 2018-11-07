@@ -1,5 +1,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -13,9 +15,9 @@ import org.jboss.tools.intellij.openshift.utils.OdoConfig;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class DeploymentConfigNode extends KubernetesResourceMutableTreeNode {
-  public DeploymentConfigNode(DeploymentConfig deploymentConfig) {
-    super(deploymentConfig);
+public class ComponentNode extends KubernetesResourceMutableTreeNode {
+  public ComponentNode(HasMetadata componentResource) {
+    super(componentResource);
   }
 
   @Override

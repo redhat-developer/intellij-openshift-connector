@@ -6,6 +6,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JOptionPane;
@@ -27,47 +28,39 @@ public class CreateComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
     ApplicationNode applicationNode = (ApplicationNode) selected;
-    try {
-      ExecHelper.execute(odo, "catalog", "list", "components").thenApply(s -> {
-        try {
-          return loadComponentTypes(s);
-        } catch (IOException e) {
-          throw new CompletionException(e);
-        }
-      })
-        .thenApply(types -> showDialog(types))
-        .thenCompose(dialog -> {
-          return createComponent(odo, applicationNode.toString(), dialog);
-        })
-        .thenAccept(s -> applicationNode.reload())
-        .thenAccept(v -> ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]))
-        .exceptionally(t -> {
-          JOptionPane.showMessageDialog(null, "Error: " + t.getLocalizedMessage(), "Create component", JOptionPane.ERROR_MESSAGE);
-          return null;
-
+    CompletableFuture.runAsync(() -> {
+      try {
+        CreateComponentDialog dialog = UIHelper.executeinUI(() -> {
+          try {
+            return showDialog(loadComponentTypes(ExecHelper.execute(odo, "catalog", "list", "components")));
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
         });
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+        if (dialog.isOK()) {
+          createComponent(odo, applicationNode.toString(), dialog);
+          applicationNode.reload();
+          ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]);
+        }
+      } catch (IOException e) {
+        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create component", JOptionPane.ERROR_MESSAGE));
+      }
+    });
   }
 
   @Nullable
-  protected CompletionStage<Void> createComponent(String odo, String appName, CreateComponentDialog dialog) {
-    if (dialog.isOK()) {
-      return ExecHelper.execute(odo, "app", "set", appName)
-        .thenCompose(s -> createComponent(odo, dialog));
-    }
-    return CompletableFuture.completedFuture(null);
+  protected void createComponent(String odo, String appName, CreateComponentDialog dialog) throws IOException {
+      ExecHelper.execute(odo, "app", "set", appName);
+      createComponent(odo, dialog);
   }
 
-  private CompletableFuture<Void> createComponent(String odo, CreateComponentDialog dialog) {
+  private void createComponent(String odo, CreateComponentDialog dialog) {
     if (dialog.getSourceType() == 0) {
-      return ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
+      ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
         "--local", dialog.getSource());
     } else {
-      return ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
+      ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
         "--git", dialog.getSource());
-
     }
   }
 

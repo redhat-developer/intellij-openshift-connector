@@ -31,12 +31,12 @@ public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode
   }
 
   protected void loadDCs(OpenShiftClient client) {
-    client.deploymentConfigs().inNamespace(((Project) ((ProjectNode) getParent()).getUserObject()).getMetadata().getName()).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels("app", this.toString()).build()).list().getItems().forEach(dc -> this.add(new DeploymentConfigNode(dc)));
+    client.deploymentConfigs().inNamespace(((Project) ((ProjectNode) getParent()).getUserObject()).getMetadata().getName()).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels("app", this.toString()).build()).list().getItems().forEach(dc -> this.add(new ComponentNode(dc)));
   }
 
   protected void loadServiceInstances(OpenShiftClient client) {
     ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-    sc.serviceInstances().inNamespace(((Project) ((ProjectNode) getParent()).getUserObject()).getMetadata().getName()).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels("app", this.toString()).build()).list().getItems().forEach(si -> this.add(new ServiceInstanceNode(si)));
+    sc.serviceInstances().inNamespace(((Project) ((ProjectNode) getParent()).getUserObject()).getMetadata().getName()).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels("app", this.toString()).build()).list().getItems().forEach(si -> this.add(new ComponentNode(si)));
   }
 
   @Override

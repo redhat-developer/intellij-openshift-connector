@@ -21,20 +21,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 public class ExecHelper {
-  public static CompletableFuture<String> execute(String executable, String... arguments) {
+  public static String execute(String executable, String... arguments) throws IOException {
     DefaultExecutor executor = new DefaultExecutor();
     StringWriter writer = new StringWriter();
     PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
     executor.setStreamHandler(handler);
     CommandLine command = new CommandLine(executable).addArguments(arguments);
-    try {
       executor.execute(command);
-      return CompletableFuture.completedFuture(writer.toString());
-    } catch (IOException e) {
-      return CompletableFuture.completedFuture("").thenApply((s) -> {
-        throw new CompletionException("Failed to launch '" + command + "'", e);
-      });
-    }
+      return writer.toString();
   }
 
   public static CompletableFuture<Void> executeWithTerminal(String... command) {

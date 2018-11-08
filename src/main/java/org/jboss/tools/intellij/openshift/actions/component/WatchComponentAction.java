@@ -14,8 +14,8 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class PushComponentAction extends OdoAction {
-  public PushComponentAction() {
+public class WatchComponentAction extends OdoAction {
+  public WatchComponentAction() {
     super(ComponentNode.class);
   }
 
@@ -28,7 +28,7 @@ public class PushComponentAction extends OdoAction {
       try {
         ExecHelper.execute(odo, "project", "set", projectNode.toString());
         ExecHelper.execute(odo, "app", "set", applicationNode.toString());
-        ExecHelper.executeWithTerminal(odo, "push", componentNode.toString());
+        ExecHelper.executeWithTerminal(odo, "watch", componentNode.toString());
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Push", JOptionPane.ERROR_MESSAGE));
       }

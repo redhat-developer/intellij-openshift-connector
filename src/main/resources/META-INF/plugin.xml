@@ -36,9 +36,10 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.currentcluster" text="Set current"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.DeleteFromKubeConfigAction" id="org.jboss.tools.intellij.delete" text="Delete from kubeconfig"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" text="New application"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" text="Delete application"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="Create component"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.CreateURLAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateURLAction" text="Create URL"/>
 
     </group>
     <!-- Add your actions here -->

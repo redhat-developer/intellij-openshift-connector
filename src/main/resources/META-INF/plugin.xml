@@ -41,6 +41,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateURLAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateURLAction" text="Create URL"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" text="Open in Browser"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
 
     </group>
     <!-- Add your actions here -->

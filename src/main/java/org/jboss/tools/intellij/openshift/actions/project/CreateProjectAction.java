@@ -1,13 +1,9 @@
-package org.jboss.tools.intellij.openshift.actions.cluster;
+package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
-import org.jboss.tools.intellij.openshift.utils.OdoConfig;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;

@@ -11,7 +11,6 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 public class DeleteApplicationAction extends OdoAction {
   public DeleteApplicationAction() {

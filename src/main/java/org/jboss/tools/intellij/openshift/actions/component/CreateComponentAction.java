@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 public class CreateComponentAction extends OdoAction {
@@ -75,9 +73,7 @@ public class CreateComponentAction extends OdoAction {
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
       return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
         .map(s -> s.split("\\|"))
-        .map(s -> {
-          return new String[] {s[0], s[2]};
-        })
+        .map(s -> new String[] {s[0], s[2]})
         .collect(Collectors.toList());
     }
   }

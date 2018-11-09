@@ -6,6 +6,7 @@ import org.jboss.tools.intellij.openshift.actions.TreeAction;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.tree.ClustersTreeModel;
 
+import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
@@ -22,7 +23,7 @@ public class DeleteFromKubeConfigAction extends TreeAction {
         try {
             ConfigHelper.saveKubeConfig(model.getConfig());
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete from Kube config", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

@@ -65,7 +65,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     public void refresh() {
         TreePath path = new TreePath(ROOT);
         client = loadClient();
-        ROOT = new ApplicationsRootNode(client);
+        ROOT.reload();
         this.treeStructureChanged(path, new int[0], new Object[0]);
     }
 

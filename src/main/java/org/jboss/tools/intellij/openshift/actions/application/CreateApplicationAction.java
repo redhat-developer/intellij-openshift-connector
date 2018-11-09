@@ -24,7 +24,7 @@ public class CreateApplicationAction extends OdoAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
-    String appName = JOptionPane.showInputDialog("Appplication name");
+    String appName = JOptionPane.showInputDialog(null, "Appplication name", "New application", JOptionPane.QUESTION_MESSAGE);
     if ((appName != null) && appName.trim().length() > 0) {
       CompletableFuture.runAsync(() -> {
         try {

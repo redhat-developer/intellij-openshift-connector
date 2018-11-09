@@ -11,7 +11,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode {
   private final OpenShiftClient client;
 
   public ApplicationsRootNode(OpenShiftClient client) {
-    super("Applications");
+    super(client.getMasterUrl());
     this.client = client;
   }
 

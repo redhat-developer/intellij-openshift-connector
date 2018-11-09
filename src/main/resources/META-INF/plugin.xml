@@ -1,8 +1,8 @@
 <idea-plugin>
-  <id>com.your.company.unique.plugin.id</id>
-  <name>Plugin display name here</name>
+  <id>org.jboss.tools.intellij.openshift</id>
+  <name>OpenShift</name>
   <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="support@redhat.com" url="http://www.redhat.com">Red Hat</vendor>
 
   <description><![CDATA[
       Enter short description for your plugin here.<br>

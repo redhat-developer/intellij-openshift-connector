@@ -36,9 +36,13 @@ public class CreateComponentAction extends OdoAction {
           }
         });
         if (dialog.isOK()) {
-          createComponent(odo, applicationNode.toString(), dialog);
-          applicationNode.reload();
-          ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]);
+          createComponent(odo, applicationNode.toString(), dialog).thenRun(() -> {
+            applicationNode.reload();
+            ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]);
+            if (dialog.getSourceType() == 0) {
+              ExecHelper.executeWithTerminal(odo, "push", dialog.getName());
+            }
+          });
         }
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create component", JOptionPane.ERROR_MESSAGE));
@@ -47,17 +51,17 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @Nullable
-  protected void createComponent(String odo, String appName, CreateComponentDialog dialog) throws IOException {
+  protected CompletableFuture<Void> createComponent(String odo, String appName, CreateComponentDialog dialog) throws IOException {
       ExecHelper.execute(odo, "app", "set", appName);
-      createComponent(odo, dialog);
+      return createComponent(odo, dialog);
   }
 
-  private void createComponent(String odo, CreateComponentDialog dialog) {
+  private CompletableFuture<Void> createComponent(String odo, CreateComponentDialog dialog) {
     if (dialog.getSourceType() == 0) {
-      ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
+      return ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
         "--local", dialog.getSource());
     } else {
-      ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
+      return ExecHelper.executeWithTerminal(odo, "create", dialog.getComponentType() + ':' + dialog.getComponentVersion(), dialog.getName(),
         "--git", dialog.getSource());
     }
   }

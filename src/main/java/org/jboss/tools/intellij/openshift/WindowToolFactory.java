@@ -28,12 +28,12 @@ public class WindowToolFactory implements ToolWindowFactory {
         Tree tree = new Tree(new ClustersTreeModel());
         tree.setCellRenderer(new ClustersTreeNodeCellRenderer());
         PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
-        panel.add(new JBScrollPane(tree), BorderLayout.PAGE_START);
+        panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
 
         tree = new Tree(new ApplicationTreeModel());
         tree.setCellRenderer(new ApplicationTreeNodeCellRenderer());
         PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
-        panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
+        panel.add(new JBScrollPane(tree), BorderLayout.PAGE_START);
         toolWindow.getContentManager().addContent(contentFactory.createContent(panel, "", false));
     }
 }

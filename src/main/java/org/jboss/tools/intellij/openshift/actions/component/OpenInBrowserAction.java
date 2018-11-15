@@ -8,10 +8,9 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -29,13 +28,13 @@ public class OpenInBrowserAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    ProjectNode projectNode = (ProjectNode) applicationNode.getParent();
+    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
+    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
         List<Route> routes = getRoute(projectNode, applicationNode, componentNode);
         if (routes.isEmpty()) {
-          if (UIHelper.executeinUI(() -> JOptionPane.showConfirmDialog(null, "No URL for component " + componentNode.toString() + ", do you want to create one ?", "Create URL", JOptionPane.OK_CANCEL_OPTION)) == JOptionPane.OK_OPTION) {
+          if (UIHelper.executeInUI(() -> JOptionPane.showConfirmDialog(null, "No URL for component " + componentNode.toString() + ", do you want to create one ?", "Create URL", JOptionPane.OK_CANCEL_OPTION)) == JOptionPane.OK_OPTION) {
 
           }
         } else {
@@ -48,12 +47,12 @@ public class OpenInBrowserAction extends OdoAction {
     });
   }
 
-  protected LabelSelector getLabelSelector(ApplicationNode applicationNode, TreeNode componentNode) {
+  protected LabelSelector getLabelSelector(LazyMutableTreeNode applicationNode, TreeNode componentNode) {
     return new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, applicationNode.toString())
       .addToMatchLabels(KubernetesLabels.COMPONENT_NAME_LABEL, componentNode.toString())
       .build();
   }
-  public List<Route> getRoute(ProjectNode projectNode, ApplicationNode applicationNode, TreeNode componentNode) {
+  public List<Route> getRoute(LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, TreeNode componentNode) {
     final OpenShiftClient client = ((ApplicationsRootNode)((DefaultMutableTreeNode)componentNode).getRoot()).getClient();
     return client.routes().inNamespace(projectNode.toString()).withLabelSelector(getLabelSelector(applicationNode, componentNode)).list().getItems();
   }

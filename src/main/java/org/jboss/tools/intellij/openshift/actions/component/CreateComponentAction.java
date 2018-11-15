@@ -2,8 +2,8 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
+import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -25,10 +25,10 @@ public class CreateComponentAction extends OdoAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
-    ApplicationNode applicationNode = (ApplicationNode) selected;
+    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) selected;
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentDialog dialog = UIHelper.executeinUI(() -> {
+        CreateComponentDialog dialog = UIHelper.executeInUI(() -> {
           try {
             return showDialog(loadComponentTypes(ExecHelper.execute(odo, "catalog", "list", "components")));
           } catch (IOException e) {
@@ -38,7 +38,7 @@ public class CreateComponentAction extends OdoAction {
         if (dialog.isOK()) {
           createComponent(odo, applicationNode.toString(), dialog).thenRun(() -> {
             applicationNode.reload();
-            ((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]);
+            //((ApplicationTreeModel)getTree(anActionEvent).getModel()).treeStructureChanged(path, new int[0], new Object[0]);
             if (dialog.getSourceType() == 0) {
               ExecHelper.executeWithTerminal(odo, "push", dialog.getName());
             }

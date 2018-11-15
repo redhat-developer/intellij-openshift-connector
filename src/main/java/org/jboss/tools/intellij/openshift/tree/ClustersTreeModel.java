@@ -9,6 +9,7 @@ import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements Co
         if (o.equals(ROOT)) {
             return config.getContexts().stream().collect(Collectors.toList());
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 

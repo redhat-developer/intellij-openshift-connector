@@ -4,7 +4,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.TreeAction;
 import org.jboss.tools.intellij.openshift.utils.OdoHelper;
 
+import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
+import java.io.IOException;
 
 public class OdoAction extends TreeAction {
   public OdoAction(Class... filters) {
@@ -13,7 +15,12 @@ public class OdoAction extends TreeAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-    OdoHelper.INSTANCE.getCommand().thenAccept(s -> this.actionPerformed(anActionEvent, path, selected, s));
+    try {
+      String odo = OdoHelper.INSTANCE.getCommand();
+      this.actionPerformed(anActionEvent, path, selected, odo);
+    } catch (IOException e) {
+      JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {

@@ -5,6 +5,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
+import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.*;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -26,8 +27,8 @@ public class CreateURLAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    ProjectNode projectNode = (ProjectNode) applicationNode.getParent();
+    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
+    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
         ExecHelper.execute(odo, "app", "set", applicationNode.toString());
@@ -36,7 +37,7 @@ public class CreateURLAction extends OdoAction {
         if (!ports.isEmpty()) {
           Integer port;
           if (ports.size() > 1) {
-            port = (Integer)UIHelper.executeinUI(() -> JOptionPane.showInputDialog(null, "Service port", "Choose port", JOptionPane.QUESTION_MESSAGE, null, ports.toArray(), ports.get(0)));
+            port = (Integer)UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Service port", "Choose port", JOptionPane.QUESTION_MESSAGE, null, ports.toArray(), ports.get(0)));
           } else {
             port = ports.get(0);
           }
@@ -52,7 +53,7 @@ public class CreateURLAction extends OdoAction {
     });
   }
 
-  public List<Integer> loadServicePorts(TreeNode componentNode, ProjectNode projectNode) {
+  public List<Integer> loadServicePorts(TreeNode componentNode, LazyMutableTreeNode projectNode) {
     final OpenShiftClient client = ((ApplicationsRootNode)((DefaultMutableTreeNode)componentNode).getRoot()).getClient();
     Service service = client.services().inNamespace(projectNode.toString()).withName(componentNode.toString() + '-' + componentNode.getParent().toString()).get();
     return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());

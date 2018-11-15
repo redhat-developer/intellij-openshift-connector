@@ -1,6 +1,5 @@
 package org.jboss.tools.intellij.openshift.ui.component;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;

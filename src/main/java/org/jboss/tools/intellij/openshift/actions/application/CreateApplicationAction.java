@@ -1,6 +1,7 @@
 package org.jboss.tools.intellij.openshift.actions.application;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
@@ -26,13 +27,13 @@ public class CreateApplicationAction extends OdoAction {
         try {
           ExecHelper.execute(odo, "project", "set", selected.toString());
           ExecHelper.execute(odo, "app", "create", appName);
-          ProjectNode projectNode = (ProjectNode) selected;
+          LazyMutableTreeNode projectNode = (LazyMutableTreeNode) selected;
           OdoConfig.Application application = new OdoConfig.Application();
           application.setActive(true);
           application.setName(appName);
           application.setProject(projectNode.toString());
           projectNode.add(new ApplicationNode(application));
-          ((ApplicationTreeModel) getTree(anActionEvent).getModel()).treeNodesInserted(path, new int[]{projectNode.getChildCount() - 1}, new Object[0]);
+          //((ApplicationTreeModel) getTree(anActionEvent).getModel()).treeNodesInserted(path, new int[]{projectNode.getChildCount() - 1}, new Object[0]);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create application", JOptionPane.ERROR_MESSAGE));
         }

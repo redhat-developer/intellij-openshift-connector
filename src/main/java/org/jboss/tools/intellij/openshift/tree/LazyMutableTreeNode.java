@@ -1,14 +1,19 @@
 package org.jboss.tools.intellij.openshift.tree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import javax.swing.tree.MutableTreeNode;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LazyMutableTreeNode extends DefaultMutableTreeNode implements LazyTreeNode {
-    private AtomicBoolean needsLoading = new AtomicBoolean(true);
+public class LazyMutableTreeNode extends DefaultMutableTreeNode  {
+    public static interface ChangeListener {
+        void onChildAdded(LazyMutableTreeNode source, Object child, int index);
+        void onChildRemoved(LazyMutableTreeNode source, Object child, int index);
+        void onChildrensRemoved(LazyMutableTreeNode source);
+    }
+
+    private boolean loaded = false;
+    private final List<ChangeListener> listeners = new ArrayList<>();
 
     public LazyMutableTreeNode() {
     }
@@ -21,21 +26,67 @@ public class LazyMutableTreeNode extends DefaultMutableTreeNode implements LazyT
         super(userObject, allowsChildren);
     }
 
-    public boolean load() {
-        if (needsLoading.getAndSet(false)) {
-            loadOnce();
-            return true;
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
+    }
+
+    public void reload() {
+        setLoaded(false);
+        removeAllChildren();
+    }
+
+    public void addChangeListener(ChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeChangeListener(ChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    protected void notifyChildAdded(Object child, int index) {
+        for(ChangeListener listener : listeners) {
+            listener.onChildAdded(this, child, index);
         }
-        return false;
+    }
+
+    protected void notifyChildRemoved(Object child, int index) {
+        for(ChangeListener listener : listeners) {
+            listener.onChildRemoved(this, child, index);
+        }
+    }
+
+    protected void notifyChildrensRemoved() {
+        for(ChangeListener listener : listeners) {
+            listener.onChildrensRemoved(this);
+        }
     }
 
     @Override
-    public void reload() {
-        needsLoading.set(true);
-        removeAllChildren();
-        load();
+    public void insert(MutableTreeNode newChild, int childIndex) {
+        super.insert(newChild, childIndex);
+        notifyChildAdded(newChild, childIndex);
     }
 
-    public void loadOnce() {
+    @Override
+    public void remove(MutableTreeNode aChild) {
+        int index = children.indexOf(aChild);
+        super.remove(aChild);
+        notifyChildRemoved(aChild, index);
+    }
+
+    @Override
+    public void removeAllChildren() {
+        super.removeAllChildren();
+        notifyChildrensRemoved();
+    }
+
+    @Override
+    public void add(MutableTreeNode newChild) {
+        super.add(newChild);
+        notifyChildAdded(newChild, children.size() -1);
     }
 }

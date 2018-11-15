@@ -8,8 +8,6 @@ import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ConfigHelper {
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());

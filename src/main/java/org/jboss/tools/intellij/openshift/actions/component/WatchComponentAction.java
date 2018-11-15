@@ -2,9 +2,9 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
+import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
@@ -23,7 +23,7 @@ public class WatchComponentAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    ProjectNode projectNode = (ProjectNode) applicationNode.getParent();
+    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
         ExecHelper.execute(odo, "project", "set", projectNode.toString());

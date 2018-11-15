@@ -25,9 +25,6 @@ public class ConfigWatcher implements Runnable {
             config.getParentFile().toPath().register(service, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
             while ((key = service.take()) != null) {
                 for (WatchEvent<?> event : key.pollEvents()) {
-                    System.out.println(
-                            "Event kind:" + event.kind() + " count:" + event.count()
-                                    + ". File affected: " + event.context() + ".");
                     Path path = (Path) event.context();
                     if (path.getFileName().toString().equals("config")) {
                         listener.onUpdate(this);
@@ -38,6 +35,5 @@ public class ConfigWatcher implements Runnable {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-System.out.println("Ending config watcher");
     }
 }

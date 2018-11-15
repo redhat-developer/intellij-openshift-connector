@@ -21,7 +21,7 @@ public class KubernetesResourceMutableTreeNode extends LazyMutableTreeNode imple
     final ObjectMeta metadata = ((HasMetadata)userObject).getMetadata();
     if (metadata.getLabels() != null) {
       return metadata.getLabels().computeIfAbsent(KubernetesLabels.COMPONENT_NAME_LABEL,
-        (key) -> ((HasMetadata)userObject).getMetadata().getName());
+        key -> ((HasMetadata)userObject).getMetadata().getName());
     } else {
       return metadata.getName();
     }

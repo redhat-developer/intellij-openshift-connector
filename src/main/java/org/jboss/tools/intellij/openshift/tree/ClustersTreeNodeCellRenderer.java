@@ -4,7 +4,6 @@ import io.fabric8.kubernetes.api.model.NamedContext;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
 import java.awt.Component;
 import java.awt.Font;
 
@@ -15,7 +14,6 @@ public class ClustersTreeNodeCellRenderer extends DefaultTreeCellRenderer {
         super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         if (value.equals(((ClustersTreeModel)tree.getModel()).getConfig().getCurrentContext())) {
             setFont(tree.getFont().deriveFont(Font.BOLD + Font.ITALIC));
-            System.out.println("Setting for " + value);
         } else {
             setFont(tree.getFont());
         }

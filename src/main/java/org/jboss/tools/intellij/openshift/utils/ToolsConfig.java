@@ -11,12 +11,22 @@ public class ToolsConfig {
   public static class Tool {
     private Map<String, Platform> platforms = new HashMap<>();
 
+    private String version;
+
     public Map<String, Platform> getPlatforms() {
       return platforms;
     }
 
     public void setPlatforms(Map<String, Platform> platforms) {
       this.platforms = platforms;
+    }
+
+    public String getVersion() {
+      return version;
+    }
+
+    public void setVersion(String version) {
+      this.version = version;
     }
   }
 

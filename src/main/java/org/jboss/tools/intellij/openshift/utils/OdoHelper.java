@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.JOptionPane;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -37,27 +38,28 @@ public class OdoHelper {
   }
 
   private String getOdoCommand() throws IOException {
-    ToolsConfig.Platform platform = ConfigHelper.loadToolsConfig().getTools().get("odo").getPlatforms().get(Platform.os().id());
+    ToolsConfig.Tool odoTool = ConfigHelper.loadToolsConfig().getTools().get("odo");
+    ToolsConfig.Platform platform = odoTool.getPlatforms().get(Platform.os().id());
     String command = platform.getCmdFileName();
     try {
       Runtime.getRuntime().exec(command);
     } catch (IOException e) {
-      command = System.getProperty("user.home") + File.separatorChar + ".vs-openshift" + File.separatorChar + command;
-      if (!Files.exists(Paths.get(command))) {
-        final String dlFileName = System.getProperty("user.home") + File.separatorChar + ".vs-openshift" + File.separatorChar + platform.getDlFileName();
-        final String cmd = command;
+      Path path = Paths.get(System.getProperty("user.home"), ".vs-openshift", "cache", odoTool.getVersion(), command);
+      if (!Files.exists(path)) {
+        final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
+        final String cmd = path.toString();
         if (JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION) {
-          ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
+          command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
             @Override
             public String compute(@NotNull ProgressIndicator progressIndicator) throws IOException {
               OkHttpClient client = new OkHttpClient();
               Request request = new Request.Builder().url(platform.getUrl()).build();
               Response response = client.newCall(request).execute();
-              downloadFile(response.body().byteStream(), dlFileName, progressIndicator, response.body().contentLength());
+              downloadFile(response.body().byteStream(), dlFilePath, progressIndicator, response.body().contentLength());
               if (progressIndicator.isCanceled()) {
                 throw new IOException("Interrupted");
               } else {
-                uncompress(dlFileName, cmd);
+                uncompress(dlFilePath, cmd);
                 return cmd;
               }
             }
@@ -68,8 +70,8 @@ public class OdoHelper {
     return command;
   }
 
-  private void uncompress(String dlFileName, String cmd) throws IOException {
-    try (InputStream input = new BufferedInputStream(new FileInputStream(dlFileName))) {
+  private void uncompress(Path dlFilePath, String cmd) throws IOException {
+    try (InputStream input = new BufferedInputStream(Files.newInputStream(dlFilePath))) {
       try (CompressorInputStream stream = new CompressorStreamFactory().createCompressorInputStream(input)) {
         try (OutputStream output = new FileOutputStream(cmd)) {
           IOUtils.copy(stream, output);
@@ -81,10 +83,10 @@ public class OdoHelper {
   }
 
 
-  private static void downloadFile(InputStream input, String dlFileName, ProgressIndicator progressIndicator, long size) throws IOException {
+  private static void downloadFile(InputStream input, Path dlFileName, ProgressIndicator progressIndicator, long size) throws IOException {
     byte[] buffer = new byte[4096];
-    new File(dlFileName).getParentFile().mkdirs();
-    try (OutputStream output = new FileOutputStream(dlFileName)) {
+    Files.createDirectories(dlFileName.getParent());
+    try (OutputStream output = Files.newOutputStream(dlFileName)) {
       int lg;
       long accumulated = 0;
       while (((lg = input.read(buffer)) > 0) && !progressIndicator.isCanceled()) {

@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 public class ConfigHelper {
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -48,6 +49,10 @@ public class ConfigHelper {
 
     public static ToolsConfig loadToolsConfig() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(ConfigHelper.class.getResource("/tools.json"), ToolsConfig.class);
+        return loadToolsConfig(ConfigHelper.class.getResource("/tools.json"));
+    }
+
+    public static ToolsConfig loadToolsConfig(URL url) throws IOException {
+        return mapper.readValue(url, ToolsConfig.class);
     }
 }

@@ -13,7 +13,7 @@ public class LazyMutableTreeNode extends DefaultMutableTreeNode  {
     }
 
     private boolean loaded = false;
-    private final List<ChangeListener> listeners = new ArrayList<>();
+    private final transient List<ChangeListener> listeners = new ArrayList<>();
 
     public LazyMutableTreeNode() {
     }

@@ -48,7 +48,6 @@ public class ConfigHelper {
     }
 
     public static ToolsConfig loadToolsConfig() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
         return loadToolsConfig(ConfigHelper.class.getResource("/tools.json"));
     }
 

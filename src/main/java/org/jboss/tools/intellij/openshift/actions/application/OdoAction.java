@@ -16,13 +16,12 @@ public class OdoAction extends TreeAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     try {
-      String odo = OdoHelper.INSTANCE.getCommand();
-      this.actionPerformed(anActionEvent, path, selected, odo);
+      this.actionPerformed(anActionEvent, path, selected, OdoHelper.get());
     } catch (IOException e) {
       JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
   }
 }

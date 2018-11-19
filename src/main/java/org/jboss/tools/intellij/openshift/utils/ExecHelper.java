@@ -26,8 +26,6 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 public class ExecHelper {
   public static String execute(String executable, String... arguments) throws IOException {
@@ -40,8 +38,7 @@ public class ExecHelper {
       return writer.toString();
   }
 
-  public static CompletableFuture<Void> executeWithTerminal(String... command) {
-    return CompletableFuture.supplyAsync(() -> {
+  public static void executeWithTerminal(String... command) throws IOException {
       try {
         OSProcessHandler handler = new OSProcessHandler(new GeneralCommandLine(command));
         AbstractTerminalRunner runner = new AbstractTerminalRunner(ProjectManager.getInstance().getDefaultProject()) {
@@ -132,12 +129,10 @@ public class ExecHelper {
         handler.startNotify();
         handler.waitFor();
         if (handler.getProcess().exitValue() != 0) {
-          throw new CompletionException("Process returned exit code: " + handler.getProcess().exitValue(), null);
+          throw new IOException("Process returned exit code: " + handler.getProcess().exitValue(), null);
         }
-        return (Void)null;
-      } catch (ExecutionException e) {
-        throw new CompletionException(e);
+    } catch (ExecutionException e) {
+        throw new IOException(e.getLocalizedMessage(), e);
       }
-    });
   }
 }

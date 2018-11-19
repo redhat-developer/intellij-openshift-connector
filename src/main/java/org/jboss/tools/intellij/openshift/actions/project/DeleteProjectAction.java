@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.utils.OdoHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -18,11 +18,11 @@ public class DeleteProjectAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
     ProjectNode projectNode = (ProjectNode) selected;
       CompletableFuture.runAsync(() -> {
         try {
-          ExecHelper.execute(odo, "project", "delete", selected.toString(), "-f");
+          odo.deleteProject(selected.toString());
           ((LazyMutableTreeNode)projectNode.getParent()).remove(projectNode);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete project", JOptionPane.ERROR_MESSAGE));

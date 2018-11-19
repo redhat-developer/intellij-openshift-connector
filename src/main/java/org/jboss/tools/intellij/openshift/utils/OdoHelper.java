@@ -4,6 +4,8 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.twelvemonkeys.lang.Platform;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import okhttp3.OkHttpClient;
@@ -21,14 +23,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OdoHelper {
   private String command;
 
-  private OdoHelper() {
+  private OdoHelper() throws IOException {
+    command = getCommand();
   }
 
-  public static final OdoHelper INSTANCE = new OdoHelper();
+  private static OdoHelper INSTANCE;
+
+  public static final OdoHelper get() throws IOException {
+    if (INSTANCE == null) {
+      INSTANCE = new OdoHelper();
+    }
+    return INSTANCE;
+  }
 
   public String getCommand() throws IOException {
     if (command == null) {
@@ -65,6 +76,8 @@ public class OdoHelper {
             }
           });
         }
+      } else {
+        command = path.toString();
       }
     }
     return command;
@@ -99,5 +112,77 @@ public class OdoHelper {
 
   public List<Project> getProjects(OpenShiftClient client) {
     return client.projects().list().getItems();
+  }
+
+  public void createApplication(String project, String application) throws IOException {
+    ExecHelper.execute(command, "app", "create", application, "--project", project);
+  }
+
+  public void deleteApplication(String project, String application) throws IOException {
+    ExecHelper.execute(command, "app", "delete", application, "-f", "--project", project);
+  }
+
+  public void push(String project, String application, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "push", "--project", project, "--app", application, component);
+  }
+
+  public void watch(String project, String application, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "watch", "--project", project, "--app", application, component);
+  }
+
+  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
+    ExecHelper.executeWithTerminal(command, "create", componentType + ':' + componentVersion, component,
+      "--local", source, "--project", project, "--app", application);
+
+  }
+
+  public void createComponentGit(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
+    ExecHelper.executeWithTerminal(command, "create", componentType + ':' + componentVersion, component,
+      "--git", source, "--project", project, "--app", application);
+
+  }
+
+  public List<String[]> getComponentTypes() throws IOException {
+    return loadComponentTypes(ExecHelper.execute(command, "catalog", "list", "components"));
+  }
+
+  private List<String[]> loadComponentTypes(String output) throws IOException {
+    try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+      return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
+        .map(s -> s.split("\\|"))
+        .map(s -> new String[] {s[0], s[2]})
+        .collect(Collectors.toList());
+    }
+  }
+
+  public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
+    Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
+    return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());
+  }
+
+  public void createUrl(String project, String application, String component, Integer port) throws IOException {
+    ExecHelper.execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
+  }
+
+  public void deleteComponent(String project, String application, String component) throws IOException {
+    ExecHelper.execute(command, "delete", "--project", project, "--app", application, component, "-f");
+  }
+
+  public void follow(String project, String application, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, component, "-f");
+  }
+
+  public void log(String project, String application, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, component);
+  }
+
+
+  public void createProject(String project) throws IOException {
+    ExecHelper.execute(command, "project", "create", project);
+  }
+
+  public void deleteProject(String project) throws IOException {
+    ExecHelper.execute(command, "project", "delete", project, "-f");
+
   }
 }

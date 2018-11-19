@@ -14,7 +14,6 @@ import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
-import org.jboss.tools.intellij.openshift.utils.OdoConfig;
 import org.jboss.tools.intellij.openshift.utils.OdoHelper;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -102,7 +101,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         sc.serviceInstances().inNamespace(((Project) ((LazyMutableTreeNode) node.getParent()).getUserObject()).getMetadata().getName()).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels("app", this.toString()).build()).list().getItems().forEach(si -> node.add(new ComponentNode(si)));
     }
     protected LabelSelector getLabelSelector(LazyMutableTreeNode node) {
-        return new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LEGACY_LABEL, node.getParent().toString())
+        return new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, node.getParent().toString())
           .addToMatchLabels(KubernetesLabels.COMPONENT_NAME_LABEL, node.toString())
           .build();
     }
@@ -123,9 +122,9 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
 
     private void loadRoot() {
         try {
-            OdoHelper.INSTANCE.getProjects(client).stream().forEach(p -> ROOT.add(new ProjectNode(p)));
+            OdoHelper.get().getProjects(client).stream().forEach(p -> ROOT.add(new ProjectNode(p)));
         } catch (Exception e) {
-            ROOT.add(new DefaultMutableTreeNode("Failed to load projects"));
+            ROOT.add(new DefaultMutableTreeNode(ERROR));
         }
     }
 

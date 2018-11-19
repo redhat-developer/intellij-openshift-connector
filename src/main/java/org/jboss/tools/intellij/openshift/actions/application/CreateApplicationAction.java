@@ -3,10 +3,9 @@ package org.jboss.tools.intellij.openshift.actions.application;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.OdoConfig;
+import org.jboss.tools.intellij.openshift.utils.OdoHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -20,20 +19,18 @@ public class CreateApplicationAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
     String appName = JOptionPane.showInputDialog(null, "Appplication name", "New application", JOptionPane.QUESTION_MESSAGE);
     if ((appName != null) && appName.trim().length() > 0) {
       CompletableFuture.runAsync(() -> {
         try {
-          ExecHelper.execute(odo, "project", "set", selected.toString());
-          ExecHelper.execute(odo, "app", "create", appName);
+          odo.createApplication(selected.toString(), appName);
           LazyMutableTreeNode projectNode = (LazyMutableTreeNode) selected;
           OdoConfig.Application application = new OdoConfig.Application();
           application.setActive(true);
           application.setName(appName);
           application.setProject(projectNode.toString());
           projectNode.add(new ApplicationNode(application));
-          //((ApplicationTreeModel) getTree(anActionEvent).getModel()).treeNodesInserted(path, new int[]{projectNode.getChildCount() - 1}, new Object[0]);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create application", JOptionPane.ERROR_MESSAGE));
         }

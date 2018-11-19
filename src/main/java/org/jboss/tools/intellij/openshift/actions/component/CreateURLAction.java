@@ -1,13 +1,11 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.application.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.*;
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.utils.OdoHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -17,7 +15,6 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class CreateURLAction extends OdoAction {
   public CreateURLAction() {
@@ -25,15 +22,13 @@ public class CreateURLAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, String odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        ExecHelper.execute(odo, "app", "set", applicationNode.toString());
-        ExecHelper.execute(odo, "component", "set", componentNode.toString());
-        List<Integer> ports = loadServicePorts(componentNode, projectNode);
+        List<Integer> ports = loadServicePorts(odo, projectNode, applicationNode, componentNode);
         if (!ports.isEmpty()) {
           Integer port;
           if (ports.size() > 1) {
@@ -42,7 +37,7 @@ public class CreateURLAction extends OdoAction {
             port = ports.get(0);
           }
           if (port != null) {
-            ExecHelper.execute(odo, "url", "create", "--port", port.toString());
+            odo.createUrl(projectNode.toString(), applicationNode.toString(), componentNode.toString(), port);
           }
         } else {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Can't create url for component without ports", "Create URL", JOptionPane.ERROR_MESSAGE));
@@ -53,9 +48,8 @@ public class CreateURLAction extends OdoAction {
     });
   }
 
-  public List<Integer> loadServicePorts(TreeNode componentNode, LazyMutableTreeNode projectNode) {
-    final OpenShiftClient client = ((ApplicationsRootNode)((DefaultMutableTreeNode)componentNode).getRoot()).getClient();
-    Service service = client.services().inNamespace(projectNode.toString()).withName(componentNode.toString() + '-' + componentNode.getParent().toString()).get();
-    return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());
+  public List<Integer> loadServicePorts(OdoHelper odo, LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, LazyMutableTreeNode componentNode) {
+    final OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
+    return odo.getServicePorts(client, projectNode.toString(), applicationNode.toString(), componentNode.toString());
   }
 }

@@ -6,8 +6,8 @@ stages:
 
 cache:
   paths:
-  - $HOME/.gradle/wrapper
-  - $HOME/.gradle/caches
+  - $HOME/.gradle/wrapper/
+  - $HOME/.gradle/caches/
 
 build:
   stage: build

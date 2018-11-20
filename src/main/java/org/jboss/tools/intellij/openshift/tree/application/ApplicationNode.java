@@ -1,13 +1,36 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.OdoConfig;
+import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.io.IOException;
 
 
 public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode {
   public ApplicationNode(OdoConfig.Application application) {
     super(application);
+  }
+
+  @Override
+  public void load() {
+    super.load();
+    try {
+      OdoHelper odo = OdoHelper.get();
+      try {
+        odo.getComponents(((ApplicationsRootNode)getParent()).getClient(), getParent().toString(), toString()).forEach(dc -> add(new ComponentNode(dc)));
+      } catch (KubernetesClientException e) {
+        add(new DefaultMutableTreeNode("Failed to load application deployment configs"));
+      }
+      try {
+        odo.getServices(((ApplicationsRootNode)getParent()).getClient(), getParent().toString(), toString()).forEach(si -> add(new ComponentNode(si)));
+      } catch (KubernetesClientException e) {}
+    } catch (IOException e) {
+      add(new DefaultMutableTreeNode("Failed to load application"));
+    }
   }
 
   @Override

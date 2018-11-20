@@ -4,10 +4,12 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.twelvemonkeys.lang.Platform;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
+import me.snowdrop.servicecatalog.api.client.ServiceCatalogClient;
+import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -15,6 +17,7 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
+import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JOptionPane;
@@ -183,6 +186,35 @@ public class OdoHelper {
 
   public void deleteProject(String project) throws IOException {
     ExecHelper.execute(command, "project", "delete", project, "-f");
+
+  }
+
+  public void logout() throws IOException {
+    ExecHelper.execute(command, "logout");
+  }
+
+  public List<OdoConfig.Application> getApplication(String project) throws IOException {
+    return ConfigHelper.loadOdoConfig().getActiveApplications().stream().filter(a -> a.getProject().equals(project)).collect(Collectors.toList());
+  }
+
+  public List<DeploymentConfig> getComponents(OpenShiftClient client, String project, String application) {
+    return client.deploymentConfigs().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+  }
+
+  public List<ServiceInstance> getServices(OpenShiftClient client, String project, String application) {
+    ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
+    return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+  }
+
+  protected LabelSelector getLabelSelector(String application, String component) {
+    return new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application)
+      .addToMatchLabels(KubernetesLabels.COMPONENT_NAME_LABEL, component)
+      .build();
+  }
+
+
+  public List<PersistentVolumeClaim> getStorages(OpenShiftClient client, String project, String application, String component) {
+    return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems();
 
   }
 }

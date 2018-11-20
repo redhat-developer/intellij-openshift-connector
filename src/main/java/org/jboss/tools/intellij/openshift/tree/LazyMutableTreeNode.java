@@ -12,7 +12,7 @@ public class LazyMutableTreeNode extends DefaultMutableTreeNode  {
         void onChildrensRemoved(LazyMutableTreeNode source);
     }
 
-    private boolean loaded = false;
+    protected boolean loaded = false;
     private final transient List<ChangeListener> listeners = new ArrayList<>();
 
     public LazyMutableTreeNode() {
@@ -30,12 +30,12 @@ public class LazyMutableTreeNode extends DefaultMutableTreeNode  {
         return loaded;
     }
 
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
+    public void load() {
+        loaded = true;
     }
 
     public void reload() {
-        setLoaded(false);
+        loaded = false;
         removeAllChildren();
     }
 

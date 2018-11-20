@@ -1,4 +1,4 @@
-package org.jboss.tools.intellij.openshift.actions.application;
+package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.TreeAction;

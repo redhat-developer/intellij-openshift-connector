@@ -13,18 +13,23 @@ import java.awt.Component;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class LogoutAction extends LoggedClusterAction {
+public abstract class LoggedClusterAction extends OdoAction {
+  public LoggedClusterAction() {
+    super(ApplicationsRootNode.class);
+  }
+
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
-    ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
-      CompletableFuture.runAsync(() -> {
-        try {
-          odo.logout();
-          clusterNode.setLogged(false);
-          clusterNode.reload();
-        } catch (IOException e) {
-          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Logout", JOptionPane.ERROR_MESSAGE));
-        }
-      });
+  public void update(AnActionEvent e) {
+    super.update(e);
+    Component comp = getTree(e);
+    if (comp instanceof Tree) {
+      TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
+      Object selected = selectPath.getLastPathComponent();
+      if (selected instanceof ApplicationsRootNode) {
+        e.getPresentation().setVisible(((ApplicationsRootNode)selected).isLogged());
+      }
+    }
+
+
   }
 }

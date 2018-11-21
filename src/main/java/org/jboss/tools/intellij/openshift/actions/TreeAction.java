@@ -29,7 +29,7 @@ public abstract class TreeAction extends AnAction {
 
         if (comp instanceof Tree) {
             TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
-            visible = Stream.of(filters).anyMatch(cl -> cl.equals(selectPath.getLastPathComponent().getClass()));
+            visible = Stream.of(filters).anyMatch(cl -> cl.isAssignableFrom(selectPath.getLastPathComponent().getClass()));
         }
         e.getPresentation().setVisible(visible);
     }

@@ -21,12 +21,12 @@ public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode
     try {
       OdoHelper odo = OdoHelper.get();
       try {
-        odo.getComponents(((ApplicationsRootNode)getParent()).getClient(), getParent().toString(), toString()).forEach(dc -> add(new ComponentNode(dc)));
+        odo.getComponents(((ApplicationsRootNode)getParent().getParent()).getClient(), getParent().toString(), toString()).forEach(dc -> add(new ComponentNode(dc)));
       } catch (KubernetesClientException e) {
         add(new DefaultMutableTreeNode("Failed to load application deployment configs"));
       }
       try {
-        odo.getServices(((ApplicationsRootNode)getParent()).getClient(), getParent().toString(), toString()).forEach(si -> add(new ComponentNode(si)));
+        odo.getServices(((ApplicationsRootNode)getParent().getParent()).getClient(), getParent().toString(), toString()).forEach(si -> add(new ComponentNode(si)));
       } catch (KubernetesClientException e) {}
     } catch (IOException e) {
       add(new DefaultMutableTreeNode("Failed to load application"));

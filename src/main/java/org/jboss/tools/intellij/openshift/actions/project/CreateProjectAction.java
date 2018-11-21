@@ -3,10 +3,8 @@ package org.jboss.tools.intellij.openshift.actions.project;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.ProjectBuilder;
-import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.actions.cluster.LoggedClusterAction;
+import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.utils.OdoHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -16,7 +14,7 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class CreateProjectAction extends LoggedClusterAction {
+public class CreateProjectAction extends LoggedInClusterAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
     LazyMutableTreeNode clusterNode = (LazyMutableTreeNode) selected;

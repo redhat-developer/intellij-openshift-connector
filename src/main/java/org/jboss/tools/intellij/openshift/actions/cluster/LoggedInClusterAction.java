@@ -13,8 +13,8 @@ import java.awt.Component;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class LoggedClusterAction extends OdoAction {
-  public LoggedClusterAction() {
+public abstract class LoggedInClusterAction extends OdoAction {
+  public LoggedInClusterAction() {
     super(ApplicationsRootNode.class);
   }
 

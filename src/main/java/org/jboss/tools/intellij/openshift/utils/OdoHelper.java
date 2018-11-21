@@ -189,6 +189,10 @@ public class OdoHelper {
 
   }
 
+  public void login(String url, String userName, char[] password) throws IOException {
+    ExecHelper.execute(command, "login", url, "-u", userName, "-p", String.valueOf(password));
+  }
+
   public void logout() throws IOException {
     ExecHelper.execute(command, "logout");
   }
@@ -217,4 +221,5 @@ public class OdoHelper {
     return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems();
 
   }
+
 }

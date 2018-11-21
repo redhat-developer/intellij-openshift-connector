@@ -47,7 +47,8 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" text="Follow Log"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Logout"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
 
     </group>
     <!-- Add your actions here -->

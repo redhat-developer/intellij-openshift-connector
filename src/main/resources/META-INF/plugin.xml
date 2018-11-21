@@ -49,7 +49,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" text="Follow Log"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
-
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console"/>
     </group>
     <!-- Add your actions here -->
   </actions>

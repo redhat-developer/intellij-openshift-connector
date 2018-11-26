@@ -9,6 +9,7 @@ import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -51,7 +52,12 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     @Override
     public void refresh() {
         TreePath path = new TreePath(ROOT);
-        this.treeStructureChanged(path, new int[0], new Object[0]);
+        try {
+            ROOT = new ApplicationsRootNode();
+            ROOT.addChangeListener(this);
+            this.treeStructureChanged(path, new int[0], new Object[0]);
+        } catch (Exception e) {
+        }
     }
 
     @Override

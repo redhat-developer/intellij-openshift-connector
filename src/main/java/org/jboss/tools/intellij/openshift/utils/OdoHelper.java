@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class OdoHelper {
@@ -145,17 +146,63 @@ public class OdoHelper {
 
   }
 
-  public List<String[]> getComponentTypes() throws IOException {
-    return loadComponentTypes(ExecHelper.execute(command, "catalog", "list", "components"));
+  public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
+    ExecHelper.executeWithTerminal(command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
   }
 
-  private List<String[]> loadComponentTypes(String output) throws IOException {
+  public interface ComponentType {
+    public String getName();
+    public String getVersions();
+  }
+
+  private ComponentType toComponentType(String[] line) {
+    return new ComponentType() {
+      @Override
+      public String getName() {
+        return line[0];
+      }
+
+      @Override
+      public String getVersions() {
+        return line[2];
+      }
+    };
+  }
+
+  public List<ComponentType> getComponentTypes() throws IOException {
+    return loadList(ExecHelper.execute(command, "catalog", "list", "components"), this::toComponentType);
+  }
+
+  private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
       return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
         .map(s -> s.split("\\|"))
-        .map(s -> new String[] {s[0], s[2]})
+        .map(mapper)
         .collect(Collectors.toList());
     }
+  }
+
+  public interface ServiceTemplate {
+    public String getName();
+    public String getPlan();
+  }
+
+  private ServiceTemplate toServiceTemplate(String[] line) {
+    return new ServiceTemplate() {
+      @Override
+      public String getName() {
+        return line[0];
+      }
+
+      @Override
+      public String getPlan() {
+        return line[1];
+      }
+    };
+  }
+
+  public List<ServiceTemplate> getServiceTemplates() throws IOException {
+    return loadList(ExecHelper.execute(command, "catalog", "list", "services"), this::toServiceTemplate);
   }
 
   public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {

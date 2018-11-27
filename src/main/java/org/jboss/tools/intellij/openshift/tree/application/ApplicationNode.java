@@ -26,7 +26,7 @@ public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode
         add(new DefaultMutableTreeNode("Failed to load application deployment configs"));
       }
       try {
-        odo.getServices(((ApplicationsRootNode)getParent().getParent()).getClient(), getParent().toString(), toString()).forEach(si -> add(new ComponentNode(si)));
+        odo.getServices(((ApplicationsRootNode)getParent().getParent()).getClient(), getParent().toString(), toString()).forEach(si -> add(new ServiceNode(si)));
       } catch (KubernetesClientException e) {}
     } catch (IOException e) {
       add(new DefaultMutableTreeNode("Failed to load application"));

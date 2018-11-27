@@ -53,9 +53,9 @@ public class CreateComponentAction extends OdoAction {
     }
   }
 
-  protected CreateComponentDialog showDialog(List<String[]> types) {
+  protected CreateComponentDialog showDialog(List<OdoHelper.ComponentType> types) {
     CreateComponentDialog dialog = new CreateComponentDialog(null);
-    dialog.setComponentTypes(types.toArray(new String[types.size()][]));
+    dialog.setComponentTypes(types.toArray(new OdoHelper.ComponentType[types.size()]));
     dialog.show();
     return dialog;
   }

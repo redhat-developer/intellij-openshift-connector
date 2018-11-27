@@ -1,7 +1,8 @@
-package org.jboss.tools.intellij.openshift.actions.component;
+package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -12,10 +13,10 @@ import org.jboss.tools.openshift.actions.ActionTest;
 
 import static org.mockito.Mockito.mock;
 
-public class DeleteComponentActionTest extends ActionTest {
+public class DeleteServiceActionTest extends ActionTest {
   @Override
   public AnAction getAction() {
-    return new DeleteComponentAction();
+    return new DeleteServiceAction();
   }
 
   public void testThatActionIsDisabledOnCluster() {
@@ -42,23 +43,21 @@ public class DeleteComponentActionTest extends ActionTest {
     assertFalse(event.getPresentation().isVisible());
   }
 
-  public void testThatActionIsEnabledOnComponent() {
+  public void testThatActionIsDisabledOnComponent() {
     ComponentNode componentNode = mock(ComponentNode.class);
     AnActionEvent event = createEvent(componentNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertTrue(event.getPresentation().isVisible());
-  }
-
-  public void testThatActionIsDisabledOnService() {
-    ServiceNode serviceNode = mock(ServiceNode.class);
-    AnActionEvent event = createEvent(serviceNode);
     AnAction action = getAction();
     action.update(event);
     assertFalse(event.getPresentation().isVisible());
   }
 
-
+  public void testThatActionIsEnabledOnService() {
+    ServiceNode serviceNode = mock(ServiceNode.class);
+    AnActionEvent event = createEvent(serviceNode);
+    AnAction action = getAction();
+    action.update(event);
+    assertTrue(event.getPresentation().isVisible());
+  }
   public void testThatActionIsDisabledOnStorage() {
     PersistentVolumeClaimNode storageNode = mock(PersistentVolumeClaimNode.class);
     AnActionEvent event = createEvent(storageNode);

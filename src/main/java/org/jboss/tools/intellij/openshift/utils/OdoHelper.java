@@ -150,6 +150,11 @@ public class OdoHelper {
     ExecHelper.executeWithTerminal(command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
   }
 
+  public void deleteService(String project, String application, String service) throws IOException {
+    ExecHelper.execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
+  }
+
+
   public interface ComponentType {
     public String getName();
     public String getVersions();

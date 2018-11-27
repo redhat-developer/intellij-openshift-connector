@@ -7,6 +7,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.openshift.actions.ActionTest;
 
 import static org.mockito.Mockito.mock;
@@ -44,6 +45,14 @@ public class DeleteApplicationActionTest extends ActionTest {
   public void testThatActionIsDisabledOnComponent() {
     ComponentNode componentNode = mock(ComponentNode.class);
     AnActionEvent event = createEvent(componentNode);
+    AnAction action = getAction();
+    action.update(event);
+    assertFalse(event.getPresentation().isVisible());
+  }
+
+  public void testThatActionIsDisabledOnService() {
+    ServiceNode serviceNode = mock(ServiceNode.class);
+    AnActionEvent event = createEvent(serviceNode);
     AnAction action = getAction();
     action.update(event);
     assertFalse(event.getPresentation().isVisible());

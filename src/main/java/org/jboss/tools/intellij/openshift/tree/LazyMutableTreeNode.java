@@ -83,10 +83,4 @@ public class LazyMutableTreeNode extends DefaultMutableTreeNode  {
         super.removeAllChildren();
         notifyChildrensRemoved();
     }
-
-    @Override
-    public void add(MutableTreeNode newChild) {
-        super.add(newChild);
-        notifyChildAdded(newChild, children.size() -1);
-    }
 }

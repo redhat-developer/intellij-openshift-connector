@@ -278,4 +278,8 @@ public class OdoHelper {
     ExecHelper.executeWithTerminal(command, "catalog", "list", "components");
   }
 
+  public void listServices() throws IOException {
+    ExecHelper.executeWithTerminal(command, "catalog", "list", "services");
+  }
+
 }

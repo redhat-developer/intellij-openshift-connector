@@ -51,6 +51,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" text="List Catalog Components"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" text="List Catalog Services"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New service"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
     </group>

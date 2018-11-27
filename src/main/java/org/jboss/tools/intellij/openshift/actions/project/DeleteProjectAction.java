@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -18,7 +18,7 @@ public class DeleteProjectAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ProjectNode projectNode = (ProjectNode) selected;
       CompletableFuture.runAsync(() -> {
         try {

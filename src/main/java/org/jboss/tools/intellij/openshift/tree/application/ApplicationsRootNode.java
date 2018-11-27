@@ -4,7 +4,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -38,7 +38,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode {
   public void load() {
     super.load();
     try {
-      OdoHelper.get().getProjects(client).stream().forEach(p -> add(new ProjectNode(p)));
+      Odo.get().getProjects(client).stream().forEach(p -> add(new ProjectNode(p)));
       setLogged(true);
     } catch (Exception e) {
       add(new DefaultMutableTreeNode(ERROR));

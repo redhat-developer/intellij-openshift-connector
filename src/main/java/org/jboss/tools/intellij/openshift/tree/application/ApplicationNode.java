@@ -3,8 +3,8 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.utils.OdoConfig;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoConfig;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode
   public void load() {
     super.load();
     try {
-      OdoHelper odo = OdoHelper.get();
+      Odo odo = Odo.get();
       try {
         odo.getComponents(((ApplicationsRootNode)getParent().getParent()).getClient(), getParent().toString(), toString()).forEach(dc -> add(new ComponentNode(dc)));
       } catch (KubernetesClientException e) {

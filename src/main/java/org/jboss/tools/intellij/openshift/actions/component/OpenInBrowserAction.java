@@ -11,7 +11,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -27,7 +27,7 @@ public class OpenInBrowserAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();

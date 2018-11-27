@@ -2,7 +2,7 @@ package org.jboss.tools.intellij.openshift.ui.service;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,11 +34,11 @@ public class CreateServiceDialog extends DialogWrapper {
     return contentPane;
   }
 
-  public void setServiceTemplates(OdoHelper.ServiceTemplate[] serviceTemplates) {
+  public void setServiceTemplates(ServiceTemplate[] serviceTemplates) {
     serviceTemplatesComboBox.setRenderer(new DefaultListCellRenderer() {
       @Override
       public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        value = ((OdoHelper.ServiceTemplate) value).getName() + " " + ((OdoHelper.ServiceTemplate) value).getPlan();
+        value = ((ServiceTemplate) value).getName() + " " + ((ServiceTemplate) value).getPlan();
         return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       }
     });
@@ -51,8 +51,8 @@ public class CreateServiceDialog extends DialogWrapper {
     return nameField.getText();
   }
 
-  public OdoHelper.ServiceTemplate getServiceTemplate() {
-    return (OdoHelper.ServiceTemplate) serviceTemplatesComboBox.getSelectedItem();
+  public ServiceTemplate getServiceTemplate() {
+    return (ServiceTemplate) serviceTemplatesComboBox.getSelectedItem();
   }
 
   @NotNull

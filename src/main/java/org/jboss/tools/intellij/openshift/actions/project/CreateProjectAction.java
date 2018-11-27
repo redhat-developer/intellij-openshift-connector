@@ -6,7 +6,7 @@ import io.fabric8.openshift.api.model.ProjectBuilder;
 import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class CreateProjectAction extends LoggedInClusterAction {
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     LazyMutableTreeNode clusterNode = (LazyMutableTreeNode) selected;
     String projectName = JOptionPane.showInputDialog(null, "Project name", "New project", JOptionPane.QUESTION_MESSAGE);
     if ((projectName != null) && projectName.trim().length() > 0) {

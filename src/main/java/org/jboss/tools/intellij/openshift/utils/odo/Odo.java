@@ -1,4 +1,4 @@
-package org.jboss.tools.intellij.openshift.utils;
+package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -18,6 +18,9 @@ import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.utils.ToolsConfig;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JOptionPane;
@@ -29,18 +32,18 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class OdoHelper {
+public class Odo {
   private String command;
 
-  private OdoHelper() throws IOException {
+  private Odo() throws IOException {
     command = getCommand();
   }
 
-  private static OdoHelper INSTANCE;
+  private static Odo INSTANCE;
 
-  public static final OdoHelper get() throws IOException {
+  public static final Odo get() throws IOException {
     if (INSTANCE == null) {
-      INSTANCE = new OdoHelper();
+      INSTANCE = new Odo();
     }
     return INSTANCE;
   }
@@ -155,11 +158,6 @@ public class OdoHelper {
   }
 
 
-  public interface ComponentType {
-    public String getName();
-    public String getVersions();
-  }
-
   private ComponentType toComponentType(String[] line) {
     return new ComponentType() {
       @Override
@@ -185,11 +183,6 @@ public class OdoHelper {
         .map(mapper)
         .collect(Collectors.toList());
     }
-  }
-
-  public interface ServiceTemplate {
-    public String getName();
-    public String getPlan();
   }
 
   private ServiceTemplate toServiceTemplate(String[] line) {

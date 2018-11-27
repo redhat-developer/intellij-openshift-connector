@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.*;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -19,7 +19,7 @@ public class DeleteComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode serviceNode = (ComponentNode) selected;
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();

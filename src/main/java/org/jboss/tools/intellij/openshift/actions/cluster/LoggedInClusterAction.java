@@ -4,14 +4,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
-import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 public abstract class LoggedInClusterAction extends OdoAction {
   public LoggedInClusterAction() {

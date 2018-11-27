@@ -4,7 +4,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,11 +49,11 @@ public class CreateComponentDialog extends DialogWrapper {
     System.exit(0);
   }
 
-  public void setComponentTypes(OdoHelper.ComponentType[] componentTypes) {
+  public void setComponentTypes(ComponentType[] componentTypes) {
     componentTypeComboBox.setRenderer(new DefaultListCellRenderer() {
       @Override
       public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        value = ((OdoHelper.ComponentType) value).getName();
+        value = ((ComponentType) value).getName();
         return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       }
     });
@@ -61,7 +61,7 @@ public class CreateComponentDialog extends DialogWrapper {
       @Override
       public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-          componentVersionComboBox.setModel(new DefaultComboBoxModel(((OdoHelper.ComponentType) e.getItem()).getVersions().split(",")));
+          componentVersionComboBox.setModel(new DefaultComboBoxModel(((ComponentType) e.getItem()).getVersions().split(",")));
         }
       }
     });
@@ -96,7 +96,7 @@ public class CreateComponentDialog extends DialogWrapper {
   }
 
   public String getComponentType() {
-    return ((OdoHelper.ComponentType) componentTypeComboBox.getSelectedItem()).getName();
+    return ((ComponentType) componentTypeComboBox.getSelectedItem()).getName();
   }
 
   public String getComponentVersion() {

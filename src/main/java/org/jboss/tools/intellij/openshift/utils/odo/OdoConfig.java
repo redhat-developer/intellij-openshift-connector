@@ -1,4 +1,4 @@
-package org.jboss.tools.intellij.openshift.utils;
+package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonDeserializer;

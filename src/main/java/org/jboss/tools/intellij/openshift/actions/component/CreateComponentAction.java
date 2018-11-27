@@ -5,7 +5,8 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.JOptionPane;
@@ -20,7 +21,7 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, OdoHelper odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) selected;
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
@@ -45,7 +46,7 @@ public class CreateComponentAction extends OdoAction {
     });
   }
 
-  private void createComponent(OdoHelper odo, String project, String application, CreateComponentDialog dialog) throws IOException{
+  private void createComponent(Odo odo, String project, String application, CreateComponentDialog dialog) throws IOException{
     if (dialog.getSourceType() == 0) {
       odo.createComponentLocal(project, application, dialog.getComponentType(), dialog.getComponentVersion(), dialog.getName(), dialog.getSource());
     } else {
@@ -53,9 +54,9 @@ public class CreateComponentAction extends OdoAction {
     }
   }
 
-  protected CreateComponentDialog showDialog(List<OdoHelper.ComponentType> types) {
+  protected CreateComponentDialog showDialog(List<ComponentType> types) {
     CreateComponentDialog dialog = new CreateComponentDialog(null);
-    dialog.setComponentTypes(types.toArray(new OdoHelper.ComponentType[types.size()]));
+    dialog.setComponentTypes(types.toArray(new ComponentType[types.size()]));
     dialog.show();
     return dialog;
   }

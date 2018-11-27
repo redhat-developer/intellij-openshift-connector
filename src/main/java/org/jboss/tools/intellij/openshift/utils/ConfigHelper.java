@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.ConfigBuilder;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoConfig;
 
 import java.io.File;
 import java.io.IOException;

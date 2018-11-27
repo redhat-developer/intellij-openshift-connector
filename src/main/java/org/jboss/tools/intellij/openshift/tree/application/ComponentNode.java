@@ -3,7 +3,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.tree.KubernetesResourceMutableTreeNode;
-import org.jboss.tools.intellij.openshift.utils.OdoHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class ComponentNode extends KubernetesResourceMutableTreeNode {
     super.load();
     try {
       ApplicationsRootNode clusterNode = (ApplicationsRootNode) getRoot();
-      OdoHelper.get().getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), toString()).forEach(pvc -> add(new PersistentVolumeClaimNode(pvc)));
+      Odo.get().getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), toString()).forEach(pvc -> add(new PersistentVolumeClaimNode(pvc)));
     } catch (KubernetesClientException|IOException e) {
       add(new DefaultMutableTreeNode("Failed to load persistent volume claims"));
     }

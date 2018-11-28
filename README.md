@@ -1,1 +1,1 @@
-Latest build is available [here](../-/jobs/artifacts/master/download?job=build)
+Latest build is available [here](https://gitlab.cee.redhat.com/jmaury/org.jboss.tools.intellij.openshift/-/jobs/artifacts/master/download?job=coverage)

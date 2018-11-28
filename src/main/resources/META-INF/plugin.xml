@@ -55,6 +55,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New service"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
       <action class="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" text="Create Storage"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" text="Delete"/>
     </group>
     <!-- Add your actions here -->
   </actions>

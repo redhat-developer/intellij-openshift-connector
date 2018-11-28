@@ -278,4 +278,8 @@ public class Odo {
   public void createStorage(String project, String application, String component, String name, String mountPath, String storageSize) throws IOException {
     ExecHelper.execute(command, "storage", "create", "--project", project, "--app", application, "--component", component, name, "--path", mountPath, "--size", storageSize);
   }
+
+  public void deleteStorage(String project, String application, String component, String storage) throws IOException {
+    ExecHelper.execute(command, "storage", "delete", "--project", project, "--app", application, "--component", component, storage, "-f");
+  }
 }

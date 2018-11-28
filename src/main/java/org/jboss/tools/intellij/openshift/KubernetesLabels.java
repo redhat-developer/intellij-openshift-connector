@@ -4,4 +4,6 @@ public final class KubernetesLabels {
   public static final String APP_LABEL = "app.kubernetes.io/name";
 
   public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/component-name";
+
+  public static final String STORAGE_NAME_LABEL = "app.kubernetes.io/storage-name";
 }

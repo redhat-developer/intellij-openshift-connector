@@ -275,4 +275,7 @@ public class Odo {
     ExecHelper.executeWithTerminal(command, "catalog", "list", "services");
   }
 
+  public void createStorage(String project, String application, String component, String name, String mountPath, String storageSize) throws IOException {
+    ExecHelper.execute(command, "storage", "create", "--project", project, "--app", application, "--component", component, name, "--path", mountPath, "--size", storageSize);
+  }
 }

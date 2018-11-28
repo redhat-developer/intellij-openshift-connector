@@ -1,1 +1,1 @@
-Latest build is available [here](https://gitlab.cee.redhat.com/jmaury/org.jboss.tools.intellij.openshift/-/jobs/artifacts/master/download?job=coverage)
+Latest build is available [here](https://gitlab.cee.redhat.com/jmaury/org.jboss.tools.intellij.openshift/-/jobs/artifacts/master/download?job=build)

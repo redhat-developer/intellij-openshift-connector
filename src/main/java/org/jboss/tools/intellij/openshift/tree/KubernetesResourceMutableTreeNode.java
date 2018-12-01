@@ -18,13 +18,7 @@ public class KubernetesResourceMutableTreeNode extends LazyMutableTreeNode imple
 
   @Override
   public String toString() {
-    final ObjectMeta metadata = ((HasMetadata)userObject).getMetadata();
-    if (metadata.getLabels() != null) {
-      return metadata.getLabels().computeIfAbsent(KubernetesLabels.COMPONENT_NAME_LABEL,
-        key -> ((HasMetadata)userObject).getMetadata().getName());
-    } else {
-      return metadata.getName();
-    }
+    return KubernetesLabels.getComponentName((HasMetadata) userObject);
   }
 
   @Override

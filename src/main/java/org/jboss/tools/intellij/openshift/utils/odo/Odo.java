@@ -282,4 +282,8 @@ public class Odo {
   public void deleteStorage(String project, String application, String component, String storage) throws IOException {
     ExecHelper.execute(command, "storage", "delete", "--project", project, "--app", application, "--component", component, storage, "-f");
   }
+
+  public void link(String project, String application, String component, String source) throws IOException {
+    ExecHelper.execute(command, "link", source, "--project", project, "--app", application, "--component", component);
+  }
 }

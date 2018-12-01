@@ -54,6 +54,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" text="List Catalog Services"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New service"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" text="Create Storage"/>
       <action class="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" text="Delete"/>
     </group>

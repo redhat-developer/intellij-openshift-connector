@@ -12,7 +12,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode {
   private OpenShiftClient client = loadClient();
   private boolean logged;
 
-  private static final String ERROR = "Please login to cluster first";
+  private static final String ERROR = "Please log in to the cluster";
 
   public ApplicationsRootNode() {
     setUserObject(client.getMasterUrl());

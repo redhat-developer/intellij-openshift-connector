@@ -121,12 +121,15 @@ public class Odo {
     return client.projects().list().getItems();
   }
 
+  private static String execute(String command, String ...args) throws IOException {
+    return ExecHelper.execute(command, args).replaceAll("/---[\\s\\S]*---/g", "");
+  }
   public void createApplication(String project, String application) throws IOException {
-    ExecHelper.execute(command, "app", "create", application, "--project", project);
+    execute(command, "app", "create", application, "--project", project);
   }
 
   public void deleteApplication(String project, String application) throws IOException {
-    ExecHelper.execute(command, "app", "delete", application, "-f", "--project", project);
+    execute(command, "app", "delete", application, "-f", "--project", project);
   }
 
   public void push(String project, String application, String component) throws IOException {
@@ -154,7 +157,7 @@ public class Odo {
   }
 
   public void deleteService(String project, String application, String service) throws IOException {
-    ExecHelper.execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
+    execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
   }
 
 
@@ -173,7 +176,7 @@ public class Odo {
   }
 
   public List<ComponentType> getComponentTypes() throws IOException {
-    return loadList(ExecHelper.execute(command, "catalog", "list", "components"), this::toComponentType);
+    return loadList(execute(command, "catalog", "list", "components"), this::toComponentType);
   }
 
   private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
@@ -200,7 +203,7 @@ public class Odo {
   }
 
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
-    return loadList(ExecHelper.execute(command, "catalog", "list", "services"), this::toServiceTemplate);
+    return loadList(execute(command, "catalog", "list", "services"), this::toServiceTemplate);
   }
 
   public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
@@ -209,11 +212,11 @@ public class Odo {
   }
 
   public void createUrl(String project, String application, String component, Integer port) throws IOException {
-    ExecHelper.execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
+    execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
   }
 
   public void deleteComponent(String project, String application, String component) throws IOException {
-    ExecHelper.execute(command, "delete", "--project", project, "--app", application, component, "-f");
+    execute(command, "delete", "--project", project, "--app", application, component, "-f");
   }
 
   public void follow(String project, String application, String component) throws IOException {
@@ -226,20 +229,19 @@ public class Odo {
 
 
   public void createProject(String project) throws IOException {
-    ExecHelper.execute(command, "project", "create", project);
+    execute(command, "project", "create", project);
   }
 
   public void deleteProject(String project) throws IOException {
-    ExecHelper.execute(command, "project", "delete", project, "-f");
-
+    execute(command, "project", "delete", project, "-f");
   }
 
   public void login(String url, String userName, char[] password) throws IOException {
-    ExecHelper.execute(command, "login", url, "-u", userName, "-p", String.valueOf(password));
+    execute(command, "login", url, "-u", userName, "-p", String.valueOf(password));
   }
 
   public void logout() throws IOException {
-    ExecHelper.execute(command, "logout");
+    execute(command, "logout");
   }
 
   public List<OdoConfig.Application> getApplication(String project) throws IOException {
@@ -276,14 +278,14 @@ public class Odo {
   }
 
   public void createStorage(String project, String application, String component, String name, String mountPath, String storageSize) throws IOException {
-    ExecHelper.execute(command, "storage", "create", "--project", project, "--app", application, "--component", component, name, "--path", mountPath, "--size", storageSize);
+    execute(command, "storage", "create", "--project", project, "--app", application, "--component", component, name, "--path", mountPath, "--size", storageSize);
   }
 
   public void deleteStorage(String project, String application, String component, String storage) throws IOException {
-    ExecHelper.execute(command, "storage", "delete", "--project", project, "--app", application, "--component", component, storage, "-f");
+    execute(command, "storage", "delete", "--project", project, "--app", application, "--component", component, storage, "-f");
   }
 
   public void link(String project, String application, String component, String source) throws IOException {
-    ExecHelper.execute(command, "link", source, "--project", project, "--app", application, "--component", component);
+    execute(command, "link", source, "--project", project, "--app", application, "--component", component);
   }
 }

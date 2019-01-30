@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.ProjectManager;
 import com.jediterm.terminal.ProcessTtyConnector;
 import com.jediterm.terminal.TerminalDisplay;
@@ -19,6 +20,7 @@ import org.apache.xmlgraphics.util.WriterOutputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.terminal.AbstractTerminalRunner;
+import org.jetbrains.plugins.terminal.TerminalOptionsProvider;
 import org.jetbrains.plugins.terminal.TerminalView;
 
 import javax.swing.JComponent;
@@ -71,7 +73,7 @@ public class ExecHelper {
 
               @Override
               public boolean isConnected() {
-                return true;
+                return process.isAlive();
               }
             };
           }
@@ -125,9 +127,13 @@ public class ExecHelper {
             });
           }
         };
+        TerminalOptionsProvider terminalOptions = ServiceManager.getService(TerminalOptionsProvider.class);
+        boolean previousAutoClassClose = terminalOptions.closeSessionOnLogout();
+        terminalOptions.setCloseSessionOnLogout(false);
         ApplicationManager.getApplication().invokeLater(() -> TerminalView.getInstance(ProjectManager.getInstance().getOpenProjects()[0]).createNewSession(ProjectManager.getInstance().getOpenProjects()[0], runner));
         handler.startNotify();
         handler.waitFor();
+        terminalOptions.setCloseSessionOnLogout(previousAutoClassClose);
         if (handler.getProcess().exitValue() != 0) {
           throw new IOException("Process returned exit code: " + handler.getProcess().exitValue(), null);
         }

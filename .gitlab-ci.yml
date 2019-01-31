@@ -17,11 +17,29 @@ build:
   tags:
     - docker
   script:
-  - ./gradlew assemble
+  - ./gradlew clean assemble
   artifacts:
     paths:
     - build/distributions/*.zip
     expire_in: 1 week
+  only:
+  - master
+
+build-2018.2:
+  stage: build
+  tags:
+    - docker
+  script:
+  - ./gradlew clean assemble -PideaVersion=IC-2018.2
+  only:
+  - master
+
+build-2018.3:
+  stage: build
+  tags:
+    - docker
+  script:
+  - ./gradlew clean assemble -PideaVersion=IC-2018.3
   only:
   - master
 
@@ -30,7 +48,21 @@ test:
   tags:
     - docker
   script:
-  - ./gradlew check
+  - ./gradlew clean check
+
+test-2018.2:
+  stage: test
+  tags:
+    - docker
+  script:
+  - ./gradlew clean check -PideaVersion=IC-2018.2
+
+test-2018.3:
+  stage: test
+  tags:
+    - docker
+  script:
+  - ./gradlew clean check -PideaVersion=IC-2018.3
 
 after_script:
 - echo "End CI"

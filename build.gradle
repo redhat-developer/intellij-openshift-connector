@@ -16,6 +16,7 @@ intellij {
     version ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName 'org.jboss.tools.intellij.openshift'
     plugins 'terminal'
+	updateSinceUntilBuild false
 }
 
 configurations {

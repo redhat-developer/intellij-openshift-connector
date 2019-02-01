@@ -22,18 +22,18 @@ public class LoginDialog extends DialogWrapper {
   private JPanel contentPane;
   private JTextField userNameField;
   private JPasswordField passwordField;
-  private JButton buttonOK;
-  private JButton buttonCancel;
+  private JTextField clusterURLField;
 
-  public LoginDialog(Component parent) {
+  public LoginDialog(Component parent, String clusterURL) {
     super((Project) null, parent, false, IdeModalityType.IDE);
     init();
     setTitle("Cluster login");
+    clusterURLField.setText(clusterURL);
   }
 
 
   public static void main(String[] args) {
-    LoginDialog dialog = new LoginDialog(null);
+    LoginDialog dialog = new LoginDialog(null, "");
     dialog.pack();
     dialog.show();
     System.exit(0);
@@ -51,5 +51,9 @@ public class LoginDialog extends DialogWrapper {
 
   public char[] getPassword() {
     return passwordField.getPassword();
+  }
+
+  public String getClusterURL() {
+    return clusterURLField.getText();
   }
 }

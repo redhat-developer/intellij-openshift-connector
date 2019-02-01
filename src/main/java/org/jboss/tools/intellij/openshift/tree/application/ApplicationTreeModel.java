@@ -1,6 +1,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ui.tree.BaseTreeModel;
+import io.fabric8.kubernetes.client.ConfigBuilder;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
@@ -46,7 +47,10 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
 
     @Override
     public void onUpdate(ConfigWatcher source) {
-        refresh();
+        try {
+            new ConfigBuilder().build();
+            refresh();
+        } catch (Exception e) {}
     }
 
     @Override

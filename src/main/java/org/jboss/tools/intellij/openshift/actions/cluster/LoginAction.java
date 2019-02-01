@@ -18,14 +18,12 @@ public class LoginAction extends LoggedOutClusterAction {
     CompletableFuture.runAsync(() -> {
         try {
           LoginDialog loginDialog = UIHelper.executeInUI(() -> {
-            LoginDialog dialog = new LoginDialog(null);
+            LoginDialog dialog = new LoginDialog(null, clusterNode.toString());
             dialog.show();
             return dialog;
             });
           if (loginDialog.isOK()) {
-            odo.login(clusterNode.toString(), loginDialog.getUserName(), loginDialog.getPassword());
-            clusterNode.setLogged(false);
-            clusterNode.reload();
+            odo.login(loginDialog.getClusterURL(), loginDialog.getUserName(), loginDialog.getPassword());
           }
         } catch (IOException e) {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Login", JOptionPane.ERROR_MESSAGE));

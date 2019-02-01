@@ -237,7 +237,7 @@ public class Odo {
   }
 
   public void login(String url, String userName, char[] password) throws IOException {
-    execute(command, "login", url, "-u", userName, "-p", String.valueOf(password));
+    execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
   }
 
   public void logout() throws IOException {

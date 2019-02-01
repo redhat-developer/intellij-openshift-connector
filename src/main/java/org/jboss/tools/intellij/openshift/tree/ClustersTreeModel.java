@@ -32,7 +32,7 @@ public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements Co
     }
 
     @Override
-    public List<? extends NamedContext> getChildren(Object o) {
+    public List<NamedContext> getChildren(Object o) {
         if (o.equals(ROOT)) {
             return config.getContexts().stream().collect(Collectors.toList());
         } else {

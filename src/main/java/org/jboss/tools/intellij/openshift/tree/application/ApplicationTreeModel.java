@@ -26,7 +26,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     }
 
     @Override
-    public List<? extends Object> getChildren(Object o) {
+    public List<Object> getChildren(Object o) {
         if (o instanceof LazyMutableTreeNode) {
             LazyMutableTreeNode node = (LazyMutableTreeNode) o;
             if (!node.isLoaded()) {

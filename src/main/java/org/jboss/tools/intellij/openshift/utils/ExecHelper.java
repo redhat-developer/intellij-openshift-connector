@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.utils;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.SystemInfo;
 import com.jediterm.terminal.ProcessTtyConnector;
@@ -32,6 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -211,7 +215,26 @@ public class ExecHelper {
         TerminalOptionsProvider terminalOptions = ServiceManager.getService(TerminalOptionsProvider.class);
         boolean previousAutoClassClose = terminalOptions.closeSessionOnLogout();
         terminalOptions.setCloseSessionOnLogout(false);
-        ApplicationManager.getApplication().invokeLater(() -> TerminalView.getInstance(ProjectManager.getInstance().getOpenProjects()[0]).createNewSession(ProjectManager.getInstance().getOpenProjects()[0], runner));
+        final TerminalView view = TerminalView.getInstance(ProjectManager.getInstance().getOpenProjects()[0]);
+        final Method[] method = new Method[1];
+        final Object[][] parameters = new Object[1][];
+        try {
+          method[0] = TerminalView.class.getMethod("createNewSession", new Class[] {Project.class, AbstractTerminalRunner.class});
+          parameters[0] = new Object[] {ProjectManager.getInstance().getOpenProjects()[0],
+                                      runner};
+        } catch (NoSuchMethodException e) {
+          try {
+            method[0] = TerminalView.class.getMethod("createNewSession", new Class[] {AbstractTerminalRunner.class});
+            parameters[0] = new Object[] { runner};
+          } catch (NoSuchMethodException e1) {
+            throw new IOException(e1);
+          }
+        }
+        ApplicationManager.getApplication().invokeLater(() -> {
+          try {
+            method[0].invoke(view, parameters[0]);
+          } catch (IllegalAccessException|InvocationTargetException e) {}
+        });
         terminalOptions.setCloseSessionOnLogout(previousAutoClassClose);
         if (p.waitFor() != 0) {
           throw new IOException("Process returned exit code: " + p.exitValue(), null);

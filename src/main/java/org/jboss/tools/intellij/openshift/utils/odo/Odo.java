@@ -106,6 +106,9 @@ public class Odo {
         try (OutputStream output = new FileOutputStream(cmd)) {
           IOUtils.copy(stream, output);
         }
+        if (!new File(cmd).setExecutable(true)) {
+          throw new IOException("Can't set " + cmd + " as executable");
+        }
       }
     } catch (CompressorException e) {
       throw new IOException(e);

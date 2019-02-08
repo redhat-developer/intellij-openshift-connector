@@ -28,12 +28,18 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class OpenInBrowserAction extends OdoAction {
   public OpenInBrowserAction() {
     super(ComponentNode.class);
+  }
+
+  private void openURL(List<Route> routes) {
+    String url = getURL(routes.get(0));
+    BrowserUtil.open(url);
   }
 
   @Override
@@ -46,13 +52,15 @@ public class OpenInBrowserAction extends OdoAction {
         List<Route> routes = getRoute(projectNode, applicationNode, componentNode);
         if (routes.isEmpty()) {
           if (UIHelper.executeInUI(() -> JOptionPane.showConfirmDialog(null, "No URL for component " + componentNode.toString() + ", do you want to create one ?", "Create URL", JOptionPane.OK_CANCEL_OPTION)) == JOptionPane.OK_OPTION) {
-
+            if (CreateURLAction.createURL(odo, projectNode, applicationNode, componentNode)) {
+              routes = getRoute(projectNode, applicationNode, componentNode);
+              openURL(routes);
+            }
           }
         } else {
-          String url = getURL(routes.get(0));
-          BrowserUtil.open(url);
+          openURL(routes);
         }
-      } catch (KubernetesClientException e) {
+      } catch (KubernetesClientException | IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Open in Brower", JOptionPane.ERROR_MESSAGE));
       }
     });

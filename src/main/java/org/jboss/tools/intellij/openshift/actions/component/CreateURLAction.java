@@ -37,28 +37,35 @@ public class CreateURLAction extends OdoAction {
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        List<Integer> ports = loadServicePorts(odo, projectNode, applicationNode, componentNode);
-        if (!ports.isEmpty()) {
-          Integer port;
-          if (ports.size() > 1) {
-            port = (Integer)UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Service port", "Choose port", JOptionPane.QUESTION_MESSAGE, null, ports.toArray(), ports.get(0)));
-          } else {
-            port = ports.get(0);
-          }
-          if (port != null) {
-            odo.createUrl(projectNode.toString(), applicationNode.toString(), componentNode.toString(), port);
-          }
-        } else {
-          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Can't create url for component without ports", "Create URL", JOptionPane.ERROR_MESSAGE));
-        }
+        createURL(odo, projectNode, applicationNode, componentNode);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create URL", JOptionPane.ERROR_MESSAGE));
       }
     });
   }
 
-  public List<Integer> loadServicePorts(Odo odo, LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, LazyMutableTreeNode componentNode) {
+  public static List<Integer> loadServicePorts(Odo odo, LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, LazyMutableTreeNode componentNode) {
     final OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
     return odo.getServicePorts(client, projectNode.toString(), applicationNode.toString(), componentNode.toString());
+  }
+
+  public static boolean createURL(Odo odo, LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, ComponentNode componentNode) throws IOException {
+    boolean done = false;
+    List<Integer> ports = loadServicePorts(odo, projectNode, applicationNode, componentNode);
+    if (!ports.isEmpty()) {
+      Integer port;
+      if (ports.size() > 1) {
+        port = (Integer)UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Service port", "Choose port", JOptionPane.QUESTION_MESSAGE, null, ports.toArray(), ports.get(0)));
+      } else {
+        port = ports.get(0);
+      }
+      if (port != null) {
+        odo.createUrl(projectNode.toString(), applicationNode.toString(), componentNode.toString(), port);
+        done = true;
+      }
+    } else {
+      throw new IOException("Can't create url for component without ports");
+    }
+    return done;
   }
 }

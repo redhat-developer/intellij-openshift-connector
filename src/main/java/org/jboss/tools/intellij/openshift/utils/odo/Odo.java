@@ -290,7 +290,8 @@ public class Odo {
 
 
   public List<PersistentVolumeClaim> getStorages(OpenShiftClient client, String project, String application, String component) {
-    return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems();
+    return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
+            .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).collect(Collectors.toList());
 
   }
 

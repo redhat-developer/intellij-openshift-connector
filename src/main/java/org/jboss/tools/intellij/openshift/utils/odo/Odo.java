@@ -315,7 +315,11 @@ public class Odo {
     execute(command, "storage", "delete", "--project", project, "--app", application, "--component", component, storage, "-f");
   }
 
-  public void link(String project, String application, String component, String source) throws IOException {
-    execute(command, "link", source, "--project", project, "--app", application, "--component", component);
+  public void link(String project, String application, String component, String source, Integer port) throws IOException {
+    if (port != null) {
+      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--port", port.toString(), "--wait");
+    } else {
+      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--wait");
+    }
   }
 }

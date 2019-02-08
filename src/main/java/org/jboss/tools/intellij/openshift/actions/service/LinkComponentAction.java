@@ -55,7 +55,7 @@ public class LinkComponentAction extends OdoAction {
             component = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link component", "Select component", JOptionPane.QUESTION_MESSAGE, null, componentsArray, componentsArray[0]));
           }
           if (component != null) {
-            odo.link(projectNode.toString(), applicationNode.toString(), component, serviceNode.toString());
+            odo.link(projectNode.toString(), applicationNode.toString(), component, serviceNode.toString(), null);
             Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Service linked to " + component,
             NotificationType.INFORMATION));
           }

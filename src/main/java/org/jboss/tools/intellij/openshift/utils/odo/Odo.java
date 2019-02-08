@@ -141,6 +141,10 @@ public class Odo {
     execute(command, "app", "create", application, "--project", project);
   }
 
+  public void describeApplication(String project, String application) throws IOException {
+    ExecHelper.executeWithTerminal(command, "app", "describe", application, "--project", project);
+  }
+
   public void deleteApplication(String project, String application) throws IOException {
     execute(command, "app", "delete", application, "-f", "--project", project);
   }

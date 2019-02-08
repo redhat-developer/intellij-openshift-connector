@@ -46,6 +46,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New project"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" text="New application"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.DescribeApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DescribeApplicationAction" text="Describe"/>
       <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" text="Delete"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>

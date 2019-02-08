@@ -34,6 +34,12 @@
 
   <actions>
     <group id="org.jboss.tools.intellij.tree" popup="true">
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" text="List Catalog Components"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" text="List Catalog Services"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.refresh" text="Refresh"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.currentcluster" text="Set current"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.DeleteFromKubeConfigAction" id="org.jboss.tools.intellij.delete" text="Delete from kubeconfig"></action>
@@ -50,11 +56,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" text="Follow Log"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link service"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" text="List Catalog Components"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" text="List Catalog Services"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New service"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link component"/>

@@ -153,6 +153,10 @@ public class Odo {
     ExecHelper.executeWithTerminal(command, "push", "--project", project, "--app", application, component);
   }
 
+  public void describeComponent(String project, String application, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, component);
+  }
+
   public void watch(String project, String application, String component) throws IOException {
     ExecHelper.executeWithTerminal(command, "watch", "--project", project, "--app", application, component);
   }

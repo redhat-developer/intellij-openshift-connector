@@ -33,7 +33,7 @@ public class LoginAction extends LoggedOutClusterAction {
             return dialog;
             });
           if (loginDialog.isOK()) {
-            odo.login(loginDialog.getClusterURL(), loginDialog.getUserName(), loginDialog.getPassword());
+            odo.login(loginDialog.getClusterURL(), loginDialog.getUserName(), loginDialog.getPassword(), loginDialog.getToken());
           }
         } catch (IOException e) {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Login", JOptionPane.ERROR_MESSAGE));

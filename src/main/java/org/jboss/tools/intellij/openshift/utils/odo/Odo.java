@@ -249,8 +249,12 @@ public class Odo {
     execute(command, "project", "delete", project, "-f");
   }
 
-  public void login(String url, String userName, char[] password) throws IOException {
-    execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
+  public void login(String url, String userName, char[] password, String token) throws IOException {
+    if (token == null || token.isEmpty()) {
+      execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
+    } else {
+      execute(command, "login", url, "-t", token, " --insecure-skip-tls-verify");
+    }
   }
 
   public void logout() throws IOException {

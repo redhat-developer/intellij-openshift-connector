@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Odo {
@@ -65,13 +66,32 @@ public class Odo {
     return command;
   }
 
+  private String getOdoVersion(String tool, String command) {
+    String version = "";
+    try {
+      Pattern pattern = Pattern.compile(tool + " v(\\d+[\\.\\d+]*).*");
+      String output = ExecHelper.execute(false, command, "version");
+      try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+        version = reader.lines().
+                map(line -> pattern.matcher(line)).
+                filter(matcher -> matcher.matches()).
+                map(matcher -> matcher.group(1)).
+                findFirst().orElse("");
+      }
+    } catch (IOException e) {}
+    return version;
+  }
+
+  private boolean areCompatible(String version, String requiredVersion) {
+    return version.equals(requiredVersion);
+  }
+
   private String getOdoCommand() throws IOException {
     ToolsConfig.Tool odoTool = ConfigHelper.loadToolsConfig().getTools().get("odo");
     ToolsConfig.Platform platform = odoTool.getPlatforms().get(Platform.os().id());
     String command = platform.getCmdFileName();
-    try {
-      Runtime.getRuntime().exec(command);
-    } catch (IOException e) {
+    String version = getOdoVersion("odo" , command);
+    if (!areCompatible(version, odoTool.getVersion())) {
       Path path = Paths.get(System.getProperty("user.home"), ".vs-openshift", "cache", odoTool.getVersion(), command);
       if (!Files.exists(path)) {
         final Path dlFilePath = path.resolveSibling(platform.getDlFileName());

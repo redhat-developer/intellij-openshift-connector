@@ -40,14 +40,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class ExecHelper {
-  public static String execute(String executable, String... arguments) throws IOException {
-    DefaultExecutor executor = new DefaultExecutor();
+  public static String execute(boolean checkExitCode, String executable, String... arguments) throws IOException {
+    DefaultExecutor executor = new DefaultExecutor() {
+      @Override
+      public boolean isFailure(int exitValue) {
+        if (checkExitCode) {
+          return super.isFailure(exitValue);
+        } else {
+          return false;
+        }
+      }
+    };
     StringWriter writer = new StringWriter();
     PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
     executor.setStreamHandler(handler);
     CommandLine command = new CommandLine(executable).addArguments(arguments);
       executor.execute(command);
       return writer.toString();
+  }
+
+  public static String execute(String executable, String... arguments) throws IOException {
+    return execute(true, executable, arguments);
   }
 
   private static class RedirectedStream extends FilterInputStream {

@@ -8,7 +8,7 @@ cache:
 before_install:
 - export GRADLE_USER_HOME=`pwd`/.gradle    
 install:
-  - gradlew clean assemble
+  - ./gradlew clean assemble
 notifications:
   on_success: change # default: always
   on_failure: always # default: always

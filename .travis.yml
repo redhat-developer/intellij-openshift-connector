@@ -23,9 +23,7 @@ jobs:
         sudo echo '{"insecure-registries": ["172.30.0.0/16"]}' > daemon.json
         sudo mv daemon.json /etc/docker
         sudo cat /etc/docker/daemon.json
-        sudo apt-get install --reinstall systemd
-        sudo systemctl daemon-reload
-        sudo systemctl restart docker
+        sudo service docker restart
         ./oc cluster up
 notifications:
   on_success: change # default: always

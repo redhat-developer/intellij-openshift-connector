@@ -37,9 +37,17 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ExecHelper {
+  private static final ScheduledExecutorService SERVICE = Executors.newSingleThreadScheduledExecutor();
+
+  public static void executeAfter(Runnable runnable, long delay, TimeUnit unit) {
+    SERVICE.schedule(runnable, delay, unit);
+  }
+
   public static String execute(boolean checkExitCode, String executable, String... arguments) throws IOException {
     DefaultExecutor executor = new DefaultExecutor() {
       @Override

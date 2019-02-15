@@ -16,6 +16,7 @@ import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener {
     private ApplicationsRootNode ROOT;
@@ -59,7 +61,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     public void onUpdate(ConfigWatcher source) {
         try {
             new ConfigBuilder().build();
-            refresh();
+            ExecHelper.executeAfter(this::refresh, 1, TimeUnit.SECONDS);
         } catch (Exception e) {}
     }
 

@@ -34,4 +34,4 @@ dependencies {
 }
 
 group 'org.jboss.tools.intellij'
-version '0.0.1-SNAPSHOT' // Plugin version
+version projectVersion // Plugin version

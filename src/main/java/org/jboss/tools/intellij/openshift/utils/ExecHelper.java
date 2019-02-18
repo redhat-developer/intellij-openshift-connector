@@ -234,7 +234,6 @@ public class ExecHelper {
           }
         };
         TerminalOptionsProvider terminalOptions = ServiceManager.getService(TerminalOptionsProvider.class);
-        boolean previousAutoClassClose = terminalOptions.closeSessionOnLogout();
         terminalOptions.setCloseSessionOnLogout(false);
         final TerminalView view = TerminalView.getInstance(ProjectManager.getInstance().getOpenProjects()[0]);
         final Method[] method = new Method[1];
@@ -256,7 +255,6 @@ public class ExecHelper {
             method[0].invoke(view, parameters[0]);
           } catch (IllegalAccessException|InvocationTargetException e) {}
         });
-        terminalOptions.setCloseSessionOnLogout(previousAutoClassClose);
         if (p.waitFor() != 0) {
           throw new IOException("Process returned exit code: " + p.exitValue(), null);
         }

@@ -24,7 +24,9 @@ jobs:
         sudo mv daemon.json /etc/docker
         sudo cat /etc/docker/daemon.json
         sudo service docker restart
-        ./oc cluster up
+        ./oc cluster up --enable=service-catalog,template-service-broker
+    - stage: integration-test
+      script: ./gradlew integrationTest
 notifications:
   on_success: change # default: always
   on_failure: always # default: always

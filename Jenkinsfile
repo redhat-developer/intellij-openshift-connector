@@ -13,7 +13,7 @@ node('rhel7'){
 
 	stage('Package') {
 	    def props = readProperties file: 'gradle.properties'
-	    def version = props['projectVersion'].replace('SNAPSHOT', '${env.BUILD_NUMBER}')
+	    def version = props['projectVersion'].replace('SNAPSHOT', "${env.BUILD_NUMBER}")
         sh "./gradlew buildPlugin -PprojectVersion=${version}"
 	}
 

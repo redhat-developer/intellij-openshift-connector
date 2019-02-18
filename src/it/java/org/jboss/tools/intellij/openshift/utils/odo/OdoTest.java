@@ -10,15 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import com.intellij.openapi.progress.ProgressIndicator;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -27,17 +31,19 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Odo.class)
-@PowerMockIgnore({"javax.net.ssl.*","javax.security.*","javax.swing.*"})
+@PowerMockIgnore({"javax.net.ssl.*","javax.security.*","javax.swing.*", "org.jboss.tools.intellij.openshift.utils.ExecHelper"})
 public class OdoTest extends BaseTest {
 
-    private static Odo odo;
+    private Odo odo;
 
-    private static OpenShiftClient client;
+    private OpenShiftClient client;
 
     private Random random = new Random();
 
@@ -45,11 +51,13 @@ public class OdoTest extends BaseTest {
 
     private static final String APPLICATION_PREFIX = "test-application-";
 
-    @BeforeClass
-    public static void init() throws IOException {
+    @Before
+    public void init() throws Exception {
         PowerMockito.mockStatic(Odo.class);
         Mockito.when(Odo.isDownloadAllowed()).thenReturn(true);
         Mockito.when((Odo.get())).thenCallRealMethod();
+        PowerMockito.when(Odo.class, "downloadFile", Mockito.any(InputStream.class), Mockito.any(Path.class), Mockito.any(ProgressIndicator.class), Mockito.anyLong()).thenCallRealMethod();
+        PowerMockito.when(Odo.class, "execute", Mockito.anyString()).thenCallRealMethod();
         odo = Odo.get();
         client = new DefaultOpenShiftClient(new ConfigBuilder().build());
     }

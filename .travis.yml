@@ -26,7 +26,7 @@ jobs:
         sudo service docker restart
         ./oc cluster up --enable=service-catalog,template-service-broker
     - stage: integration-test
-      script: ./gradlew integrationTest --stacktrace
+      script: ./gradlew integrationTest
 after_failure:
   - cat build/test-results/integrationTest/*.xml
 notifications:

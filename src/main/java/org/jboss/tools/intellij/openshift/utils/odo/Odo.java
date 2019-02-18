@@ -96,7 +96,7 @@ public class Odo {
       if (!Files.exists(path)) {
         final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
         final String cmd = path.toString();
-        if (JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION) {
+        if (isDownloadAllowed()) {
           command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
             @Override
             public String compute(@NotNull ProgressIndicator progressIndicator) throws IOException {
@@ -118,6 +118,10 @@ public class Odo {
       }
     }
     return command;
+  }
+
+  public static boolean isDownloadAllowed() {
+    return JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION;
   }
 
   private void uncompress(Path dlFilePath, String cmd) throws IOException {

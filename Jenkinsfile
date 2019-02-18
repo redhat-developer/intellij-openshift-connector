@@ -4,7 +4,7 @@ node('rhel7'){
 	stage('Checkout repo') {
 		deleteDir()
 		git url: 'https://github.com/redhat-developer/intellij-openshift-connector',
-			branch: "${BRANCH}"
+			branch: "${sha1}"
 	}
 
 	stage('Build') {

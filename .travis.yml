@@ -27,6 +27,8 @@ jobs:
         ./oc cluster up --enable=service-catalog,template-service-broker
     - stage: integration-test
       script: ./gradlew integrationTest --stacktrace
+after_failure:
+  - cat build/test-results/integrationTest/*.xml
 notifications:
   on_success: change # default: always
   on_failure: always # default: always

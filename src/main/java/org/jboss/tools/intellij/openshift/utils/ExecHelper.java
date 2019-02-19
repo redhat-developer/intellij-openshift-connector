@@ -55,8 +55,12 @@ public class ExecHelper {
     PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
     executor.setStreamHandler(handler);
     CommandLine command = new CommandLine(executable).addArguments(arguments);
+    try {
       executor.execute(command);
       return writer.toString();
+    } catch (IOException e) {
+      throw new IOException(e.getLocalizedMessage() + " " + writer.toString(), e);
+    }
   }
 
   public static String execute(String executable, String... arguments) throws IOException {

@@ -44,6 +44,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Odo {
+  public static final String ODO_DOWNLOAD_FLAG = Odo.class.getName() + ".download";
+
   private String command;
 
   private Odo() throws IOException {
@@ -121,7 +123,7 @@ public class Odo {
   }
 
   public static boolean isDownloadAllowed() {
-    return JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION;
+    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION;
   }
 
   private void uncompress(Path dlFilePath, String cmd) throws IOException {

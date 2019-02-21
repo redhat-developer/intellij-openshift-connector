@@ -188,7 +188,7 @@ public class Odo {
   }
 
   public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
-    ExecHelper.executeWithTerminal(command, "create", componentType + ':' + componentVersion, component,
+    execute(command, "create", componentType + ':' + componentVersion, component,
       "--local", source, "--project", project, "--app", application);
 
   }

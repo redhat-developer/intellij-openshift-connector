@@ -27,7 +27,7 @@ jobs:
         ./oc cluster up
         ./oc cluster add service-catalog
         ./oc cluster add template-service-broker
-        curl https://raw.githubusercontent.com/minishift/minishift/master/addons/xpaas/v3.10/xpaas-streams/openjdk18-image-stream.json --location --ouput openjdk18-image-stream.json
+        curl https://raw.githubusercontent.com/minishift/minishift/master/addons/xpaas/v3.10/xpaas-streams/openjdk18-image-stream.json --location --output openjdk18-image-stream.json
         ./oc apply -f openjdk18-image-stream.json
         cd ..
         ./gradlew integrationTest

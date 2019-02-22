@@ -28,7 +28,9 @@ jobs:
         ./oc cluster add service-catalog
         ./oc cluster add template-service-broker
         curl https://raw.githubusercontent.com/minishift/minishift/master/addons/xpaas/v3.10/xpaas-streams/openjdk18-image-stream.json --location --output openjdk18-image-stream.json
+        ./oc login -u system:admin
         ./oc apply -f openjdk18-image-stream.json -n openshift
+        ./oc login -u developer -p dummy
         cd ..
         ./gradlew integrationTest
 after_failure:

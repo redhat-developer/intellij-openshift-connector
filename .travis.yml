@@ -17,8 +17,9 @@ jobs:
       script: ./gradlew check
     - stage: integration-test
       env:
-        - OPENSHIFT_VERSION=3.10 OPENSHIFT_HASH=dd10d17
-        - OPENSHIFT_VERSION=3.11 OPENSHIFT_HASH=0cbc58b
+        matrix:
+          - OPENSHIFT_VERSION=3.10 OPENSHIFT_HASH=dd10d17
+          - OPENSHIFT_VERSION=3.11 OPENSHIFT_HASH=0cbc58b
       script: |
         curl https://github.com/openshift/origin/releases/download/v${OPENSHIFT_VERSION}.0/openshift-origin-client-tools-v${OPENSHIFT_VERSION}.0-${OPENSHIFT_HASH}-linux-64bit.tar.gz --location --output oc-client.tgz
         tar -xzvf oc-client.tgz

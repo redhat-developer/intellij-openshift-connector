@@ -1,6 +1,6 @@
 
 plugins {
-    id "org.jetbrains.intellij" version "0.3.12"
+    id "org.jetbrains.intellij" version "0.4.3"
 }
 
 repositories {
@@ -17,6 +17,10 @@ intellij {
     pluginName 'org.jboss.tools.intellij.openshift'
     plugins 'terminal'
 	updateSinceUntilBuild false
+}
+
+publishPlugin {
+    token jetBrainsToken
 }
 
 configurations {

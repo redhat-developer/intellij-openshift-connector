@@ -18,6 +18,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -170,6 +171,7 @@ public class OdoTest extends BaseTest {
     }
 
     @Test
+    @Ignore("not yet supported by odo")
     public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
@@ -233,6 +235,7 @@ public class OdoTest extends BaseTest {
     }
 
     @Test
+    @Ignore("not yet supported by odo")
     public void checkCreateDeleteService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();

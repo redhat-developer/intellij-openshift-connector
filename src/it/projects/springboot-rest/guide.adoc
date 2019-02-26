@@ -1,0 +1,598 @@
+= Understanding how to deploy a simple RESTful service and front-end on OpenShift using Spring Boot and Apache CXF
+
+This document will guide you through the steps to create a simple "Hello World" https://jcp.org/en/jsr/detail?id=370[JAX-RS]
+based, RESTful web service using http://cxf.apache.org/[Apache CXF] and https://spring.io/projects/spring-boot[Spring Boot].
+While learning how to use JAX-RS with Spring Boot is interesting in itself, we will detail the steps and mechanisms involved in
+deploying the application on an OpenShift cluster in an effort to develop a truly cloud-native application with a workflow
+focused on making things natural to Java developers.
+
+Conceptually, the application is similar to the one developed in
+https://spring.io/guides/gs/rest-service/[Spring Boot's guide on building RESTful services]. However, where the Spring
+Boot guide uses Spring-specific annotations to define the endpoint and its method, we will use standard annotations, making it
+easier to reuse endpoints implementations across servers, should you want to target a different platform than Spring Boot at some point.
+
+== What you'll build
+
+The application you will be building exposes a very simple greeting web service accepting `GET` HTTP requests to
+`/api/greeting`, responding with a JSON message in the form `{"content":"Hello, World!"}`. The
+message can be customized by passing the `name` query parameter to the request as in
+`http://localhost:8080/api/greeting?name=John` which would result in the following response: `{"content":"Hello,
+John!"}`.
+Additionally, a very simple front-end is provided using HTML and jQuery to interact with the greeting endpoint
+from a more user-friendly interface than query the service using https://curl.haxx.se/[`cURL`].
+
+NOTE: While we will go over the implementation, we will focus mostly on the specifics needed to get your application running on
+OpenShift as opposed to detailing all the Spring Boot-specific implementation.
+
+== What you'll need
+
+* Java 8
+* Access to an OpenShift cluster whether locally via https://www.openshift.org/minishift/[minishift] or using the different
+  flavors of https://www.openshift.com/products[OpenShift products]
+
+
+== Endpoint
+
+The application is composed of a RESTful service. Its code can be found in the `src/main/java/io/openshift/booster/service`
+directory. It is split in two classes: `GreetingEndpoint`, which implements the endpoint itself, and `Greeting` which is a
+simple class representing the payload sent back to users of the endpoint.
+
+Let's look at the `Greeting` class first, which is pretty simple:
+```java
+public class Greeting {
+
+    public static final String FORMAT = "Hello, %s!"; #<1>
+
+    private final String content; #<2>
+
+    public Greeting() {
+        this.content = null;
+    }
+
+    public Greeting(String content) {
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
+}
+```
+<1> `FORMAT` constant that can be used by clients of the class to create greeting messages in the expected format
+<2> `content` field which will be used to populate our JSON payload
+This `Greeting` class will be automatically marshalled by Jackson using the accessor.
+
+Let's now look at the `GreetingEndpoint` class, short and sweet but packing quite a punch, thanks to annotations:
+```java
+import javax.ws.rs.DefaultValue; # <1>
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
+import org.springframework.stereotype.Component;
+
+@Path("/greeting") # <2>
+@Component # <3>
+public class GreetingEndpoint {
+    @GET # <4>
+    @Produces("application/json") # <5>
+    public Greeting greeting(@QueryParam("name") @DefaultValue("World") String name) { #<6>
+        final String message = String.format(Greeting.FORMAT, name); #<7>
+        return new Greeting(message); #<8>
+    }
+}
+```
+<1> Standard JAX-RS annotation imports
+<2> Specify that this class is a JAX-RS root resource and that the endpoint will answer requests on `/greeting`
+<3> Mark the endpoint as a Spring component to be managed by Spring Boot. In conjunction with the `cxf.jaxrs.component-scan` property set to `true` in `application.properties`, this allows CXF to create a JAX-RS endpoint from the auto-discovered JAX-RS root resources.
+<4> Mark the `greeting` method as answering HTTP `GET` requests
+<5> Specify that the method returns JSON content (`application/json` content type)
+<6> The `name` method parameter is annotated with `@QueryParam("name")` to specify that it is passed as a query parameter in the URL when the service is invoked and that its default value is `World` if none is provided (thanks to the `@DefaultValue("World")` annotation)
+<7> We format the message using the `Greeting.FORMAT` constant…
+<8> and return a `Greeting` instance with the proper message. This object will be automatically serialized to JSON using https://github.com/FasterXML/jackson[Jackson] as we will see later.
+
+As you can see, there isn't much to it as far as code goes.
+
+We still need to configure CXF and Spring Boot properly for everything to work well.
+
+On the Spring Boot side, we need an entry point to our service in the form a class annotated with `@SpringBootApplication`, also giving us the opportunity to further configure our stack:
+```java
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication #<1>
+public class BoosterApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(BoosterApplication.class, args);
+    }
+
+    @Bean
+    public JacksonJsonProvider jsonProvider() { #<2>
+        return new JacksonJsonProvider(); 
+    }
+}
+```
+<1> Activates auto-configuration, component scan and marks the class as providing configuration using the https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-using-springbootapplication-annotation.html[`@SpringBootApplication` annotation]. This also allows to package the application as a jar that can be run as a typical application. Spring Boot will then start the embedded Tomcat server.
+<2> Specifies that the JSON provider to be used by CXF (which uses http://cxf.apache.org/docs/configuration.html[Spring as basis of its configuration]) should be Jackson.
+
+NOTE: You'll notice that, contrary to https://docs.spring.io/spring/docs/4.3.18.RELEASE/spring-framework-reference/htmlsingle/#mvc[Spring MVC] where Jackson only needs to be present on the classpath for it to be used, Apache CXF requires Jackson to be explicitly configured. This could be done via XML but we might as well leverage the `@SpringBootApplication` configuration capability.
+
+Let's now look at the content of `application.properties` which we need to further configure CXF:
+```properties
+cxf.path:/api #<1>
+cxf.jaxrs.component-scan:true #<2>
+```
+<1> Specify that CXF will answer to requests sent to the `/api` context. Our endpoint root resource is annotated with `@Path("/greeting")` which means that the full context for our endpoint will be `/api/greeting`.
+<2> As mentioned above when we looked at the `GreetingEndpoint` class, we need to set that property to `true` to activate automatic creation of endpoint based on resource detection.
+
+== Frontend
+
+Let's take a quick look at our frontend. It's implemented as a static HTML `src/resources/static/index.html` file served from the root of the embedded Tomcat server. The basic idea is similar to what is explained in the https://spring.io/guides/gs/consuming-rest-jquery/[consuming a RESTful Web Service with jQuery] Spring Boot guide so we will only focus on the salient parts for our purpose.
+
+In our case, our service is running on the same server so we don't need to worry about https://spring.io/understanding/CORS[CORS]. Moreover, for the same reason, we don't need any extra code for Spring Boot to start Tomcat. 
+
+The simple UI consists in a form to specify which name to pass to the greeting service and then invoke it:
+```html
+<form class="form-inline">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name" placeholder="World"> #<1>
+    </div>
+    <button id="invoke" type="submit" class="btn btn-success">Invoke</button> #<2>
+</form>
+<p class="lead">Result:</p>
+<pre><code id="greeting-result">Invoke the service to see the result.</code></pre> #<3>
+```
+<1> Text input to enter the name to pass to the greeting service
+<2> Button to trigger the call to the greeting service
+<3> Placeholder text that will be replaced by the result of the service call
+
+and the embedded jQuery script:
+```js
+  $(document).ready(function () {
+    $("#invoke").click(function (e) { #<1>
+      var n = $("#name").val() || "World"; #<2>
+      $.getJSON("/api/greeting?name=" + n, function (res) { #<3>
+        $("#greeting-result").text(JSON.stringify(res)); #<4>
+      });
+      e.preventDefault();
+    });
+  });
+```
+<1> Add a `click` event handler to the button with the `invoke` id
+<2> Retrieve the value of the `name` input to pass to the greeting server
+<3> Invoke the RESTful endpoint and retrieve the JSON response
+<4> Replace the content of the element with the `greeting-result` id with the result of the invocation
+
+== Building and testing the application locally
+
+You can run the application using `./mvnw spring-boot:run`, using the `run` goal of the https://docs.spring.io/spring-boot/docs/1.5.x/maven-plugin//index.html[Maven Spring Boot plugin].
+It's also possible to build the JAR file with `./mvnw clean package` and run it like a traditional Java application:
+
+    java -jar target/spring-boot-rest-http-<version>.jar
+
+where `<version>` corresponds to the current version of the project.
+Once the application is started, you can visit http://localhost:8080/index.html to see the frontend of the application and interact with the greeting service.
+
+Let's look at the important parts of the Maven project to properly build and run the application locally.
+
+First, we need to tell Maven that we're using Spring Boot and more specifically that we want to use the http://snowdrop.me/[Snowdrop] supported set of Spring Boot starters. This is accomplished by using 2 properties and importing the https://github.com/snowdrop/spring-boot-bom/tree/sb-1.5.x[Snowdrop Bill Of Materials (BOM)] and any dependencies we need for our application:
+```xml
+...
+<properties>
+    <spring-boot-bom.version>1.5.14.Final</spring-boot-bom.version> #<1>
+    <spring-boot.version>1.5.14.RELEASE</spring-boot.version> #<2>
+    ....
+</properties>
+...
+<dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>me.snowdrop</groupId>
+        <artifactId>spring-boot-bom</artifactId>
+        <version>${spring-boot-bom.version}</version> #<3>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      ...
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>   #<4>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-tomcat</artifactId>  #<5>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-spring-boot-starter-jaxrs</artifactId> #<6>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-json-provider</artifactId> #<7>
+      </dependency>
+      ...
+  </dependencies>
+...
+```
+<1> Specify the BOM version we want to use. More details on the
+https://github.com/snowdrop/spring-boot-bom/tree/sb-1.5.x[BOM content] and its
+https://github.com/snowdrop/spring-boot-bom/tree/sb-1.5.x#versioning-scheme[versioning scheme] are available.
+<2> Associated Spring Boot version
+<3> The BOM version is imported in the `dependencyManagement` section of the POM file
+<4> Since the BOM defines supported versions, we can then import supported dependencies without having to worry about their respective versions
+<5> Specify that we want to use Spring Boot with an embedded Tomcat server
+<6> Needed to be able to use Apache CXF integration with Spring Boot
+<7> Needed so that Apache CXF can use Jackson as JSON marshaller as seen above when we defined a `jsonProvider` bean provider method in our application entry point
+
+Let's now look at the build configuration:
+
+```xml
+...
+<build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering> #<3>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering> #<4>
+      </testResource>
+    </testResources>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version> #<1>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration/>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal> #<2>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+</build>
+...
+```
+<1> Add the https://docs.spring.io/spring-boot/docs/1.5.x/maven-plugin/[Spring Boot Maven plugin] to the build using the previously defined `spring-boot.version` property.
+<2> Specify that the `repackage` goal of the Spring Boot plugin should be executed during the `package` phase of the Maven build. This leads to the creation of new jar file repackaged to create a self-contained, executable application. The originally generated jar file is kept but renamed with the `.original` suffix appended to its name.
+<3> Activate https://maven.apache.org/shared/maven-filtering/index.html[Maven filtering] on files put in `src/main/resources` where Spring Boot configuration files live so that properties in the `${property.name}` can be interpolated and replaced during the build
+<4> Also perform Maven filtering on `src/test/resources` test resource files
+
+== Deploying the application on OpenShift
+
+Now that we've seen the gist of the application and how to run it locally, let's look at what's needed to deploy it on OpenShift. This is accomplished using the http://maven.fabric8.io/[Fabric8 Maven Plugin] (aka FMP). FMP brings your Java applications to OpenShift. Tightly integrated with Maven, it leverages the existing build configuration to focus on two tasks: building Docker images and creating OpenShift (or plain Kubernetes) resource descriptors. Since our application is built using Maven, it makes sense to continue to leverage that tool to generate whatever is necessary to deploy and run our application on OpenShift.
+
+NOTE: The following steps assume that you are currently connected to a running OpenShift cluster via `oc login`. By doing so, FMP will be able to determine that you are targeting an OpenShift deployment automatically and take additional steps to generate OpenShift-specific descriptors (as opposed to generic Kubernetes ones).
+
+First, we need to tell Maven that we want to use this plugin. This is accomplished in the parent POM of our booster, which is declared as:
+```xml
+<parent>
+    <groupId>io.openshift</groupId>
+    <artifactId>booster-parent</artifactId>
+    <version>23</version>
+</parent>
+```
+NOTE: We're considering removing the need for a parent and including the FMP (Fabric8 Maven Plugin) configuration directly in our boosters.
+
+Let's look at the parts that deal with configuring the Fabric8 Maven Plugin:
+```xml
+...
+  <properties>
+    ...
+    <fabric8-maven-plugin.version>3.5.40</fabric8-maven-plugin.version> #<1>
+    ...
+
+    <fabric8.generator.from>registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.2</fabric8.generator.from> #<2>
+    <fabric8.openshift.trimImageInContainerSpec>true</fabric8.openshift.trimImageInContainerSpec> #<3>
+    <fabric8.skip.build.pom>true</fabric8.skip.build.pom> #<4>
+  </properties>
+
+  ...
+
+  <build>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>fabric8-maven-plugin</artifactId>
+          <version>${fabric8-maven-plugin.version}</version> #<5>
+        </plugin>
+
+        ...
+      </plugins>
+    </pluginManagement>
+    ...
+  </build>
+...
+```
+<1> Specify which version of FMP to use in a property, to be used in the plugin definition later on.
+<2> Specify which Docker base image to use when generating the images for our application. The base image will serve as the foundation on top of which the FMP plugin adds our application to create a container ready to be deployed on a Kubernetes cluster. In this case, the base image is the
+https://access.redhat.com/containers/?tab=overview&platform=openshift#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift[Red Hat supported OpenJDK 8 image] since our application is, at its code, a Java application. The booster's parent specifies that version `1.2` should be used but this property is overridden in the booster itself to use a more recent version. We will look later at how this is done in our booster (essentially, redefining the `fabric8.generator.from` property but with a twist)!
+<3> This configuration property is only needed if running on OpenShift `3.7` version earlier than `3.7.2` to work around an issue between an older version of FMP and OpenShift `3.7`. This property might be removed in future versions of the boosters. For more details on this issue, see https://github.com/fabric8io/fabric8-maven-plugin/issues/1130#issuecomment-366216830 (and below).
+<4> This configuration property instructs FMP to not build modules with the `pom` type. Without this property, This was required for an older version of FMP and might become needed again. For more details on this issue, see https://github.com/fabric8io/fabric8-maven-plugin/issues/1184#issuecomment-368308674 (and below).
+<5> Specify that we want to use the Fabric8 Maven Plugin at the version that we previously specified.
+
+NOTE: You can see and explore the list of Red Hat supported images that can serve as base images for you applications at: https://access.redhat.com/containers/.
+
+Now that we've seen the configuration of the plugin in the booster parent, let's look at how it's used in the booster itself:
+
+```xml
+...
+  <properties>
+    ...
+    <openjdk18-openshift.version>1.3</openjdk18-openshift.version> #<2>
+    <fabric8.generator.from>
+      registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:${openjdk18-openshift.version} #<3>
+    </fabric8.generator.from>
+  </properties>
+  ...
+  <profile>
+    <id>openshift</id> #<1>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>fabric8-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>fmp</id>
+              <goals>
+                <goal>resource</goal> #<4>
+                <goal>build</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+...
+```
+<1> Since we don't want the Docker image / OpenShift resource descriptor generation process executed by FMP when we only want to run the application locally, we "hide" the FMP execution behind an `openshift` profile.
+<2> Earlier, we said that we would redefine the version of the base image used to perform our builds. This is how we do it: instead of re-defining the whole `fabric8.generator.from` property, we introduce a new `openjdk18-openshift.version` property, which we set to the desired value and
+<3> ... use that property when specifying the `fabric8.generator.from` property, thus allowing us to easily change the image version without touching the base image identifier.
+<4> We bind the plugin https://maven.fabric8.io/#fabric8:resource[`resource`] and https://maven.fabric8.io/#fabric8:build[`build`] goals to Maven's lifecycle so that they are automatically run when we execute a Maven build. The `resource` goal creates the OpenShift resource descriptors (by default a https://docs.openshift.org/latest/architecture/core_concepts/pods_and_services.html#services[`Service`] along with an associated https://docs.openshift.org/latest/architecture/networking/routes.html[`Route`] and a https://docs.openshift.org/latest/architecture/core_concepts/deployments.html#deployments-and-deployment-configurations[`DeploymentConfig`]) while `build` creates a Docker image using the https://docs.openshift.org/latest/architecture/core_concepts/builds_and_image_streams.html#source-build[Source-to-Image (S2I) build process] by default using the base image we specified above.
+
+We then need to execute the https://maven.fabric8.io/#fabric8:deploy[`fabric8:deploy`] goal of the Fabric8 Maven plugin to deploy the application to an OpenShift cluster. Since we have bound the `resource` and `build` goals to Maven's lifecycle, they will be automatically triggered at appropriate times during the build process. Resource descriptors will therefore be appropriately generated using information from the booster's POM, a Docker image containing all that's needed to run a Java application *and* our application will be built using the S2I process and finally, all these artifacts will be pushed to the OpenShift cluster we're connected to. This is accomplished by running:
+
+```bash
+./mvnw clean fabric8:deploy -Popenshift
+```
+
+By default, FMP will operate in `auto` mode, meaning that it will attempt to detect which kind of cluster you are targeting (plain Kubernetes or OpenShift). Being logged in an OpenShift cluster (via `oc login`) should allow FMP to properly detect that we are focusing on an OpenShift deployment and therefore trigger the creation of OpenShift-specific resource descriptors. `fabric8:deploy` will invoke the `fabric8:build` and `fabric8:resource-apply` goals (this last one being similar to `fabric8:resource` but additionally sending the resources to the target cluster to be applied).
+
+In order to understand more deeply what `fabric8:deploy` does, let's execute these steps separately and look at the generated resources.
+
+`fabric8:resource` generates a `fabric8` directory in `target`. This directory is a working directory containing resources that are created from http://maven.fabric8.io/#resource-fragments[resource fragments]. In our case, though, we operate using FMP's http://maven.fabric8.io/#zero-config[zero-config mode], meaning that we let FMP create automatically the needed resources in an opinionated way. We could override some of these generated values if needed but we're content with the defaults. In particular, an OpenShift Route is automatically created for our service and it therefore appears in that `fabric8` directory.
+
+The more interesting directory when it comes to files generated by `fabric8:resource` is the `target/classes/META-INF/fabric8` directory. This is where FMP puts the final version of the generated files once they have prepared. Looking at it, we notice it has the following structure:
+
+```
++ kubernetes
+\__ spring-boot-rest-http-deployment.yml
+ |_ spring-boot-rest-http-svc.yml
+- kubernetes.json
+- kubernetes.yml
++ openshift
+ \__ spring-boot-rest-http-deploymentconfig.yml
+  |_ spring-boot-rest-http-route.yml
+  |_ spring-boot-rest-http-svc.yml
+- openshift.json
+- openshift.yml
+```
+
+The first thing that we notice is that descriptors are generated for both plain Kubernetes and OpenShift. For each "flavor", FMP generates top-level resource lists, in both JSON (`kubernetes.json` or `openshift.json`) and YAML (`kubernetes.yml` and `openshift.yml`) formats, aggregating the individual resources generated in the associated directories (`kubernetes` for plain Kubernetes, `openshift` for OpenShift).
+
+Looking at the individual generated resources, we notice that they follow the `<artifactId of the project>-<resource type>.yml` convention. We also notice that, while the service descriptors (`spring-boot-rest-http-svc.yml`) are identical for both plain Kubernetes and OpenShift flavors, FMP generates a `Deployment` descriptor for Kubernetes but a https://docs.openshift.org/latest/dev_guide/deployments/how_deployments_work.html[`DeploymentConfig`] descriptor for OpenShift. OpenShift's `DeploymentConfig` provide additional features on top of Kubernetes' `Deployments`, notably lifecycle hooks and custom triggers based on either configuration or image changes. For more details on the differences between both concepts, please take a look at https://docs.openshift.org/latest/dev_guide/deployments/kubernetes_deployments.html[Deployment vs. DeploymentConfig]. Additionally, a https://docs.openshift.org/latest/architecture/networking/routes.html[`Route`] descriptor is also generated for OpenShift.
+
+It's worth pausing here a moment and realize that simply thanks to the addition of the FMP plugin to our Maven POM, our application is ready for the cloud. While it is important to understand the concepts at play here, it's also worth mentioning that simply running `./mvnw fabric8:deploy -Popenshift` while connected to a running OpenShift instance will deploy our app to the cloud and make it available without us having to worry (at least for now) about how it got there or what's required to do so! In fact, you can access your application by running
+
+```bash
+oc get route spring-boot-rest-http -o jsonpath='{"http://"}{.spec.host}{"\n"}'
+```
+
+and pasting that URL in your favorite browser.
+
+This works because FMP generated the `spring-boot-rest-http` `Route` automatically for you as follows:
+
+```yaml
+---
+apiVersion: v1
+kind: Route #<1>
+metadata:
+  labels:
+    app: spring-boot-rest-http
+    provider: fabric8
+    version: 1.5.14-1-SNAPSHOT
+    group: io.openshift.booster
+  name: spring-boot-rest-http #<2>
+spec:
+  port:
+    targetPort: 8080 #<3>
+  to:
+    kind: Service #<4>
+    name: spring-boot-rest-http #<5>
+```
+<1> Create a `Route`…
+<2> named `spring-boot-rest-http`…
+<3> targeting the `8080` port of …
+<4> the `Service`…
+<5> named `spring-boot-rest-http`!
+
+Let's now look at some the `spring-boot-rest-http-svc.yml` file, the `Service` definition:
+
+```yaml
+---
+apiVersion: v1
+kind: Service #<1>
+metadata:
+  annotations:  #<2>
+    fabric8.io/git-commit: 1fc0c37f21be5db9a77f93e42382583b32a588a7
+    fabric8.io/scm-con-url: scm:git:https://github.com/openshiftio/booster-parent.git/spring-boot-rest-http
+    prometheus.io/port: "9779"
+    fabric8.io/scm-url: https://github.com/openshiftio/spring-boot-rest-http
+    fabric8.io/iconUrl: img/icons/spring-boot.svg
+    fabric8.io/git-branch: guide
+    prometheus.io/scrape: "true"
+    fabric8.io/scm-devcon-url: scm:git:git:@github.com:openshiftio/booster-parent.git/spring-boot-rest-http
+    fabric8.io/scm-tag: booster-parent-23
+  labels:
+    expose: "true"  #<4>
+    app: spring-boot-rest-http #<6>
+    provider: fabric8
+    version: 1.5.14-1-SNAPSHOT
+    group: io.openshift.booster
+  name: spring-boot-rest-http #<3>
+spec:
+  ports:
+  - name: http #<5>
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: spring-boot-rest-http
+    provider: fabric8
+    group: io.openshift.booster
+```
+<1> Create a `Service`…
+<2> with some annotations, which provide metadata that interested third-parties can leverage…
+<3> named `spring-boot-rest-http`…
+<4> marked as being exposed, meaning a `Route` should be generated to expose the `Service` from outside the cluster…
+<5> and exposing the `8080` HTTP port.
+<6> Note also, that we add an `app` label with the `spring-boot-rest-http` value, label that is added to all the generated resources to mark them as being part of the same application.
+
+Finally, let's look at the `DeploymentConfig` descriptor, not going into details here, rather just pointing out some interesting parts:
+```yaml
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    fabric8.io/git-commit: 1fc0c37f21be5db9a77f93e42382583b32a588a7
+    fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=spring-boot-rest-http&var-version=1.5.14-1-SNAPSHOT
+    fabric8.io/scm-con-url: scm:git:https://github.com/openshiftio/booster-parent.git/spring-boot-rest-http
+    fabric8.io/scm-url: https://github.com/openshiftio/spring-boot-rest-http
+    fabric8.io/iconUrl: img/icons/spring-boot.svg
+    fabric8.io/git-branch: guide
+    fabric8.io/scm-devcon-url: scm:git:git:@github.com:openshiftio/booster-parent.git/spring-boot-rest-http
+    fabric8.io/scm-tag: booster-parent-23
+  labels:
+    app: spring-boot-rest-http
+    provider: fabric8
+    version: 1.5.14-1-SNAPSHOT
+    group: io.openshift.booster
+  name: spring-boot-rest-http
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    app: spring-boot-rest-http
+    provider: fabric8
+    group: io.openshift.booster
+  strategy:
+    rollingParams:
+      timeoutSeconds: 3600
+    type: Rolling
+  template:
+    metadata:
+      annotations:
+        fabric8.io/git-commit: 1fc0c37f21be5db9a77f93e42382583b32a588a7
+        fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=spring-boot-rest-http&var-version=1.5.14-1-SNAPSHOT
+        fabric8.io/scm-con-url: scm:git:https://github.com/openshiftio/booster-parent.git/spring-boot-rest-http
+        fabric8.io/scm-url: https://github.com/openshiftio/spring-boot-rest-http
+        fabric8.io/iconUrl: img/icons/spring-boot.svg
+        fabric8.io/git-branch: guide
+        fabric8.io/scm-devcon-url: scm:git:git:@github.com:openshiftio/booster-parent.git/spring-boot-rest-http
+        fabric8.io/scm-tag: booster-parent-23
+      labels:
+        app: spring-boot-rest-http
+        provider: fabric8
+        version: 1.5.14-1-SNAPSHOT
+        group: io.openshift.booster
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: ""
+        imagePullPolicy: IfNotPresent
+        livenessProbe: #<5>
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 180
+        name: spring-boot #<1>
+        ports:
+        - containerPort: 8080
+          name: http #<2>
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus #<3>
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia #<4>
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+        securityContext:
+          privileged: false
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams: #<6>
+      automatic: true
+      containerNames:
+      - spring-boot
+      from:
+        kind: ImageStreamTag
+        name: spring-boot-rest-http:latest
+    type: ImageChange
+```
+<1> The container name is `spring-boot`. This is due to FMP detecting that we're deploying a Spring Boot app and therefore triggers the associated http://maven.fabric8.io/#generator-spring-boot[generator] which actually handles the image creation details automatically for us. You might remember though that we set the `fabric8.generator.from` property earlier when configurating FMP. This is where this comes into play: instructing the Spring Boot generator to use the specific base image that will serve as the substrate for our container when the S2I process combines it with our application jar.
+<2> Exposing the `8080` HTTP port but also…
+<3> a port to access https://prometheus.io/[Prometheus] monitoring information and…
+<4> a port to access https://jolokia.org/[Jolokia]
+<5> FMP also uses http://maven.fabric8.io/#enrichers[enrichers] to enrich the generated resources depending on some conditions. For example, one such enricher, the http://maven.fabric8.io/#f8-spring-boot-health-check[`f8-spring-boot-health-check`] enricher is activated when the `spring-boot-starter-actuator` is detected as a dependency of a Spring Boot application (which is our case). This enricher then automatically creates `livenessProbe` and `readinessProbe` entries to the application's container.
+<6> Contrary to plain Kubernetes `Deployment`, OpenShift's `DeploymentConfig` can re-deploy containers when related images change. Here, we specify that if the image corresponding to the `spring-boot-rest-http:latest` tag in the `ImageStream` generated by `fabric8:build` changes then our `spring-boot` container needs to be redeployed.
+
+
+== See Also
+
+* https://spring.io/guides/gs/rest-service/[Spring Boot's guide on building RESTful services]
+* https://docs.spring.io/spring-boot/docs/1.5.x/reference/html/[Spring Boot 1.5.x reference documentation]
+* https://docs.spring.io/spring-boot/docs/1.5.x/maven-plugin/[Spring Boot 1.5.x Maven plugin]
+* http://cxf.apache.org/docs/springboot.html[Apache CXF Spring Boot configuration]
+* http://cxf.apache.org/docs/configuration.html[Apache CXF configuration]
+* http://www.baeldung.com/spring-boot-devtools[Introduction to Spring Boot devtools]
+* https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html[Spring Boot devtools documentation]
+* http://maven.fabric8.io/[Fabric8 Maven Plugin]
+* https://docs.openshift.org/latest/welcome/index.html[OpenShift Origin documentation]

@@ -1,0 +1,94 @@
+version: 2.1
+orbs:
+  # defined at https://github.com/snowdrop/circleci-orbs
+  # needs to have been published before being used here
+  openshift: snowdrop/openshift@0.1.0
+jobs:
+  openshift39:
+    machine: true
+
+    steps:
+      - checkout
+
+      - openshift/launch_openshift_39
+
+      # based on this: https://discuss.circleci.com/t/circle-2-0-caching-is-too-limited-to-be-very-useful/11694/10
+      - restore_cache:
+          keys:
+            - spring-boot-http-booster-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - spring-boot-http-booster-{{ .Branch }}
+            - spring-boot-http-booster
+
+      - run:
+          name: Install Maven dependencies locally
+          command: |
+            # Need to exclude tests since Maven will fail. See https://stackoverflow.com/q/14694139/2504224
+            if ! ./mvnw -q -s .circleci/settings.xml dependency:go-offline; then
+                bom_version=$(grep -oPm1 "(?<=<spring-boot.bom.version>)[^<]+" pom.xml)
+                echo "Need to checkout the Spring Boot BOM by checking it out from Github using version: ${bom_version}"
+
+                pushd /tmp > /dev/null
+                #Clone the BOM from Github, checkout the tag that matches the BOM version and install it locally
+                git clone https://github.com/snowdrop/spring-boot-bom.git
+                cd spring-boot-bom
+                git fetch --all --tags --prune
+                git checkout tags/${bom_version}
+                mvn install
+
+                echo "Installed BOM from source"
+
+                popd > /dev/null
+                #Re-execute command since the BOM has now been installed to the local .m2 directory
+                ./mvnw -q -s .circleci/settings.xml dependency:go-offline
+            fi
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: spring-boot-http-booster-{{ .Branch }}-{{ checksum "pom.xml" }}
+
+      - run:
+          name: run tests against s2i build
+          command: |
+            # create the necessary vars for both PR and regular commit cases
+            if [ -z "$CIRCLE_PR_REPONAME" ]; then
+              SOURCE_REPOSITORY_URL="https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+              SOURCE_REPOSITORY_REF=${CIRCLE_BRANCH}
+            else
+              SOURCE_REPOSITORY_URL="https://github.com/${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}"
+              SOURCE_REPOSITORY_REF=${CIRCLE_SHA1}
+            fi
+
+            # deploy application
+            oc new-project s2i
+            oc create -f .openshiftio/application.yaml
+            oc new-app --template=spring-boot-rest-http -p SOURCE_REPOSITORY_URL=${SOURCE_REPOSITORY_URL} -p SOURCE_REPOSITORY_REF=${SOURCE_REPOSITORY_REF}
+
+            sleep 30 # needed in order to bypass the 'Pending' state
+            # wait for the app to stand up
+            timeout 300s bash -c 'while [[ $(oc get pod -o json | jq  ".items[] | select(.metadata.name | contains(\"build\"))  | .status  " | jq -rs "sort_by(.startTme) | last | .phase") == "Running" ]]; do sleep 20; done; echo ""'
+
+            # launch the tests without deploying the application
+            ./mvnw -s .circleci/settings.xml verify -Dfabric8.skip=true -Popenshift,openshift-it
+
+      - run:
+          name: Cleanup s2i build
+          command: |
+            oc delete all --all
+            sleep 5
+            oc delete project s2i
+            sleep 10
+            echo "Cleaned up s2i build"
+
+      - run:
+          name: run tests against fmp build
+          command:  |
+            oc new-project fmp
+            .circleci/run_tests_with_fmp.sh -s .circleci/settings.xml
+          no_output_timeout: 3600
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - openshift39

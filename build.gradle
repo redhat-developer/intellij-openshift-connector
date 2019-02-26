@@ -25,6 +25,24 @@ configurations {
     }
 }
 
+sourceSets {
+    integrationTest {
+        java.srcDir file('src/it/java')
+        resources.srcDir file('src/it/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs the integration tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+    mustRunAfter test
+}
+
 dependencies {
     compile 'io.fabric8:openshift-client:3.2.0'
     compile 'me.snowdrop:servicecatalog-client:1.0.1'

@@ -33,9 +33,15 @@ public class OdoTest extends BaseTest {
 
     private Random random = new Random();
 
-    private static final String PROJECT_PREFIX = "test-project-";
+    private static final String PROJECT_PREFIX = "prj";
 
-    private static final String APPLICATION_PREFIX = "test-application-";
+    private static final String APPLICATION_PREFIX = "app";
+
+    private static final String COMPONENT_PREFIX = "comp";
+
+    private static final String SERVICE_PREFIX = "srv";
+
+    private static final String STORAGE_PREFIX = "stor";
 
     @Before
     public void init() throws Exception {
@@ -48,12 +54,31 @@ public class OdoTest extends BaseTest {
         Thread.sleep(1000);
     }
 
+    private void createProject(String project) throws IOException, InterruptedException {
+        odo.createProject(project);
+        pause();
+    }
+
+    private void createApplication(String project, String application) throws IOException, InterruptedException {
+        createProject(project);
+        odo.createApplication(project, application);
+    }
+
+    private void createComponent(String project, String application, String component) throws IOException, InterruptedException {
+        createApplication(project, application);
+        odo.createComponentLocal(project, application, "redhat-openjdk18-openshift", "1.4", component, new File("src/it/projects/springboot-rest").getAbsolutePath());
+    }
+
+    private void createStorage(String project, String application, String component, String storage) throws IOException, InterruptedException {
+        createComponent(project, application, component);
+        odo.createStorage(project, application, component, storage, "/tmp", "1Gi");
+    }
+
     @Test
     public void checkCreateProject() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
-            odo.createProject(project);
-            pause();
+            createProject(project);
         } finally {
             try {
                 odo.deleteProject(project);
@@ -66,14 +91,8 @@ public class OdoTest extends BaseTest {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         try {
-            odo.createProject(project);
-            pause();
-            odo.createApplication(project, application);
-            pause();
+            createApplication(project, application);
         } finally {
-            try {
-                odo.deleteApplication(project, application);
-            } catch (IOException e) {}
             try {
                 odo.deleteProject(project);
             } catch (IOException e) {}
@@ -93,10 +112,10 @@ public class OdoTest extends BaseTest {
     }
 
     @Test
-    public void checkListProjects() throws IOException {
+    public void checkListProjects() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
-            odo.createProject(project);
+            createProject(project);
             List<Project> projects = odo.getProjects(client);
             Assert.assertTrue(projects.size() > 0);
         } finally {
@@ -110,16 +129,119 @@ public class OdoTest extends BaseTest {
     public void checkCreateComponent() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            odo.createProject(project);
-            pause();
-            odo.createApplication(project, application);
-            pause();
-            odo.createComponentLocal(project, application, "redhat-openjdk18-openshift", "1.4", "comp", new File("src/it/projects/springboot-rest").getAbsolutePath());
+            createComponent(project, application, component);
         } finally {
             try {
-                odo.deleteApplication(project, application);
+                odo.deleteProject(project);
             } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateAndDeleteComponent() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        try {
+            createComponent(project, application, component);
+            odo.deleteComponent(project, application, component);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateURL() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        try {
+            createComponent(project, application, component);
+            odo.createUrl(project, application, component, 8080);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        String service = SERVICE_PREFIX + random.nextInt();
+        try {
+            createComponent(project, application, component);
+            odo.createService(project, application, "postgresql-persistent", "default", service);
+            odo.link(project, application, component, service, null);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateStorage() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        String storage = STORAGE_PREFIX + random.nextInt();
+        try {
+            createStorage(project, application, component, storage);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateDeleteStorage() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        String storage = STORAGE_PREFIX + random.nextInt();
+        try {
+            createStorage(project, application, component, storage);
+            odo.deleteStorage(project, application, component, storage);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateService() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String service = SERVICE_PREFIX + random.nextInt();
+        try {
+            createApplication(project, application);
+            odo.createService(project, application, "postgresql-persistent", "default", service);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateDeleteService() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String service = SERVICE_PREFIX + random.nextInt();
+        try {
+            createApplication(project, application);
+            odo.createService(project, application, "postgresql-persistent", "default", service);
+            odo.deleteService(project, application, service);
+        } finally {
             try {
                 odo.deleteProject(project);
             } catch (IOException e) {}

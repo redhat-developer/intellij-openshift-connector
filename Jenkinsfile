@@ -12,7 +12,7 @@ node('rhel7'){
 	def version = isSnapshot?props['projectVersion'].replace('-SNAPSHOT', ".${env.BUILD_NUMBER}"):props['projectVersion'] + ".${env.BUILD_NUMBER}"
 
 	stage('Build') {
-		sh "./gradlew assemble"
+		sh "./gradlew assemble  -PprojectVersion=${version}"
 	}
 
 	stage('Package') {
@@ -38,7 +38,7 @@ node('rhel7'){
     	    stage("Publish to Marketplace") {
                 unstash 'zip'
                 withCredentials([[$class: 'usernamePassword', credentialsId: 'JetBrains marketplace token', usernameVariable: 'USERNAME', passwordVariable: 'USERPWD']]) {
-                    sh './gradlew publishPlugin -PjetBrainsUsername=${USERNAME} -PjetBrainsPassword=${USERPWD}'
+                    sh './gradlew publishPlugin -PjetBrainsUsername=${USERNAME} -PjetBrainsPassword=${USERPWD}  -PprojectVersion=${version}'
                 }
                 archive includes:"**.zip"
 

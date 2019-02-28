@@ -39,7 +39,7 @@ node('rhel7'){
     	stage("Publish to Marketplace") {
             unstash 'zip'
             withCredentials([[$class: 'StringBinding', credentialsId: 'JetBrains marketplace token', variable: 'TOKEN']]) {
-                sh './gradlew publishPlugin -PjetBrainsToken=${TOKEN} -PprojectVersion=${version} -PjetBrainsChannel=${channel}'
+                sh "./gradlew publishPlugin -PjetBrainsToken=${TOKEN} -PprojectVersion=${version} -PjetBrainsChannel=${channel}"
             }
             archive includes:"**.zip"
 

@@ -27,21 +27,23 @@ node('rhel7'){
 		}
     }
 
-    if(publishToMarketPlace.equals('true')){
-        if (isSnapshot) {
-            error("Check the code, version is SNAPSHOT")
-        } else {
+    if(isSnapshot || publishToMarketPlace.equals('true')){
+        if (!isSnapshot) {
         	timeout(time:5, unit:'DAYS') {
         		input message:'Approve deployment?', submitter: 'jmaury'
     	    }
+    	}
 
-    	    stage("Publish to Marketplace") {
-                unstash 'zip'
-                withCredentials([[$class: 'usernamePassword', credentialsId: 'JetBrains marketplace token', usernameVariable: 'USERNAME', passwordVariable: 'USERPWD']]) {
-                    sh './gradlew publishPlugin -PjetBrainsUsername=${USERNAME} -PjetBrainsPassword=${USERPWD}  -PprojectVersion=${version}'
-                }
-                archive includes:"**.zip"
+    	def channel = isSnapshot?"nightly":"stable"
 
+    	stage("Publish to Marketplace") {
+            unstash 'zip'
+            withCredentials([[$class: 'StringBinding', credentialsId: 'JetBrains marketplace token', variable: 'TOKEN']]) {
+                sh './gradlew publishPlugin -PjetBrainsToken=${TOKEN} -PprojectVersion=${version} -PjetBrainsChannel=${channel}'
+            }
+            archive includes:"**.zip"
+
+            if (!isSnapshot) {
                 stage("Promote the build to stable") {
                     def zip = findFiles(glob: '**/*.zip')
                     sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${zip[0].path} ${UPLOAD_LOCATION}/stable/intellij-openshift-connector/"

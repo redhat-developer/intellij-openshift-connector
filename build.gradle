@@ -1,6 +1,6 @@
 
 plugins {
-    id "org.jetbrains.intellij" version "0.3.12"
+    id "org.jetbrains.intellij" version "0.4.3"
 }
 
 repositories {
@@ -20,14 +20,16 @@ intellij {
 }
 
 publishPlugin {
-    username jetBrainsUsername
-    password jetBrainsPassword
+    token    jetBrainsToken
+    channels jetBrainsChannel
 }
 
 configurations {
     compile {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 sourceSets {

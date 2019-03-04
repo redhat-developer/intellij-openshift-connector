@@ -27,11 +27,9 @@ node('rhel7'){
 		}
     }
 
-    if(isSnapshot || publishToMarketPlace.equals('true')){
-        if (!isSnapshot) {
-        	timeout(time:5, unit:'DAYS') {
-        		input message:'Approve deployment?', submitter: 'jmaury'
-    	    }
+    if(publishToMarketPlace.equals('true')){
+        timeout(time:5, unit:'DAYS') {
+        	input message:'Approve deployment?', submitter: 'jmaury'
     	}
 
     	def channel = isSnapshot?"nightly":"stable"

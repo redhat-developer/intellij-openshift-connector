@@ -42,16 +42,20 @@ public class ConfigHelper {
     }
 
     public static String getOdoConfigPath() {
-        return System.getProperty("user.home") + "/.kube/odo";
+        return System.getProperty("user.home") + "/.odo/odo-config.yaml";
     }
 
     public static OdoConfig loadOdoConfig() throws IOException {
         File f = new File(getOdoConfigPath());
         if (f.exists()) {
-            return mapper.readValue(f, OdoConfig.class);
+            return loadOdoConfig(f.toURI().toURL());
         } else {
             return new OdoConfig();
         }
+    }
+
+    public static OdoConfig loadOdoConfig(URL url) throws IOException {
+        return mapper.readValue(url, OdoConfig.class);
     }
 
     public static void saveOdoConfig(OdoConfig config) throws IOException {

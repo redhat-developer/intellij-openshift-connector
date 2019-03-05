@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -161,8 +162,23 @@ public class Odo {
   }
 
   private static String execute(String command, String ...args) throws IOException {
-    return ExecHelper.execute(command, args).replaceAll("/---[\\s\\S]*---/g", "");
+    String output = ExecHelper.execute(command, args);
+    try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+      BinaryOperator<String> reducer = new BinaryOperator<String>() {
+        private boolean notificationFound = false;
+
+        @Override
+        public String apply(String s, String s2) {
+          if (s2.startsWith("---")) {
+            notificationFound = true;
+          }
+          return notificationFound?s:s+s2+"\n";
+        }
+      };
+      return reader.lines().reduce("", reducer);
+    }
   }
+
   public void createApplication(String project, String application) throws IOException {
     execute(command, "app", "create", application, "--project", project);
   }

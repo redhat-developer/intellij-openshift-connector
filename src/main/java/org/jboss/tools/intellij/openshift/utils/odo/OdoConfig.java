@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -21,9 +22,16 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OdoConfig {
   public static class Application {
+    @JsonProperty("Active")
     private boolean active;
+
+    @JsonProperty("ActiveComponent")
     private String activeComponent;
+
+    @JsonProperty("Name")
     private String name;
+
+    @JsonProperty("Project")
     private String project;
 
     public boolean isActive() {
@@ -59,6 +67,7 @@ public class OdoConfig {
     }
   }
 
+  @JsonProperty("ActiveApplications")
   private List<Application> activeApplications = new ArrayList<>();
 
   public List<Application> getActiveApplications() {

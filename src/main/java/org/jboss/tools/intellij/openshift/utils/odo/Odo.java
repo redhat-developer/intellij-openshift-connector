@@ -47,6 +47,11 @@ import java.util.stream.Collectors;
 public class Odo {
   public static final String ODO_DOWNLOAD_FLAG = Odo.class.getName() + ".download";
 
+  /**
+   * Home sub folder for the plugin
+   */
+  public static final String PLUGIN_FOLDER = ".odo";
+
   private String command;
 
   private Odo() throws IOException {
@@ -95,7 +100,7 @@ public class Odo {
     String command = platform.getCmdFileName();
     String version = getOdoVersion("odo" , command);
     if (!areCompatible(version, odoTool.getVersion())) {
-      Path path = Paths.get(System.getProperty("user.home"), ".vs-openshift", "cache", odoTool.getVersion(), command);
+      Path path = Paths.get(System.getProperty("user.home"), PLUGIN_FOLDER, "cache", odoTool.getVersion(), command);
       if (!Files.exists(path)) {
         final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
         final String cmd = path.toString();

@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils;
 
 import com.intellij.execution.process.ProcessHandler;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
@@ -77,9 +78,13 @@ public class ExecHelper {
 
   private static class RedirectedStream extends FilterInputStream {
     private boolean emitLF = false;
+    private final boolean redirect;
+    private final boolean delay;
 
-    private RedirectedStream(InputStream delegate) {
+    private RedirectedStream(InputStream delegate, boolean redirect, boolean delay) {
       super(delegate);
+      this.redirect = redirect;
+      this.delay = delay;
     }
 
     @Override
@@ -89,7 +94,7 @@ public class ExecHelper {
         return '\n';
       } else {
         int c = super.read();
-        if (c == '\n') {
+        if (redirect && c == '\n') {
           emitLF = true;
           c = '\r';
         }
@@ -114,6 +119,11 @@ public class ExecHelper {
 
       int c = read();
       if (c == -1) {
+        if (delay) {
+          try {
+            Thread.sleep(60000L);
+          } catch (InterruptedException e) {}
+        }
         return -1;
       }
       b[off] = (byte)c;
@@ -136,10 +146,10 @@ public class ExecHelper {
     private final InputStream inputStream;
     private final InputStream errorStream;
 
-    private RedirectedProcess(Process delegate) {
+    private RedirectedProcess(Process delegate, boolean redirect, boolean delay) {
       this.delegate = delegate;
-      inputStream = new RedirectedStream(delegate.getInputStream()) {};
-      errorStream = new RedirectedStream(delegate.getErrorStream()) {};
+      inputStream = new RedirectedStream(delegate.getInputStream(), redirect, delay) {};
+      errorStream = new RedirectedStream(delegate.getErrorStream(), redirect, delay) {};
     }
 
     @Override
@@ -191,8 +201,10 @@ public class ExecHelper {
   public static void executeWithTerminal(String... command) throws IOException {
       try {
         Process p = new ProcessBuilder(command).start();
-        if (SystemInfo.isWindows) {
-          p = new RedirectedProcess(p);
+        boolean isWindows = SystemInfo.isWindows;
+        boolean is2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() == 183;
+        if (isWindows || is2018_3) {
+          p = new RedirectedProcess(p, isWindows, is2018_3);
         }
 
         final Process process = p;

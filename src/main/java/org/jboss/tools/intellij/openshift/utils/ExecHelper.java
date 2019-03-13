@@ -202,9 +202,9 @@ public class ExecHelper {
       try {
         Process p = new ProcessBuilder(command).start();
         boolean isWindows = SystemInfo.isWindows;
-        boolean is2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() == 183;
-        if (isWindows || is2018_3) {
-          p = new RedirectedProcess(p, isWindows, is2018_3);
+        boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
+        if (isWindows || isPost2018_3) {
+          p = new RedirectedProcess(p, isWindows, isPost2018_3);
         }
 
         final Process process = p;

@@ -12,6 +12,12 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.0.1</b></p>
+  <p>Initial release</p>
+  <p><b>0.0.2</b></p>
+  <p>Fix terminal auto close for 2018.3+ based products</p>
+  <p><b>0.0.3</b></p>
+  <p>Fix line feed issue for Macos<p>
     ]]>
   </change-notes>
 

@@ -201,10 +201,10 @@ public class ExecHelper {
   public static void executeWithTerminal(String... command) throws IOException {
       try {
         Process p = new ProcessBuilder(command).start();
-        boolean isWindows = SystemInfo.isWindows;
+        boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
-        if (isWindows || isPost2018_3) {
-          p = new RedirectedProcess(p, isWindows, isPost2018_3);
+        if (needsRedirect || isPost2018_3) {
+          p = new RedirectedProcess(p, needsRedirect, isPost2018_3);
         }
 
         final Process process = p;

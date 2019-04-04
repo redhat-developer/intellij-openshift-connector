@@ -13,7 +13,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoConfig;
+import org.jboss.tools.intellij.openshift.utils.odo.Application;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -21,7 +21,7 @@ import java.io.IOException;
 
 
 public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode {
-  public ApplicationNode(OdoConfig.Application application) {
+  public ApplicationNode(Application application) {
     super(application);
   }
 
@@ -45,7 +45,7 @@ public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode
 
   @Override
   public String toString() {
-    return ((OdoConfig.Application) userObject).getName();
+    return ((Application) userObject).getName();
   }
 
   @Override

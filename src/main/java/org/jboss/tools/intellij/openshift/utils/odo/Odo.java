@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -38,6 +41,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -46,6 +50,8 @@ import java.util.stream.Collectors;
 
 public class Odo {
   public static final String ODO_DOWNLOAD_FLAG = Odo.class.getName() + ".download";
+
+  private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
 
   /**
    * Home sub folder for the plugin
@@ -316,8 +322,17 @@ public class Odo {
     execute(command, "logout");
   }
 
-  public List<OdoConfig.Application> getApplication(String project) throws IOException {
-    return ConfigHelper.loadOdoConfig().getActiveApplications().stream().filter(a -> a.getProject().equals(project)).collect(Collectors.toList());
+  private static List<Application> parseApplications(String json) {
+    List<Application> result = new ArrayList<>();
+    try {
+      JsonNode root = JSON_MAPPER.readTree(json);
+      root.get("items").forEach(item -> result.add(Application.of(item.get("metadata").get("name").asText())));
+    } catch (IOException e) {}
+    return result;
+  }
+
+  public List<Application> getApplications(String project) throws IOException {
+    return parseApplications(execute(command, "app", "list", "-o", "json"));
   }
 
   public List<DeploymentConfig> getComponents(OpenShiftClient client, String project, String application) {

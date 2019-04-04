@@ -26,7 +26,7 @@ public class ProjectNode extends KubernetesResourceMutableTreeNode {
   public void load() {
     super.load();
     try {
-      Odo.get().getApplication(toString()).forEach(a -> add(new ApplicationNode(a)));
+      Odo.get().getApplications(toString()).forEach(a -> add(new ApplicationNode(a)));
     } catch (IOException e) {
       add(new DefaultMutableTreeNode("Failed to load applications"));
     }

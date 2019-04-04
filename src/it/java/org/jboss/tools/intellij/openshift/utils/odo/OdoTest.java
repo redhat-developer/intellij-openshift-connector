@@ -10,13 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import com.intellij.openapi.progress.ProgressIndicator;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.BaseTest;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,6 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class OdoTest extends BaseTest {
 
@@ -101,15 +103,33 @@ public class OdoTest extends BaseTest {
     }
 
     @Test
+    public void checkGetApplications() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String application1 = APPLICATION_PREFIX + random.nextInt();
+        try {
+            createApplication(project, application);
+            odo.createApplication(project, application1);
+            List<Application> applications = odo.getApplications(project);
+            assertNotNull(applications);
+            assertEquals(2, applications.size());
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
     public void checkGetComponentTypes() throws IOException {
         List<ComponentType> components = odo.getComponentTypes();
-        Assert.assertTrue(components.size() > 0);
+        assertTrue(components.size() > 0);
     }
 
     @Test
     public void checkGetServiceTemplates() throws IOException {
         List<ServiceTemplate> services = odo.getServiceTemplates();
-        Assert.assertTrue(services.size() > 0);
+        assertTrue(services.size() > 0);
     }
 
     @Test
@@ -118,7 +138,7 @@ public class OdoTest extends BaseTest {
         try {
             createProject(project);
             List<Project> projects = odo.getProjects(client);
-            Assert.assertTrue(projects.size() > 0);
+            assertTrue(projects.size() > 0);
         } finally {
             try {
                 odo.deleteProject(project);

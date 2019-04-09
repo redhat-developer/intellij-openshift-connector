@@ -3,12 +3,13 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class ApplicationsRootNode extends LazyMutableTreeNode {
+public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTreeNode {
   private OpenShiftClient client = loadClient();
   private boolean logged;
 
@@ -49,5 +50,10 @@ public class ApplicationsRootNode extends LazyMutableTreeNode {
   public void reload() {
     client = loadClient();
     super.reload();
+  }
+
+  @Override
+  public String getIconName() {
+    return "/images/cluster.png";
   }
 }

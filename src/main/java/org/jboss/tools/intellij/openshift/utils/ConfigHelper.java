@@ -40,6 +40,15 @@ public class ConfigHelper {
         }
     }
 
+    public static boolean isKubeConfigParsable() {
+        try {
+            mapper.readValue(new File(getKubeConfigPath()), Config.class);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public static ToolsConfig loadToolsConfig() throws IOException {
         return loadToolsConfig(ConfigHelper.class.getResource("/tools.json"));
     }

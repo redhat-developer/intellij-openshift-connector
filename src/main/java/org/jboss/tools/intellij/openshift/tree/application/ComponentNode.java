@@ -26,13 +26,13 @@ public class ComponentNode extends KubernetesResourceMutableTreeNode {
   @Override
   public void load() {
     super.load();
+    ApplicationsRootNode clusterNode = (ApplicationsRootNode) getRoot();
     try {
-      ApplicationsRootNode clusterNode = (ApplicationsRootNode) getRoot();
       Odo.get().getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), toString()).forEach(pvc -> add(new PersistentVolumeClaimNode(pvc)));
-    } catch (KubernetesClientException|IOException e) {
-      add(new DefaultMutableTreeNode("Failed to load persistent volume claims"));
-    }
-
+    } catch (KubernetesClientException|IOException e) {}
+    try {
+      Odo.get().listURLs(getParent().getParent().toString(), getParent().toString(), toString()).forEach(url -> add(new URLNode(url)));
+    } catch (IOException e) {}
   }
 
   @Override

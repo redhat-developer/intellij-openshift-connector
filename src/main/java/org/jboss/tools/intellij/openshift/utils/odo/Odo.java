@@ -17,7 +17,11 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.twelvemonkeys.lang.Platform;
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -283,6 +287,20 @@ public class Odo {
   public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
     Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
     return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());
+  }
+
+  private static List<URL> parseURLs(String json) {
+    List<URL> result = new ArrayList<>();
+    try {
+      JsonNode root = JSON_MAPPER.readTree(json);
+      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").get("protocol").asText(), item.get("spec").get("path").asText(), item.get("spec").get("port").asText())));
+    } catch (IOException e) {
+    }
+    return result;
+  }
+
+  public List<URL> listURLs(String project, String application, String component) throws IOException {
+    return parseURLs(execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json"));
   }
 
   public void createUrl(String project, String application, String component, Integer port) throws IOException {

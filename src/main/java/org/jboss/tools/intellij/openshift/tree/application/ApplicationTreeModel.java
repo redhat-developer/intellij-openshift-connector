@@ -60,8 +60,9 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     @Override
     public void onUpdate(ConfigWatcher source) {
         try {
-            new ConfigBuilder().build();
-            ExecHelper.executeAfter(this::refresh, 1, TimeUnit.SECONDS);
+            if (ConfigHelper.isKubeConfigParsable()) {
+                ExecHelper.executeAfter(this::refresh, 1, TimeUnit.SECONDS);
+            }
         } catch (Exception e) {}
     }
 

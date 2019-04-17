@@ -309,8 +309,12 @@ public class Odo {
     return parseURLs(output);
   }
 
-  public void createUrl(String project, String application, String component, Integer port) throws IOException {
-    execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
+  public void createUrl(String project, String application, String component, String name, Integer port) throws IOException {
+    if (name != null && !name.isEmpty()) {
+      execute(command, "url", "create", name, "--project", project, "--app", application, "--component", component, "--port", port.toString());
+    } else {
+      execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
+    }
   }
 
   public void deleteComponent(String project, String application, String component) throws IOException {
@@ -356,7 +360,7 @@ public class Odo {
   }
 
   public List<Application> getApplications(String project) throws IOException {
-    return parseApplications(execute(command, "app", "list", "-o", "json"));
+    return parseApplications(execute(command, "app", "list", "--project", project, "-o", "json"));
   }
 
   public List<DeploymentConfig> getComponents(OpenShiftClient client, String project, String application) {

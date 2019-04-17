@@ -182,7 +182,7 @@ public class OdoTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.createUrl(project, application, component, 8080);
+            odo.createUrl(project, application, component, null, 8080);
             List<URL> urls = odo.listURLs(project, application, component);
             assertEquals(1, urls.size());
         } finally {

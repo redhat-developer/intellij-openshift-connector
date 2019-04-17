@@ -300,7 +300,13 @@ public class Odo {
   }
 
   public List<URL> listURLs(String project, String application, String component) throws IOException {
-    return parseURLs(execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json"));
+    String output;
+    try {
+      output = execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
+    } catch (IOException e) {
+      output = "";
+    }
+    return parseURLs(output);
   }
 
   public void createUrl(String project, String application, String component, Integer port) throws IOException {

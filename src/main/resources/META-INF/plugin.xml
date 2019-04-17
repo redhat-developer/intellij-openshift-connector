@@ -18,6 +18,9 @@
   <p>Fix terminal auto close for 2018.3+ based products</p>
   <p><b>0.0.3</b></p>
   <p>Fix line feed issue for Macos<p>
+  <p><b>0.0.4</b></p>
+  <p>Fix error reported when logging to a cluster<p>
+  <p>Fix error reported when getting applications list for a project<p>
     ]]>
   </change-notes>
 

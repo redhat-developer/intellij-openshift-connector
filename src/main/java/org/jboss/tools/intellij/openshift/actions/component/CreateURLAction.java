@@ -15,6 +15,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.*;
+import org.jboss.tools.intellij.openshift.ui.url.CreateURLDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
@@ -53,15 +54,20 @@ public class CreateURLAction extends OdoAction {
     boolean done = false;
     List<Integer> ports = loadServicePorts(odo, projectNode, applicationNode, componentNode);
     if (!ports.isEmpty()) {
-      Integer port;
-      if (ports.size() > 1) {
-        port = (Integer)UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Service port", "Choose port", JOptionPane.QUESTION_MESSAGE, null, ports.toArray(), ports.get(0)));
-      } else {
-        port = ports.get(0);
-      }
-      if (port != null) {
-        odo.createUrl(projectNode.toString(), applicationNode.toString(), componentNode.toString(), port);
-        done = true;
+      CreateURLDialog dialog = UIHelper.executeInUI(() -> {
+        CreateURLDialog dialog1 = new CreateURLDialog(null);
+        dialog1.setPorts(ports);
+        dialog1.show();
+        return dialog1;
+      });
+      if (dialog.isOK()) {
+        Integer port = dialog.getSelectedPort();
+        String name = dialog.getName();
+        if (port != null) {
+          odo.createUrl(projectNode.toString(), applicationNode.toString(), componentNode.toString(), name, port);
+          componentNode.reload();
+          done = true;
+        }
       }
     } else {
       throw new IOException("Can't create url for component without ports");

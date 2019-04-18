@@ -64,7 +64,7 @@ public class CreateURLAction extends OdoAction {
         Integer port = dialog.getSelectedPort();
         String name = dialog.getName();
         if (port != null) {
-          odo.createUrl(projectNode.toString(), applicationNode.toString(), componentNode.toString(), name, port);
+          odo.createURL(projectNode.toString(), applicationNode.toString(), componentNode.toString(), name, port);
           componentNode.reload();
           done = true;
         }

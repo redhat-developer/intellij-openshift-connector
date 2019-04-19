@@ -16,12 +16,12 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.JOptionPane;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class OpenInBrowserAction extends OdoAction {
   public OpenInBrowserAction() {
-    super(ComponentNode.class);
+    super(ComponentNode.class, URLNode.class);
   }
 
   private void openURL(List<URL> urls) {
@@ -39,8 +39,15 @@ public class OpenInBrowserAction extends OdoAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
+    if(selected instanceof ComponentNode) {
+      openFromComponent((ComponentNode) selected, odo);
+    } else {
+      BrowserUtil.open(getURL(((URL)((URLNode)selected).getUserObject())));
+    }
+  }
+
+  private void openFromComponent(ComponentNode componentNode, Odo odo) {
+    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {

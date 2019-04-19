@@ -8,15 +8,16 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.storage;
+package org.jboss.tools.intellij.openshift.actions.url;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
+import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
@@ -24,24 +25,24 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class DeleteStorageAction extends OdoAction {
-  public DeleteStorageAction() {
-    super(PersistentVolumeClaimNode.class);
+public class DeleteURLAction extends OdoAction {
+  public DeleteURLAction() {
+    super(URLNode.class);
   }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
-    ComponentNode componentNode = (ComponentNode) storageNode.getParent();
+    URLNode urlNode = (URLNode) selected;
+    ComponentNode componentNode = (ComponentNode) urlNode.getParent();
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) componentNode).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-          odo.deleteStorage(projectNode.toString(), applicationNode.toString(), componentNode.toString(), storageNode.toString());
+          odo.deleteURL(projectNode.toString(), applicationNode.toString(), componentNode.toString(), ((URL)urlNode.getUserObject()).getName());
           componentNode.reload();
       }
       catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete storage", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete URL", JOptionPane.ERROR_MESSAGE));
       }
     });
   }

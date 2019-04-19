@@ -309,12 +309,16 @@ public class Odo {
     return parseURLs(output);
   }
 
-  public void createUrl(String project, String application, String component, String name, Integer port) throws IOException {
+  public void createURL(String project, String application, String component, String name, Integer port) throws IOException {
     if (name != null && !name.isEmpty()) {
       execute(command, "url", "create", name, "--project", project, "--app", application, "--component", component, "--port", port.toString());
     } else {
       execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
     }
+  }
+
+  public void deleteURL(String project, String application, String component, String name) throws IOException {
+    execute(command, "url", "delete", "-f", name, "--project", project, "--app", application, "--component", component);
   }
 
   public void deleteComponent(String project, String application, String component) throws IOException {

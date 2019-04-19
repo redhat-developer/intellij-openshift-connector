@@ -22,6 +22,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
+import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -129,9 +130,20 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
     verifyStorage(event.getPresentation().isVisible());
   }
 
-  protected void verifyStorage(boolean visible) {
+  protected void verifyURL(boolean visible) {
     assertFalse(visible);
   }
 
+  public void testActionOnURL() {
+    URLNode urlNode = mock(URLNode.class);
+    AnActionEvent event = createEvent(urlNode);
+    AnAction action = getAction();
+    action.update(event);
+    verifyURL(event.getPresentation().isVisible());
+  }
+
+  protected void verifyStorage(boolean visible) {
+    assertFalse(visible);
+  }
 
 }

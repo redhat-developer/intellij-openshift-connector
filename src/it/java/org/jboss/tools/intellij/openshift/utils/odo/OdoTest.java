@@ -182,9 +182,29 @@ public class OdoTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.createUrl(project, application, component, null, 8080);
+            odo.createURL(project, application, component, null, 8080);
             List<URL> urls = odo.listURLs(project, application, component);
             assertEquals(1, urls.size());
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateAndDeleteURL() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        try {
+            createComponent(project, application, component);
+            odo.createURL(project, application, component, null, 8080);
+            List<URL> urls = odo.listURLs(project, application, component);
+            assertEquals(1, urls.size());
+            odo.deleteURL(project, application, component, urls.get(0).getName());
+            urls = odo.listURLs(project, application, component);
+            assertEquals(0, urls.size());
         } finally {
             try {
                 odo.deleteProject(project);

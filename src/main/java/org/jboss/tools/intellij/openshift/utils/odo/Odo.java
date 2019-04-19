@@ -234,6 +234,11 @@ public class Odo {
     ExecHelper.executeWithTerminal(command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
   }
 
+  public String getServiceTemplate(OpenShiftClient client, String project, String application, String service) {
+    ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
+    return sc.serviceInstances().inNamespace(project).withName(service).get().getMetadata().getLabels().get(KubernetesLabels.COMPONENT_TYPE_LABEL);
+  }
+
   public void deleteService(String project, String application, String service) throws IOException {
     execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
   }
@@ -282,6 +287,10 @@ public class Odo {
 
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
     return loadList(execute(command, "catalog", "list", "services"), this::toServiceTemplate);
+  }
+
+  public void describeServiceTemplate(String template) throws IOException {
+    ExecHelper.executeWithTerminal(command, "catalog", "describe", "service", template);
   }
 
   public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {

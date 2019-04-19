@@ -18,6 +18,8 @@ public final class KubernetesLabels {
 
   public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/component-name";
 
+  public static final String COMPONENT_TYPE_LABEL = "app.kubernetes.io/component-type";
+
   public static final String STORAGE_NAME_LABEL = "app.kubernetes.io/storage-name";
 
   public static String getComponentName(HasMetadata resource) {

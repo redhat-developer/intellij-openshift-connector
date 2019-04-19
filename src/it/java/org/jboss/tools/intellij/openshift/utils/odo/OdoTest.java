@@ -293,6 +293,24 @@ public class OdoTest extends BaseTest {
     }
 
     @Test
+    public void checkCreateServiceAndGetTemplate() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String service = SERVICE_PREFIX + random.nextInt();
+        try {
+            createApplication(project, application);
+            odo.createService(project, application, "postgresql-persistent", "default", service);
+            String template = odo.getServiceTemplate(client, project, application, service);
+            assertNotNull(template);
+            assertEquals("postgresql-persistent", template);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
     @Ignore("not yet supported by odo")
     public void checkCreateDeleteService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();

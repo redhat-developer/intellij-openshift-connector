@@ -84,6 +84,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
       <!-- service level -->
       <action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link Component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" text="Describe"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
       <!-- storage level -->

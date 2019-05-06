@@ -21,6 +21,8 @@
   <p><b>0.0.4</b></p>
   <p>Fix error reported when logging to a cluster<p>
   <p>Fix error reported when getting applications list for a project<p>
+  <p><b>0.0.5</b></p>
+  <p>Add support for URL management<p>
     ]]>
   </change-notes>
 

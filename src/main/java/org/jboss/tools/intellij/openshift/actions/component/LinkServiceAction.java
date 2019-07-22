@@ -14,7 +14,6 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
@@ -23,7 +22,6 @@ import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
@@ -53,7 +51,7 @@ public class LinkServiceAction extends OdoAction {
           if (services.size() == 1) {
             service = KubernetesLabels.getComponentName(services.get(0));
           } else {
-            Object[] servicesArray = services.stream().map(comp -> KubernetesLabels.getComponentName(comp)).toArray();
+            Object[] servicesArray = services.stream().map(KubernetesLabels::getComponentName).toArray();
             service = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link service", "Select service", JOptionPane.QUESTION_MESSAGE, null, servicesArray, servicesArray[0]));
           }
           if (service != null) {

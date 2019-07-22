@@ -14,15 +14,14 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.JOptionPane;
@@ -41,13 +40,13 @@ public class LinkComponentAction extends OdoAction {
   protected String getSelectedTargetComponent(Odo odo, OpenShiftClient client, String project, String application, String component) {
     String targetComponent = null;
 
-    List<DeploymentConfig> components = odo.getComponents(client, project, application)
-            .stream().filter(dc -> !KubernetesLabels.getComponentName(dc).equals(component)).collect(Collectors.toList());
+    List<Component> components = odo.getComponents(client, project, application)
+            .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
     if (!components.isEmpty()) {
       if (components.size() == 1) {
-        targetComponent = KubernetesLabels.getComponentName(components.get(0));
+        targetComponent = components.get(0).getName();
       } else {
-        Object[] componentsArray = components.stream().map(comp -> KubernetesLabels.getComponentName(comp)).toArray();
+        Object[] componentsArray = components.stream().map(Component::getName).toArray();
         targetComponent = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Select component", "Link component", JOptionPane.QUESTION_MESSAGE, null, componentsArray, componentsArray[0]));
       }
     }

@@ -33,7 +33,7 @@ public class DeleteStorageAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
     ComponentNode componentNode = (ComponentNode) storageNode.getParent();
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) componentNode).getParent();
+    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {

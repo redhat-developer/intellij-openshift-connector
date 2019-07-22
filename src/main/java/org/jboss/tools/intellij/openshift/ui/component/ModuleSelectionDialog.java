@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.component;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -19,37 +20,36 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
-public class ProjectSelectionDialog extends DialogWrapper {
+public class ModuleSelectionDialog extends DialogWrapper {
   private JPanel contentPane;
-  private JList projectList;
+  private JList moduleList;
 
-  public ProjectSelectionDialog(Component parent) {
-    super((Project) null, parent, false, IdeModalityType.IDE);
+  public ModuleSelectionDialog(Component parent, Project project) {
+    super(project, parent, false, IdeModalityType.IDE);
     init();
-    setTitle("Select project");
+    setTitle("Select module");
     DefaultListModel model = new DefaultListModel();
-    for (Project p : ProjectManager.getInstance().getOpenProjects()) {
-      model.addElement(p);
+    for (Module m : project.getComponent(ModuleManager.class).getModules()) {
+      model.addElement(m);
     }
-    projectList.setModel(model);
-    projectList.setCellRenderer(new DefaultListCellRenderer() {
+    moduleList.setModel(model);
+    moduleList.setCellRenderer(new DefaultListCellRenderer() {
       @Override
       public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        value = ((Project) value).getName();
+        value = ((Module) value).getName();
         return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       }
     });
   }
 
-  public Project getSelectedProject() {
-    return (Project) projectList.getSelectedValue();
+  public Module getSelectedModule() {
+    return (Module) moduleList.getSelectedValue();
   }
 
 
   public static void main(String[] args) {
-    ProjectSelectionDialog dialog = new ProjectSelectionDialog(null);
+    ModuleSelectionDialog dialog = new ModuleSelectionDialog(null, null);
     dialog.pack();
     dialog.show();
     System.exit(0);
@@ -81,8 +81,8 @@ public class ProjectSelectionDialog extends DialogWrapper {
     final JPanel panel1 = new JPanel();
     panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
     contentPane.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-    projectList = new JList();
-    panel1.add(projectList, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+    moduleList = new JList();
+    panel1.add(moduleList, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
   }
 
   /**

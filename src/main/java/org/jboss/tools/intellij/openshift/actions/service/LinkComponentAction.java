@@ -14,15 +14,14 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.JOptionPane;
@@ -45,13 +44,13 @@ public class LinkComponentAction extends OdoAction {
     OpenShiftClient client = ((ApplicationsRootNode)serviceNode.getRoot()).getClient();
     CompletableFuture.runAsync(() -> {
       try {
-        List<DeploymentConfig> components = odo.getComponents(client, projectNode.toString(), applicationNode.toString());
+        List<Component> components = odo.getComponents(client, projectNode.toString(), applicationNode.toString());
         if (!components.isEmpty()) {
           String component;
           if (components.size() == 1) {
-            component = KubernetesLabels.getComponentName(components.get(0));
+            component = components.get(0).getName();
           } else {
-            Object[] componentsArray = components.stream().map(comp -> KubernetesLabels.getComponentName(comp)).toArray();
+            Object[] componentsArray = components.stream().map(Component::getName).toArray();
             component = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link component", "Select component", JOptionPane.QUESTION_MESSAGE, null, componentsArray, componentsArray[0]));
           }
           if (component != null) {

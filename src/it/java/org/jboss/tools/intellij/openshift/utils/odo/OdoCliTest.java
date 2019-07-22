@@ -28,11 +28,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class OdoTest extends BaseTest {
+public class OdoCliTest extends BaseTest {
 
-    private static Odo odo;
+    private Odo odo;
 
-    private static OpenShiftClient client;
+    private OpenShiftClient client;
 
     private Random random = new Random();
 
@@ -48,8 +48,8 @@ public class OdoTest extends BaseTest {
 
     @Before
     public void init() throws Exception {
-        System.setProperty(Odo.ODO_DOWNLOAD_FLAG, Boolean.TRUE.toString());
-        odo = Odo.get();
+        System.setProperty(OdoCli.ODO_DOWNLOAD_FLAG, Boolean.TRUE.toString());
+        odo = OdoCli.get();
         client = new DefaultOpenShiftClient(new ConfigBuilder().build());
     }
 

@@ -34,7 +34,7 @@ public class DeleteURLAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     URLNode urlNode = (URLNode) selected;
     ComponentNode componentNode = (ComponentNode) urlNode.getParent();
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) componentNode).getParent();
+    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {

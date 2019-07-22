@@ -10,32 +10,88 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
+import com.intellij.ProjectTopics;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.project.ModuleListener;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
-import io.fabric8.kubernetes.client.ConfigBuilder;
+import com.intellij.util.messages.MessageBusConnection;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.LocalConfig;
 
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener {
+public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
     private ApplicationsRootNode ROOT;
+    private final Project project;
 
+    private final Map<String, LocalConfig.ComponentSettings> settings = new HashMap();
 
-
-    public ApplicationTreeModel() {
+    public ApplicationTreeModel(Project project) {
         CompletableFuture.runAsync(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
-        ROOT = new ApplicationsRootNode();
+        ROOT = new ApplicationsRootNode(this);
         ROOT.addChangeListener(this);
+        this.project = project;
+        loadProjectModel(project);
+        registerProjectListener(project);
+    }
+
+    private void loadProjectModel(Project project) {
+        for(Module module : project.getComponent(ModuleManager.class).getModules()) {
+            addContext(module.getModuleFile());
+        }
+    }
+
+    private void addContext(File file) {
+        if (file.exists()) {
+            try {
+                LocalConfig config = LocalConfig.load(file.toPath().toUri().toURL());
+                settings.put(file.getPath(), config.getComponentSettings());
+            } catch (IOException e) {}
+        }
+    }
+    private void addContext(VirtualFile moduleFile) {
+        try {
+            VirtualFile file = moduleFile.getParent().findFileByRelativePath(".odo/config.yaml");
+            if (file != null && file.isValid()) {
+                LocalConfig config = LocalConfig.load(new File(file.getPath()).toPath().toUri().toURL());
+                settings.put(moduleFile.getParent().getPath(), config.getComponentSettings());
+            }
+        } catch (IOException e) { }
+    }
+
+    public void addContext(String path) {
+        if (!settings.containsKey(path)) {
+            addContext(new File(path, ".odo/config.yaml"));
+        }
+    }
+
+    private void registerProjectListener(Project project) {
+        MessageBusConnection connection = project.getMessageBus().connect(project);
+        connection.subscribe(ProjectTopics.MODULES, this);
+    }
+
+    public Map<String, LocalConfig.ComponentSettings> getSettings() {
+        return settings;
+    }
+
+    public Project getProject() {
+        return project;
     }
 
     @Override
@@ -70,7 +126,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     public void refresh() {
         TreePath path = new TreePath(ROOT);
         try {
-            ROOT = new ApplicationsRootNode();
+            ROOT = new ApplicationsRootNode(this);
             ROOT.addChangeListener(this);
             this.treeStructureChanged(path, new int[0], new Object[0]);
         } catch (Exception e) {
@@ -96,6 +152,5 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     @Override
     public void onChildrensRemoved(LazyMutableTreeNode source) {
         treeStructureChanged(new TreePath(source.getPath()), new int[0], new Object[0]);
-
     }
 }

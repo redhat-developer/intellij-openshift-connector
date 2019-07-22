@@ -11,10 +11,15 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
+import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -23,31 +28,42 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateComponentAction extends OdoAction {
   public CreateComponentAction() {
-    super(ApplicationNode.class);
+    super(ApplicationNode.class, ProjectNode.class);
   }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) selected;
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    final Optional<String> application;
+    String projectName;
+    if (selected instanceof ApplicationNode) {
+      application = Optional.of(selected.toString());
+      projectName =  ((LazyMutableTreeNode)selected).getParent().toString();
+    } else {
+      application = Optional.empty();
+      projectName = selected.toString();
+    }
+    ApplicationTreeModel rootModel = ((ApplicationsRootNode)((LazyMutableTreeNode)selected).getRoot()).getModel();
+    Project project = rootModel.getProject();
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentDialog dialog = UIHelper.executeInUI(() -> {
+        CreateComponentModel model = UIHelper.executeInUI(() -> {
           try {
-            return showDialog(odo.getComponentTypes());
+            return showDialog(project, application, odo.getComponentTypes());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }
         });
-        if (dialog.isOK()) {
-          createComponent(odo, projectNode.toString(), applicationNode.toString(), dialog);
-          applicationNode.reload();
-          if (dialog.getSourceType() == 0) {
-              odo.push(projectNode.toString(), applicationNode.toString(), dialog.getName());
+        if (model != null) {
+          createComponent(odo, projectName, application.orElse(model.getApplication()), model);
+          rootModel.addContext(model.getContext());
+          ((LazyMutableTreeNode)selected).reload();
+          if (model.isPushAfterCreate()) {
+              odo.push(projectName, application.orElse(model.getApplication()), model.getName());
           }
         }
       } catch (IOException e) {
@@ -56,19 +72,24 @@ public class CreateComponentAction extends OdoAction {
     });
   }
 
-  private void createComponent(Odo odo, String project, String application, CreateComponentDialog dialog) throws IOException{
-    if (dialog.getSourceType() == 0) {
-      odo.createComponentLocal(project, application, dialog.getComponentType(), dialog.getComponentVersion(), dialog.getName(), dialog.getSource());
+  private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
+    if (model.getSourceType() == CreateComponentModel.SourceType.LOCAL) {
+      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext());
     } else {
-      odo.createComponentGit(project, application, dialog.getComponentType(), dialog.getComponentVersion(), dialog.getName(), dialog.getSource());
+      odo.createComponentGit(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL());
     }
   }
 
-  protected CreateComponentDialog showDialog(List<ComponentType> types) {
-    CreateComponentDialog dialog = new CreateComponentDialog(null);
-    dialog.setComponentTypes(types.toArray(new ComponentType[types.size()]));
-    dialog.show();
-    return dialog;
+  protected CreateComponentModel showDialog(Project project, Optional<String> application, List<ComponentType> types) {
+    CreateComponentModel model =  new CreateComponentModel("Create component");
+    model.setProject(project);
+    model.setComponentTypes(types.toArray(new ComponentType[types.size()]));
+    if (application.isPresent()) {
+      model.setApplication(application.get());
+    }
+    CreateComponentDialog dialog1 = new CreateComponentDialog(project, true, model);
+    dialog1.show();
+    return dialog1.isOK()?model:null;
   }
 
 }

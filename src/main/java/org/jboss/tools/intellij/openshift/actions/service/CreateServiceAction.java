@@ -38,9 +38,7 @@ public class CreateServiceAction extends OdoAction {
       try {
         List<ServiceTemplate> templates = odo.getServiceTemplates();
         if (!templates.isEmpty()) {
-          CreateServiceDialog dialog = UIHelper.executeInUI(() -> {
-              return showDialog(templates);
-          });
+          CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates));
           if (dialog.isOK()) {
             createService(odo, projectNode.toString(), applicationNode.toString(), dialog);
             applicationNode.reload();

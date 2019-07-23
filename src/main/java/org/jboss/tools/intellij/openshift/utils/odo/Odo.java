@@ -49,9 +49,9 @@ public interface Odo {
 
     void deleteComponent(String project, String application, String context, String component) throws IOException;
 
-    void follow(String project, String application, String component) throws IOException;
+    void follow(String project, String application, String context, String component) throws IOException;
 
-    void log(String project, String application, String component) throws IOException;
+    void log(String project, String application, String context, String component) throws IOException;
 
     void createProject(String project) throws IOException;
 

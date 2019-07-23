@@ -120,13 +120,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void follow(String project, String application, String component) throws IOException {
-        delegate.follow(project, application, component);
+    public void follow(String project, String application, String context, String component) throws IOException {
+        delegate.follow(project, application, context, component);
     }
 
     @Override
-    public void log(String project, String application, String component) throws IOException {
-        delegate.log(project, application, component);
+    public void log(String project, String application, String context, String component) throws IOException {
+        delegate.log(project, application, context, component);
     }
 
     @Override

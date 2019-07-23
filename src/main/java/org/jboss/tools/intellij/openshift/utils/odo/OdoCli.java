@@ -355,13 +355,13 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void follow(String project, String application, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, component, "-f");
+  public void follow(String project, String application, String context, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, "--context", context, component, "-f");
   }
 
   @Override
-  public void log(String project, String application, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, component);
+  public void log(String project, String application, String context, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, "--context", context, component);
   }
 
 

@@ -17,7 +17,7 @@ public interface Odo {
 
     void deleteApplication(String project, String application) throws IOException;
 
-    void push(String project, String application, String component) throws IOException;
+    void push(String project, String application, String context, String component) throws IOException;
 
     void describeComponent(String project, String application, String component) throws IOException;
 

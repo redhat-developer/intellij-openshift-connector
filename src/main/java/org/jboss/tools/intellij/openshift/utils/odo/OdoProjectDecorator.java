@@ -39,8 +39,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void push(String project, String application, String component) throws IOException {
-        delegate.push(project, application, component);
+    public void push(String project, String application, String context, String component) throws IOException {
+        delegate.push(project, application, context, component);
     }
 
     @Override

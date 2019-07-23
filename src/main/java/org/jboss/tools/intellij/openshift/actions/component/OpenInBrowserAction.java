@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class OpenInBrowserAction extends OdoAction {
+public class OpenInBrowserAction extends ContextAwareComponentAction {
   public OpenInBrowserAction() {
     super(ComponentNode.class, URLNode.class);
   }

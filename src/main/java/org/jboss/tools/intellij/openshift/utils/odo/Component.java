@@ -16,6 +16,9 @@ public interface Component {
   void setState(ComponentState state);
   String getPath();
   void setPath(String path);
+  default boolean hasContext() {
+      return getPath() != null;
+  }
 
   class ComponentImpl implements Component {
     private String name;

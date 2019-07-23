@@ -211,8 +211,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void push(String project, String application, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "push", "--project", project, "--app", application, component);
+  public void push(String project, String application, String context, String component) throws IOException {
+    ExecHelper.executeWithTerminal(command, "push", "--context", context, component);
   }
 
   @Override

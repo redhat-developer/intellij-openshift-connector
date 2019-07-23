@@ -24,11 +24,7 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class ShowLogComponentAction extends OdoAction {
-  public ShowLogComponentAction() {
-    super(ComponentNode.class);
-  }
-
+public class ShowLogComponentAction extends ContextAwareComponentAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;

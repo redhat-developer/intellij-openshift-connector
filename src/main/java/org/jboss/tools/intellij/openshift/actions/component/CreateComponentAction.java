@@ -63,7 +63,7 @@ public class CreateComponentAction extends OdoAction {
           rootModel.addContext(model.getContext());
           ((LazyMutableTreeNode)selected).reload();
           if (model.isPushAfterCreate()) {
-              odo.push(projectName, application.orElse(model.getApplication()), model.getName());
+              odo.push(projectName, application.orElse(model.getApplication()), model.getContext(), model.getName());
           }
         }
       } catch (IOException e) {

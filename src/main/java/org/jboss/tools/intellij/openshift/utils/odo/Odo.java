@@ -25,7 +25,7 @@ public interface Odo {
 
     void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException;
 
-    void createComponentGit(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException;
+    void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException;
 
     void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException;
 

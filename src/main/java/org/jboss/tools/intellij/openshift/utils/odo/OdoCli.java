@@ -233,9 +233,9 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createComponentGit(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
+  public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
     ExecHelper.executeWithTerminal(command, "create", componentType + ':' + componentVersion, component,
-      "--git", source, "--project", project, "--app", application);
+      "--git", source, "--project", project, "--app", application, "--context", context);
 
   }
 

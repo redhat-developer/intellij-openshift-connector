@@ -76,7 +76,7 @@ public class CreateComponentAction extends OdoAction {
     if (model.getSourceType() == CreateComponentModel.SourceType.LOCAL) {
       odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext());
     } else {
-      odo.createComponentGit(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL());
+      odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL());
     }
   }
 

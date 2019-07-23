@@ -44,8 +44,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void describeComponent(String project, String application, String component) throws IOException {
-        delegate.describeComponent(project, application, component);
+    public void describeComponent(String project, String application, String context, String component) throws IOException {
+        delegate.describeComponent(project, application, context, component);
     }
 
     @Override

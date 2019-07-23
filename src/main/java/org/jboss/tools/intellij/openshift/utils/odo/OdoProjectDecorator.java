@@ -115,8 +115,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void deleteComponent(String project, String application, String component) throws IOException {
-        delegate.deleteComponent(project, application, component);
+    public void deleteComponent(String project, String application, String context, String component) throws IOException {
+        delegate.deleteComponent(project, application, context, component);
     }
 
     @Override

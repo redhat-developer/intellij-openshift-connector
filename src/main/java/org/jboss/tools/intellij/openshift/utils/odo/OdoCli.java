@@ -350,8 +350,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void deleteComponent(String project, String application, String component) throws IOException {
-    execute(command, "delete", "--project", project, "--app", application, component, "-f");
+  public void deleteComponent(String project, String application, String context, String component) throws IOException {
+    execute(command, "delete", "--project", project, "--app", application, "--context", context, component, "-f", "--all");
   }
 
   @Override

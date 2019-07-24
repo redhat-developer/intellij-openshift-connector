@@ -27,13 +27,14 @@ public class ComponentNode extends LazyMutableTreeNode implements IconTreeNode {
   public void load() {
     super.load();
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) getRoot();
+    Component component = (Component) getUserObject();
       try {
           Odo odo = clusterNode.getOdo();
           try {
             odo.getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), toString()).forEach(pvc -> add(new PersistentVolumeClaimNode(pvc)));
           } catch (KubernetesClientException e) {}
           try {
-            odo.listURLs(getParent().getParent().toString(), getParent().toString(), toString()).forEach(url -> add(new URLNode(url)));
+            odo.listURLs(getParent().getParent().toString(), getParent().toString(), component.getPath(), component.getName()).forEach(url -> add(new URLNode(url)));
           } catch (IOException e) {}
       } catch (IOException e) {}
   }

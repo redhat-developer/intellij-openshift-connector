@@ -15,11 +15,11 @@ public interface URL {
 
   String getProtocol();
 
-  String getPath();
+  String getHost();
 
   String getPort();
 
-  static URL of(String name, String protocol, String path, String port) {
+  static URL of(String name, String protocol, String host, String port) {
     return new URL() {
       @Override
       public String getName() {
@@ -27,8 +27,8 @@ public interface URL {
       }
 
       @Override
-      public String getPath() {
-        return path;
+      public String getHost() {
+        return host;
       }
 
       @Override

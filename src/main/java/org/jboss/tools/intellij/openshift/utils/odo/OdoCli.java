@@ -318,17 +318,17 @@ public class OdoCli implements Odo {
     List<URL> result = new ArrayList<>();
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
-      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").get("protocol").asText(), item.get("spec").get("path").asText(), item.get("spec").get("port").asText())));
+      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").get("protocol").asText(), item.get("spec").get("host").asText(), item.get("spec").get("port").asText())));
     } catch (IOException e) {
     }
     return result;
   }
 
   @Override
-  public List<URL> listURLs(String project, String application, String component) throws IOException {
+  public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
     String output;
     try {
-      output = execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
+      output = execute(command, "url", "list", "--project", project, "--app", application, "--context", context, "--component", component, "-o", "json");
     } catch (IOException e) {
       output = "";
     }
@@ -336,11 +336,11 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createURL(String project, String application, String component, String name, Integer port) throws IOException {
+  public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
     if (name != null && !name.isEmpty()) {
-      execute(command, "url", "create", name, "--project", project, "--app", application, "--component", component, "--port", port.toString());
+      ExecHelper.executeWithTerminal(command, "url", "create", name, "--project", project, "--app", application, "--context", context, "--component", component, "--port", port.toString());
     } else {
-      execute(command, "url", "create", "--project", project, "--app", application, "--component", component, "--port", port.toString());
+      ExecHelper.executeWithTerminal(command, "url", "create", "--project", project, "--app", application, "--context", context, "--component", component, "--port", port.toString());
     }
   }
 

@@ -13,10 +13,12 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
@@ -47,15 +49,17 @@ public class OpenInBrowserAction extends ContextAwareComponentAction {
   }
 
   private void openFromComponent(ComponentNode componentNode, Odo odo) {
+    Component component = (Component) componentNode.getUserObject();
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        List<URL> urls = odo.listURLs(projectNode.toString(), applicationNode.toString(), componentNode.toString());
+        List<URL> urls = odo.listURLs(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName());
         if (urls.isEmpty()) {
           if (UIHelper.executeInUI(() -> JOptionPane.showConfirmDialog(null, "No URL for component " + componentNode.toString() + ", do you want to create one ?", "Create URL", JOptionPane.OK_CANCEL_OPTION)) == JOptionPane.OK_OPTION) {
-            if (CreateURLAction.createURL(odo, projectNode, applicationNode, componentNode)) {
-              urls = odo.listURLs(projectNode.toString(), applicationNode.toString(), componentNode.toString());
+            final OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
+            if (CreateURLAction.createURL(odo, client, projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName())) {
+              urls = odo.listURLs(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName());
               openURL(urls);
             }
           }
@@ -70,6 +74,6 @@ public class OpenInBrowserAction extends ContextAwareComponentAction {
 
 
   protected String getURL(URL url) {
-    return url.getProtocol() + "://" + url.getPath();
+    return url.getProtocol() + "://" + url.getHost();
   }
 }

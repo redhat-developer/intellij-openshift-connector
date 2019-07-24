@@ -100,13 +100,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<org.jboss.tools.intellij.openshift.utils.odo.URL> listURLs(String project, String application, String component) throws IOException {
-        return delegate.listURLs(project, application, component);
+    public List<org.jboss.tools.intellij.openshift.utils.odo.URL> listURLs(String project, String application, String context, String component) throws IOException {
+        return delegate.listURLs(project, application, context, component);
     }
 
     @Override
-    public void createURL(String project, String application, String component, String name, Integer port) throws IOException {
-        createURL(project, application, component, name, port);
+    public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
+        delegate.createURL(project, application, context, component, name, port);
     }
 
     @Override

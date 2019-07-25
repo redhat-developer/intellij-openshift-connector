@@ -60,8 +60,6 @@
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>
       <!-- project level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.CreateApplicationAction" text="New Application"/>
-      <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"></action>
       <separator/>
       <!-- application level -->

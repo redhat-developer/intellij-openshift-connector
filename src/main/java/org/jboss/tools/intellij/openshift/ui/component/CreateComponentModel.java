@@ -2,7 +2,11 @@ package org.jboss.tools.intellij.openshift.ui.component;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class CreateComponentModel extends WizardModel {
     public enum SourceType {
@@ -33,6 +37,8 @@ public class CreateComponentModel extends WizardModel {
 
     private String gitURL;
     private String gitReference;
+
+    private String binaryFilePath;
 
     public CreateComponentModel(String title) {
         super(title);
@@ -125,5 +131,30 @@ public class CreateComponentModel extends WizardModel {
 
     public void setGitReference(String gitReference) {
         this.gitReference = gitReference;
+    }
+
+    public String getBinaryFilePath() {
+        return binaryFilePath;
+    }
+
+    public void setBinaryFilePath(String binaryFilePath) {
+        this.binaryFilePath = binaryFilePath;
+    }
+
+    protected boolean isValidURL(String url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    public boolean isValid() {
+        return StringUtils.isNotBlank(getName()) && StringUtils.isNotBlank(getApplication()) &&
+                StringUtils.isNotBlank(getContext()) &&
+                (getSourceType() == SourceType.LOCAL ||
+                        (getSourceType() == SourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
+                        (getSourceType() == SourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));
     }
 }

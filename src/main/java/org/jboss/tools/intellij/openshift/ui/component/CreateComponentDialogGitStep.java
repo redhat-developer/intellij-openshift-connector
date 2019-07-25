@@ -55,12 +55,7 @@ public class CreateComponentDialogGitStep extends WizardStep<CreateComponentMode
 
     private void updateState() {
         WizardNavigationState state = model.getCurrentNavigationState();
-        try {
-            new URL(model.getGitURL());
-            state.FINISH.setEnabled(true);
-        } catch (MalformedURLException e) {
-            state.FINISH.setEnabled(false);
-        }
+        state.FINISH.setEnabled(model.isValid());
     }
 
     @Override

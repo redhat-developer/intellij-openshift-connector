@@ -45,6 +45,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         sourceTypeComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 model.setSourceType((CreateComponentModel.SourceType) sourceTypeComboBox.getSelectedItem());
+                updateState();
             }
         });
         contextTextField.getDocument().addDocumentListener(new DocumentAdapter() {
@@ -102,14 +103,14 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
     private void updateState() {
         WizardNavigationState state = model.getCurrentNavigationState();
-        if (model.getName().length() > 0 && model.getContext().length() > 0 && model.getApplication().length() > 0) {
+        state.FINISH.setEnabled(model.isValid());
+        if (model.getSourceType() != CreateComponentModel.SourceType.LOCAL && model.getName().length() > 0 && model.getContext().length() > 0 && model.getApplication().length() > 0) {
             state.NEXT.setEnabled(true);
             if (model.getSourceType() == CreateComponentModel.SourceType.LOCAL) {
                 state.FINISH.setEnabled(true);
             }
         } else {
             state.NEXT.setEnabled(false);
-            state.FINISH.setEnabled(false);
         }
     }
 

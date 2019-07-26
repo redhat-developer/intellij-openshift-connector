@@ -24,6 +24,7 @@ import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.LocalConfig;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -37,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
+    public static final String ODO_CONFIG_YAML = ".odo/config.yaml";
     private ApplicationsRootNode ROOT;
     private final Project project;
 
@@ -57,28 +59,68 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         }
     }
 
+    @Override
+    public void moduleAdded(@NotNull Project project, @NotNull Module module) {
+        /* moduleFile is not yet available when we are notified so try
+         * the odo file
+         */
+        addContext(new File(new File(module.getModuleFilePath()).getParent(), ODO_CONFIG_YAML));
+    }
+
+    @Override
+    public void moduleRemoved(@NotNull Project project, @NotNull Module module) {
+        removeContext(module.getModuleFile());
+    }
+
+    private void addContextToSettings(String path, LocalConfig.ComponentSettings componentSettings) {
+        if (!settings.containsKey(path)) {
+            settings.put(path, componentSettings);
+            refresh();
+        }
+    }
     private void addContext(File file) {
         if (file.exists()) {
             try {
                 LocalConfig config = LocalConfig.load(file.toPath().toUri().toURL());
-                settings.put(file.getPath(), config.getComponentSettings());
+                addContextToSettings(file.getPath(), config.getComponentSettings());
             } catch (IOException e) {}
         }
     }
     private void addContext(VirtualFile moduleFile) {
         try {
-            VirtualFile file = moduleFile.getParent().findFileByRelativePath(".odo/config.yaml");
+            VirtualFile file = moduleFile.getParent().findFileByRelativePath(ODO_CONFIG_YAML);
             if (file != null && file.isValid()) {
                 LocalConfig config = LocalConfig.load(new File(file.getPath()).toPath().toUri().toURL());
-                settings.put(moduleFile.getParent().getPath(), config.getComponentSettings());
+                addContextToSettings(moduleFile.getParent().getPath(), config.getComponentSettings());
             }
         } catch (IOException e) { }
     }
 
-    public void addContext(String path) {
-        if (!settings.containsKey(path)) {
-            addContext(new File(path, ".odo/config.yaml"));
+    public void addContext(String modulePath) {
+        addContext(new File(modulePath, ODO_CONFIG_YAML));
+    }
+
+    private void removeContextFromSettings(String path) {
+        if (settings.containsKey(path)) {
+            settings.remove(path);
+            refresh();
         }
+    }
+    private void removeContext(File file) {
+        if (file.exists()) {
+            removeContextFromSettings(file.getPath());
+        }
+    }
+
+    private void removeContext(VirtualFile moduleFile) {
+            VirtualFile file = moduleFile.getParent().findFileByRelativePath(ODO_CONFIG_YAML);
+            if (file != null && file.isValid()) {
+                removeContextFromSettings(moduleFile.getParent().getPath());
+            }
+    }
+
+    public void removeContext(String modulePath) {
+        removeContext(new File(modulePath, ODO_CONFIG_YAML));
     }
 
     private void registerProjectListener(Project project) {

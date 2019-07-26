@@ -15,6 +15,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.*;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
@@ -27,6 +28,15 @@ import java.util.concurrent.CompletableFuture;
 public class DeleteComponentAction extends OdoAction {
   public DeleteComponentAction() {
     super(ComponentNode.class);
+  }
+
+  @Override
+  public boolean isVisible(Object selected) {
+    boolean visible = super.isVisible(selected);
+    if (visible) {
+      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() != ComponentState.NO_CONTEXT;
+    }
+    return visible;
   }
 
   @Override

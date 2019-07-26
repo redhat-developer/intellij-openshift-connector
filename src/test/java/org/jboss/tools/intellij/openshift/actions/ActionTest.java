@@ -23,6 +23,8 @@ import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaim
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -97,15 +99,39 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
     assertFalse(visible);
   }
 
-  public void testActionIsDisabledOnComponent() {
+  private AnActionEvent setupActionOnComponent(Component component) {
     ComponentNode componentNode = mock(ComponentNode.class);
+    when(componentNode.getUserObject()).thenReturn(component);
     AnActionEvent event = createEvent(componentNode);
     AnAction action = getAction();
     action.update(event);
-    verifyComponent(event.getPresentation().isVisible());
+    return event;
+
+  }
+  public void testActionOnPushedComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.PUSHED, "."));
+    verifyPushedComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyComponent(boolean visible) {
+  protected void verifyPushedComponent(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnNotPushedComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NOT_PUSHED, "."));
+    verifyNotPushedComponent(event.getPresentation().isVisible());
+  }
+
+  protected void verifyNotPushedComponent(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnNoContextComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NO_CONTEXT));
+    verifyNoContextComponent(event.getPresentation().isVisible());
+  }
+
+  protected void verifyNoContextComponent(boolean visible) {
     assertFalse(visible);
   }
 

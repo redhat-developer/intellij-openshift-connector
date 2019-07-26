@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.storage;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import org.jboss.tools.intellij.openshift.actions.component.ContextAwareComponentAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -27,11 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class CreateStorageAction extends OdoAction {
-  public CreateStorageAction() {
-    super(ComponentNode.class);
-  }
-
+public class CreateStorageAction extends ContextAwareComponentAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;

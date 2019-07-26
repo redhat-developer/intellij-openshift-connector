@@ -20,7 +20,7 @@ public class LinkComponentActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyComponent(boolean visible) {
+  protected void verifyPushedComponent(boolean visible) {
     assertTrue(visible);
   }
 }

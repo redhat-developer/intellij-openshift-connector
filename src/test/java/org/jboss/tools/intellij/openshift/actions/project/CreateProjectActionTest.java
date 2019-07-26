@@ -63,7 +63,7 @@ public class CreateProjectActionTest extends ActionTest {
     assertFalse(event.getPresentation().isVisible());
   }
 
-  public void testActionIsDisabledOnComponent() {
+  public void testActionOnPushedComponent() {
     ComponentNode componentNode = mock(ComponentNode.class);
     AnActionEvent event = createEvent(componentNode);
     AnAction action = getAction();

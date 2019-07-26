@@ -20,7 +20,12 @@ public class DescribeComponentActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyComponent(boolean visible) {
+  protected void verifyPushedComponent(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyNoContextComponent(boolean visible) {
     assertTrue(visible);
   }
 }

@@ -14,11 +14,13 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
@@ -29,9 +31,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class OpenInBrowserAction extends ContextAwareComponentAction {
+public class OpenInBrowserAction extends OdoAction {
   public OpenInBrowserAction() {
     super(ComponentNode.class, URLNode.class);
+  }
+
+  @Override
+  public boolean isVisible(Object selected) {
+    boolean visible = super.isVisible(selected);
+    if (visible && selected instanceof ComponentNode) {
+      Component component = (Component) ((ComponentNode)selected).getUserObject();
+      visible = component.getState() == ComponentState.PUSHED;
+    }
+    return visible;
   }
 
   private void openURL(List<URL> urls) {

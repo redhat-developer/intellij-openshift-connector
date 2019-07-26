@@ -217,7 +217,12 @@ public class OdoCli implements Odo {
 
   @Override
   public void describeComponent(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, "--context", context, component);
+    if (context != null) {
+      ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, "--context", context, component);
+    } else {
+      ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, component);
+    }
+
   }
 
   @Override

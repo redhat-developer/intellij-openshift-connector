@@ -1,9 +1,9 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 public enum ComponentState {
-    PUSHED("pushed"),
-    NOT_PUSHED("not pushed"),
-    NO_CONTEXT("no context");
+    PUSHED("\u25C9 pushed"),
+    NOT_PUSHED("\u25CE not pushed"),
+    NO_CONTEXT("\u2718 no context");
 
     private String label;
 

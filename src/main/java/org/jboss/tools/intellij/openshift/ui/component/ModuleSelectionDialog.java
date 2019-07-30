@@ -20,18 +20,21 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.Predicate;
 
 public class ModuleSelectionDialog extends DialogWrapper {
   private JPanel contentPane;
   private JList moduleList;
 
-  public ModuleSelectionDialog(Component parent, Project project) {
+  public ModuleSelectionDialog(Component parent, Project project, Predicate<Module> filter) {
     super(project, parent, false, IdeModalityType.IDE);
     init();
     setTitle("Select module");
     DefaultListModel model = new DefaultListModel();
     for (Module m : project.getComponent(ModuleManager.class).getModules()) {
-      model.addElement(m);
+      if (filter.test(m)) {
+        model.addElement(m);
+      }
     }
     moduleList.setModel(model);
     moduleList.setCellRenderer(new DefaultListCellRenderer() {
@@ -41,6 +44,9 @@ public class ModuleSelectionDialog extends DialogWrapper {
         return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       }
     });
+    if (model.isEmpty()) {
+      moduleList.setEnabled(false);
+    }
   }
 
   public Module getSelectedModule() {
@@ -49,7 +55,7 @@ public class ModuleSelectionDialog extends DialogWrapper {
 
 
   public static void main(String[] args) {
-    ModuleSelectionDialog dialog = new ModuleSelectionDialog(null, null);
+    ModuleSelectionDialog dialog = new ModuleSelectionDialog(null, null, null);
     dialog.pack();
     dialog.show();
     System.exit(0);

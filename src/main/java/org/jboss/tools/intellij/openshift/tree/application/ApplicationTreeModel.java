@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
@@ -37,8 +38,9 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
+
 public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
-    public static final String ODO_CONFIG_YAML = ".odo/config.yaml";
     private ApplicationsRootNode ROOT;
     private final Project project;
 

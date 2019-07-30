@@ -1,5 +1,6 @@
 package org.jboss.tools.intellij.openshift.ui.component;
 
+import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
@@ -11,9 +12,11 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.Arrays;
 
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
@@ -56,7 +59,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
         });
         browseModulesButton.addActionListener(e -> {
-            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject());
+            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !org.jboss.tools.intellij.openshift.utils.odo.Component.hasComponent(m.getModuleFile().getParent().getPath()));
             dialog.show();
             if (dialog.isOK()) {
                 contextTextField.setText(dialog.getSelectedModule().getModuleFile().getParent().getPath());
@@ -65,6 +68,18 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         browseFolderButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser(model.getContext());
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            chooser.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return !org.jboss.tools.intellij.openshift.utils.odo.Component.hasComponent(f.getPath());
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Folders not containing Odo components";
+                }
+            });
             if (chooser.showOpenDialog(root.getParent()) == JFileChooser.APPROVE_OPTION) {
                 contextTextField.setText(chooser.getSelectedFile().getAbsolutePath());
             }

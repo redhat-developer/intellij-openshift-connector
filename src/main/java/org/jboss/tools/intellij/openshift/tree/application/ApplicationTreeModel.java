@@ -18,7 +18,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
@@ -84,7 +83,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         if (file.exists()) {
             try {
                 LocalConfig config = LocalConfig.load(file.toPath().toUri().toURL());
-                addContextToSettings(file.getPath(), config.getComponentSettings());
+                String path = file.getParentFile().getParentFile().getAbsolutePath().replace(File.pathSeparatorChar, '/');
+                addContextToSettings(path, config.getComponentSettings());
             } catch (IOException e) {}
         }
     }

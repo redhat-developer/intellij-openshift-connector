@@ -14,3 +14,6 @@ ComponentSettings:
   Envs:
   - Name: JEFF
     Value: jeff
+  Url:
+    - Name: url1
+      Port: 8080

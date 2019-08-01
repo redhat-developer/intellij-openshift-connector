@@ -16,6 +16,7 @@ import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
@@ -34,11 +35,12 @@ public class DeleteURLAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     URLNode urlNode = (URLNode) selected;
     ComponentNode componentNode = (ComponentNode) urlNode.getParent();
+    Component component = (Component) componentNode.getUserObject();
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-          odo.deleteURL(projectNode.toString(), applicationNode.toString(), componentNode.toString(), ((URL)urlNode.getUserObject()).getName());
+          odo.deleteURL(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), ((URL)urlNode.getUserObject()).getName());
           componentNode.reload();
       }
       catch (IOException e) {

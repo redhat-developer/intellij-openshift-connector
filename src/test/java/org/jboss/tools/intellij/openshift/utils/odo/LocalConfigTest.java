@@ -92,4 +92,26 @@ public class LocalConfigTest {
     Assert.assertEquals("JEFF", envs.get(0).getName());
     Assert.assertEquals("jeff", envs.get(0).getValue());
   }
+
+  @Test
+  public void verifyThatConfigReturnsComponentSettingsURLs() throws IOException {
+    LocalConfig config = LocalConfig.load(url);
+    Assert.assertNotNull(config);
+    LocalConfig.ComponentSettings settings = config.getComponentSettings();
+    Assert.assertNotNull(settings);
+    List<LocalConfig.URL> urls = settings.getUrls();
+    Assert.assertNotNull(urls);
+  }
+
+  @Test
+  public void verifyThatConfigReturnsComponentSettingsURLsProperties() throws IOException {
+    LocalConfig config = LocalConfig.load(url);
+    Assert.assertNotNull(config);
+    LocalConfig.ComponentSettings settings = config.getComponentSettings();
+    Assert.assertNotNull(settings);
+    List<LocalConfig.URL> urls = settings.getUrls();
+    Assert.assertNotNull(urls);
+    Assert.assertEquals("url1", urls.get(0).getName());
+    Assert.assertEquals("8080", urls.get(0).getPort());
+  }
 }

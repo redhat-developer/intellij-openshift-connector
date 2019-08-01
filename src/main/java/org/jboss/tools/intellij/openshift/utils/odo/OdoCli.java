@@ -345,8 +345,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void deleteURL(String project, String application, String component, String name) throws IOException {
-    execute(command, "url", "delete", "-f", name, "--project", project, "--app", application, "--component", component);
+  public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
+    execute(command, "url", "delete", "-f", name, "--project", project, "--app", application, "--context", context, "--component", component);
   }
 
   @Override
@@ -422,9 +422,10 @@ public class OdoCli implements Odo {
 
 
   @Override
-  public List<PersistentVolumeClaim> getStorages(OpenShiftClient client, String project, String application, String component) {
+  public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
     return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
-            .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).collect(Collectors.toList());
+            .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
+                    map(pvc -> Storage.of(pvc.getMetadata().getName())).collect(Collectors.toList());
 
   }
 
@@ -444,13 +445,13 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createStorage(String project, String application, String component, String name, String mountPath, String storageSize) throws IOException {
-    execute(command, "storage", "create", "--project", project, "--app", application, "--component", component, name, "--path", mountPath, "--size", storageSize);
+  public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
+    execute(command, "storage", "create", "--project", project, "--app", application, "--context", context, "--component", component, name, "--path", mountPath, "--size", storageSize);
   }
 
   @Override
-  public void deleteStorage(String project, String application, String component, String storage) throws IOException {
-    execute(command, "storage", "delete", "--project", project, "--app", application, "--component", component, storage, "-f");
+  public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
+    execute(command, "storage", "delete", "--project", project, "--app", application, "--context", context, "--component", component, storage, "-f");
   }
 
   @Override

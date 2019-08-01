@@ -19,6 +19,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.ui.storage.CreateStorageDialog;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.JOptionPane;
@@ -32,13 +33,14 @@ public class CreateStorageAction extends ContextAwareComponentAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
+    Component component = (Component) componentNode.getUserObject();
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
         CreateStorageDialog dialog = UIHelper.executeInUI(this::showDialog);
         if (dialog.isOK()) {
-          odo.createStorage(projectNode.toString(), applicationNode.toString(), componentNode.toString(), dialog.getName(), dialog.getMountPath(), dialog.getStorageSize());
+          odo.createStorage(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), dialog.getName(), dialog.getMountPath(), dialog.getStorageSize());
           componentNode.reload();
         }
       } catch (IOException e) {

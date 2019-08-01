@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
+import net.sf.cglib.core.Local;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
@@ -43,7 +44,37 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     private ApplicationsRootNode ROOT;
     private final Project project;
 
-    private final Map<String, LocalConfig.ComponentSettings> settings = new HashMap();
+    public static class ComponentDescriptor {
+        private final String path;
+        private final String project;
+        private final String application;
+        private final String name;
+
+        ComponentDescriptor(String project, String application, String path, String name) {
+            this.project = project;
+            this.application = application;
+            this.path = path;
+            this.name = name;
+        }
+
+        public String getProject() {
+            return project;
+        }
+
+        public String getApplication() {
+            return application;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public LocalConfig.ComponentSettings getSettings() throws IOException {
+            return LocalConfig.load(new File(path, ODO_CONFIG_YAML).toURI().toURL()).getComponentSettings();
+        }
+    }
+
+    private final Map<String, ComponentDescriptor> components = new HashMap();
 
     public ApplicationTreeModel(Project project) {
         CompletableFuture.runAsync(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
@@ -74,8 +105,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     }
 
     private void addContextToSettings(String path, LocalConfig.ComponentSettings componentSettings) {
-        if (!settings.containsKey(path)) {
-            settings.put(path, componentSettings);
+        if (!components.containsKey(path)) {
+            components.put(path, new ComponentDescriptor(componentSettings.getProject(), componentSettings.getApplication(), path, componentSettings.getName()));
             refresh();
         }
     }
@@ -103,8 +134,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     }
 
     private void removeContextFromSettings(String path) {
-        if (settings.containsKey(path)) {
-            settings.remove(path);
+        if (components.containsKey(path)) {
+            components.remove(path);
             refresh();
         }
     }
@@ -130,8 +161,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         connection.subscribe(ProjectTopics.MODULES, this);
     }
 
-    public Map<String, LocalConfig.ComponentSettings> getSettings() {
-        return settings;
+    public Map<String, ComponentDescriptor> getComponents() {
+        return components;
     }
 
     public Project getProject() {

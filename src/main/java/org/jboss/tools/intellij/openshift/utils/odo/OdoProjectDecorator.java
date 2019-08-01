@@ -13,6 +13,19 @@ public class OdoProjectDecorator implements Odo {
     private final Odo delegate;
     private final ApplicationTreeModel model;
 
+    private LocalConfig.ComponentSettings findComponent(String project, String application, String component) {
+        Optional<ApplicationTreeModel.ComponentDescriptor> comp = model.getComponents().values().stream().filter(c -> c.getProject().equals(project) && c.getApplication().equals(application) && c.getName().equals(component)).findFirst();
+        try {
+            if (comp.isPresent()) {
+                return comp.get().getSettings();
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     public OdoProjectDecorator(Odo delegate, ApplicationTreeModel model) {
         this.delegate = delegate;
         this.model = model;
@@ -95,8 +108,17 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<org.jboss.tools.intellij.openshift.utils.odo.URL> listURLs(String project, String application, String context, String component) throws IOException {
-        return delegate.listURLs(project, application, context, component);
+    public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
+        List<URL> urls = delegate.listURLs(project, application, context, component);
+        LocalConfig.ComponentSettings settings = findComponent(project, application, component);
+        if (settings != null) {
+            settings.getUrls().forEach(url -> {
+                if (urls.stream().noneMatch(url1 -> url1.getName().equals(url.getName()))) {
+                    urls.add(URL.of(url.getName(), null, null, url.getPort()));
+                }
+            });
+        }
+        return urls;
     }
 
     @Override
@@ -105,8 +127,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void deleteURL(String project, String application, String component, String name) throws IOException {
-        delegate.deleteURL(project, application, component, name);
+    public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
+        delegate.deleteURL(project, application, context, component, name);
     }
 
     @Override
@@ -147,7 +169,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Application> getApplications(String project) throws IOException {
         List<Application> applications = delegate.getApplications(project);
-        model.getSettings().forEach((path, component) -> {
+        model.getComponents().forEach((path, component) -> {
            if (component.getProject().equals(project) && applications.stream().noneMatch(application -> application.getName().equals(component.getApplication()))) {
                applications.add(Application.of(component.getApplication()));
            }
@@ -158,7 +180,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Component> getComponents(OpenShiftClient client, String project, String application) {
         List<Component> components = delegate.getComponents(client, project, application);
-        model.getSettings().forEach((path, comp) -> {
+        model.getComponents().forEach((path, comp) -> {
             if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
                 Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(comp.getName())).findFirst();
                 if (found.isPresent()) {
@@ -178,8 +200,17 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<PersistentVolumeClaim> getStorages(OpenShiftClient client, String project, String application, String component) {
-        return delegate.getStorages(client, project, application, component);
+    public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
+        List<Storage> storages = delegate.getStorages(client, project, application, component);
+        LocalConfig.ComponentSettings settings = findComponent(project, application, component);
+        if (settings != null) {
+            settings.getStorages().forEach(storage -> {
+                if (storages.stream().noneMatch(storage1 -> storage1.getName().equals(storage.getName()))) {
+                    storages.add(Storage.of(storage.getName()));
+                }
+            });
+        }
+        return storages;
     }
 
     @Override
@@ -198,13 +229,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createStorage(String project, String application, String component, String name, String mountPath, String storageSize) throws IOException {
-        delegate.createStorage(project, application, component, name, mountPath, storageSize);
+    public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
+        delegate.createStorage(project, application, context, component, name, mountPath, storageSize);
     }
 
     @Override
-    public void deleteStorage(String project, String application, String component, String storage) throws IOException {
-        delegate.deleteStorage(project, application, component, storage);
+    public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
+        delegate.deleteStorage(project, application, context, component, storage);
     }
 
     @Override

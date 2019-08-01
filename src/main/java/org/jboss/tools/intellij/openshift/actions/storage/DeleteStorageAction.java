@@ -16,6 +16,7 @@ import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.JOptionPane;
@@ -33,11 +34,12 @@ public class DeleteStorageAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
     ComponentNode componentNode = (ComponentNode) storageNode.getParent();
+    Component component = (Component) componentNode.getUserObject();
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-          odo.deleteStorage(projectNode.toString(), applicationNode.toString(), componentNode.toString(), storageNode.toString());
+          odo.deleteStorage(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), storageNode.toString());
           componentNode.reload();
       }
       catch (IOException e) {

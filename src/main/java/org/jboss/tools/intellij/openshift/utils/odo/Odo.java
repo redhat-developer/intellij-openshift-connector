@@ -1,6 +1,5 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
@@ -43,7 +42,7 @@ public interface Odo {
 
     void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException;
 
-    void deleteURL(String project, String application, String component, String name) throws IOException;
+    void deleteURL(String project, String application, String context, String component, String name) throws IOException;
 
     void deleteComponent(String project, String application, String context, String component) throws IOException;
 
@@ -65,7 +64,7 @@ public interface Odo {
 
     List<ServiceInstance> getServices(OpenShiftClient client, String project, String application);
 
-    List<PersistentVolumeClaim> getStorages(OpenShiftClient client, String project, String application, String component);
+    List<Storage> getStorages(OpenShiftClient client, String project, String application, String component);
 
     void listComponents() throws IOException;
 
@@ -73,9 +72,9 @@ public interface Odo {
 
     void about() throws IOException;
 
-    void createStorage(String project, String application, String component, String name, String mountPath, String storageSize) throws IOException;
+    void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException;
 
-    void deleteStorage(String project, String application, String component, String storage) throws IOException;
+    void deleteStorage(String project, String application, String context, String component, String storage) throws IOException;
 
     void link(String project, String application, String component, String source, Integer port) throws IOException;
 }

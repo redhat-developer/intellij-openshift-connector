@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -73,6 +74,31 @@ public class LocalConfig {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class URL {
+        @JsonProperty("Name")
+        private String name;
+
+        @JsonProperty("Port")
+        private String port;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPort() {
+            return port;
+        }
+
+        public void setPort(String port) {
+            this.port = port;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ComponentSettings {
         @JsonProperty("Type")
         private String type;
@@ -93,10 +119,13 @@ public class LocalConfig {
         private String name;
 
         @JsonProperty("Storage")
-        private List<Storage> storages;
+        private List<Storage> storages = new ArrayList<>();
 
         @JsonProperty("Envs")
-        private List<Env> envs;
+        private List<Env> envs = new ArrayList<>();
+
+        @JsonProperty("Url")
+        private List<URL> urls = new ArrayList<>();
 
         public String getType() {
             return type;
@@ -161,6 +190,14 @@ public class LocalConfig {
         public void setEnvs(List<Env> envs) {
             this.envs = envs;
         }
+
+        public List<URL> getUrls() {
+            return urls;
+        }
+
+        public void setUrls(List<URL> urls) {
+            this.urls = urls;
+        }
     }
 
     @JsonProperty("ComponentSettings")
@@ -176,7 +213,7 @@ public class LocalConfig {
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    public static LocalConfig load(URL url) throws IOException {
+    public static LocalConfig load(java.net.URL url) throws IOException {
         return mapper.readValue(url, LocalConfig.class);
     }
 }

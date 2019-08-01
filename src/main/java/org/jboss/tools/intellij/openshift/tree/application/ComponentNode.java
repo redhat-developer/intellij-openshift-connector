@@ -15,6 +15,7 @@ import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.Storage;
 
 import java.io.IOException;
 
@@ -31,7 +32,7 @@ public class ComponentNode extends LazyMutableTreeNode implements IconTreeNode {
       try {
           Odo odo = clusterNode.getOdo();
           try {
-            odo.getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), toString()).forEach(pvc -> add(new PersistentVolumeClaimNode(pvc)));
+            odo.getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), component.getName()).forEach(storage -> add(new PersistentVolumeClaimNode(storage)));
           } catch (KubernetesClientException e) {}
           try {
             odo.listURLs(getParent().getParent().toString(), getParent().toString(), component.getPath(), component.getName()).forEach(url -> add(new URLNode(url)));

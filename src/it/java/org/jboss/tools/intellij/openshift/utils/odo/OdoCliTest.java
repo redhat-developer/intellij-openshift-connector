@@ -70,7 +70,7 @@ public class OdoCliTest extends BaseTest {
 
     private void createStorage(String project, String application, String component, String storage) throws IOException, InterruptedException {
         createComponent(project, application, component);
-        odo.createStorage(project, application, component, storage, "/tmp", "1Gi");
+        odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
     }
 
     @Test
@@ -168,7 +168,7 @@ public class OdoCliTest extends BaseTest {
             odo.createURL(project, application, COMPONENT_PATH, component, null, 8080);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
-            odo.deleteURL(project, application, component, urls.get(0).getName());
+            odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
             urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(0, urls.size());
         } finally {
@@ -219,7 +219,7 @@ public class OdoCliTest extends BaseTest {
         String storage = STORAGE_PREFIX + random.nextInt();
         try {
             createStorage(project, application, component, storage);
-            odo.deleteStorage(project, application, component, storage);
+            odo.deleteStorage(project, application, COMPONENT_PATH, component, storage);
         } finally {
             try {
                 odo.deleteProject(project);

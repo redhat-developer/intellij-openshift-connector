@@ -24,11 +24,6 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createApplication(String project, String application) throws IOException {
-        delegate.createApplication(project, application);
-    }
-
-    @Override
     public void describeApplication(String project, String application) throws IOException {
         delegate.describeApplication(project, application);
     }

@@ -30,6 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OdoCliTest extends BaseTest {
 
+    public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
     private Odo odo;
 
     private OpenShiftClient client;
@@ -62,14 +63,9 @@ public class OdoCliTest extends BaseTest {
         pause();
     }
 
-    private void createApplication(String project, String application) throws IOException, InterruptedException {
-        createProject(project);
-        odo.createApplication(project, application);
-    }
-
     private void createComponent(String project, String application, String component) throws IOException, InterruptedException {
-        createApplication(project, application);
-        odo.createComponentLocal(project, application, "redhat-openjdk18-openshift", "1.4", component, new File("src/it/projects/springboot-rest").getAbsolutePath());
+        createProject(project);
+        odo.createComponentLocal(project, application, "redhat-openjdk18-openshift", "1.4", component, new File(COMPONENT_PATH).getAbsolutePath());
     }
 
     private void createStorage(String project, String application, String component, String storage) throws IOException, InterruptedException {
@@ -89,36 +85,6 @@ public class OdoCliTest extends BaseTest {
         }
     }
 
-    @Test
-    public void checkCreateApplication() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        try {
-            createApplication(project, application);
-        } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
-        }
-    }
-
-    @Test
-    public void checkGetApplications() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String application1 = APPLICATION_PREFIX + random.nextInt();
-        try {
-            createApplication(project, application);
-            odo.createApplication(project, application1);
-            List<Application> applications = odo.getApplications(project);
-            assertNotNull(applications);
-            assertEquals(2, applications.size());
-        } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
-        }
-    }
 
     @Test
     public void checkGetComponentTypes() throws IOException {
@@ -167,7 +133,7 @@ public class OdoCliTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.deleteComponent(project, application, component);
+            odo.deleteComponent(project, application, COMPONENT_PATH, component);
         } finally {
             try {
                 odo.deleteProject(project);
@@ -182,8 +148,8 @@ public class OdoCliTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.createURL(project, application, component, null, 8080);
-            List<URL> urls = odo.listURLs(project, application, component);
+            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080);
+            List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
         } finally {
             try {
@@ -199,11 +165,11 @@ public class OdoCliTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.createURL(project, application, component, null, 8080);
-            List<URL> urls = odo.listURLs(project, application, component);
+            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080);
+            List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
             odo.deleteURL(project, application, component, urls.get(0).getName());
-            urls = odo.listURLs(project, application, component);
+            urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(0, urls.size());
         } finally {
             try {
@@ -268,7 +234,7 @@ public class OdoCliTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            List<URL> urls = odo.listURLs(project, application, component);
+            List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(0, urls.size());
         } finally {
             try {
@@ -283,7 +249,7 @@ public class OdoCliTest extends BaseTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createApplication(project, application);
+            createProject(project);
             odo.createService(project, application, "postgresql-persistent", "default", service);
         } finally {
             try {
@@ -298,7 +264,7 @@ public class OdoCliTest extends BaseTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createApplication(project, application);
+            createProject(project);
             odo.createService(project, application, "postgresql-persistent", "default", service);
             String template = odo.getServiceTemplate(client, project, application, service);
             assertNotNull(template);
@@ -317,7 +283,7 @@ public class OdoCliTest extends BaseTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createApplication(project, application);
+            createProject(project);
             odo.createService(project, application, "postgresql-persistent", "default", service);
             odo.deleteService(project, application, service);
         } finally {

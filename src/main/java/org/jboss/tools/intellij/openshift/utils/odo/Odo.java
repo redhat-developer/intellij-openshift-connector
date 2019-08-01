@@ -11,8 +11,6 @@ import java.util.List;
 public interface Odo {
     List<Project> getProjects(OpenShiftClient client);
 
-    void createApplication(String project, String application) throws IOException;
-
     void describeApplication(String project, String application) throws IOException;
 
     void deleteApplication(String project, String application) throws IOException;

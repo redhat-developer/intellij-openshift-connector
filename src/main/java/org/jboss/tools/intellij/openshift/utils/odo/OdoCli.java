@@ -196,11 +196,6 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createApplication(String project, String application) throws IOException {
-    execute(command, "app", "create", application, "--project", project);
-  }
-
-  @Override
   public void describeApplication(String project, String application) throws IOException {
     ExecHelper.executeWithTerminal(command, "app", "describe", application, "--project", project);
   }

@@ -164,6 +164,8 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     public WizardStep onNext(CreateComponentModel model) {
         if (model.getSourceType() == CreateComponentModel.SourceType.GIT) {
             return new CreateComponentDialogGitStep(model);
+        } else if (model.getSourceType() == CreateComponentModel.SourceType.BINARY) {
+            return new CreateComponentDialogBinaryStep(model);
         } else {
             return WizardStep.FORCED_GOAL_ACHIEVED;
         }

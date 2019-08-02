@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.jboss.tools.intellij.openshift.Constants;
-
 import java.io.File;
 
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;

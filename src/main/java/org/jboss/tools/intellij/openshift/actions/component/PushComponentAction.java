@@ -34,6 +34,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
     CompletableFuture.runAsync(() -> {
       try {
         odo.push(projectNode.toString(), applicationNode.toString(), ((Component)componentNode.getUserObject()).getPath(), ((Component)componentNode.getUserObject()).getName());
+        componentNode.reload();
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Push", JOptionPane.ERROR_MESSAGE));
       }

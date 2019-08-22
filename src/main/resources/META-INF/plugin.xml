@@ -23,6 +23,9 @@
   <p>Fix error reported when getting applications list for a project<p>
   <p><b>0.0.5</b></p>
   <p>Add support for URL management<p>
+  <p><b>0.0.6</b></p>
+  <p>Add icon for the OpenShift window</p>
+  <p>Update download URLs to reflect the new Odo organization</p>
     ]]>
   </change-notes>
 

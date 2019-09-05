@@ -30,6 +30,8 @@ import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
@@ -87,7 +89,7 @@ public class OdoCli implements Odo {
   private String getOdoVersion(String tool, String command) {
     String version = "";
     try {
-      Pattern pattern = Pattern.compile(tool + " v(\\d+[\\.\\d+]*).*");
+      Pattern pattern = Pattern.compile(tool + " v(\\d+[\\.\\d+]*(-.*)?)\\s.*");
       String output = ExecHelper.execute(false, command, "version");
       try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
         version = reader.lines().
@@ -115,7 +117,7 @@ public class OdoCli implements Odo {
         final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
         final String cmd = path.toString();
         if (isDownloadAllowed()) {
-          command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading OdoCli", true) {
+          command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
             @Override
             public String compute(@NotNull ProgressIndicator progressIndicator) throws IOException {
               OkHttpClient client = new OkHttpClient();
@@ -139,18 +141,23 @@ public class OdoCli implements Odo {
   }
 
   public static boolean isDownloadAllowed() {
-    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || JOptionPane.showConfirmDialog(null, "OdoCli not found, do you want to download odo ?") == JOptionPane.OK_OPTION;
+    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION;
   }
 
   private void uncompress(Path dlFilePath, String cmd) throws IOException {
     try (InputStream input = new BufferedInputStream(Files.newInputStream(dlFilePath))) {
-      try (CompressorInputStream stream = new CompressorStreamFactory().createCompressorInputStream(input)) {
-        try (OutputStream output = new FileOutputStream(cmd)) {
-          IOUtils.copy(stream, output);
-        }
-        if (!new File(cmd).setExecutable(true)) {
-          throw new IOException("Can't set " + cmd + " as executable");
-        }
+      try (CompressorInputStream gzStream = new CompressorStreamFactory().createCompressorInputStream(input)) {
+          try (TarArchiveInputStream  tarStream = new TarArchiveInputStream(gzStream)) {
+            TarArchiveEntry entry = tarStream.getNextTarEntry();
+            if (entry != null) {
+              try (OutputStream output = new FileOutputStream(cmd)) {
+                IOUtils.copy(tarStream, output);
+              }
+              if (!new File(cmd).setExecutable(true)) {
+                throw new IOException("Can't set " + cmd + " as executable");
+              }
+            }
+          }
       }
     } catch (CompressorException e) {
       throw new IOException(e);

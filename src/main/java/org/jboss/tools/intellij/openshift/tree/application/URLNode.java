@@ -24,7 +24,7 @@ public class URLNode extends LazyMutableTreeNode implements IconTreeNode {
   @Override
   public String toString() {
     URL url = (URL) userObject;
-    return url.getName() + " (" + url.getPort() + ')';
+    return url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')';
   }
 
   @Override

@@ -25,6 +25,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
+import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -106,8 +107,17 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
     AnAction action = getAction();
     action.update(event);
     return event;
-
   }
+
+  private AnActionEvent setupActionOnURL(URL url) {
+    URLNode urlNode = mock(URLNode.class);
+    when(urlNode.getUserObject()).thenReturn(url);
+    AnActionEvent event = createEvent(urlNode);
+    AnAction action = getAction();
+    action.update(event);
+    return event;
+  }
+
   public void testActionOnPushedComponent() {
     AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.PUSHED, "."));
     verifyPushedComponent(event.getPresentation().isVisible());
@@ -156,16 +166,37 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
     verifyStorage(event.getPresentation().isVisible());
   }
 
-  protected void verifyURL(boolean visible) {
+  protected void verifyNotPushedURL(boolean visible) {
     assertFalse(visible);
   }
 
-  public void testActionOnURL() {
-    URLNode urlNode = mock(URLNode.class);
-    AnActionEvent event = createEvent(urlNode);
+  protected void verifyPushedURL(boolean visible) {
+    assertFalse(visible);
+  }
+
+  protected void verifyLocallyDeletedURL(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnNotPushedURL() {
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Not Pushed"));
     AnAction action = getAction();
     action.update(event);
-    verifyURL(event.getPresentation().isVisible());
+    verifyNotPushedURL(event.getPresentation().isVisible());
+  }
+
+  public void testActionOnPushedURL() {
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Pushed"));
+    AnAction action = getAction();
+    action.update(event);
+    verifyPushedURL(event.getPresentation().isVisible());
+  }
+
+  public void testActionOnLocallyDeleteURL() {
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Locally Deleted"));
+    AnAction action = getAction();
+    action.update(event);
+    verifyLocallyDeletedURL(event.getPresentation().isVisible());
   }
 
   protected void verifyStorage(boolean visible) {

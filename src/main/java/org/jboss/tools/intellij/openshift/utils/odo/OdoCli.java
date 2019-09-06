@@ -325,7 +325,7 @@ public class OdoCli implements Odo {
     List<URL> result = new ArrayList<>();
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
-      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").get("protocol").asText(), item.get("spec").get("host").asText(), item.get("spec").get("port").asText())));
+      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").get("protocol").asText(), item.get("spec").get("host").asText(), item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
     } catch (IOException e) {
     }
     return result;

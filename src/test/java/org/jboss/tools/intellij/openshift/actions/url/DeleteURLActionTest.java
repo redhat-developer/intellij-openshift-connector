@@ -21,7 +21,18 @@ public class DeleteURLActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyURL(boolean visible) {
+  protected void verifyPushedURL(boolean visible) {
     assertTrue(visible);
   }
+
+  @Override
+  protected void verifyNotPushedURL(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyLocallyDeletedURL(boolean visible) {
+    assertTrue(visible);
+  }
+
 }

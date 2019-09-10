@@ -23,12 +23,15 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.xmlgraphics.util.WriterOutputStream;
+import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoCli;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.terminal.AbstractTerminalRunner;
 import org.jetbrains.plugins.terminal.TerminalOptionsProvider;
 import org.jetbrains.plugins.terminal.TerminalView;
 
+import java.io.File;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +44,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 
 public class ExecHelper {
   private static final ScheduledExecutorService SERVICE = Executors.newSingleThreadScheduledExecutor();
@@ -200,7 +205,8 @@ public class ExecHelper {
 
   public static void executeWithTerminal(String... command) throws IOException {
       try {
-        Process p = new ProcessBuilder(command).start();
+        ProcessBuilder builder = new ProcessBuilder(command).directory(new File(HOME_FOLDER));
+        Process p = builder.start();
         boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
         if (needsRedirect || isPost2018_3) {

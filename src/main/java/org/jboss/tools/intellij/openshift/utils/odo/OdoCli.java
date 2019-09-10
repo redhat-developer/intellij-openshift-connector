@@ -19,10 +19,8 @@ import com.intellij.openapi.progress.Task;
 import com.twelvemonkeys.lang.Platform;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.client.ServiceCatalogClient;
@@ -36,6 +34,7 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
@@ -53,6 +52,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.SERVICE_TEMPLATE_NAME;
 
 public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
@@ -112,7 +114,7 @@ public class OdoCli implements Odo {
     String command = platform.getCmdFileName();
     String version = getOdoVersion("odo" , command);
     if (!areCompatible(version, odoTool.getVersion())) {
-      Path path = Paths.get(System.getProperty("user.home"), PLUGIN_FOLDER, "cache", odoTool.getVersion(), command);
+      Path path = Paths.get(HOME_FOLDER, PLUGIN_FOLDER, "cache", odoTool.getVersion(), command);
       if (!Files.exists(path)) {
         final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
         final String cmd = path.toString();
@@ -246,15 +248,32 @@ public class OdoCli implements Odo {
 
   }
 
+  /**
+   * ensure that $HOME/.odo/config.yaml file exists so thar we can use service related commands.
+   */
+  private void ensureDefaultOdoConfigFileExists() {
+    File dir = new File(HOME_FOLDER, PLUGIN_FOLDER);
+    File config = new File(dir, "config.yaml");
+    try {
+      if (!config.exists()) {
+        dir.mkdirs();
+        config.createNewFile();
+      }
+    } catch (IOException e) {
+    }
+  }
+
   @Override
   public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
-    ExecHelper.executeWithTerminal(command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
+    ensureDefaultOdoConfigFileExists();
+    ExecHelper.executeWithTerminal(command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project, "--context", HOME_FOLDER);
   }
+
 
   @Override
   public String getServiceTemplate(OpenShiftClient client, String project, String application, String service) {
     ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-    return sc.serviceInstances().inNamespace(project).withName(service).get().getMetadata().getLabels().get(KubernetesLabels.COMPONENT_TYPE_LABEL);
+    return sc.serviceInstances().inNamespace(project).withName(service).get().getMetadata().getLabels().get(SERVICE_TEMPLATE_NAME);
   }
 
   @Override
@@ -312,6 +331,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void describeServiceTemplate(String template) throws IOException {
+    ensureDefaultOdoConfigFileExists();
     ExecHelper.executeWithTerminal(command, "catalog", "describe", "service", template);
   }
 

@@ -14,11 +14,13 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 public final class KubernetesLabels {
-  public static final String APP_LABEL = "app.kubernetes.io/name";
+  public static final String APP_LABEL = "app.kubernetes.io/part-of";
 
   public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/component-name";
 
   public static final String COMPONENT_TYPE_LABEL = "app.kubernetes.io/component-type";
+
+  public static final String SERVICE_TEMPLATE_NAME = "app.kubernetes.io/name";
 
   public static final String STORAGE_NAME_LABEL = "app.kubernetes.io/storage-name";
 

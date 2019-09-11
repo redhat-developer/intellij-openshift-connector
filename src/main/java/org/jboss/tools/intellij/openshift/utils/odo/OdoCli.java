@@ -34,7 +34,7 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
-import org.jboss.tools.intellij.openshift.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
@@ -42,7 +42,14 @@ import org.jboss.tools.intellij.openshift.utils.ToolsConfig;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JOptionPane;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,6 +61,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
+import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.SERVICE_TEMPLATE_NAME;
 
 public class OdoCli implements Odo {
@@ -118,7 +126,7 @@ public class OdoCli implements Odo {
       if (!Files.exists(path)) {
         final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
         final String cmd = path.toString();
-        if (isDownloadAllowed()) {
+        if (isDownloadAllowed(version, odoTool.getVersion())) {
           command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
             @Override
             public String compute(@NotNull ProgressIndicator progressIndicator) throws IOException {
@@ -142,8 +150,8 @@ public class OdoCli implements Odo {
     return command;
   }
 
-  public static boolean isDownloadAllowed() {
-    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || JOptionPane.showConfirmDialog(null, "Odo not found, do you want to download odo ?") == JOptionPane.OK_OPTION;
+  public static boolean isDownloadAllowed(String currentVersion, String requiredVersion) {
+    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || JOptionPane.showConfirmDialog(null, StringUtils.isEmpty(currentVersion)?"Odo not found , do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ", do you want to download odo ?") == JOptionPane.OK_OPTION;
   }
 
   private void uncompress(Path dlFilePath, String cmd) throws IOException {
@@ -377,8 +385,18 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void deleteComponent(String project, String application, String context, String component) throws IOException {
+  public void undeployComponent(String project, String application, String context, String component) throws IOException {
     execute(command, "delete", "--project", project, "--app", application, "--context", context, component, "-f", "--all");
+  }
+
+  @Override
+  public void deleteComponent(String project, String application, String context, String component, boolean undeploy) throws IOException {
+    if (undeploy) {
+      undeployComponent(project, application, context, component);
+    }
+    if (context != null) {
+      new File(context, ODO_CONFIG_YAML).delete();
+    }
   }
 
   @Override
@@ -452,7 +470,7 @@ public class OdoCli implements Odo {
   public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
     return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
             .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
-                    map(pvc -> Storage.of(pvc.getMetadata().getName())).collect(Collectors.toList());
+                    map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());
 
   }
 

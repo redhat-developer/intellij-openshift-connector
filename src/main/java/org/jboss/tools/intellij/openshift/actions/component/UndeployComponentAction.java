@@ -25,8 +25,8 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class DeleteComponentAction extends OdoAction {
-  public DeleteComponentAction() {
+public class UndeployComponentAction extends OdoAction {
+  public UndeployComponentAction() {
     super(ComponentNode.class);
   }
 
@@ -34,7 +34,7 @@ public class DeleteComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() != ComponentState.NO_CONTEXT;
+      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
     }
     return visible;
   }
@@ -47,7 +47,7 @@ public class DeleteComponentAction extends OdoAction {
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName());
+        odo.undeployComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName());
         applicationNode.remove(componentNode);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete component", JOptionPane.ERROR_MESSAGE));

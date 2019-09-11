@@ -16,7 +16,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 public final class KubernetesLabels {
   public static final String APP_LABEL = "app.kubernetes.io/part-of";
 
-  public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/component-name";
+  public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/instance";
 
   public static final String COMPONENT_TYPE_LABEL = "app.kubernetes.io/component-type";
 

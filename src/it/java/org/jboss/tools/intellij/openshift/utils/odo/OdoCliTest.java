@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -65,7 +66,8 @@ public class OdoCliTest extends BaseTest {
 
     private void createComponent(String project, String application, String component) throws IOException, InterruptedException {
         createProject(project);
-        odo.createComponentLocal(project, application, "redhat-openjdk18-openshift", "1.4", component, new File(COMPONENT_PATH).getAbsolutePath());
+        FileUtils.deleteDirectory(new File(COMPONENT_PATH, ".odo"));
+        odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath());
     }
 
     private void createStorage(String project, String application, String component, String storage) throws IOException, InterruptedException {
@@ -133,7 +135,7 @@ public class OdoCliTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.deleteComponent(project, application, COMPONENT_PATH, component);
+            odo.deleteComponent(project, application, COMPONENT_PATH, component, false);
         } finally {
             try {
                 odo.deleteProject(project);
@@ -148,7 +150,7 @@ public class OdoCliTest extends BaseTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component);
-            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
         } finally {

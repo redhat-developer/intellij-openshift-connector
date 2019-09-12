@@ -190,7 +190,7 @@ public class OdoCliTest extends BaseTest {
         try {
             createComponent(project, application, component);
             odo.createService(project, application, "postgresql-persistent", "default", service);
-            odo.link(project, application, component, service, null);
+            odo.link(project, application, component, COMPONENT_PATH, service, null);
         } finally {
             try {
                 odo.deleteProject(project);

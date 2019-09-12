@@ -228,7 +228,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void push(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "push", context, component);
+    ExecHelper.executeWithTerminal(new File(context), command, "push");
   }
 
   @Override
@@ -242,8 +242,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void watch(String project, String application, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "watch", "--project", project, "--app", application, component);
+  public void watch(String project, String application, String context, String component) throws IOException {
+    ExecHelper.executeWithTerminal(new File(context), command, "watch");
   }
 
   @Override

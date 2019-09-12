@@ -66,8 +66,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void watch(String project, String application, String component) throws IOException {
-        delegate.watch(project, application, component);
+    public void watch(String project, String application, String context, String component) throws IOException {
+        delegate.watch(project, application, context, component);
     }
 
     @Override

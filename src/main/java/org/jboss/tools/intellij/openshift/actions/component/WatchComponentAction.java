@@ -15,6 +15,8 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
@@ -24,7 +26,20 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class WatchComponentAction extends ContextAwareComponentAction {
+public class WatchComponentAction extends OdoAction {
+  public WatchComponentAction() {
+    super(ComponentNode.class);
+  }
+  
+  @Override
+  public boolean isVisible(Object selected) {
+    boolean visible = super.isVisible(selected);
+    if (visible) {
+      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
+    }
+    return visible;
+  }
+
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
@@ -32,7 +47,7 @@ public class WatchComponentAction extends ContextAwareComponentAction {
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        odo.watch(projectNode.toString(), applicationNode.toString(), componentNode.toString());
+        odo.watch(projectNode.toString(), applicationNode.toString(), ((Component)componentNode.getUserObject()).getPath(), componentNode.toString());
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Push", JOptionPane.ERROR_MESSAGE));
       }

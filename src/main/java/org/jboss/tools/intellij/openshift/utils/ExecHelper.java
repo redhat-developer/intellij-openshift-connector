@@ -54,7 +54,7 @@ public class ExecHelper {
     SERVICE.schedule(runnable, delay, unit);
   }
 
-  public static String execute(boolean checkExitCode, String executable, String... arguments) throws IOException {
+  public static String execute(String executable, boolean checkExitCode, File workingDirectory, String... arguments) throws IOException {
     DefaultExecutor executor = new DefaultExecutor() {
       @Override
       public boolean isFailure(int exitValue) {
@@ -68,6 +68,7 @@ public class ExecHelper {
     StringWriter writer = new StringWriter();
     PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
     executor.setStreamHandler(handler);
+    executor.setWorkingDirectory(workingDirectory);
     CommandLine command = new CommandLine(executable).addArguments(arguments);
     try {
       executor.execute(command);
@@ -78,7 +79,15 @@ public class ExecHelper {
   }
 
   public static String execute(String executable, String... arguments) throws IOException {
-    return execute(true, executable, arguments);
+    return execute(executable, true, new File(HOME_FOLDER), arguments);
+  }
+
+  public static String execute(String executable, File workingDirectory, String... arguments) throws IOException {
+    return execute(executable, true, workingDirectory, arguments);
+  }
+
+  public static String execute(String executable, boolean checkExitCode, String... arguments) throws IOException {
+    return execute(executable, checkExitCode, new File(HOME_FOLDER), arguments);
   }
 
   private static class RedirectedStream extends FilterInputStream {
@@ -203,9 +212,9 @@ public class ExecHelper {
     }
   }
 
-  public static void executeWithTerminal(String... command) throws IOException {
+  public static void executeWithTerminal(File workingDirecty , String... command) throws IOException {
       try {
-        ProcessBuilder builder = new ProcessBuilder(command).directory(new File(HOME_FOLDER));
+        ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirecty);
         Process p = builder.start();
         boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
@@ -286,4 +295,9 @@ public class ExecHelper {
         throw new IOException(e);
       }
   }
-}
+
+  public static void executeWithTerminal(String... command) throws IOException {
+    executeWithTerminal(new File(HOME_FOLDER), command);
+  }
+
+  }

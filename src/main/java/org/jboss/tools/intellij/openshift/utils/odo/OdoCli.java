@@ -100,7 +100,7 @@ public class OdoCli implements Odo {
     String version = "";
     try {
       Pattern pattern = Pattern.compile(tool + " v(\\d+[\\.\\d+]*(-.*)?)\\s.*");
-      String output = ExecHelper.execute(false, command, "version");
+      String output = ExecHelper.execute(command, false, "version");
       try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
         version = reader.lines().
                 map(line -> pattern.matcher(line)).
@@ -194,8 +194,8 @@ public class OdoCli implements Odo {
     return client.projects().list().getItems();
   }
 
-  private static String execute(String command, String ...args) throws IOException {
-    String output = ExecHelper.execute(command, args);
+  private static String execute(File workingDirectory, String command, String ...args) throws IOException {
+    String output = ExecHelper.execute(command, workingDirectory, args);
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
       BinaryOperator<String> reducer = new BinaryOperator<String>() {
         private boolean notificationFound = false;
@@ -212,6 +212,10 @@ public class OdoCli implements Odo {
     }
   }
 
+  private static String execute(String command, String ...args) throws IOException {
+    return execute(new File(HOME_FOLDER), command, args);
+  }
+
   @Override
   public void describeApplication(String project, String application) throws IOException {
     ExecHelper.executeWithTerminal(command, "app", "describe", application, "--project", project);
@@ -224,13 +228,13 @@ public class OdoCli implements Odo {
 
   @Override
   public void push(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "push", "--context", context, component);
+    ExecHelper.executeWithTerminal(new File(context), command, "push", context, component);
   }
 
   @Override
   public void describeComponent(String project, String application, String context, String component) throws IOException {
     if (context != null) {
-      ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, "--context", context, component);
+      ExecHelper.executeWithTerminal(new File(context), command, "describe");
     } else {
       ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, component);
     }
@@ -244,15 +248,15 @@ public class OdoCli implements Odo {
 
   @Override
   public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
-    ExecHelper.executeWithTerminal(command, "create", componentType + ':' + componentVersion, component,
-      "--project", project, "--app", application, "--context", source);
+    ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+      "--project", project, "--app", application);
 
   }
 
   @Override
   public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
-    ExecHelper.executeWithTerminal(command, "create", componentType + ':' + componentVersion, component,
-      "--git", source, "--project", project, "--app", application, "--context", context);
+    ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+      "--git", source, "--project", project, "--app", application);
 
   }
 
@@ -274,7 +278,7 @@ public class OdoCli implements Odo {
   @Override
   public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
     ensureDefaultOdoConfigFileExists();
-    ExecHelper.executeWithTerminal(command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project, "--context", HOME_FOLDER);
+    ExecHelper.executeWithTerminal(new File(HOME_FOLDER), command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
   }
 
 
@@ -353,7 +357,7 @@ public class OdoCli implements Odo {
     List<URL> result = new ArrayList<>();
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
-      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").get("protocol").asText(), item.get("spec").get("host").asText(), item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
+      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol")?item.get("spec").get("protocol").asText():"", item.get("spec").has("host")?item.get("spec").get("host").asText():"", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
     } catch (IOException e) {
     }
     return result;
@@ -363,7 +367,7 @@ public class OdoCli implements Odo {
   public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
     String output;
     try {
-      output = execute(command, "url", "list", "--project", project, "--app", application, "--context", context, "--component", component, "-o", "json");
+      output = execute(new File(context), command, "url", "list", "-o", "json");
     } catch (IOException e) {
       output = "";
     }
@@ -373,20 +377,20 @@ public class OdoCli implements Odo {
   @Override
   public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
     if (name != null && !name.isEmpty()) {
-      ExecHelper.executeWithTerminal(command, "url", "create", name, "--project", project, "--app", application, "--context", context, "--component", component, "--port", port.toString());
+      ExecHelper.executeWithTerminal(new File(context), command, "url", "create", name, "--port", port.toString());
     } else {
-      ExecHelper.executeWithTerminal(command, "url", "create", "--project", project, "--app", application, "--context", context, "--component", component, "--port", port.toString());
+      ExecHelper.executeWithTerminal(new File(context), command, "url", "create", "--port", port.toString());
     }
   }
 
   @Override
   public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
-    execute(command, "url", "delete", "-f", name, "--project", project, "--app", application, "--context", context, "--component", component);
+    execute(new File(context), command, "url", "delete", "-f", name);
   }
 
   @Override
   public void undeployComponent(String project, String application, String context, String component) throws IOException {
-    execute(command, "delete", "--project", project, "--app", application, "--context", context, component, "-f", "--all");
+    execute(new File(context), command, "delete", "-f");
   }
 
   @Override
@@ -401,12 +405,12 @@ public class OdoCli implements Odo {
 
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, "--context", context, component, "-f");
+    ExecHelper.executeWithTerminal(new File(context), command, "log", "-f");
   }
 
   @Override
   public void log(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(command, "log", "--project", project, "--app", application, "--context", context, component);
+    ExecHelper.executeWithTerminal(new File(context), command, "log");
   }
 
 
@@ -491,20 +495,20 @@ public class OdoCli implements Odo {
 
   @Override
   public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
-    execute(command, "storage", "create", "--project", project, "--app", application, "--context", context, "--component", component, name, "--path", mountPath, "--size", storageSize);
+    execute(new File(context), command, "storage", "create", name, "--path", mountPath, "--size", storageSize);
   }
 
   @Override
   public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
-    execute(command, "storage", "delete", "--project", project, "--app", application, "--context", context, "--component", component, storage, "-f");
+    execute(new File(context), command, "storage", "delete", storage, "-f");
   }
 
   @Override
   public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
     if (port != null) {
-      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--context", context, "--port", port.toString(), "--wait");
+      execute(new File(context), command, "link", source, "--port", port.toString(), "--wait");
     } else {
-      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--context", context, "--wait");
+      execute(new File(context), command, "link", source, "--wait");
     }
   }
 }

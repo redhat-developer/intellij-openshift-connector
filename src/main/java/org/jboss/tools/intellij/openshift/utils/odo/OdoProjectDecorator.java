@@ -253,7 +253,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void link(String project, String application, String component, String source, Integer port) throws IOException {
-        delegate.link(project, application, component, source, port);
+    public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
+        delegate.link(project, application, component, context, source, port);
     }
 }

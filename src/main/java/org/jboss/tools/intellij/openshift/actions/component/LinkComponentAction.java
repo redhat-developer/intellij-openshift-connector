@@ -81,17 +81,18 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
+    Component sourceComponent = (Component) componentNode.getUserObject();
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
     CompletableFuture.runAsync(() -> {
       try {
-        String component = getSelectedTargetComponent(odo, client, projectNode.toString(), applicationNode.toString(), componentNode.toString());
-          if (component != null) {
-            Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), component);
+        String targetComponent = getSelectedTargetComponent(odo, client, projectNode.toString(), applicationNode.toString(), sourceComponent.getName());
+          if (targetComponent != null) {
+            Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), targetComponent);
             if (port != null) {
-              odo.link(projectNode.toString(), applicationNode.toString(), componentNode.toString(), component, port.intValue());
-              Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Component linked to " + component,
+              odo.link(projectNode.toString(), applicationNode.toString(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port.intValue());
+              Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
             } else {
               UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No ports to link to", "Link component", JOptionPane.WARNING_MESSAGE));

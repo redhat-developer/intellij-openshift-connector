@@ -500,11 +500,11 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void link(String project, String application, String component, String source, Integer port) throws IOException {
+  public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
     if (port != null) {
-      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--port", port.toString(), "--wait");
+      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--context", context, "--port", port.toString(), "--wait");
     } else {
-      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--wait");
+      execute(command, "link", source, "--project", project, "--app", application, "--component", component, "--context", context, "--wait");
     }
   }
 }

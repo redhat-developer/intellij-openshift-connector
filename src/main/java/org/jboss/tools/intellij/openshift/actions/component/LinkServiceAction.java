@@ -51,6 +51,7 @@ public class LinkServiceAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
+    Component component = (Component) componentNode.getUserObject();
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
@@ -66,7 +67,7 @@ public class LinkServiceAction extends OdoAction {
             service = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link service", "Select service", JOptionPane.QUESTION_MESSAGE, null, servicesArray, servicesArray[0]));
           }
           if (service != null) {
-            odo.link(projectNode.toString(), applicationNode.toString(), componentNode.toString(), service, null);
+            odo.link(projectNode.toString(), applicationNode.toString(), component.getName(), component.getPath(), service, null);
             Notifications.Bus.notify(new Notification("OpenShift", "Link service", "Component linked to " + service,
             NotificationType.INFORMATION));
           }

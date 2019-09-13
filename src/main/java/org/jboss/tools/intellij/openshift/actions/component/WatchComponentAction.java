@@ -15,6 +15,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -30,7 +31,7 @@ public class WatchComponentAction extends OdoAction {
   public WatchComponentAction() {
     super(ComponentNode.class);
   }
-  
+
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
@@ -45,7 +46,7 @@ public class WatchComponentAction extends OdoAction {
     ComponentNode componentNode = (ComponentNode) selected;
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    CompletableFuture.runAsync(() -> {
+    ExecHelper.submit(() -> {
       try {
         odo.watch(projectNode.toString(), applicationNode.toString(), ((Component)componentNode.getUserObject()).getPath(), componentNode.toString());
       } catch (IOException e) {

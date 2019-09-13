@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 
 import javax.swing.tree.TreePath;
 import java.io.File;
@@ -31,7 +32,7 @@ public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements Co
     public ClustersTreeModel() {
          try {
              config = ConfigHelper.loadKubeConfig();
-             CompletableFuture.runAsync(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
+             ExecHelper.submit(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
          } catch (IOException e) {
              e.printStackTrace();
          }

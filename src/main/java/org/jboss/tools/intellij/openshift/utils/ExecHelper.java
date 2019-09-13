@@ -48,10 +48,14 @@ import java.util.concurrent.TimeUnit;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 
 public class ExecHelper {
-  private static final ScheduledExecutorService SERVICE = Executors.newSingleThreadScheduledExecutor();
+  private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 
   public static void executeAfter(Runnable runnable, long delay, TimeUnit unit) {
     SERVICE.schedule(runnable, delay, unit);
+  }
+
+  public static void submit(Runnable runnable) {
+    SERVICE.submit(runnable);
   }
 
   public static String execute(String executable, boolean checkExitCode, File workingDirectory, String... arguments) throws IOException {

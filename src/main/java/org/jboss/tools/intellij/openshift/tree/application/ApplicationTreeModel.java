@@ -77,7 +77,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     private final Map<String, ComponentDescriptor> components = new HashMap();
 
     public ApplicationTreeModel(Project project) {
-        CompletableFuture.runAsync(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
+        ExecHelper.submit(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
         ROOT = new ApplicationsRootNode(this);
         ROOT.addChangeListener(this);
         this.project = project;

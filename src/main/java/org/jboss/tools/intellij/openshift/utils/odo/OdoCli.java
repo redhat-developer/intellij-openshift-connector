@@ -367,7 +367,13 @@ public class OdoCli implements Odo {
   public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
     String output;
     try {
-      output = execute(new File(context), command, "url", "list", "-o", "json");
+      if (context != null) {
+        output = execute(new File(context), command, "url", "list", "-o", "json");
+      } else {
+        ensureDefaultOdoConfigFileExists();
+        output = execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
+      }
+
     } catch (IOException e) {
       output = "";
     }

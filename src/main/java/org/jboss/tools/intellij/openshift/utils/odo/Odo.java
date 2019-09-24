@@ -16,9 +16,14 @@ import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public interface Odo {
     List<Project> getProjects(OpenShiftClient client);
+
+    List<Project> getPreOdo10Projects(OpenShiftClient client);
+
+    List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects, BiConsumer<String, String> reporter);
 
     void describeApplication(String project, String application) throws IOException;
 
@@ -89,4 +94,5 @@ public interface Odo {
     void deleteStorage(String project, String application, String context, String component, String storage) throws IOException;
 
     void link(String project, String application, String component, String context, String source, Integer port) throws IOException;
+
 }

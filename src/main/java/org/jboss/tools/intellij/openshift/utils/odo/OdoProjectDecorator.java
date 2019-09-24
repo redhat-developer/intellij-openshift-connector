@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
@@ -17,6 +18,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class OdoProjectDecorator implements Odo {
     private final Odo delegate;
@@ -255,5 +257,15 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
         delegate.link(project, application, component, context, source, port);
+    }
+
+    @Override
+    public List<Project> getPreOdo10Projects(OpenShiftClient client) {
+        return delegate.getPreOdo10Projects(client);
+    }
+
+    @Override
+    public List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects, BiConsumer<String, String> reporter) {
+        return delegate.migrateProjects(client, projects, reporter);
     }
 }

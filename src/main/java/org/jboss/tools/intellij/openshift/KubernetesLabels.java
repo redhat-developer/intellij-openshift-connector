@@ -18,9 +18,22 @@ public final class KubernetesLabels {
 
   public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/instance";
 
+  /**
+   * Labels used for components prior to odo 1.0
+   */
+  public static final String COMPONENT_NAME_LABEL_PRE10 = "app.kubernetes.io/component-name";
+
   public static final String COMPONENT_TYPE_LABEL = "app.kubernetes.io/component-type";
 
-  public static final String SERVICE_TEMPLATE_NAME = "app.kubernetes.io/name";
+  public static final String COMPONENT_VERSION_LABEL = "app.kubernetes.io/component-version";
+
+  public static final String RUNTIME_VERSION_LABEL = "app.openshift.io/runtime-version";
+
+  public static final String NAME_LABEL = "app.kubernetes.io/name";
+
+  public static final String URL_NAME_LABEL = "app.kubernetes.io/url-name";
+
+  public static final String ODO_URL_NAME = "odo.openshift.io/url-name";
 
   public static final String STORAGE_NAME_LABEL = "app.kubernetes.io/storage-name";
 

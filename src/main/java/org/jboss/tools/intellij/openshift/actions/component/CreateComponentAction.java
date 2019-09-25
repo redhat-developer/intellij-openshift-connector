@@ -27,6 +27,8 @@ import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -75,8 +77,11 @@ public class CreateComponentAction extends OdoAction {
   private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
     if (model.getSourceType() == CreateComponentModel.SourceType.LOCAL) {
       odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext());
-    } else {
+    } else if (model.getSourceType() == CreateComponentModel.SourceType.GIT) {
       odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL());
+    } else if (model.getSourceType() == CreateComponentModel.SourceType.BINARY) {
+      Path binary = Paths.get(model.getContext()).relativize(Paths.get(model.getBinaryFilePath()));
+      odo.createComponentBinary(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), binary.toString());
     }
   }
 

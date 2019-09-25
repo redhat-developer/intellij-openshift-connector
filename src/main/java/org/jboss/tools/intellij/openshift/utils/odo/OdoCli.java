@@ -303,6 +303,13 @@ public class OdoCli implements Odo {
 
   }
 
+  @Override
+  public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
+    ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+            "--binary", source, "--project", project, "--app", application);
+
+  }
+
   /**
    * ensure that $HOME/.odo/config.yaml file exists so thar we can use service related commands.
    */

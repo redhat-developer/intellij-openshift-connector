@@ -84,6 +84,11 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
+    public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
+        delegate.createComponentBinary(project, application, context, componentType, componentVersion, component, source);
+    }
+
+    @Override
     public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
         delegate.createService(project, application, serviceTemplate, servicePlan, service);
     }

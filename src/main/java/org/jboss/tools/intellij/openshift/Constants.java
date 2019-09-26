@@ -2,6 +2,8 @@ package org.jboss.tools.intellij.openshift;
 
 public class Constants {
     public static final String ODO_CONFIG_YAML = ".odo/config.yaml";
+
+    public static final String GROUP_DISPLAY_ID = "OpenShift";
     public static String HOME_FOLDER = System.getProperty("user.home");
 
     public static final String MIGRATION_TITLE = "Cluster migration";

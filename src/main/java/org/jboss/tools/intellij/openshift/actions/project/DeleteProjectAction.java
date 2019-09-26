@@ -10,7 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.project;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
@@ -22,6 +26,8 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
+
 public class DeleteProjectAction extends OdoAction {
   public DeleteProjectAction() {
     super(ProjectNode.class);
@@ -32,7 +38,11 @@ public class DeleteProjectAction extends OdoAction {
     ProjectNode projectNode = (ProjectNode) selected;
       CompletableFuture.runAsync(() -> {
         try {
+          Notification notif = new Notification(GROUP_DISPLAY_ID, "Delete project", "Deleting project " + selected.toString(), NotificationType.INFORMATION);
+          Notifications.Bus.notify(notif);
           odo.deleteProject(selected.toString());
+          notif.expire();
+          Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Delete project", "Project " + selected + " has been successfully deleted", NotificationType.INFORMATION));
           ((LazyMutableTreeNode)projectNode.getParent()).remove(projectNode);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete project", JOptionPane.ERROR_MESSAGE));

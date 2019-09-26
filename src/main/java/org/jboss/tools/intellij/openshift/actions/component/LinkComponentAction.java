@@ -15,6 +15,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
@@ -34,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class LinkComponentAction extends OdoAction {
+
   public LinkComponentAction() {
     super(ComponentNode.class);
   }
@@ -92,7 +94,7 @@ public class LinkComponentAction extends OdoAction {
             Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), targetComponent);
             if (port != null) {
               odo.link(projectNode.toString(), applicationNode.toString(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port.intValue());
-              Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Component linked to " + targetComponent,
+              Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
             } else {
               UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No ports to link to", "Link component", JOptionPane.WARNING_MESSAGE));

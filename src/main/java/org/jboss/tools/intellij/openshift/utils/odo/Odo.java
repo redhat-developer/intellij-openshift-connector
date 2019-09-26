@@ -35,11 +35,11 @@ public interface Odo {
 
     void watch(String project, String application, String context, String component) throws IOException;
 
-    void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException;
+    void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
-    void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException;
+    void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException;
 
-    void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException;
+    void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
     void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException;
 
@@ -56,6 +56,8 @@ public interface Odo {
     List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component);
 
     List<URL> listURLs(String project, String application, String context, String component) throws IOException;
+
+    ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component) throws IOException;
 
     void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException;
 

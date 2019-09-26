@@ -10,22 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.component;
 
-import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Arrays;
 
@@ -57,7 +54,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         });
         sourceTypeComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                model.setSourceType((CreateComponentModel.SourceType) sourceTypeComboBox.getSelectedItem());
+                model.setSourceType((ComponentSourceType) sourceTypeComboBox.getSelectedItem());
                 updateState();
             }
         });
@@ -129,9 +126,9 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private void updateState() {
         WizardNavigationState state = model.getCurrentNavigationState();
         state.FINISH.setEnabled(model.isValid());
-        if (model.getSourceType() != CreateComponentModel.SourceType.LOCAL && model.getName().length() > 0 && model.getContext().length() > 0 && model.getApplication().length() > 0) {
+        if (model.getSourceType() != ComponentSourceType.LOCAL && model.getName().length() > 0 && model.getContext().length() > 0 && model.getApplication().length() > 0) {
             state.NEXT.setEnabled(true);
-            if (model.getSourceType() == CreateComponentModel.SourceType.LOCAL) {
+            if (model.getSourceType() == ComponentSourceType.LOCAL) {
                 state.FINISH.setEnabled(true);
             }
         } else {
@@ -141,14 +138,23 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
     private void loadModel() {
         nameTextField.setText(model.getName());
-        sourceTypeComboBox.setModel(new DefaultComboBoxModel(CreateComponentModel.SourceType.values()));
+        sourceTypeComboBox.setModel(new DefaultComboBoxModel(ComponentSourceType.values()));
         sourceTypeComboBox.setSelectedItem(model.getSourceType());
         contextTextField.setText(model.getContext());
+        applicationTextField.setText(model.getApplication());
         componentTypeComboBox.setModel(new DefaultComboBoxModel(model.getComponentTypes()));
         componentTypeComboBox.setSelectedItem(null);
         componentTypeComboBox.setSelectedItem(Arrays.stream(model.getComponentTypes()).filter(t -> t.getName().equals(model.getComponentTypeName())).findFirst().orElse(model.getComponentTypes()[0]));
-        applicationTextField.setText(model.getApplication());
+        componentVersionComboBox.setSelectedItem(null);
+        componentVersionComboBox.setSelectedItem(model.getComponentTypeVersion());
         pushAfterCreateCheckBox.setSelected(model.isPushAfterCreate());
+        if (model.isImportMode()) {
+            nameTextField.setEnabled(false);
+            sourceTypeComboBox.setEnabled(false);
+            applicationTextField.setEnabled(false);
+            componentTypeComboBox.setEnabled(false);
+            componentVersionComboBox.setEnabled(false);
+        }
     }
 
     @Override
@@ -162,9 +168,9 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
     @Override
     public WizardStep onNext(CreateComponentModel model) {
-        if (model.getSourceType() == CreateComponentModel.SourceType.GIT) {
+        if (model.getSourceType() == ComponentSourceType.GIT) {
             return new CreateComponentDialogGitStep(model);
-        } else if (model.getSourceType() == CreateComponentModel.SourceType.BINARY) {
+        } else if (model.getSourceType() == ComponentSourceType.BINARY) {
             return new CreateComponentDialogBinaryStep(model);
         } else {
             return WizardStep.FORCED_GOAL_ACHIEVED;

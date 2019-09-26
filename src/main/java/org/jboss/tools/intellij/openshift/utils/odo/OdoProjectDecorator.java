@@ -73,19 +73,19 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
-        delegate.createComponentLocal(project, application, componentType, componentVersion, component, source);
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
+        delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, push);
 
     }
 
     @Override
-    public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
-        delegate.createComponentGit(project, application, context, componentType, componentVersion, component, source);
+    public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
+        delegate.createComponentGit(project, application, context, componentType, componentVersion, component, source, reference, push);
     }
 
     @Override
-    public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
-        delegate.createComponentBinary(project, application, context, componentType, componentVersion, component, source);
+    public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
+        delegate.createComponentBinary(project, application, context, componentType, componentVersion, component, source, push);
     }
 
     @Override
@@ -135,6 +135,11 @@ public class OdoProjectDecorator implements Odo {
             });
         }
         return urls;
+    }
+
+    @Override
+    public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component) throws IOException {
+        return delegate.getComponentInfo(client, project, application, component);
     }
 
     @Override

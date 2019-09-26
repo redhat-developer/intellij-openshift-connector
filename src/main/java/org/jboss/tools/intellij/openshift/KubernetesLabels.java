@@ -27,6 +27,8 @@ public final class KubernetesLabels {
 
   public static final String COMPONENT_VERSION_LABEL = "app.kubernetes.io/component-version";
 
+  public static final String RUNTIME_NAME_LABEL = "app.kubernetes.io/name";
+
   public static final String RUNTIME_VERSION_LABEL = "app.openshift.io/runtime-version";
 
   public static final String NAME_LABEL = "app.kubernetes.io/name";
@@ -36,6 +38,13 @@ public final class KubernetesLabels {
   public static final String ODO_URL_NAME = "odo.openshift.io/url-name";
 
   public static final String STORAGE_NAME_LABEL = "app.kubernetes.io/storage-name";
+
+  /*
+   * Annotations
+   */
+  public static final String COMPONENT_SOURCE_TYPE_ANNOTATION = "app.kubernetes.io/component-source-type";
+
+  public static final String VCS_URI_ANNOTATION = "app.openshift.io/vcs-uri";
 
   public static String getComponentName(HasMetadata resource) {
     ObjectMeta metadata = resource.getMetadata();

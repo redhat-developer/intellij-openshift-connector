@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
+import com.intellij.openapi.util.io.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -36,7 +38,7 @@ public class ConfigWatcher implements Runnable {
             while ((key = service.take()) != null) {
                 for (WatchEvent<?> event : key.pollEvents()) {
                     Path path = (Path) event.context();
-                    if (path.getFileName().toString().equals("config")) {
+                    if (FileUtil.filesEqual(path.getFileName().toAbsolutePath().toFile(), config)) {
                         listener.onUpdate(this);
                     }
                 }

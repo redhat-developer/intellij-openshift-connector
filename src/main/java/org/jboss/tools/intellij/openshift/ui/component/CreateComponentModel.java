@@ -13,31 +13,17 @@ package org.jboss.tools.intellij.openshift.ui.component;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class CreateComponentModel extends WizardModel {
-    public enum SourceType {
-        LOCAL("Local"),
-        GIT("Git"),
-        BINARY("Binary");
-
-        private final String label;
-
-        SourceType(String label) {
-            this.label = label;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-    };
+    ;
     private Project project;
     private String name = "";
-    private SourceType sourceType = SourceType.LOCAL;
+    private ComponentSourceType sourceType = ComponentSourceType.LOCAL;
     private String context = "";
     private ComponentType[] componentTypes;
     private String componentTypeName;
@@ -49,6 +35,8 @@ public class CreateComponentModel extends WizardModel {
     private String gitReference;
 
     private String binaryFilePath;
+
+    private boolean importMode;
 
     public CreateComponentModel(String title) {
         super(title);
@@ -71,11 +59,11 @@ public class CreateComponentModel extends WizardModel {
         this.name = name;
     }
 
-    public SourceType getSourceType() {
+    public ComponentSourceType getSourceType() {
         return sourceType;
     }
 
-    public void setSourceType(SourceType sourceType) {
+    public void setSourceType(ComponentSourceType sourceType) {
         this.sourceType = sourceType;
     }
 
@@ -151,6 +139,14 @@ public class CreateComponentModel extends WizardModel {
         this.binaryFilePath = binaryFilePath;
     }
 
+    public boolean isImportMode() {
+        return importMode;
+    }
+
+    public void setImportMode(boolean importMode) {
+        this.importMode = importMode;
+    }
+
     protected boolean isValidURL(String url) {
         try {
             new URL(url);
@@ -163,8 +159,8 @@ public class CreateComponentModel extends WizardModel {
     public boolean isValid() {
         return StringUtils.isNotBlank(getName()) && StringUtils.isNotBlank(getApplication()) &&
                 StringUtils.isNotBlank(getContext()) &&
-                (getSourceType() == SourceType.LOCAL ||
-                        (getSourceType() == SourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
-                        (getSourceType() == SourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));
+                (getSourceType() == ComponentSourceType.LOCAL ||
+                        (getSourceType() == ComponentSourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
+                        (getSourceType() == ComponentSourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));
     }
 }

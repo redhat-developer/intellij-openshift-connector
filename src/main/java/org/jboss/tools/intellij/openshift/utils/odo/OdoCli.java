@@ -105,7 +105,13 @@ import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
 public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
@@ -290,24 +296,46 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source) throws IOException {
-    ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
-      "--project", project, "--app", application);
-
+  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
+    if (push) {
+      ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+              "--project", project, "--app", application, "--now");
+    } else {
+      ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+              "--project", project, "--app", application);
+    }
   }
 
   @Override
-  public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-      "--git", source, "--project", project, "--app", application);
-
+  public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
+    if (StringUtils.isNotBlank(reference)) {
+      if (push) {
+        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
+      } else {
+        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                "--git", source, "--ref", reference, "--project", project, "--app", application);
+      }
+    } else {
+      if (push) {
+        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                "--git", source, "--project", project, "--app", application, "--now");
+      } else {
+        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                "--git", source, "--project", project, "--app", application);
+      }
+    }
   }
 
   @Override
-  public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-            "--binary", source, "--project", project, "--app", application);
-
+  public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
+    if (push) {
+      ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+              "--binary", source, "--project", project, "--app", application, "--now");
+    } else {
+      ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+              "--binary", source, "--project", project, "--app", application);
+    }
   }
 
   /**
@@ -428,6 +456,26 @@ public class OdoCli implements Odo {
       output = "";
     }
     return parseURLs(output);
+  }
+
+  @Override
+  public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component) throws IOException {
+    List<DeploymentConfig> DCs = client.deploymentConfigs().inNamespace(project).withLabel(COMPONENT_NAME_LABEL, component).withLabel(APP_LABEL, application).list().getItems();
+    if (DCs.size() == 1) {
+      DeploymentConfig deploymentConfig = DCs.get(0);
+      ComponentSourceType sourceType = ComponentSourceType.fromAnnotation(deploymentConfig.getMetadata().getAnnotations().get(COMPONENT_SOURCE_TYPE_ANNOTATION));
+      ComponentInfo.Builder builder = new ComponentInfo.Builder().withSourceType(sourceType).withComponentTypeName(deploymentConfig.getMetadata().getLabels().get(RUNTIME_NAME_LABEL)).withComponentTypeVersion(deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL));
+      if (sourceType == ComponentSourceType.LOCAL) {
+        return builder.build();
+      } else if (sourceType == ComponentSourceType.BINARY) {
+        return builder.withBinaryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).build();
+      } else {
+        BuildConfig buildConfig = client.buildConfigs().inNamespace(project).withName(deploymentConfig.getMetadata().getName()).get();
+        return builder.withRepositoryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).withRepositoryReference(buildConfig.getSpec().getSource().getGit().getRef()).build();
+      }
+    } else {
+      throw new IOException("Invalid number of deployment configs (" + DCs.size() + "), should be 1");
+    }
   }
 
   @Override

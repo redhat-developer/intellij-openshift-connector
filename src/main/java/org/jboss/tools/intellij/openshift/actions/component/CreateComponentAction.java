@@ -20,9 +20,11 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
@@ -36,6 +38,10 @@ import java.util.concurrent.CompletableFuture;
 public class CreateComponentAction extends OdoAction {
   public CreateComponentAction() {
     super(ApplicationNode.class, ProjectNode.class);
+  }
+
+  protected CreateComponentAction(Class... clazz) {
+    super(clazz);
   }
 
   @Override
@@ -53,48 +59,54 @@ public class CreateComponentAction extends OdoAction {
     Project project = rootModel.getProject();
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentModel model = UIHelper.executeInUI(() -> {
-          try {
-            return showDialog(project, application, odo.getComponentTypes());
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-        });
-        if (model != null) {
-          createComponent(odo, projectName, application.orElse(model.getApplication()), model);
-          rootModel.addContext(model.getContext());
-          ((LazyMutableTreeNode)selected).reload();
-          if (model.isPushAfterCreate()) {
-              odo.push(projectName, application.orElse(model.getApplication()), model.getContext(), model.getName());
-          }
-        }
+        CreateComponentModel model = getModel(project, application, odo.getComponentTypes());
+        process((LazyMutableTreeNode) selected, odo, projectName, application, rootModel, model);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create component", JOptionPane.ERROR_MESSAGE));
       }
     });
   }
 
-  private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
-    if (model.getSourceType() == CreateComponentModel.SourceType.LOCAL) {
-      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext());
-    } else if (model.getSourceType() == CreateComponentModel.SourceType.GIT) {
-      odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL());
-    } else if (model.getSourceType() == CreateComponentModel.SourceType.BINARY) {
-      Path binary = Paths.get(model.getContext()).relativize(Paths.get(model.getBinaryFilePath()));
-      odo.createComponentBinary(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), binary.toString());
+  protected void process(LazyMutableTreeNode selected, Odo odo, String projectName, Optional<String> application, ApplicationTreeModel rootModel, CreateComponentModel model) throws IOException {
+    boolean doit = UIHelper.executeInUI(() -> {
+        return showDialog(model);
+    });
+    if (doit) {
+      createComponent(odo, projectName, application.orElse(model.getApplication()), model);
+      rootModel.addContext(model.getContext());
+      selected.reload();
     }
   }
 
-  protected CreateComponentModel showDialog(Project project, Optional<String> application, List<ComponentType> types) {
+  private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
+    if (model.getSourceType() == ComponentSourceType.LOCAL) {
+      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isPushAfterCreate());
+    } else if (model.getSourceType() == ComponentSourceType.GIT) {
+      odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL(), model.getGitReference(), model.isPushAfterCreate());
+    } else if (model.getSourceType() == ComponentSourceType.BINARY) {
+      Path binary = Paths.get(model.getBinaryFilePath());
+      if (binary.isAbsolute()) {
+       binary = Paths.get(model.getContext()).relativize(binary);
+      }
+      odo.createComponentBinary(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), binary.toString(), model.isPushAfterCreate());
+    }
+  }
+
+  protected boolean showDialog(CreateComponentModel model) {
+    CreateComponentDialog dialog = new CreateComponentDialog(model.getProject(), true, model);
+    dialog.show();
+    return dialog.isOK();
+  }
+
+  @NotNull
+  protected CreateComponentModel getModel(Project project, Optional<String> application, List<ComponentType> types) {
     CreateComponentModel model =  new CreateComponentModel("Create component");
     model.setProject(project);
     model.setComponentTypes(types.toArray(new ComponentType[types.size()]));
     if (application.isPresent()) {
       model.setApplication(application.get());
     }
-    CreateComponentDialog dialog1 = new CreateComponentDialog(project, true, model);
-    dialog1.show();
-    return dialog1.isOK()?model:null;
+    return model;
   }
 
 }

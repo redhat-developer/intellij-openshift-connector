@@ -192,13 +192,13 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     public void onUpdate(ConfigWatcher source) {
         try {
             if (ConfigHelper.isKubeConfigParsable()) {
-                ExecHelper.executeAfter(this::refresh, 1, TimeUnit.SECONDS);
+                refresh();
             }
         } catch (Exception e) {}
     }
 
     @Override
-    public void refresh() {
+    public synchronized  void refresh() {
         TreePath path = new TreePath(ROOT);
         try {
             ROOT = new ApplicationsRootNode(this);

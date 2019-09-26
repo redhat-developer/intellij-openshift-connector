@@ -67,7 +67,7 @@ public class OdoCliTest extends BaseTest {
     private void createComponent(String project, String application, String component) throws IOException, InterruptedException {
         createProject(project);
         FileUtils.deleteDirectory(new File(COMPONENT_PATH, ".odo"));
-        odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath());
+        odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath(), false);
     }
 
     private void createStorage(String project, String application, String component, String storage) throws IOException, InterruptedException {

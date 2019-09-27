@@ -30,14 +30,13 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.getWarningIcon;
 import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
-import static org.jboss.tools.intellij.openshift.Constants.MIGRATION_ERROR_MESSAGE;
-import static org.jboss.tools.intellij.openshift.Constants.MIGRATION_MESSAGE;
-import static org.jboss.tools.intellij.openshift.Constants.MIGRATION_TITLE;
+import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_ERROR_MESSAGE;
+import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_MESSAGE;
+import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_TITLE;
 import static org.jboss.tools.intellij.openshift.Constants.UPDATE_LABEL;
 
 public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTreeNode {
@@ -95,11 +94,11 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
 
   private void checkMigrate(Odo odo, List<Project> preOdo10Projects) {
     if (!preOdo10Projects.isEmpty()) {
-      int choice = Messages.showDialog(getModel().getProject(), MIGRATION_MESSAGE, MIGRATION_TITLE, new String[]{UPDATE_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon());
+      int choice = Messages.showDialog(getModel().getProject(), CLUSTER_MIGRATION_MESSAGE, CLUSTER_MIGRATION_TITLE, new String[]{UPDATE_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon());
       if (choice == 0) {
         try {
           List<Exception> exceptions = ProgressManager.getInstance().run(
-                  new Task.WithResult<List<Exception>, Exception>(getModel().getProject(), MIGRATION_TITLE, false) {
+                  new Task.WithResult<List<Exception>, Exception>(getModel().getProject(), CLUSTER_MIGRATION_TITLE, false) {
                     private int counter = 0;
 
                     @Override
@@ -113,12 +112,12 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
 
           );
           if (!exceptions.isEmpty()) {
-            Messages.showErrorDialog(getModel().getProject(), MIGRATION_ERROR_MESSAGE, MIGRATION_TITLE);
+            Messages.showErrorDialog(getModel().getProject(), CLUSTER_MIGRATION_ERROR_MESSAGE, CLUSTER_MIGRATION_TITLE);
           }
         } catch (Exception e) {
         }
       } else if (choice == 1) {
-        BrowserUtil.browse("https://github.com/redhat-developer/intellij-openshift-connect/wiki/Migration-to-v0.1.0");
+        BrowserUtil.browse(Constants.MIGRATION_HELP_PAGE_URL);
       }
     }
   }

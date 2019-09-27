@@ -39,6 +39,8 @@ public final class KubernetesLabels {
 
   public static final String STORAGE_NAME_LABEL = "app.kubernetes.io/storage-name";
 
+  public static final String ODO_MIGRATED_LABEL = "odo.openshift.io/migrated";
+
   /*
    * Annotations
    */
@@ -50,7 +52,7 @@ public final class KubernetesLabels {
     ObjectMeta metadata = resource.getMetadata();
     if (metadata.getLabels() != null) {
       return metadata.getLabels().computeIfAbsent(COMPONENT_NAME_LABEL,
-        key -> metadata.getName());
+              key -> metadata.getName());
     } else {
       return metadata.getName();
     }

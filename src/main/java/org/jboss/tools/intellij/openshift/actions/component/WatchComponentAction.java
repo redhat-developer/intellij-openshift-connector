@@ -27,11 +27,7 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class WatchComponentAction extends OdoAction {
-  public WatchComponentAction() {
-    super(ComponentNode.class);
-  }
-
+public class WatchComponentAction extends PushComponentAction {
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
@@ -42,16 +38,12 @@ public class WatchComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    ExecHelper.submit(() -> {
-      try {
-        odo.watch(projectNode.toString(), applicationNode.toString(), ((Component)componentNode.getUserObject()).getPath(), componentNode.toString());
-      } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Push", JOptionPane.ERROR_MESSAGE));
-      }
-    });
+  protected String getActionName() {
+    return "Watch";
+  }
+
+  @Override
+  protected void process(Odo odo, String project, String application, Component component) throws IOException {
+    odo.watch(project, application, component.getPath(), component.getName());
   }
 }

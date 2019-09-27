@@ -109,6 +109,7 @@ import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
@@ -464,7 +465,7 @@ public class OdoCli implements Odo {
     if (DCs.size() == 1) {
       DeploymentConfig deploymentConfig = DCs.get(0);
       ComponentSourceType sourceType = ComponentSourceType.fromAnnotation(deploymentConfig.getMetadata().getAnnotations().get(COMPONENT_SOURCE_TYPE_ANNOTATION));
-      ComponentInfo.Builder builder = new ComponentInfo.Builder().withSourceType(sourceType).withComponentTypeName(deploymentConfig.getMetadata().getLabels().get(RUNTIME_NAME_LABEL)).withComponentTypeVersion(deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL));
+      ComponentInfo.Builder builder = new ComponentInfo.Builder().withSourceType(sourceType).withComponentTypeName(deploymentConfig.getMetadata().getLabels().get(RUNTIME_NAME_LABEL)).withComponentTypeVersion(deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL)).withMigrated(deploymentConfig.getMetadata().getLabels().containsKey(ODO_MIGRATED_LABEL));
       if (sourceType == ComponentSourceType.LOCAL) {
         return builder.build();
       } else if (sourceType == ComponentSourceType.BINARY) {
@@ -677,6 +678,7 @@ public class OdoCli implements Odo {
     if (name != null) {
       labels.put(KubernetesLabels.ODO_URL_NAME, name);
     }
+    labels.put(ODO_MIGRATED_LABEL, "true");
     labels.remove(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10);
   }
 
@@ -805,7 +807,7 @@ public class OdoCli implements Odo {
         }
       }
     } catch (Exception e) {
-      exceptions.add(e);
+      //TODO: exception is skipped because of non catalog aware cluster, need to find a way to better deal with that
     }
   }
 

@@ -7,6 +7,7 @@ public interface ComponentInfo {
     String getRepositoryURL();
     String getRepositoryReference();
     String getBinaryURL();
+    boolean isMigrated();
 
     public class Builder {
         private ComponentSourceType sourceType;
@@ -15,6 +16,7 @@ public interface ComponentInfo {
         private String repositoryURL;
         private String repositoryReference;
         private String binaryURL;
+        private boolean migrated;
 
         public Builder withSourceType(ComponentSourceType sourceType) {
             this.sourceType = sourceType;
@@ -43,6 +45,11 @@ public interface ComponentInfo {
 
         public Builder withBinaryURL(String binaryURL) {
             this.binaryURL = binaryURL;
+            return this;
+        }
+
+        public Builder withMigrated(boolean migrated) {
+            this.migrated = migrated;
             return this;
         }
 
@@ -76,6 +83,11 @@ public interface ComponentInfo {
                 @Override
                 public String getBinaryURL() {
                     return binaryURL;
+                }
+
+                @Override
+                public boolean isMigrated() {
+                    return migrated;
                 }
             };
         }

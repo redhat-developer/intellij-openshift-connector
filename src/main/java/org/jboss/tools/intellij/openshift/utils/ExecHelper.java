@@ -162,12 +162,10 @@ public class ExecHelper {
   private static class RedirectedProcess extends Process {
     private final Process delegate;
     private final InputStream inputStream;
-    private final InputStream errorStream;
 
     private RedirectedProcess(Process delegate, boolean redirect, boolean delay) {
       this.delegate = delegate;
       inputStream = new RedirectedStream(delegate.getInputStream(), redirect, delay) {};
-      errorStream = new RedirectedStream(delegate.getErrorStream(), redirect, delay) {};
     }
 
     @Override
@@ -182,7 +180,7 @@ public class ExecHelper {
 
     @Override
     public InputStream getErrorStream() {
-      return errorStream;
+      return delegate.getErrorStream();
     }
 
     @Override
@@ -218,7 +216,7 @@ public class ExecHelper {
 
   public static void executeWithTerminal(File workingDirecty , String... command) throws IOException {
       try {
-        ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirecty);
+        ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirecty).redirectErrorStream(true);
         Process p = builder.start();
         boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;

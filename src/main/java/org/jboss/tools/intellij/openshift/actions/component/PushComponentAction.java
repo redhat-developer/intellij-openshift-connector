@@ -22,6 +22,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
@@ -70,17 +71,19 @@ public class PushComponentAction extends ContextAwareComponentAction {
   }
 
   private boolean checkMigrated(Odo odo, OpenShiftClient client, String project, String application, Component component) throws IOException {
-    ComponentInfo info = odo.getComponentInfo(client, project, application, component.getName());
     boolean ok = true;
-    if (info.isMigrated()) {
-      int choice = UIHelper.executeInUI(() -> Messages.showDialog(COMPONENT_MIGRATION_MESSAGE, COMPONENT_MIGRATION_TITLE, new String[]{UNDEPLOY_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon()));
-      if (choice == 0) {
-        odo.undeployComponent(project, application, component.getPath(), component.getName());
-      } else if (choice == 1) {
-        BrowserUtil.browse(Constants.MIGRATION_HELP_PAGE_URL);
-        ok = false;
-      } else {
-        ok = false;
+    if (component.getState() == ComponentState.PUSHED) {
+      ComponentInfo info = odo.getComponentInfo(client, project, application, component.getName());
+      if (info.isMigrated()) {
+        int choice = UIHelper.executeInUI(() -> Messages.showDialog(COMPONENT_MIGRATION_MESSAGE, COMPONENT_MIGRATION_TITLE, new String[]{UNDEPLOY_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon()));
+        if (choice == 0) {
+          odo.undeployComponent(project, application, component.getPath(), component.getName());
+        } else if (choice == 1) {
+          BrowserUtil.browse(Constants.MIGRATION_HELP_PAGE_URL);
+          ok = false;
+        } else {
+          ok = false;
+        }
       }
     }
     return ok;

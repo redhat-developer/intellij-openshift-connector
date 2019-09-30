@@ -93,7 +93,11 @@ public class LinkComponentAction extends OdoAction {
           if (targetComponent != null) {
             Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), targetComponent);
             if (port != null) {
+              Notification notification = new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Linking component to " + targetComponent,
+                      NotificationType.INFORMATION);
+              Notifications.Bus.notify(notification);
               odo.link(projectNode.toString(), applicationNode.toString(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port.intValue());
+              notification.expire();
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
             } else {

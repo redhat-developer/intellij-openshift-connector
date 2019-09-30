@@ -16,6 +16,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
@@ -33,6 +34,8 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
 public class LinkServiceAction extends OdoAction {
   public LinkServiceAction() {
@@ -67,8 +70,11 @@ public class LinkServiceAction extends OdoAction {
             service = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link service", "Select service", JOptionPane.QUESTION_MESSAGE, null, servicesArray, servicesArray[0]));
           }
           if (service != null) {
+            Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service, NotificationType.INFORMATION);
+            Notifications.Bus.notify(notification);
             odo.link(projectNode.toString(), applicationNode.toString(), component.getName(), component.getPath(), service, null);
-            Notifications.Bus.notify(new Notification("OpenShift", "Link service", "Component linked to " + service,
+            notification.expire();
+            Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service,
             NotificationType.INFORMATION));
           }
        } else {

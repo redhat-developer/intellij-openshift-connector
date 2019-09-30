@@ -101,7 +101,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
         componentTypeComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                componentVersionComboBox.setModel(new DefaultComboBoxModel(((ComponentType) e.getItem()).getVersions().split(",")));
+                componentVersionComboBox.setModel(new DefaultComboBoxModel(((ComponentType) e.getItem()).getVersions()));
                 componentVersionComboBox.setSelectedIndex(-1);
                 componentVersionComboBox.setSelectedIndex(0);
                 model.setComponentTypeName(((ComponentType) e.getItem()).getName());

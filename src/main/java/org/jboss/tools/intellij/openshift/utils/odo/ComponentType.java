@@ -12,5 +12,5 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 public interface ComponentType {
   String getName();
-  String getVersions();
+  String[] getVersions();
 }

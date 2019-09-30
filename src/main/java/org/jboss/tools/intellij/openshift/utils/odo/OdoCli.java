@@ -11,8 +11,11 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -118,6 +121,12 @@ public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
 
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
+
+  static {
+    SimpleModule module = new SimpleModule();
+    module.addDeserializer(List.class, new ComponentTypesDeserializer());
+    JSON_MAPPER.registerModule(module);
+  }
 
   /**
    * Home sub folder for the plugin
@@ -372,24 +381,9 @@ public class OdoCli implements Odo {
     execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
   }
 
-
-  private ComponentType toComponentType(String[] line) {
-    return new ComponentType() {
-      @Override
-      public String getName() {
-        return line[0];
-      }
-
-      @Override
-      public String getVersions() {
-        return line[2];
-      }
-    };
-  }
-
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
-    return loadList(execute(command, "catalog", "list", "components"), this::toComponentType);
+    return JSON_MAPPER.readValue(execute(command, "catalog", "list", "components", "-o", "json"), new TypeReference<List<ComponentType>>() {});
   }
 
   private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {

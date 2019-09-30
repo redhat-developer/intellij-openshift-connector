@@ -1,4 +1,3 @@
-{% assign odoVersion = "v1.0.0-beta6" %}
 # Migration Guide to v0.1.0 OpenShift Connector
 
 ## When migration is required
@@ -7,7 +6,7 @@ Migration is required only if you are updating previously installed version of t
 
 ## Why migration is required
 
-This plugin uses OpenShift Do, in short `odo`, CLI tool to create your application and deploy it to OpenShift cluster. Each new release of the plugin uses latest version of `odo` available at the time of release.  Until this new release of OpenShift Connector plugin v0.1.0 `odo` releases it used were backward compatible. It means you would only required to download specific version of `odo` after plugin update to continue your work. This release uses `odo` {{odoVersion}} which is not backward compatible with previous releases.
+This plugin uses OpenShift Do, in short `odo`, CLI tool to create your application and deploy it to OpenShift cluster. Each new release of the plugin uses latest version of `odo` available at the time of release.  Until this new release of OpenShift Connector plugin v0.1.0 `odo` releases it used were backward compatible. It means you would only required to download specific version of `odo` after plugin update to continue your work. This release uses `odo` v1.0.0-beta6 which is not backward compatible with previous releases.
 
 After installing update you will not be able to see previously created applications, components and services in OpenShift Application Explorer window and won't be able to deploy them again until you finish migration.
 
@@ -30,7 +29,7 @@ In request for update you have several option to continue:
 * `Help` - read this document, before continue
 * `Cancel` - cancel migration and let it appear next time you restart plugin or refresh OpenShift Application Explorer window
 
-Select `Update` option to start migration. During migration only resources with specific labels are updated. Migration will convert old labels to new ones that compatible with odo `{{odoVersion}}` release. That will make all component and services created with previous version of plugin visible in OpenShift Application Explorer window.
+Select `Update` option to start migration. During migration only resources with specific labels are updated. Migration will convert old labels to new ones that compatible with odo `v1.0.0-beta6` release. That will make all component and services created with previous version of plugin visible in OpenShift Application Explorer window.
 
 In this plugin release to create and work with Component you need so called 'context' folder, where component's configuration is stored. Depending on context folder presence in current workspace and component deployment status, tree nodes representing components in OpenShift Application Explorer window can have different status description:
 * not pushed - you have context folder for component in workspace, but component is not deployed to cluster;

@@ -4,7 +4,7 @@ public class Constants {
     public static final String ODO_CONFIG_YAML = ".odo/config.yaml";
     public static String HOME_FOLDER = System.getProperty("user.home");
 
-    public static final String MIGRATION_HELP_PAGE_URL = "https://github.com/redhat-developer/intellij-openshift-connect/wiki/Migration-to-v0.1.0";
+    public static final String MIGRATION_HELP_PAGE_URL = "https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0";
 
     public static final String GROUP_DISPLAY_ID = "OpenShift";
 

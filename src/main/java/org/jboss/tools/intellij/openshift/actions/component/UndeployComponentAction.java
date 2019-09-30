@@ -48,7 +48,8 @@ public class UndeployComponentAction extends OdoAction {
     CompletableFuture.runAsync(() -> {
       try {
         odo.undeployComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName());
-        applicationNode.remove(componentNode);
+        component.setState(ComponentState.NOT_PUSHED);
+        componentNode.reload();
       } catch (IOException e) {
         UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete component", JOptionPane.ERROR_MESSAGE));
       }

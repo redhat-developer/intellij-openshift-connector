@@ -58,6 +58,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
       try {
         if (checkMigrated(odo, client, projectNode.toString(), applicationNode.toString(), component)) {
           process(odo, projectNode.toString(), applicationNode.toString(), component);
+          component.setState(ComponentState.PUSHED);
           componentNode.reload();
         }
       } catch (IOException e) {

@@ -38,7 +38,8 @@ public class ConfigWatcher implements Runnable {
             while ((key = service.take()) != null) {
                 for (WatchEvent<?> event : key.pollEvents()) {
                     Path path = (Path) event.context();
-                    if (FileUtil.filesEqual(path.getFileName().toAbsolutePath().toFile(), config)) {
+                    path = config.getParentFile().toPath().resolve(path);
+                    if (path.equals(config.toPath())) {
                         listener.onUpdate(this);
                     }
                 }

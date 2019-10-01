@@ -18,7 +18,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
-import net.sf.cglib.core.Local;
+import io.fabric8.kubernetes.api.model.Context;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
@@ -35,14 +36,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 
 public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
     private ApplicationsRootNode ROOT;
     private final Project project;
+    private Context context;
 
     public static class ComponentDescriptor {
         private final String path;
@@ -83,6 +83,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         this.project = project;
         loadProjectModel(project);
         registerProjectListener(project);
+        context = ConfigHelper.getCurrentContext();
     }
 
     private void loadProjectModel(Project project) {
@@ -188,10 +189,15 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         return ROOT;
     }
 
+    private boolean hasContextChanged() {
+        Context newContext = ConfigHelper.getCurrentContext();
+        return newContext == null || context == null || !StringUtils.equals(context.getCluster(), newContext.getCluster()) || !StringUtils.equals(context.getUser(), newContext.getUser());
+    }
+
     @Override
     public void onUpdate(ConfigWatcher source) {
         try {
-            if (ConfigHelper.isKubeConfigParsable()) {
+            if (ConfigHelper.isKubeConfigParsable() && hasContextChanged()) {
                 refresh();
             }
         } catch (Exception e) {}
@@ -199,6 +205,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
 
     @Override
     public synchronized  void refresh() {
+        context = ConfigHelper.getCurrentContext();
         TreePath path = new TreePath(ROOT);
         try {
             ROOT = new ApplicationsRootNode(this);

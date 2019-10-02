@@ -281,7 +281,7 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void deleteApplication(String project, String application) throws IOException {
+  public void deleteApplication(OpenShiftClient client, String project, String application) throws IOException {
     execute(command, "app", "delete", application, "-f", "--project", project);
   }
 
@@ -489,7 +489,11 @@ public class OdoCli implements Odo {
 
   @Override
   public void undeployComponent(String project, String application, String context, String component) throws IOException {
-    execute(new File(context), command, "delete", "-f");
+      if (context != null) {
+          execute(new File(context), command, "delete", "-f");
+      } else {
+          execute(command, "delete", "-f", "--project", project, "--app", application, component);
+      }
   }
 
   @Override

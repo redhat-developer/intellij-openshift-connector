@@ -53,8 +53,18 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void deleteApplication(String project, String application) throws IOException {
-        delegate.deleteApplication(project, application);
+    public void deleteApplication(OpenShiftClient client, String project, String application) throws IOException {
+        final IOException[] exception = {null};
+        getComponents(client, project, application).forEach(component -> {
+            try {
+                deleteComponent(project, application, component.getPath(), component.getName(), component.getState() != ComponentState.NOT_PUSHED);
+            } catch (IOException e) {
+                exception[0] = e;
+            }
+        });
+        if (exception[0] != null) {
+            throw exception[0];
+        }
     }
 
     @Override

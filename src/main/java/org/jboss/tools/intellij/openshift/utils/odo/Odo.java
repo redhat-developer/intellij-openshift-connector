@@ -27,7 +27,7 @@ public interface Odo {
 
     void describeApplication(String project, String application) throws IOException;
 
-    void deleteApplication(String project, String application) throws IOException;
+    void deleteApplication(OpenShiftClient client, String project, String application) throws IOException;
 
     void push(String project, String application, String context, String component) throws IOException;
 

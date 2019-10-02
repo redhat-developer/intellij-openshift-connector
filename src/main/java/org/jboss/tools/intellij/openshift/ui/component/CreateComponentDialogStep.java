@@ -15,6 +15,7 @@ import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
@@ -154,6 +155,9 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             applicationTextField.setEnabled(false);
             componentTypeComboBox.setEnabled(false);
             componentVersionComboBox.setEnabled(false);
+        }
+        if (StringUtils.isNotEmpty(model.getApplication())) {
+            applicationTextField.setEnabled(false);
         }
     }
 

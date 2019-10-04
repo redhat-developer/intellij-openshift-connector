@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils;
 
 import com.intellij.execution.process.ProcessHandler;
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
@@ -41,6 +42,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -214,9 +216,9 @@ public class ExecHelper {
     }
   }
 
-  public static void executeWithTerminal(File workingDirecty , String... command) throws IOException {
+  private static void executeWithTerminalInternal(File workingDirectory , String... command) throws IOException {
       try {
-        ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirecty).redirectErrorStream(true);
+        ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirectory).redirectErrorStream(true);
         Process p = builder.start();
         boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
@@ -298,8 +300,19 @@ public class ExecHelper {
       }
   }
 
+  public static void executeWithTerminal(File workingDirectory, String... command) throws IOException {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      execute(command[0], workingDirectory, Arrays.stream(command)
+              .skip(1)
+              .toArray(String[]::new));
+    } else {
+      executeWithTerminalInternal(workingDirectory, command);
+    }
+  }
+
   public static void executeWithTerminal(String... command) throws IOException {
     executeWithTerminal(new File(HOME_FOLDER), command);
   }
 
-  }
+
+}

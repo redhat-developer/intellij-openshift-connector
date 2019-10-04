@@ -14,6 +14,7 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
@@ -26,7 +27,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -58,8 +58,8 @@ public class LinkComponentAction extends OdoAction {
       if (components.size() == 1) {
         targetComponent = components.get(0).getName();
       } else {
-        Object[] componentsArray = components.stream().map(Component::getName).toArray();
-        targetComponent = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Select component", "Link component", JOptionPane.QUESTION_MESSAGE, null, componentsArray, componentsArray[0]));
+        String[] componentsArray = components.stream().map(Component::getName).toArray(String[]::new);
+        targetComponent = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select component", "Link component", Messages.getQuestionIcon(), componentsArray, componentsArray[0], null));
       }
     }
     return targetComponent;
@@ -73,8 +73,11 @@ public class LinkComponentAction extends OdoAction {
       if (ports.size() == 1) {
         port = ports.get(0);
       } else {
-        Object[] portsArray = ports.toArray();
-        port = (Integer) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Select port", "Link component", JOptionPane.QUESTION_MESSAGE, null, portsArray, portsArray[0]));
+        String[] portsArray = ports.stream().map(p -> p.toString()).toArray(String[]::new);
+        String portStr = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select port", "Link component", Messages.getQuestionIcon(), portsArray, portsArray[0], null));
+        if (portStr != null) {
+          port = Integer.parseInt(portStr);
+        }
       }
     }
     return port;
@@ -101,13 +104,13 @@ public class LinkComponentAction extends OdoAction {
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
             } else {
-              UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No ports to link to", "Link component", JOptionPane.WARNING_MESSAGE));
+              UIHelper.executeInUI(() -> Messages.showWarningDialog("No ports to link to", "Link component"));
             }
           } else {
-            UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No components to link to", "Link component", JOptionPane.WARNING_MESSAGE));
+            UIHelper.executeInUI(() -> Messages.showWarningDialog("No components to link to", "Link component"));
           }
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Link component", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
       }
     });
   }

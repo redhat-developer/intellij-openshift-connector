@@ -11,13 +11,13 @@
 package org.jboss.tools.intellij.openshift.actions.application;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +35,7 @@ public class DescribeApplicationAction extends OdoAction {
       try {
         odo.describeApplication(projectNode.toString(), applicationNode.toString());
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Describe application", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe application"));
       }
     });
   }

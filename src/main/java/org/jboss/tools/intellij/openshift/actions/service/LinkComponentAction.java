@@ -14,6 +14,7 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
@@ -25,7 +26,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -53,8 +53,8 @@ public class LinkComponentAction extends OdoAction {
           if (components.size() == 1) {
             component = components.get(0);
           } else {
-            Object[] componentNames = components.stream().map(Component::getName).toArray();
-            String componentName = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link component", "Select component", JOptionPane.QUESTION_MESSAGE, null, componentNames, componentNames[0]));
+            String[] componentNames = components.stream().map(Component::getName).toArray(String[]::new);
+            String componentName = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link component", "Select component", Messages.getQuestionIcon(), componentNames, componentNames[0], null));
             component = components.get(Arrays.asList(componentNames).indexOf(componentName));
           }
           if (component != null) {
@@ -63,10 +63,10 @@ public class LinkComponentAction extends OdoAction {
             NotificationType.INFORMATION));
           }
        } else {
-          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No components to link to", "Link component", JOptionPane.WARNING_MESSAGE));
+          UIHelper.executeInUI(() -> Messages.showWarningDialog("No components to link to", "Link component"));
         }
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Link component", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
       }
     });
   }

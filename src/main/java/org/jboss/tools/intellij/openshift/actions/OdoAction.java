@@ -11,11 +11,11 @@
 package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class OdoAction extends TreeAction {
     try {
       this.actionPerformed(anActionEvent, path, selected, getOdo(anActionEvent));
     } catch (IOException e) {
-      JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
     }
   }
 

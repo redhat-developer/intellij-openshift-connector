@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements ConfigWatcher.Listener {

@@ -14,9 +14,9 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
@@ -28,7 +28,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -66,8 +65,8 @@ public class LinkServiceAction extends OdoAction {
           if (services.size() == 1) {
             service = KubernetesLabels.getComponentName(services.get(0));
           } else {
-            Object[] servicesArray = services.stream().map(KubernetesLabels::getComponentName).toArray();
-            service = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Link service", "Select service", JOptionPane.QUESTION_MESSAGE, null, servicesArray, servicesArray[0]));
+            String[] servicesArray = services.stream().map(KubernetesLabels::getComponentName).toArray(String[]::new);
+            service = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
           }
           if (service != null) {
             Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service, NotificationType.INFORMATION);
@@ -78,10 +77,10 @@ public class LinkServiceAction extends OdoAction {
             NotificationType.INFORMATION));
           }
        } else {
-          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No services to link to", "Link service", JOptionPane.WARNING_MESSAGE));
+          UIHelper.executeInUI(() -> Messages.showWarningDialog("No services to link to", "Link service"));
         }
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Link service", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link service"));
       }
     });
   }

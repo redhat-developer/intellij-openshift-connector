@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
@@ -20,7 +21,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class DeleteComponentAction extends OdoAction {
         odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getState() != ComponentState.NOT_PUSHED);
         applicationNode.remove(componentNode);
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete component", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete component"));
       }
     });
   }

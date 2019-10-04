@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
-import com.intellij.openapi.util.io.FileUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;

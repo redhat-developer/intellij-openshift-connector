@@ -13,20 +13,17 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.ui.Messages;
 import com.twelvemonkeys.lang.Platform;
-import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.DoneableService;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -39,7 +36,6 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceFluent;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.Build;
@@ -85,7 +81,6 @@ import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.ToolsConfig;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JOptionPane;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -210,7 +205,7 @@ public class OdoCli implements Odo {
   }
 
   public static boolean isDownloadAllowed(String currentVersion, String requiredVersion) {
-    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || JOptionPane.showConfirmDialog(null, StringUtils.isEmpty(currentVersion)?"Odo not found , do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ", do you want to download odo ?") == JOptionPane.OK_OPTION;
+    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || Messages.showYesNoCancelDialog(StringUtils.isEmpty(currentVersion)?"Odo not found , do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ", do you want to download odo ?", "Odo tool required", Messages.getQuestionIcon()) == Messages.YES;
   }
 
   private void uncompress(Path dlFilePath, String cmd) throws IOException {

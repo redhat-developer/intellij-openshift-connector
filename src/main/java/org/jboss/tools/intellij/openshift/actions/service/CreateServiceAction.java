@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
@@ -19,7 +20,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
@@ -44,10 +44,10 @@ public class CreateServiceAction extends OdoAction {
             applicationNode.reload();
           }
         } else {
-          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No templates available", "Create service", JOptionPane.WARNING_MESSAGE));
+          UIHelper.executeInUI(() -> Messages.showWarningDialog("No templates available", "Create service"));
         }
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create service", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create service"));
       }
     });
   }

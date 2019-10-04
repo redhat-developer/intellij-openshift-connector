@@ -16,11 +16,13 @@ import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
-import java.awt.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.awt.Dimension;
+import java.awt.Insets;
 
 public class CreateComponentDialogGitStep extends WizardStep<CreateComponentModel> {
     private JTextField urlTextField;

@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
@@ -26,7 +27,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -62,15 +62,13 @@ public class CreateComponentAction extends OdoAction {
         CreateComponentModel model = getModel(project, application, odo.getComponentTypes());
         process((LazyMutableTreeNode) selected, odo, projectName, application, rootModel, model);
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Create component", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
       }
     });
   }
 
   protected void process(LazyMutableTreeNode selected, Odo odo, String projectName, Optional<String> application, ApplicationTreeModel rootModel, CreateComponentModel model) throws IOException {
-    boolean doit = UIHelper.executeInUI(() -> {
-        return showDialog(model);
-    });
+    boolean doit = UIHelper.executeInUI(() -> showDialog(model));
     if (doit) {
       createComponent(odo, projectName, application.orElse(model.getApplication()), model);
       rootModel.addContext(model.getContext());

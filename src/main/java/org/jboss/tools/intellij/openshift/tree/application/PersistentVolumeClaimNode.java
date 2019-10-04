@@ -10,11 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
-import org.jboss.tools.intellij.openshift.tree.KubernetesResourceMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Storage;
 

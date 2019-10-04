@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;

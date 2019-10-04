@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class CreateComponentModel extends WizardModel {
-    ;
     private Project project;
     private String name = "";
     private ComponentSourceType sourceType = ComponentSourceType.LOCAL;

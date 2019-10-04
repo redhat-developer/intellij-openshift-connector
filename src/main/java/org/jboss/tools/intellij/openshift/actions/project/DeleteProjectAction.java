@@ -14,14 +14,13 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import org.jboss.tools.intellij.openshift.Constants;
+import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +44,7 @@ public class DeleteProjectAction extends OdoAction {
           Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Delete project", "Project " + selected + " has been successfully deleted", NotificationType.INFORMATION));
           ((LazyMutableTreeNode)projectNode.getParent()).remove(projectNode);
         } catch (IOException e) {
-          UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Delete project", JOptionPane.ERROR_MESSAGE));
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete project"));
         }
       });
   }

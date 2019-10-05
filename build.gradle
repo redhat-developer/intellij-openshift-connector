@@ -48,6 +48,9 @@ task integrationTest(type: Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
     mustRunAfter test
+    afterTest { desc, result ->
+        logger.quiet "IT: ${desc.name} [${desc.className}] ${result.resultType}"
+    }
 }
 
 dependencies {

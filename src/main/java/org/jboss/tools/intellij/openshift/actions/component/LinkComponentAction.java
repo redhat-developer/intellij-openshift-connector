@@ -14,18 +14,19 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.fabric8.openshift.api.model.DeploymentConfig;
+import com.intellij.openapi.ui.Messages;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -34,21 +35,31 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class LinkComponentAction extends OdoAction {
+
   public LinkComponentAction() {
     super(ComponentNode.class);
+  }
+  
+  @Override
+  public boolean isVisible(Object selected) {
+    boolean visible = super.isVisible(selected);
+    if (visible) {
+      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
+    }
+    return visible;
   }
 
   protected String getSelectedTargetComponent(Odo odo, OpenShiftClient client, String project, String application, String component) {
     String targetComponent = null;
 
-    List<DeploymentConfig> components = odo.getComponents(client, project, application)
-            .stream().filter(dc -> !KubernetesLabels.getComponentName(dc).equals(component)).collect(Collectors.toList());
+    List<Component> components = odo.getComponents(client, project, application)
+            .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
     if (!components.isEmpty()) {
       if (components.size() == 1) {
-        targetComponent = KubernetesLabels.getComponentName(components.get(0));
+        targetComponent = components.get(0).getName();
       } else {
-        Object[] componentsArray = components.stream().map(comp -> KubernetesLabels.getComponentName(comp)).toArray();
-        targetComponent = (String) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Select component", "Link component", JOptionPane.QUESTION_MESSAGE, null, componentsArray, componentsArray[0]));
+        String[] componentsArray = components.stream().map(Component::getName).toArray(String[]::new);
+        targetComponent = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select component", "Link component", Messages.getQuestionIcon(), componentsArray, componentsArray[0], null));
       }
     }
     return targetComponent;
@@ -62,8 +73,11 @@ public class LinkComponentAction extends OdoAction {
       if (ports.size() == 1) {
         port = ports.get(0);
       } else {
-        Object[] portsArray = ports.toArray();
-        port = (Integer) UIHelper.executeInUI(() -> JOptionPane.showInputDialog(null, "Select port", "Link component", JOptionPane.QUESTION_MESSAGE, null, portsArray, portsArray[0]));
+        String[] portsArray = ports.stream().map(p -> p.toString()).toArray(String[]::new);
+        String portStr = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select port", "Link component", Messages.getQuestionIcon(), portsArray, portsArray[0], null));
+        if (portStr != null) {
+          port = Integer.parseInt(portStr);
+        }
       }
     }
     return port;
@@ -72,26 +86,31 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
+    Component sourceComponent = (Component) componentNode.getUserObject();
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
     CompletableFuture.runAsync(() -> {
       try {
-        String component = getSelectedTargetComponent(odo, client, projectNode.toString(), applicationNode.toString(), componentNode.toString());
-          if (component != null) {
-            Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), component);
+        String targetComponent = getSelectedTargetComponent(odo, client, projectNode.toString(), applicationNode.toString(), sourceComponent.getName());
+          if (targetComponent != null) {
+            Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), targetComponent);
             if (port != null) {
-              odo.link(projectNode.toString(), applicationNode.toString(), componentNode.toString(), component, port.intValue());
-              Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Component linked to " + component,
+              Notification notification = new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Linking component to " + targetComponent,
+                      NotificationType.INFORMATION);
+              Notifications.Bus.notify(notification);
+              odo.link(projectNode.toString(), applicationNode.toString(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port.intValue());
+              notification.expire();
+              Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
             } else {
-              UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No ports to link to", "Link component", JOptionPane.WARNING_MESSAGE));
+              UIHelper.executeInUI(() -> Messages.showWarningDialog("No ports to link to", "Link component"));
             }
           } else {
-            UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "No components to link to", "Link component", JOptionPane.WARNING_MESSAGE));
+            UIHelper.executeInUI(() -> Messages.showWarningDialog("No components to link to", "Link component"));
           }
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> JOptionPane.showMessageDialog(null, "Error: " + e.getLocalizedMessage(), "Link component", JOptionPane.ERROR_MESSAGE));
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
       }
     });
   }

@@ -10,15 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Application;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.io.IOException;
 
 
 public class URLNode extends LazyMutableTreeNode implements IconTreeNode {
@@ -30,7 +24,7 @@ public class URLNode extends LazyMutableTreeNode implements IconTreeNode {
   @Override
   public String toString() {
     URL url = (URL) userObject;
-    return url.getName() + " (" + url.getPort() + ')';
+    return url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')';
   }
 
   @Override

@@ -39,9 +39,13 @@ public abstract class TreeAction extends AnAction {
 
         if (comp instanceof Tree) {
             TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
-            visible = Stream.of(filters).anyMatch(cl -> cl.isAssignableFrom(selectPath.getLastPathComponent().getClass()));
+            visible = isVisible(selectPath.getLastPathComponent());
         }
         e.getPresentation().setVisible(visible);
+    }
+
+    public boolean isVisible(Object selected) {
+        return Stream.of(filters).anyMatch(cl -> cl.isAssignableFrom(selected.getClass()));
     }
 
 

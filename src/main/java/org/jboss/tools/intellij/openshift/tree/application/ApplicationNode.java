@@ -29,7 +29,8 @@ public class ApplicationNode extends LazyMutableTreeNode implements IconTreeNode
   public void load() {
     super.load();
     try {
-      Odo odo = Odo.get();
+      ApplicationsRootNode rootNode = (ApplicationsRootNode) getRoot();
+      Odo odo = rootNode.getOdo();
       try {
         odo.getComponents(((ApplicationsRootNode)getParent().getParent()).getClient(), getParent().toString(), toString()).forEach(dc -> add(new ComponentNode(dc)));
       } catch (KubernetesClientException e) {

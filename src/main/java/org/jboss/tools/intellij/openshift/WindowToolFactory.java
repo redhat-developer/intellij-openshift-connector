@@ -40,7 +40,7 @@ public class WindowToolFactory implements ToolWindowFactory {
         PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
         panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
 
-        tree = new Tree(new ApplicationTreeModel());
+        tree = new Tree(new ApplicationTreeModel(project));
         tree.setCellRenderer(new ApplicationTreeNodeCellRenderer());
         PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
         panel.add(new JBScrollPane(tree), BorderLayout.PAGE_START);

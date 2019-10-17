@@ -1,20 +1,20 @@
 {
   "tools": {
     "odo": {
-      "version": "0.0.20",
+      "version": "1.0.0-beta7",
       "platforms": {
         "win": {
-          "url": "https://github.com/openshift/odo/releases/download/v0.0.20/odo-windows-amd64.exe.gz",
+          "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0-beta7/odo-windows-amd64.exe.tar.gz",
           "cmdFileName": "odo.exe",
           "dlFileName": "odo-windows-amd64.exe.gz"
         },
         "osx": {
-          "url": "https://github.com/openshift/odo/releases/download/v0.0.20/odo-darwin-amd64.gz",
+          "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0-beta7/odo-darwin-amd64.tar.gz",
           "cmdFileName": "odo",
           "dlFileName": "odo-darwin-amd64.gz"
         },
         "lnx": {
-          "url": "https://github.com/openshift/odo/releases/download/v0.0.20/odo-linux-amd64.gz",
+          "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0-beta7/odo-linux-amd64.tar.gz",
           "cmdFileName": "odo",
           "dlFileName": "odo-linux-amd64.gz"
         }

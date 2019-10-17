@@ -29,27 +29,34 @@ import org.jetbrains.plugins.terminal.AbstractTerminalRunner;
 import org.jetbrains.plugins.terminal.TerminalOptionsProvider;
 import org.jetbrains.plugins.terminal.TerminalView;
 
+import java.io.File;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
+
 public class ExecHelper {
-  private static final ScheduledExecutorService SERVICE = Executors.newSingleThreadScheduledExecutor();
+  private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 
   public static void executeAfter(Runnable runnable, long delay, TimeUnit unit) {
     SERVICE.schedule(runnable, delay, unit);
   }
 
-  public static String execute(boolean checkExitCode, String executable, String... arguments) throws IOException {
+  public static void submit(Runnable runnable) {
+    SERVICE.submit(runnable);
+  }
+
+  public static String execute(String executable, boolean checkExitCode, File workingDirectory, String... arguments) throws IOException {
     DefaultExecutor executor = new DefaultExecutor() {
       @Override
       public boolean isFailure(int exitValue) {
@@ -63,6 +70,7 @@ public class ExecHelper {
     StringWriter writer = new StringWriter();
     PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
     executor.setStreamHandler(handler);
+    executor.setWorkingDirectory(workingDirectory);
     CommandLine command = new CommandLine(executable).addArguments(arguments);
     try {
       executor.execute(command);
@@ -73,7 +81,15 @@ public class ExecHelper {
   }
 
   public static String execute(String executable, String... arguments) throws IOException {
-    return execute(true, executable, arguments);
+    return execute(executable, true, new File(HOME_FOLDER), arguments);
+  }
+
+  public static String execute(String executable, File workingDirectory, String... arguments) throws IOException {
+    return execute(executable, true, workingDirectory, arguments);
+  }
+
+  public static String execute(String executable, boolean checkExitCode, String... arguments) throws IOException {
+    return execute(executable, checkExitCode, new File(HOME_FOLDER), arguments);
   }
 
   private static class RedirectedStream extends FilterInputStream {
@@ -144,12 +160,10 @@ public class ExecHelper {
   private static class RedirectedProcess extends Process {
     private final Process delegate;
     private final InputStream inputStream;
-    private final InputStream errorStream;
 
     private RedirectedProcess(Process delegate, boolean redirect, boolean delay) {
       this.delegate = delegate;
       inputStream = new RedirectedStream(delegate.getInputStream(), redirect, delay) {};
-      errorStream = new RedirectedStream(delegate.getErrorStream(), redirect, delay) {};
     }
 
     @Override
@@ -164,7 +178,7 @@ public class ExecHelper {
 
     @Override
     public InputStream getErrorStream() {
-      return errorStream;
+      return delegate.getErrorStream();
     }
 
     @Override
@@ -198,9 +212,10 @@ public class ExecHelper {
     }
   }
 
-  public static void executeWithTerminal(String... command) throws IOException {
+  private static void executeWithTerminalInternal(File workingDirectory , String... command) throws IOException {
       try {
-        Process p = new ProcessBuilder(command).start();
+        ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirectory).redirectErrorStream(true);
+        Process p = builder.start();
         boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
         if (needsRedirect || isPost2018_3) {
@@ -280,4 +295,20 @@ public class ExecHelper {
         throw new IOException(e);
       }
   }
+
+  public static void executeWithTerminal(File workingDirectory, String... command) throws IOException {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      execute(command[0], workingDirectory, Arrays.stream(command)
+              .skip(1)
+              .toArray(String[]::new));
+    } else {
+      executeWithTerminalInternal(workingDirectory, command);
+    }
+  }
+
+  public static void executeWithTerminal(String... command) throws IOException {
+    executeWithTerminal(new File(HOME_FOLDER), command);
+  }
+
+
 }

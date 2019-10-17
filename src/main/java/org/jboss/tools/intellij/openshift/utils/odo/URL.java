@@ -11,15 +11,43 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 public interface URL {
+  enum State {
+    NOT_PUSHED("Not Pushed"),
+    PUSHED("Pushed"),
+    LOCALLY_DELETED("Locally Deleted");
+
+    private String label;
+
+    private State(String label) {
+      this.label = label;
+    }
+
+    public static State from(String value) {
+      for(State state : State.values()) {
+        if (state.label.equals(value)) {
+          return state;
+        }
+      }
+      return NOT_PUSHED;
+    }
+
+    @Override
+    public String toString() {
+      return label;
+    }
+  }
+
   String getName();
 
   String getProtocol();
 
-  String getPath();
+  String getHost();
 
   String getPort();
 
-  static URL of(String name, String protocol, String path, String port) {
+  State getState();
+
+  static URL of(String name, String protocol, String host, String port, String state) {
     return new URL() {
       @Override
       public String getName() {
@@ -27,8 +55,8 @@ public interface URL {
       }
 
       @Override
-      public String getPath() {
-        return path;
+      public String getHost() {
+        return host;
       }
 
       @Override
@@ -39,6 +67,11 @@ public interface URL {
       @Override
       public String getPort() {
         return port;
+      }
+
+      @Override
+      public State getState() {
+        return State.from(state);
       }
     };
   }

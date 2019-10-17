@@ -1,0 +1,19 @@
+kind: LocalConfig
+apiversion: odo.openshift.io/v1alpha1
+ComponentSettings:
+  Type: java:8
+  SourceLocation: https://github.com/jeffmaury/non_existent
+  SourceType: git
+  Application: app
+  Project: springproject
+  Name: sbcomp
+  Storage:
+  - Name: storage1
+    Size: 1gi
+    Path: C:/Program Files/Git/storage1
+  Envs:
+  - Name: JEFF
+    Value: jeff
+  Url:
+    - Name: url1
+      Port: 8080

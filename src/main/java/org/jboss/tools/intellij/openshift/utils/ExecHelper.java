@@ -16,7 +16,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.util.SystemInfo;
 import com.jediterm.terminal.ProcessTtyConnector;
 import com.jediterm.terminal.TtyConnector;
 import org.apache.commons.exec.CommandLine;
@@ -216,11 +215,8 @@ public class ExecHelper {
       try {
         ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirectory).redirectErrorStream(true);
         Process p = builder.start();
-        boolean needsRedirect = SystemInfo.isWindows | SystemInfo.isMac;
         boolean isPost2018_3 = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 183;
-        if (needsRedirect || isPost2018_3) {
-          p = new RedirectedProcess(p, needsRedirect, isPost2018_3);
-        }
+        p = new RedirectedProcess(p, true, isPost2018_3);
 
         final Process process = p;
         AbstractTerminalRunner runner = new AbstractTerminalRunner(ProjectManager.getInstance().getDefaultProject()) {

@@ -16,16 +16,31 @@ import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
-import javax.swing.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.Arrays;
+
+import static org.jboss.tools.intellij.openshift.utils.odo.Component.hasComponent;
 
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
     private JTextField nameTextField;
@@ -67,10 +82,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
         });
         browseModulesButton.addActionListener(e -> {
-            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !org.jboss.tools.intellij.openshift.utils.odo.Component.hasComponent(m.getModuleFile().getParent().getPath()));
+            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !hasComponent(ApplicationTreeModel.getModuleRoot(m).getPath()));
             dialog.show();
             if (dialog.isOK()) {
-                contextTextField.setText(dialog.getSelectedModule().getModuleFile().getParent().getPath());
+                contextTextField.setText(ApplicationTreeModel.getModuleRoot(dialog.getSelectedModule()).getPath());
             }
         });
         browseFolderButton.addActionListener(e -> {
@@ -80,7 +95,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             chooser.setFileFilter(new FileFilter() {
                 @Override
                 public boolean accept(File f) {
-                    return !org.jboss.tools.intellij.openshift.utils.odo.Component.hasComponent(f.getPath());
+                    return !hasComponent(f.getPath());
                 }
 
                 @Override

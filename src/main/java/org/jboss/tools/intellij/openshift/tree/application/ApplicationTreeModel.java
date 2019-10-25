@@ -15,6 +15,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
@@ -86,23 +87,24 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         context = ConfigHelper.getCurrentContext();
     }
 
+    public static VirtualFile getModuleRoot(Module module) {
+        return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
+    }
+
     private void loadProjectModel(Project project) {
         for(Module module : project.getComponent(ModuleManager.class).getModules()) {
-            addContext(module.getModuleFile());
+            addContext(getModuleRoot(module));
         }
     }
 
     @Override
     public void moduleAdded(@NotNull Project project, @NotNull Module module) {
-        /* moduleFile is not yet available when we are notified so try
-         * the odo file
-         */
-        addContext(new File(new File(module.getModuleFilePath()).getParent(), ODO_CONFIG_YAML));
+        addContext(getModuleRoot(module));
     }
 
     @Override
     public void moduleRemoved(@NotNull Project project, @NotNull Module module) {
-        removeContext(module.getModuleFile());
+        removeContext(getModuleRoot(module));
     }
 
     private void addContextToSettings(String path, LocalConfig.ComponentSettings componentSettings) {
@@ -111,32 +113,24 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
             refresh();
         }
     }
-    private void addContext(File file) {
-        if (file.exists()) {
-            try {
-                LocalConfig config = LocalConfig.load(file.toPath().toUri().toURL());
-                String path = file.getParentFile().getParentFile().getAbsolutePath().replace(File.pathSeparatorChar, '/');
-                addContextToSettings(path, config.getComponentSettings());
-            } catch (IOException e) {}
-        }
-    }
-    private void addContext(VirtualFile moduleFile) {
+
+    private void addContext(VirtualFile modulePathFile) {
         try {
-            VirtualFile file = moduleFile.getParent().findFileByRelativePath(ODO_CONFIG_YAML);
+            VirtualFile file = modulePathFile.findFileByRelativePath(ODO_CONFIG_YAML);
             if (file != null && file.isValid()) {
                 LocalConfig config = LocalConfig.load(new File(file.getPath()).toPath().toUri().toURL());
-                addContextToSettings(moduleFile.getParent().getPath(), config.getComponentSettings());
+                addContextToSettings(modulePathFile.getPath(), config.getComponentSettings());
             }
         } catch (IOException e) { }
     }
 
     public void addContext(String modulePath) {
-        addContext(new File(modulePath, ODO_CONFIG_YAML));
+        addContext(LocalFileSystem.getInstance().findFileByPath(modulePath));
     }
 
-    private void removeContextFromSettings(String path) {
-        if (components.containsKey(path)) {
-            components.remove(path);
+    private void removeContextFromSettings(String modulePath) {
+        if (components.containsKey(modulePath)) {
+            components.remove(modulePath);
             refresh();
         }
     }
@@ -146,15 +140,11 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         }
     }
 
-    private void removeContext(VirtualFile moduleFile) {
-            VirtualFile file = moduleFile.getParent().findFileByRelativePath(ODO_CONFIG_YAML);
+    private void removeContext(VirtualFile modulePathFile) {
+            VirtualFile file = modulePathFile.findFileByRelativePath(ODO_CONFIG_YAML);
             if (file != null && file.isValid()) {
-                removeContextFromSettings(moduleFile.getParent().getPath());
+                removeContextFromSettings(modulePathFile.getPath());
             }
-    }
-
-    public void removeContext(String modulePath) {
-        removeContext(new File(modulePath, ODO_CONFIG_YAML));
     }
 
     private void registerProjectListener(Project project) {

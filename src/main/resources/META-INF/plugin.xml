@@ -87,6 +87,8 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" text="Open in Browser"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DebugComponentAction"
+              id="org.jboss.tools.intellij.openshift.actions.component.DebugComponentAction" text="Debug"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" text="Undeploy"/>

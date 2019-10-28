@@ -20,10 +20,42 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
 import com.twelvemonkeys.lang.Platform;
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.DoneableSecret;
+import io.fabric8.kubernetes.api.model.DoneableService;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimFluent;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretFluent;
+import io.fabric8.kubernetes.api.model.SecretList;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceFluent;
+import io.fabric8.kubernetes.api.model.ServiceList;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.openshift.api.model.*;
+import io.fabric8.openshift.api.model.Build;
+import io.fabric8.openshift.api.model.BuildConfig;
+import io.fabric8.openshift.api.model.BuildConfigFluent;
+import io.fabric8.openshift.api.model.BuildConfigList;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.api.model.DeploymentConfigFluent;
+import io.fabric8.openshift.api.model.DeploymentConfigList;
+import io.fabric8.openshift.api.model.DoneableBuildConfig;
+import io.fabric8.openshift.api.model.DoneableDeploymentConfig;
+import io.fabric8.openshift.api.model.DoneableImageStream;
+import io.fabric8.openshift.api.model.DoneableRoute;
+import io.fabric8.openshift.api.model.ImageStream;
+import io.fabric8.openshift.api.model.ImageStreamFluent;
+import io.fabric8.openshift.api.model.ImageStreamList;
+import io.fabric8.openshift.api.model.Project;
+import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteFluent;
+import io.fabric8.openshift.api.model.RouteList;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.BuildConfigResource;
 import io.fabric8.openshift.client.dsl.DeployableScalableResource;
@@ -49,7 +81,14 @@ import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.ToolsConfig;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,7 +103,14 @@ import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.*;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
 public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
@@ -564,20 +610,10 @@ public class OdoCli implements Odo {
     }
   }
 
-    @Override
-    public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        if (port != null) {
-            // use specified local port forwarding to remote container port
-            execute(new File(component), command, "debug", "port-forward", "--local-port", port.toString());
-        } else {
-            // use default local port (5858) forwarding to remote container port
-            execute(new File(component), command, "debug", "port-forward");
-        }
-    }
-
   @Override
   public List<Project> getPreOdo10Projects(OpenShiftClient client) {
     return getProjects(client).stream().filter(project -> isLegacyProject(client, project)).collect(Collectors.toList());
+
   }
 
   private boolean isLegacyProject(OpenShiftClient client, Project project) {
@@ -767,6 +803,5 @@ public class OdoCli implements Odo {
       //TODO: exception is skipped because of non catalog aware cluster, need to find a way to better deal with that
     }
   }
-
 
 }

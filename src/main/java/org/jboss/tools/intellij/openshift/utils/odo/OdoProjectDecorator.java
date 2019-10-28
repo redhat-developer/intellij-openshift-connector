@@ -280,11 +280,6 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        delegate.debug(project, application, component, context, port);
-    }
-
-    @Override
     public List<Project> getPreOdo10Projects(OpenShiftClient client) {
         return delegate.getPreOdo10Projects(client);
     }

@@ -99,4 +99,6 @@ public interface Odo {
 
     void link(String project, String application, String component, String context, String source, Integer port) throws IOException;
 
+    void debug(String project, String application, String context, String component, Integer port) throws IOException;
+
 }

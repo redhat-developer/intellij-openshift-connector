@@ -12,20 +12,24 @@
     ]]></description>
 
   <change-notes><![CDATA[
-  <p><b>0.0.1</b></p>
-  <p>Initial release</p>
-  <p><b>0.0.2</b></p>
-  <p>Fix terminal auto close for 2018.3+ based products</p>
-  <p><b>0.0.3</b></p>
-  <p>Fix line feed issue for Macos<p>
-  <p><b>0.0.4</b></p>
-  <p>Fix error reported when logging to a cluster<p>
-  <p>Fix error reported when getting applications list for a project<p>
-  <p><b>0.0.5</b></p>
-  <p>Add support for URL management<p>
+  <p><b>0.1.0</b></p>
+  <p>Switch to Odo 1.0.0</p>
+  <p>Use the Odo 1.0.0 based workflow</p>
+  <p>For more information, see <a href="https://github.com/redhat-developer/intellij-openshift-connector/blob/master/README.md">this page</a></p>
   <p><b>0.0.6</b></p>
   <p>Add icon for the OpenShift window</p>
   <p>Update download URLs to reflect the new Odo organization</p>
+  <p><b>0.0.5</b></p>
+  <p>Add support for URL management<p>
+  <p><b>0.0.4</b></p>
+  <p>Fix error reported when logging to a cluster<p>
+  <p>Fix error reported when getting applications list for a project<p>
+  <p><b>0.0.3</b></p>
+  <p>Fix line feed issue for Macos<p>
+  <p><b>0.0.2</b></p>
+  <p>Fix terminal auto close for 2018.3+ based products</p>
+  <p><b>0.0.1</b></p>
+  <p>Initial release</p>
     ]]>
   </change-notes>
 

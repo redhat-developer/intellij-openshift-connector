@@ -288,4 +288,9 @@ public class OdoProjectDecorator implements Odo {
     public List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects, BiConsumer<String, String> reporter) {
         return delegate.migrateProjects(client, projects, reporter);
     }
+
+    @Override
+    public String consoleURL(OpenShiftClient client) throws IOException {
+        return delegate.consoleURL(client);
+    }
 }

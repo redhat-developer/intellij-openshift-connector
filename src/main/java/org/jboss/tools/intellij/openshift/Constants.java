@@ -16,7 +16,7 @@ public class Constants {
 
     public static final String MIGRATION_HELP_PAGE_URL = "https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0";
 
-    public static final String GROUP_DISPLAY_ID = "OpenShift";
+    public static final String GROUP_DISPLAY_ID = "OpenShift Connector";
 
     public static final String CLUSTER_MIGRATION_TITLE = "Cluster migration";
     public static final String CLUSTER_MIGRATION_MESSAGE = "Some of the resources in cluster must be updated to work with latest release of OpenShift Connector plugin";

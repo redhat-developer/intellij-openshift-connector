@@ -77,7 +77,6 @@ import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
@@ -620,10 +619,10 @@ public class OdoCli implements Odo {
     public void debug(String project, String application, String context, String component, Integer port) throws IOException {
         if (port != null) {
             // use specified local port forwarding to remote container port
-            execute(new File(component), command, "debug", "port-forward", "--local-port", port.toString());
+          ExecHelper.executeWithTerminal(new File(component), command, "debug", "port-forward", "--local-port", port.toString());
         } else {
             // use default local port (5858) forwarding to remote container port
-            execute(new File(component), command, "debug", "port-forward");
+          ExecHelper.executeWithTerminal(new File(component), command, "debug", "port-forward");
         }
     }
 

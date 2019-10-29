@@ -12,15 +12,23 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
+import java.io.IOException;
 
 public class OpenConsoleAction extends LoggedInClusterAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
-    BrowserUtil.open(clusterNode.toString());
+    try {
+      String url = odo.consoleURL(clusterNode.getClient());
+      BrowserUtil.open(url);
+    } catch (IOException e) {
+      Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Open Console Dashboard");
+    }
+
   }
 }

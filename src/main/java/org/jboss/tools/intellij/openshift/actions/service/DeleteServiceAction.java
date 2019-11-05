@@ -34,6 +34,10 @@ public class DeleteServiceAction extends OdoAction {
     ServiceNode serviceNode = (ServiceNode) selected;
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    if (Messages.NO == Messages.showYesNoDialog("Delete Service '" + serviceNode.toString() + "'.\nAre you sure?", "Delete Service",
+      Messages.getQuestionIcon())) {
+      return;
+    }
     CompletableFuture.runAsync(() -> {
       try {
         odo.deleteService(projectNode.toString(), applicationNode.toString(), serviceNode.toString());

@@ -36,6 +36,10 @@ public class DeleteStorageAction extends OdoAction {
     Component component = (Component) componentNode.getUserObject();
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    if (Messages.NO == Messages.showYesNoDialog("Delete Storage '" + storageNode.toString() + "'.\nAre you sure?", "Delete Storage",
+        Messages.getQuestionIcon())) {
+        return;
+    }
     CompletableFuture.runAsync(() -> {
       try {
           odo.deleteStorage(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), storageNode.toString());

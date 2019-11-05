@@ -34,6 +34,10 @@ public class DeleteApplicationAction extends OdoAction {
     LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) selected;
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     OpenShiftClient client = ((ApplicationsRootNode)applicationNode.getRoot()).getClient();
+    if (Messages.NO == Messages.showYesNoDialog("Delete Application '" + applicationNode.toString() + "'.\nAre you sure?", "Delete Application",
+        Messages.getQuestionIcon())) {
+        return;
+    }
     CompletableFuture.runAsync(() -> {
       try {
         odo.deleteApplication(client, projectNode.toString(), applicationNode.toString());

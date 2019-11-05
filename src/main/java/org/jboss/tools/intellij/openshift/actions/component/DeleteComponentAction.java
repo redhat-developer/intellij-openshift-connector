@@ -37,6 +37,11 @@ public class DeleteComponentAction extends OdoAction {
     Component component = (Component) componentNode.getUserObject();
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    if (Messages.NO == Messages.showYesNoDialog("Delete Component '" + component.getName() + "'.\nAre you sure?", "Delete Component",
+      Messages.getQuestionIcon())) {
+      return;
+    }
+
     CompletableFuture.runAsync(() -> {
       try {
         odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getState() != ComponentState.NOT_PUSHED);

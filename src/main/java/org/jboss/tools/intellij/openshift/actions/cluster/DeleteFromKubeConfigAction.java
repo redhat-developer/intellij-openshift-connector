@@ -29,6 +29,10 @@ public class DeleteFromKubeConfigAction extends TreeAction {
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
         NamedContext context = (NamedContext) selected;
         ClustersTreeModel model = (ClustersTreeModel) getTree(anActionEvent).getModel();
+        if (Messages.NO == Messages.showYesNoDialog("Delete Cluster '" + context.getName() + "'.\nAre you sure?", "Delete Cluster",
+            Messages.getQuestionIcon())) {
+            return;
+        }
         model.getConfig().getContexts().remove(context);
         try {
             ConfigHelper.saveKubeConfig(model.getConfig());

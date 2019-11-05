@@ -65,6 +65,8 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>
+      <!-- project level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
       <separator/>
       <!-- application level -->
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New Component"/>
@@ -105,6 +107,8 @@
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction"
               id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
+      <!-- project level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"></action>
       <!-- cluster explorer -->
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" text="Set current"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>

@@ -35,7 +35,11 @@ public class DeleteProjectAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ProjectNode projectNode = (ProjectNode) selected;
-      CompletableFuture.runAsync(() -> {
+    if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + projectNode.toString() + "'.\nAre you sure?", "Delete Project",
+        Messages.getQuestionIcon())) {
+        return;
+    }
+    CompletableFuture.runAsync(() -> {
         try {
           Notification notif = new Notification(GROUP_DISPLAY_ID, "Delete project", "Deleting project " + selected.toString(), NotificationType.INFORMATION);
           Notifications.Bus.notify(notif);

@@ -19,8 +19,10 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
+import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
-import org.apache.commons.lang.StringUtils;
+import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
+import org.apache.commons.codec.binary.StringUtils;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
@@ -44,7 +46,7 @@ import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
     private ApplicationsRootNode ROOT;
     private final Project project;
-    private Context context;
+    private Config config;
 
     public static class ComponentDescriptor {
         private final String path;
@@ -85,7 +87,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         this.project = project;
         loadProjectModel(project);
         registerProjectListener(project);
-        context = ConfigHelper.getCurrentContext();
+        this.config = ConfigHelper.safeLoadKubeConfig();
     }
 
     public static VirtualFile getModuleRoot(Module module) {
@@ -180,23 +182,46 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
         return ROOT;
     }
 
-    private boolean hasContextChanged() {
-        Context newContext = ConfigHelper.getCurrentContext();
-        return newContext == null || context == null || !StringUtils.equals(context.getCluster(), newContext.getCluster()) || !StringUtils.equals(context.getUser(), newContext.getUser());
+    @Override
+    public void onUpdate(ConfigWatcher source, Config config) {
+        if (hasContextChanged(config, this.config)) {
+            refresh();
+        }
+        this.config = config;
     }
 
-    @Override
-    public void onUpdate(ConfigWatcher source) {
-        try {
-            if (ConfigHelper.isKubeConfigParsable() && hasContextChanged()) {
-                refresh();
-            }
-        } catch (Exception e) {}
+    private boolean hasContextChanged(Config newConfig, Config currentConfig) {
+        Context currentContext = KubeConfigUtils.getCurrentContext(currentConfig);
+        Context newContext = KubeConfigUtils.getCurrentContext(currentConfig);
+        return hasServerChanged(newContext, currentContext)
+                || hasNewToken(newContext, newConfig, currentContext, currentConfig);
     }
 
-    @Override
+    private boolean hasServerChanged(Context newContext, Context currentContext) {
+        return newContext == null
+                || currentContext == null
+                || !StringUtils.equals(currentContext.getCluster(), newContext.getCluster())
+                || !StringUtils.equals(currentContext.getUser(), newContext.getUser());
+    }
+
+    private boolean hasNewToken(Context newContext, Config newConfig, Context currentContext, Config currentConfig) {
+        if (newContext == null) {
+            return false;
+        }
+        if (currentContext == null) {
+            return true;
+        }
+        String newToken = KubeConfigUtils.getUserToken(newConfig, newContext);
+        if (newToken == null) {
+            // logout, LogoutAction already refreshes
+            return false;
+        }
+        String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext);
+        return !StringUtils.equals(newToken, currentToken);
+  }
+
+  @Override
     public synchronized  void refresh() {
-        context = ConfigHelper.getCurrentContext();
         TreePath path = new TreePath(ROOT);
         try {
             ROOT = new ApplicationsRootNode(this);

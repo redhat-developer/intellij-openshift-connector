@@ -56,11 +56,8 @@ public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements Co
     }
 
     @Override
-    public void onUpdate(ConfigWatcher source) {
-        try {
-            config = ConfigHelper.loadKubeConfig();
-            this.treeStructureChanged(new TreePath(ROOT), new int[0], new Object[0]);
-        } catch (IOException e) {
-        }
+    public void onUpdate(ConfigWatcher source, Config config) {
+        this.config = config;
+        this.treeStructureChanged(new TreePath(ROOT), new int[0], new Object[0]);
     }
 }

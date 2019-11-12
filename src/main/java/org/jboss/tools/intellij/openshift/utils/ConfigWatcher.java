@@ -50,11 +50,9 @@ public class ConfigWatcher implements Runnable {
         });
     }
 
-    private void runOnConfigChange(Runnable runnable) {
+    private void runOnConfigChange(final Runnable runnable) {
         try (WatchService service = FileSystems.getDefault().newWatchService()) {
-            config.getParentFile().toPath().register(service,
-                    StandardWatchEventKinds.ENTRY_MODIFY,
-                    StandardWatchEventKinds.ENTRY_DELETE);
+            registerWatchService(service);
             WatchKey key;
             while ((key = service.take()) != null) {
                 key.pollEvents().stream()
@@ -69,6 +67,16 @@ public class ConfigWatcher implements Runnable {
             e.printStackTrace();
         }
 
+    }
+
+    @NotNull
+    private void registerWatchService(WatchService service) throws IOException {
+        HighSensitivityRegistrar modifier = new HighSensitivityRegistrar();
+        modifier.registerService(config.getParentFile().toPath(),
+                new WatchEvent.Kind[]{
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.ENTRY_DELETE},
+                service);
     }
 
     @NotNull

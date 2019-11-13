@@ -32,6 +32,14 @@ public class ConfigHelper {
         mapper.writeValue(new File(getKubeConfigPath()), config);
     }
 
+    public static Config safeLoadKubeConfig() {
+        try {
+            return loadKubeConfig();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     public static Config loadKubeConfig() throws IOException {
         File f = new File(getKubeConfigPath());
         if (f.exists()) {
@@ -42,8 +50,12 @@ public class ConfigHelper {
     }
 
     public static boolean isKubeConfigParsable() {
+        return isKubeConfigParsable(new File(getKubeConfigPath()));
+    }
+
+    public static boolean isKubeConfigParsable(File kubeConfig) {
         try {
-            mapper.readValue(new File(getKubeConfigPath()), Config.class);
+            mapper.readValue(kubeConfig, Config.class);
             return true;
         } catch (IOException e) {
             return false;

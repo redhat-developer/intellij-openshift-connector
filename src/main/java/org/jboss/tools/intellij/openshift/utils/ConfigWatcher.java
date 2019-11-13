@@ -10,16 +10,24 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
+import io.fabric8.kubernetes.api.model.Config;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 
 public class ConfigWatcher implements Runnable {
     private final File config;
     private final Listener listener;
 
     public interface Listener {
-        void onUpdate(ConfigWatcher source);
+        void onUpdate(ConfigWatcher source, Config config);
     }
 
     public ConfigWatcher(File config, Listener listener) {
@@ -29,22 +37,43 @@ public class ConfigWatcher implements Runnable {
 
     @Override
     public void run() {
-        WatchKey key;
-
-        try (WatchService service = FileSystems.getDefault().newWatchService()) {
-            config.getParentFile().toPath().register(service, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
-            while ((key = service.take()) != null) {
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    Path path = (Path) event.context();
-                    path = config.getParentFile().toPath().resolve(path);
-                    if (path.equals(config.toPath())) {
-                        listener.onUpdate(this);
-                    }
+        runOnConfigChange(() -> {
+            try {
+                if (!ConfigHelper.isKubeConfigParsable()) {
+                    return;
                 }
+                Config config = ConfigHelper.loadKubeConfig();
+                listener.onUpdate(this, config);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void runOnConfigChange(Runnable runnable) {
+        try (WatchService service = FileSystems.getDefault().newWatchService()) {
+            config.getParentFile().toPath().register(service,
+                    StandardWatchEventKinds.ENTRY_MODIFY,
+                    StandardWatchEventKinds.ENTRY_DELETE);
+            WatchKey key;
+            while ((key = service.take()) != null) {
+                key.pollEvents().stream()
+                        .filter(event -> {
+                            Path path = getPath(event);
+                            return path.equals(config.toPath());
+                        })
+                        .forEach((Void) -> runnable.run());
                 key.reset();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+
+    }
+
+    @NotNull
+    private Path getPath(WatchEvent<?> event) {
+        Path path = (Path) event.context();
+        return config.getParentFile().toPath().resolve(path);
     }
 }

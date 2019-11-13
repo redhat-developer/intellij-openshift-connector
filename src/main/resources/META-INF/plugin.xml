@@ -12,6 +12,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.1.1</b></p>
+  <p>Bug fixes, Application Explorer was not refreshed after login</p>
   <p><b>0.1.0</b></p>
   <p>Switch to Odo 1.0.0</p>
   <p>Use the Odo 1.0.0 based workflow</p>

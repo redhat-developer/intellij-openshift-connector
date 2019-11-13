@@ -25,7 +25,7 @@ The extension also supports OpenShift running on Azure, AWS.
 
 ## WARNING !!! Breaking Changes
 
-This release `0.1.0` contains breaking changes mentioned below.
+This release `0.1.1` contains breaking changes mentioned below.
 
 * The Components created with previous versions(<=0.0.6) will no longer be visible in OpenShift Application Explorer view.
 * New Component, Url and Storage objects are created locally in context folder and not immediatly pushed to the cluster.

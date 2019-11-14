@@ -35,6 +35,7 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -43,7 +44,8 @@ import java.util.Map;
 
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 
-public class ApplicationTreeModel extends BaseTreeModel<Object> implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
+public class ApplicationTreeModel extends BaseTreeModel<Object>
+        implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
     private ApplicationsRootNode ROOT;
     private final Project project;
     private Config config;
@@ -81,7 +83,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object> implements Confi
     private final Map<String, ComponentDescriptor> components = new HashMap();
 
     public ApplicationTreeModel(Project project) {
-        ExecHelper.submit(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
+        ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
         ROOT = new ApplicationsRootNode(this);
         ROOT.addChangeListener(this);
         this.project = project;

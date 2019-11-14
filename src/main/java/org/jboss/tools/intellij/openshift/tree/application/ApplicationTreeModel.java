@@ -83,20 +83,28 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
     private final Map<String, ComponentDescriptor> components = new HashMap();
 
     public ApplicationTreeModel(Project project) {
-        ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
+        initConfigWatcher();
         ROOT = new ApplicationsRootNode(this);
         ROOT.addChangeListener(this);
         this.project = project;
         loadProjectModel(project);
         registerProjectListener(project);
-        this.config = ConfigHelper.safeLoadKubeConfig();
+        this.config = loadConfig();
+    }
+
+    protected void initConfigWatcher() {
+        ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
+    }
+
+    protected Config loadConfig() {
+        return ConfigHelper.safeLoadKubeConfig();
     }
 
     public static VirtualFile getModuleRoot(Module module) {
         return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
     }
 
-    private void loadProjectModel(Project project) {
+    protected void loadProjectModel(Project project) {
         for(Module module : project.getComponent(ModuleManager.class).getModules()) {
             addContext(getModuleRoot(module));
         }
@@ -152,7 +160,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
             }
     }
 
-    private void registerProjectListener(Project project) {
+    protected void registerProjectListener(Project project) {
         MessageBusConnection connection = project.getMessageBus().connect(project);
         connection.subscribe(ProjectTopics.MODULES, this);
     }
@@ -215,7 +223,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
         }
         String newToken = KubeConfigUtils.getUserToken(newConfig, newContext);
         if (newToken == null) {
-            // logout, LogoutAction already refreshes
+            // logout, do not refresh, LogoutAction already refreshes
             return false;
         }
         String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext);

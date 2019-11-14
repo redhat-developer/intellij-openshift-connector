@@ -18,8 +18,8 @@ import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 
 import javax.swing.tree.TreePath;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements Co
     public ClustersTreeModel() {
          try {
              config = ConfigHelper.loadKubeConfig();
-             ExecHelper.submit(new ConfigWatcher(new File(ConfigHelper.getKubeConfigPath()), this));
+             ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
          } catch (IOException e) {
              e.printStackTrace();
          }

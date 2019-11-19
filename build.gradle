@@ -2,16 +2,14 @@
 plugins {
     id "org.jetbrains.intellij" version "0.4.10"
     id "com.adarshr.test-logger" version "1.7.0"
+    id "idea"
+    id "java"
+    id "jacoco"
 }
 
 repositories {
     mavenCentral()
 }
-
-apply plugin: 'idea'
-apply plugin: 'org.jetbrains.intellij'
-apply plugin: 'java'
-apply plugin: 'jacoco'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'

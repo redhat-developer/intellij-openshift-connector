@@ -516,7 +516,6 @@ public class OdoCli implements Odo {
     ExecHelper.executeWithTerminal(new File(context), command, "log");
   }
 
-
   @Override
   public void createProject(String project) throws IOException {
     execute(command, "project", "create", project);
@@ -572,7 +571,6 @@ public class OdoCli implements Odo {
       .build();
   }
 
-
   @Override
   public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
     return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
@@ -615,16 +613,16 @@ public class OdoCli implements Odo {
     }
   }
 
-    @Override
-    public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        if (port != null) {
-            // use specified local port forwarding to remote container port
-          ExecHelper.executeWithTerminal(new File(component), command, "debug", "port-forward", "--local-port", port.toString());
-        } else {
-            // use default local port (5858) forwarding to remote container port
-          ExecHelper.executeWithTerminal(new File(component), command, "debug", "port-forward");
-        }
+  @Override
+  public void debug(String project, String application, String context, String component, Integer port) throws IOException {
+    if (port != null) {
+      // use specified local port forwarding to remote container port
+      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
+    } else {
+      // use default local port (5858) forwarding to remote container port
+      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward");
     }
+  }
 
   @Override
   public List<Project> getPreOdo10Projects(OpenShiftClient client) {

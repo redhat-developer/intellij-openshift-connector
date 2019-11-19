@@ -103,7 +103,8 @@
       <!-- URL level -->
       <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
       <!-- project level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"></action>
+      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction"
+              id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
       <!-- cluster explorer -->
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" text="Set current"></action>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"></action>

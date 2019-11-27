@@ -1,0 +1,10 @@
+<idea-plugin>
+    <actions>
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DebugJavaScriptComponentAction"
+                id="org.jboss.tools.intellij.openshift.actions.component.DebugJavaScriptComponentAction" text="Debug">
+            <add-to-group group-id="org.jboss.tools.intellij.tree"
+                          relative-to-action="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction"
+                          anchor="after"/>
+        </action>
+    </actions>
+</idea-plugin>

@@ -615,13 +615,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-    if (port != null) {
-      // use specified local port forwarding to remote container port
-      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
-    } else {
-      // use default local port (5858) forwarding to remote container port
-      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward");
-    }
+    ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
   }
 
   @Override

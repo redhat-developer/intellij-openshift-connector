@@ -39,11 +39,15 @@
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
   <idea-version since-build="181.3741.2"/>
-  <depends>org.jetbrains.plugins.terminal</depends>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
   <depends>com.intellij.modules.lang</depends>
+  <depends>org.jetbrains.plugins.terminal</depends>
+
+  <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
+  <depends optional="true" config-file="withJavaScript.xml">JavaScript</depends>
+
 
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->
@@ -87,8 +91,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" text="Open in Browser"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.DebugComponentAction"
-              id="org.jboss.tools.intellij.openshift.actions.component.DebugComponentAction" text="Debug"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" text="Undeploy"/>
@@ -103,8 +105,7 @@
       <!-- URL level -->
       <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
       <!-- project level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction"
-              id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
       <!-- cluster explorer -->
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" text="Set current"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>

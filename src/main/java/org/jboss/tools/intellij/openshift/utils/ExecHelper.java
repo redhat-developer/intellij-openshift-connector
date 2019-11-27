@@ -258,7 +258,7 @@ public class ExecHelper {
 
         private RedirectedProcess(Process delegate, boolean redirect, boolean delay) {
             this.delegate = delegate;
-      inputStream = new RedirectedStream(delegate.getInputStream(), redirect, delay) {};
+            inputStream = new RedirectedStream(delegate.getInputStream(), redirect, delay) {};
         }
 
         @Override

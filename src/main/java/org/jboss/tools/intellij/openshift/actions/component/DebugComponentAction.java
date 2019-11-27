@@ -13,9 +13,9 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.remote.RemoteConfiguration;
-import com.intellij.execution.remote.RemoteConfigurationType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
@@ -34,7 +34,12 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-public class DebugComponentAction extends OdoAction {
+public abstract class DebugComponentAction extends OdoAction {
+
+    private RunnerAndConfigurationSettings runSettings;
+
+    private Integer port;
+
     public DebugComponentAction() {
         super(ComponentNode.class);
     }
@@ -57,7 +62,6 @@ public class DebugComponentAction extends OdoAction {
             LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
             ApplicationsRootNode root = (ApplicationsRootNode) applicationNode.getRoot();
             ComponentInfo info = odo.getComponentInfo(root.getClient(), projectNode.toString(), applicationNode.toString(), component.getName());
-            //TODO check here is the port is in use, avoiding the error message below when execute the action.
             return info.getComponentTypeName().equals("java") || info.getComponentTypeName().equals("nodejs");
         } catch (IOException e) {
             UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Debug"));
@@ -75,30 +79,51 @@ public class DebugComponentAction extends OdoAction {
         Component component = (Component) componentNode.getUserObject();
         ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
         LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-        //TODO check if local port is modified
-        Integer port = new Integer("5858");
-        if (!isAvailable(port)) {
-            UIHelper.executeInUI(() -> Messages.showErrorDialog("Error, cannot run Odo Debug using port " + port + ".\nPort is already in use.", "Odo Debug"));
-            return;
-        }
+
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
 
-        RunnerAndConfigurationSettings runSettings = RunManager.getInstance(project).createConfiguration(
-                component.getName() + " Remote Debug with odo", RemoteConfigurationType.getInstance().getFactory());
+        RunManager runManager = RunManager.getInstance(project);
+        ConfigurationType configurationType = getConfigurationType();
+        String configurationName = component.getName() + " Remote Debug";
+        //lookup if existing config already exist, based on name and type
+        RemoteConfiguration remoteConfiguration;
+        runSettings = runManager.findConfigurationByTypeAndName(configurationType.getId(), configurationName);
+        if (runSettings == null) {
+            runSettings = runManager.createConfiguration(
+                    configurationName, configurationType.getConfigurationFactories()[0]);
+            ServerSocket serverSocket = null;
+            try {
+                serverSocket = new ServerSocket(0); // find an available port and use it
+                port = serverSocket.getLocalPort();
+                serverSocket.close();
+                remoteConfiguration = (RemoteConfiguration) runSettings.getConfiguration();
+                remoteConfiguration.HOST = "localhost";
+                remoteConfiguration.PORT = port.toString();
+            } catch (IOException e) {
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Odo Debug"));
+                return;
+            }
 
-        RemoteConfiguration remoteConfiguration = (RemoteConfiguration) runSettings.getConfiguration();
-        remoteConfiguration.HOST = "localhost";
-        remoteConfiguration.PORT = port.toString();
-
+        } else {
+            remoteConfiguration = (RemoteConfiguration) runSettings.getConfiguration();
+            port = Integer.valueOf(remoteConfiguration.PORT);
+        }
         ExecHelper.submit(() -> {
             try {
+                // test if the port is still available before running odo
+                if (!isAvailable(port)) {
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error, cannot run Odo Debug using port " + port + ".\nPort is already in use.", "Odo Debug"));
+                    return;
+                }
                 odo.debug(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), port);
                 try {
-                    Thread.sleep(7000L);
+                    Thread.sleep(7000L); // TODO use 'odo debug info' to wait until odo finish to start
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 ApplicationManager.getApplication().invokeLater(() -> {
+                    runManager.addConfiguration(runSettings);
+                    runManager.setSelectedConfiguration(runSettings);
                     ProgramRunnerUtil.executeConfiguration(runSettings, DefaultDebugExecutor.getDebugExecutorInstance());
                 });
 
@@ -117,4 +142,7 @@ public class DebugComponentAction extends OdoAction {
             return false;
         }
     }
+
+    protected abstract ConfigurationType getConfigurationType();
+
 }

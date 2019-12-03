@@ -1,7 +1,7 @@
 <idea-plugin>
     <actions>
-        <action class="org.jboss.tools.intellij.openshift.actions.component.DebugJavaScriptComponentAction"
-                id="org.jboss.tools.intellij.openshift.actions.component.DebugJavaScriptComponentAction" text="Debug">
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DebugNodeJSComponentAction"
+                id="org.jboss.tools.intellij.openshift.actions.component.DebugNodeJSComponentAction" text="Debug">
             <add-to-group group-id="org.jboss.tools.intellij.tree"
                           relative-to-action="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction"
                           anchor="after"/>

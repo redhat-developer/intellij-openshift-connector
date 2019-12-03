@@ -1,0 +1,64 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+package org.jboss.tools.intellij.openshift.actions.component;
+
+import com.intellij.execution.configurations.ConfigurationType;
+import com.intellij.execution.configurations.RunConfiguration;
+import com.jetbrains.debugger.wip.JSRemoteDebugConfiguration;
+import com.jetbrains.debugger.wip.JSRemoteDebugConfigurationType;
+
+import java.lang.reflect.Field;
+
+public class DebugNodeJSComponentAction extends DebugComponentAction {
+
+    @Override
+    protected boolean isDebuggable(String componentTypeName) {
+        return "nodejs".equals(componentTypeName);
+    }
+
+    @Override
+    protected ConfigurationType getConfigurationType() {
+        return new JSRemoteDebugConfigurationType();
+    }
+
+    @Override
+    protected void initConfiguration(RunConfiguration configuration, Integer port) {
+        if (configuration instanceof JSRemoteDebugConfiguration) {
+            JSRemoteDebugConfiguration remoteConfiguration = (JSRemoteDebugConfiguration) configuration;
+            try {
+                Field hostField = JSRemoteDebugConfiguration.class.getDeclaredField("host");
+                hostField.setAccessible(true);
+                hostField.set(configuration, "localhost");
+                Field portField = JSRemoteDebugConfiguration.class.getDeclaredField("port");
+                portField.setAccessible(true);
+                portField.set(configuration, port);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    protected int getPortFromConfiguration(RunConfiguration configuration) {
+        if (configuration instanceof JSRemoteDebugConfiguration) {
+            Integer port = null;
+            try {
+                Field f = JSRemoteDebugConfiguration.class.getDeclaredField("port");
+                f.setAccessible(true);
+                port = (Integer) f.get(configuration);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                return -1;
+            }
+            return port.intValue();
+        }
+        return -1;
+    }
+}

@@ -14,8 +14,8 @@ import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.configurations.ConfigurationType;
+import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.executors.DefaultDebugExecutor;
-import com.intellij.execution.remote.RemoteConfiguration;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
@@ -62,7 +62,7 @@ public abstract class DebugComponentAction extends OdoAction {
             LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
             ApplicationsRootNode root = (ApplicationsRootNode) applicationNode.getRoot();
             ComponentInfo info = odo.getComponentInfo(root.getClient(), projectNode.toString(), applicationNode.toString(), component.getName());
-            return info.getComponentTypeName().equals("java") || info.getComponentTypeName().equals("nodejs");
+            return isDebuggable(info.getComponentTypeName());
         } catch (IOException e) {
             UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Debug"));
         }
@@ -86,7 +86,6 @@ public abstract class DebugComponentAction extends OdoAction {
         ConfigurationType configurationType = getConfigurationType();
         String configurationName = component.getName() + " Remote Debug";
         //lookup if existing config already exist, based on name and type
-        RemoteConfiguration remoteConfiguration;
         runSettings = runManager.findConfigurationByTypeAndName(configurationType.getId(), configurationName);
         if (runSettings == null) {
             runSettings = runManager.createConfiguration(
@@ -96,17 +95,19 @@ public abstract class DebugComponentAction extends OdoAction {
                 serverSocket = new ServerSocket(0); // find an available port and use it
                 port = serverSocket.getLocalPort();
                 serverSocket.close();
-                remoteConfiguration = (RemoteConfiguration) runSettings.getConfiguration();
-                remoteConfiguration.HOST = "localhost";
-                remoteConfiguration.PORT = port.toString();
+                initConfiguration(runSettings.getConfiguration(), port);
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Odo Debug"));
                 return;
             }
 
         } else {
-            remoteConfiguration = (RemoteConfiguration) runSettings.getConfiguration();
-            port = Integer.valueOf(remoteConfiguration.PORT);
+            port = getPortFromConfiguration(runSettings.getConfiguration());
+            if (port == -1) {
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error when retrieving local port from configuration.", "Odo Debug"));
+                return;
+            }
+
         }
         ExecHelper.submit(() -> {
             try {
@@ -143,6 +144,12 @@ public abstract class DebugComponentAction extends OdoAction {
         }
     }
 
+    protected abstract boolean isDebuggable(String componentTypeName);
+
     protected abstract ConfigurationType getConfigurationType();
+
+    protected abstract void initConfiguration(RunConfiguration configuration, Integer port);
+
+    protected abstract int getPortFromConfiguration(RunConfiguration configuration);
 
 }

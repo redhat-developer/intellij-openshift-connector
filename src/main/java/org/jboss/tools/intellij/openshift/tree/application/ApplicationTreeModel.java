@@ -80,7 +80,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
         }
     }
 
-    private final Map<String, ComponentDescriptor> components = new HashMap();
+    private final Map<String, ComponentDescriptor> components = new HashMap<>();
 
     public ApplicationTreeModel(Project project) {
         initConfigWatcher();
@@ -180,7 +180,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
             if (!node.isLoaded()) {
                 node.load();
             }
-            return Collections.list((Enumeration) ((MutableTreeNode)o).children());
+            return Collections.list(((MutableTreeNode)o).children());
 
         } else {
             return Collections.emptyList();

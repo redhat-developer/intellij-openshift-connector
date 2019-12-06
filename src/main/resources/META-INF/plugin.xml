@@ -36,7 +36,7 @@
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="181.3741.2"/>
+  <idea-version since-build="182.3684.101"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -44,7 +44,7 @@
   <depends>org.jetbrains.plugins.terminal</depends>
 
   <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
-  <depends optional="true" config-file="withNodeJS.xml">NodeJS</depends>
+  <depends optional="true" config-file="withJavaScriptDebugger.xml">JavaScriptDebugger</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->

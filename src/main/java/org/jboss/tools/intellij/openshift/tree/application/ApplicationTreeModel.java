@@ -180,7 +180,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
             if (!node.isLoaded()) {
                 node.load();
             }
-            return Collections.list(((MutableTreeNode)o).children());
+            return Collections.list((Enumeration) ((MutableTreeNode)o).children());
 
         } else {
             return Collections.emptyList();

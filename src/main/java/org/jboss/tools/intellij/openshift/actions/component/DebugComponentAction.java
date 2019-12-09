@@ -87,16 +87,14 @@ public abstract class DebugComponentAction extends OdoAction {
         }
         ExecHelper.submit(() -> {
             try {
-                // test if the port is still available before running odo
-                if (!isAvailable(port)) {
-                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Cannot run Odo Debug using port " + port + ".\nPort is already in use.", "Odo Debug"));
-                    return;
-                }
-                odo.debug(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), port);
-                try {
-                    Thread.sleep(7000L); // TODO use 'odo debug status' to wait until odo finish to start
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                // test if the port is available before running odo, if not, it means odo is already running. //TODO use 'odo debug status'
+                if (isAvailable(port)) {
+                    odo.debug(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), port);
+                    try {
+                        Thread.sleep(7000L); // TODO use again 'odo debug status' to wait until odo finish to start
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ProgramRunnerUtil.executeConfiguration(runSettings, DefaultDebugExecutor.getDebugExecutorInstance());

@@ -32,7 +32,6 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
     @Override
     protected void initConfiguration(RunConfiguration configuration, Integer port) {
         if (configuration instanceof JSRemoteDebugConfiguration) {
-            JSRemoteDebugConfiguration remoteConfiguration = (JSRemoteDebugConfiguration) configuration;
             try {
                 Field hostField = JSRemoteDebugConfiguration.class.getDeclaredField("host");
                 hostField.setAccessible(true);
@@ -49,7 +48,7 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
     @Override
     protected int getPortFromConfiguration(RunConfiguration configuration) {
         if (configuration instanceof JSRemoteDebugConfiguration) {
-            Integer port = null;
+            Integer port;
             try {
                 Field f = JSRemoteDebugConfiguration.class.getDeclaredField("port");
                 f.setAccessible(true);
@@ -57,7 +56,7 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 return -1;
             }
-            return port.intValue();
+            return port;
         }
         return -1;
     }

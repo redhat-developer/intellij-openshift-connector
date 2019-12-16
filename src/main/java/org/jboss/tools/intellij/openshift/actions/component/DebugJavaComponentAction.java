@@ -38,8 +38,9 @@ public class DebugJavaComponentAction extends DebugComponentAction {
 
     @Override
     protected int getPortFromConfiguration(RunConfiguration configuration) {
-        if (configuration instanceof RemoteConfiguration)
-            return Integer.valueOf(((RemoteConfiguration) configuration).PORT);
+        if (configuration instanceof RemoteConfiguration) {
+            return Integer.parseInt(((RemoteConfiguration) configuration).PORT);
+        }
         return -1;
     }
 

@@ -91,6 +91,8 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Open in Browser` - Open the exposed URL in browser.
    * `Push` - Push the source code to a Component.
    * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
+   * `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more
+    details.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Delete` - Delete an existing Component from the cluster and removes the local config also.
 

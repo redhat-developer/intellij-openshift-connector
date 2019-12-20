@@ -1,19 +1,20 @@
 # How to debug a component
 This page explains how to debug a component using `odo` and the according actions in IntelliJ.
 
-The `Debug` action is implemented since version `0.1.2`.
+The `Debug` action is implemented since version `0.2.0`.
 
 ## Supported component types and IntelliJ versions
-The `Debug` action is actually limited to `java` and `nodejs` component types.
+The `Debug` action is actually limited to `Java` and `NodeJS` component types.
 
-Debugging `java` components is available in all versions of IntelliJ. 
-However, to debug `nodejs` components, the `JavaScript Debugger` plugin is required and is only available to licensed versions of IntelliJ. 
+Debugging `Java` components is available in IntelliJ Community and Ultimate.
+However, to debug `nodejs` components, the `JavaScript Debugger` plugin is required and is only available to licensed versions of IntelliJ (Ultimate, WebStorm).
 
 See [https://www.jetbrains.com/idea/features/editions_comparison_matrix.html](https://www.jetbrains.com/idea/features/editions_comparison_matrix.html)
 
 ## Step by Step instructions to debug components
+
 To debug a component, it must be already pushed in the cluster. The debug action is not visible when the component is not pushed or has no context.
-When the component is pushed, the `Debug` action is visible only on `java` and `nodejs` component types.
+When the component is pushed, the `Debug` action is visible only on `Java` and `NodeJS` component types.
 
 ![image](debug-action-ui.png)
 

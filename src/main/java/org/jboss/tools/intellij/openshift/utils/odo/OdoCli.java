@@ -615,7 +615,11 @@ public class OdoCli implements Odo {
 
   @Override
   public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-    ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
+    if (port != null) {
+      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
+    } else {
+      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward");
+    }
   }
 
   @Override

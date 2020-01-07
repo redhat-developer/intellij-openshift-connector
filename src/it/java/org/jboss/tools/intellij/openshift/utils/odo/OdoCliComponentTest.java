@@ -26,7 +26,7 @@ import static org.junit.runners.Parameterized.*;
 public class OdoCliComponentTest extends OdoCliTest {
     private boolean push;
 
-    public OdoCliComponentTest(boolean push, String labek) {
+    public OdoCliComponentTest(boolean push, String label) {
         this.push = push;
     }
 
@@ -162,6 +162,29 @@ public class OdoCliComponentTest extends OdoCliTest {
             createComponent(project, application, component, push);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(0, urls.size());
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateComponentAndDebug() throws IOException, InterruptedException {
+        if (!push){
+            return;
+        }
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        try {
+            createComponent(project, application, component, push);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080);
+            odo.push(project,application,COMPONENT_PATH,component);
+            List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+            assertEquals(1, urls.size());
+            URL url = urls.get(0);
+            odo.debug(project,application,COMPONENT_PATH, component,null);
         } finally {
             try {
                 odo.deleteProject(project);

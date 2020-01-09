@@ -10,9 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.tree.BaseTreeModel;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
@@ -33,7 +35,7 @@ public class ClustersTreeModel extends BaseTreeModel<NamedContext> implements Co
              config = ConfigHelper.loadKubeConfig();
              ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
          } catch (IOException e) {
-             e.printStackTrace();
+             Logger.getInstance(Constants.LOGGER_CATEGORY).error(e);
          }
     }
 

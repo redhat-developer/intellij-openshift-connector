@@ -12,10 +12,12 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.openapi.diagnostic.Logger;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfiguration;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfigurationType;
 
 import java.lang.reflect.Field;
+import org.jboss.tools.intellij.openshift.Constants;
 
 public class DebugNodeJSComponentAction extends DebugComponentAction {
 
@@ -40,7 +42,7 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
                 portField.setAccessible(true);
                 portField.set(configuration, port);
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
+                Logger.getInstance(Constants.LOGGER_CATEGORY).error(e);
             }
         }
     }

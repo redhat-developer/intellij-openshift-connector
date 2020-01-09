@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -88,6 +89,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
       checkMigrate(odo, odo.getPreOdo10Projects(client));
       setLogged(true);
     } catch (Exception e) {
+      Logger.getInstance(Constants.LOGGER_CATEGORY).error(e);
       add(new DefaultMutableTreeNode(ERROR));
     }
   }

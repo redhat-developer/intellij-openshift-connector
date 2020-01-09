@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
+import com.intellij.openapi.diagnostic.Logger;
 import io.fabric8.kubernetes.api.model.Config;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -63,7 +65,7 @@ public class ConfigWatcher implements Runnable {
                 key.reset();
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            Logger.getInstance(Constants.LOGGER_CATEGORY).error(e);
         }
     }
 

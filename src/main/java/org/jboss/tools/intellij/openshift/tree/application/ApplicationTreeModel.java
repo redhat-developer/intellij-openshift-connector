@@ -80,7 +80,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
         }
     }
 
-    private final Map<String, ComponentDescriptor> components = new HashMap();
+    private final Map<String, ComponentDescriptor> components = new HashMap<>();
 
     public ApplicationTreeModel(Project project) {
         initConfigWatcher();

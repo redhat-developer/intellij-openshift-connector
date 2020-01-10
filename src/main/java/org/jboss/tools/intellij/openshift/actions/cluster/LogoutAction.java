@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
@@ -28,6 +29,7 @@ public class LogoutAction extends LoggedInClusterAction {
         try {
           odo.logout();
           clusterNode.setLogged(false);
+          ExecHelper.setProxyEnvironmentVariables(null);
           clusterNode.reload();
         } catch (IOException e) {
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));

@@ -14,11 +14,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.cluster.LoginDialog;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.OkHttpClientProxy;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 
 public class LoginAction extends LoggedOutClusterAction {
@@ -33,9 +36,10 @@ public class LoginAction extends LoggedOutClusterAction {
             return dialog;
             });
           if (loginDialog.isOK()) {
+            ExecHelper.setProxyEnvironmentVariables(OkHttpClientProxy.buildEnvironmentVariables(loginDialog.getClusterURL()));
             odo.login(loginDialog.getClusterURL(), loginDialog.getUserName(), loginDialog.getPassword(), loginDialog.getToken());
           }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
         }
       });

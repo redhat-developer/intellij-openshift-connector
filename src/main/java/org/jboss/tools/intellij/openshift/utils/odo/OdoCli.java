@@ -82,6 +82,8 @@ import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.ToolsConfig;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -118,6 +120,7 @@ import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSIO
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
 public class OdoCli implements Odo {
+  private static final Logger LOG = LoggerFactory.getLogger(OdoCli.class);
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
 
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -189,7 +192,7 @@ public class OdoCli implements Odo {
           command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
             @Override
             public String compute(@NotNull ProgressIndicator progressIndicator) throws IOException {
-              OkHttpClient client = new OkHttpClient();
+              final OkHttpClient client = new OkHttpClientProxy().getClient();
               Request request = new Request.Builder().url(platform.getUrl()).build();
               Response response = client.newCall(request).execute();
               downloadFile(response.body().byteStream(), dlFilePath, progressIndicator, response.body().contentLength());
@@ -250,7 +253,15 @@ public class OdoCli implements Odo {
 
   @Override
   public List<Project> getProjects(OpenShiftClient client) {
-    return client.projects().list().getItems();
+    List<Project> projects = new ArrayList<>();
+
+    try {
+      projects = client.projects().list().getItems();
+    } catch (KubernetesClientException e) {
+      LOG.error("Error: " + e.getLocalizedMessage() + " - cause: " + e.getCause());
+    }
+
+    return projects;
   }
 
   private static String execute(File workingDirectory, String command, String ...args) throws IOException {

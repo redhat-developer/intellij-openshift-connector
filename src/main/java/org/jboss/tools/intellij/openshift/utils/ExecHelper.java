@@ -38,6 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +47,12 @@ import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 
 public class ExecHelper {
     private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+
+    private static Map<String, String> proxyEnvironmentVariables;
+
+    public static void setProxyEnvironmentVariables(Map<String, String> environmentVariables) {
+        proxyEnvironmentVariables = environmentVariables;
+    }
 
     public static void submit(Runnable runnable) {
         SERVICE.submit(runnable);
@@ -68,7 +75,7 @@ public class ExecHelper {
         executor.setWorkingDirectory(workingDirectory);
         CommandLine command = new CommandLine(executable).addArguments(arguments);
         try {
-            executor.execute(command);
+            executor.execute(command, proxyEnvironmentVariables);
             return writer.toString();
         } catch (IOException e) {
             throw new IOException(e.getLocalizedMessage() + " " + writer.toString(), e);

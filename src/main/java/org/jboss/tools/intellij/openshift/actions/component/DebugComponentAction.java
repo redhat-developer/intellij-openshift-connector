@@ -46,8 +46,12 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public abstract class DebugComponentAction extends OdoAction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DebugComponentAction.class);
 
     private RunnerAndConfigurationSettings runSettings;
 
@@ -116,7 +120,7 @@ public abstract class DebugComponentAction extends OdoAction {
                             try {
                                 Thread.sleep(2000L);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                LOG.error(e.getLocalizedMessage(), e);
                             }
                         }
                     });
@@ -140,7 +144,7 @@ public abstract class DebugComponentAction extends OdoAction {
                             DefaultDebugExecutor.getDebugExecutorInstance().getId(),
                             runSettings)).execute(getEnvironment());
                     } catch (ExecutionException e) {
-                        e.printStackTrace();
+                        LOG.error(e.getLocalizedMessage(), e);
                     }
                 });
         });
@@ -201,7 +205,7 @@ public abstract class DebugComponentAction extends OdoAction {
                 environment = ExecutionEnvironmentBuilder.create(
                     DefaultDebugExecutor.getDebugExecutorInstance(), runSettings).build();
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                LOG.error(e.getLocalizedMessage(), e);
             }
         }
         return environment;

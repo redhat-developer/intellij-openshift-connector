@@ -14,18 +14,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.ConfigBuilder;
-import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import org.jboss.tools.intellij.openshift.Constants;
 
 public class ConfigHelper {
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     public static String getKubeConfigPath() {
-        return System.getProperty("user.home") + "/.kube/config";
+        return Constants.HOME_FOLDER + "/.kube/config";
     }
 
     public static void saveKubeConfig(Config config) throws IOException {
@@ -42,23 +43,10 @@ public class ConfigHelper {
 
     public static Config loadKubeConfig() throws IOException {
         File f = new File(getKubeConfigPath());
-        if (f.exists()) {
+        if (Files.exists(f.toPath())) {
             return KubeConfigUtils.parseConfig(f);
         } else {
             return new ConfigBuilder().build();
-        }
-    }
-
-    public static boolean isKubeConfigParsable() {
-        return isKubeConfigParsable(new File(getKubeConfigPath()));
-    }
-
-    public static boolean isKubeConfigParsable(File kubeConfig) {
-        try {
-            mapper.readValue(kubeConfig, Config.class);
-            return true;
-        } catch (IOException e) {
-            return false;
         }
     }
 
@@ -68,14 +56,5 @@ public class ConfigHelper {
 
     public static ToolsConfig loadToolsConfig(URL url) throws IOException {
         return mapper.readValue(url, ToolsConfig.class);
-    }
-
-    public static Context getCurrentContext() {
-        try {
-            Config config = loadKubeConfig();
-            return KubeConfigUtils.getCurrentContext(config);
-        } catch (IOException e) {
-            return null;
-        }
     }
 }

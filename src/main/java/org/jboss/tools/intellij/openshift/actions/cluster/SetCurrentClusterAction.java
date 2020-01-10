@@ -18,8 +18,13 @@ import org.jboss.tools.intellij.openshift.tree.ClustersTreeModel;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SetCurrentClusterAction extends TreeAction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SetCurrentClusterAction.class);
+
     public SetCurrentClusterAction() {
         super(NamedContext.class);
     }
@@ -32,7 +37,7 @@ public class SetCurrentClusterAction extends TreeAction {
         try {
             ConfigHelper.saveKubeConfig(model.getConfig());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 }

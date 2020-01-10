@@ -16,8 +16,12 @@ import com.jetbrains.debugger.wip.JSRemoteDebugConfiguration;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfigurationType;
 
 import java.lang.reflect.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DebugNodeJSComponentAction extends DebugComponentAction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DebugNodeJSComponentAction.class);
 
     @Override
     protected boolean isDebuggable(String componentTypeName) {
@@ -40,7 +44,7 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
                 portField.setAccessible(true);
                 portField.set(configuration, port);
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
+                LOG.error(e.getLocalizedMessage(), e);
             }
         }
     }

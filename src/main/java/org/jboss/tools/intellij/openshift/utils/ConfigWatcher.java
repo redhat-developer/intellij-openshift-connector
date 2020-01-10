@@ -10,9 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
-import com.intellij.openapi.diagnostic.Logger;
 import io.fabric8.kubernetes.api.model.Config;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -22,8 +20,13 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigWatcher implements Runnable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigWatcher.class);
+
     private final Path config;
     protected Listener listener;
 
@@ -65,7 +68,7 @@ public class ConfigWatcher implements Runnable {
                 key.reset();
             }
         } catch (IOException | InterruptedException e) {
-            Logger.getInstance(Constants.LOGGER_CATEGORY).error(e);
+            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 

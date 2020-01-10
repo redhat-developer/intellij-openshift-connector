@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ide.BrowserUtil;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -31,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
 import java.util.List;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.getWarningIcon;
@@ -47,6 +49,8 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
   private Odo odo;
 
   private static final String ERROR = "Please log in to the cluster";
+
+  private static final Logger LOG = LoggerFactory.getLogger(ApplicationsRootNode.class);
 
   public ApplicationsRootNode(ApplicationTreeModel model) {
     setUserObject(client.getMasterUrl());
@@ -89,7 +93,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
       checkMigrate(odo, odo.getPreOdo10Projects(client));
       setLogged(true);
     } catch (Exception e) {
-      Logger.getInstance(Constants.LOGGER_CATEGORY).error(e);
+      LOG.error(e.getLocalizedMessage(), e);
       add(new DefaultMutableTreeNode(ERROR));
     }
   }

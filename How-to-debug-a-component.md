@@ -28,7 +28,7 @@ The `odo` command line displays a message like `Started port forwarding at ports
 
 For more information about using a different component port, see [https://github.com/openshift/odo/blob/master/docs/proposals/odo-debug.md](https://github.com/openshift/odo/blob/master/docs/proposals/odo-debug.md)
 
-Depending on the component type, the debugger can be either the Java remote debugger or the Javascript remote debugger.
+Depending on the component type, the debugger can be either the Java remote debugger or the JavaScript remote debugger.
 
 When a breakpoint set in the source code of the component is hit, the debugger will act as usual: 
 
@@ -50,7 +50,7 @@ Please note that the component is still running on the cluster and `odo` is also
 **Yes**, you can push any modifications on the cluster while the debugger is running. The local debugger will stop and you need to run the debug configuration again to reconnect to the component. This can take time as the push may rebuild the component.
 
 ### Can i launch multiple debugger session in the same time?
-**Yes**, if each run configuration uses differents local ports, you can debug as many components as you want.
+**Yes**, if each run configuration uses different local ports, you can debug as many components as you want.
 If the debugger is trying to connect to port not available, a message will be displayed.
 Also, if you try to run the same configuration twice, a message will be displayed.
 
@@ -58,7 +58,7 @@ Also, if you try to run the same configuration twice, a message will be displaye
 **Yes**, the run configuration settings are used to determine the local port when the `Debug` action is selected.
 Also, you can delete the run configuration, a new one will be automatically created when needed.
 
-### How do i stop completly debugging a component?
+### How do i stop completely debugging a component?
 First stop the debugger, then select the `Terminal` tab. Locate the `odo` debug terminal and right click on it, then select `Close Session`.
 
 ### The debugger cannot connect/The debugger does not stop at my breakpoint/How do i see the odo logs?

@@ -110,7 +110,6 @@ public abstract class DebugComponentAction extends OdoAction {
                                     projectNode.toString(),
                                     applicationNode.toString(),
                                     component.getPath(),
-                                    component.getName(),
                                     port);
                             } catch (IOException e) {
                                 UIHelper.executeInUI(() -> Messages.showErrorDialog(

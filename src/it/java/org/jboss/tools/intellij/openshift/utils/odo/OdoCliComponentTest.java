@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import java.net.ServerSocket;
+import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +21,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.junit.runners.Parameterized.*;
 
 @RunWith(Parameterized.class)
@@ -30,14 +34,15 @@ public class OdoCliComponentTest extends OdoCliTest {
         this.push = push;
     }
 
-    @Parameters(name="{1}")
+    @Parameters(name = "{1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { false, "not pushed" },
-                { true, "pushed"}
+            {false, "not pushed"},
+            {true, "pushed"}
         });
 
     }
+
     @Test
     public void checkCreateComponent() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
@@ -48,7 +53,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -63,7 +69,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -80,7 +87,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -100,7 +108,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -118,7 +127,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -133,7 +143,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -149,7 +160,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -165,13 +177,14 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
     @Test
     public void checkCreateComponentAndDebug() throws IOException, InterruptedException {
-        if (!push){
+        if (!push) {
             return;
         }
         String project = PROJECT_PREFIX + random.nextInt();
@@ -180,15 +193,24 @@ public class OdoCliComponentTest extends OdoCliTest {
         try {
             createComponent(project, application, component, push);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080);
-            odo.push(project,application,COMPONENT_PATH,component);
+            odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
             URL url = urls.get(0);
-            odo.debug(project,application,COMPONENT_PATH, component,null);
+            int debugPort;
+            try (ServerSocket serverSocket = new ServerSocket(0)) {
+                debugPort = serverSocket.getLocalPort();
+            }
+            ExecHelper.submit(() -> {
+                try {
+                    odo.debug(project, application, COMPONENT_PATH, debugPort);
+                } catch (IOException e) {
+                    fail("should not raise IOE");
+                }
+            });
+
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
+            odo.deleteProject(project);
         }
     }
 }

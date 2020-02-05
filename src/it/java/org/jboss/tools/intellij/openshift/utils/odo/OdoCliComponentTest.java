@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.junit.runners.Parameterized.*;
@@ -53,8 +52,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -69,8 +67,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -87,8 +84,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -108,8 +104,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -127,8 +122,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -143,8 +137,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -160,8 +153,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -177,8 +169,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
     }
 
@@ -205,12 +196,14 @@ public class OdoCliComponentTest extends OdoCliTest {
                 try {
                     odo.debug(project, application, COMPONENT_PATH, debugPort);
                 } catch (IOException e) {
-                    fail("should not raise IOE");
+                    fail("Should not raise Exception");
                 }
             });
 
         } finally {
-            odo.deleteProject(project);
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
         }
     }
 }

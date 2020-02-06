@@ -44,6 +44,15 @@ You can stop the debugger by using the usual stop buttons or shortcut in Intelli
 
 Please note that the component is still running on the cluster and `odo` is also still running on the terminal.
 
+## See it in Action !
+Below are animations that shows how a debug is performed from the OpenShift view, when a component is already pushed to the cluster.
+
+Java debug: 
+![image](java-debug-intellij.gif)
+
+Node.js debug: 
+![image](nodejs-debug-intellij.gif)
+
 ## FAQ
 
 ### Can i make changes on the component when it is debugging?

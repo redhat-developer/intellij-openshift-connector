@@ -101,6 +101,6 @@ public interface Odo {
 
     String consoleURL(OpenShiftClient client) throws IOException;
 
-    void debug(String project, String application, String context, Integer port) throws IOException;
+    void debug(String project, String application, String component, String context, Integer port) throws IOException;
 
 }

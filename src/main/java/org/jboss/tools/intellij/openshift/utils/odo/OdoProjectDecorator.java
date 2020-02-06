@@ -280,8 +280,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void debug(String project, String application, String context, Integer port) throws IOException {
-        delegate.debug(project, application, context, port);
+    public void debug(String project, String application, String component, String context, Integer port) throws IOException {
+        delegate.debug(project, application,component , context, port);
     }
 
     @Override

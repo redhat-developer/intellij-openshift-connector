@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,10 +11,16 @@
 package org.jboss.tools.intellij.openshift.actions.cluster;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
-public class OpenConsoleActionTest extends LogoutActionTest {
+public class OpenConsoleActionTest extends ActionTest {
   @Override
   public AnAction getAction() {
     return new OpenConsoleAction();
+  }
+
+  @Override
+  protected void verifyLoggedInCluster(boolean visible) {
+    assertTrue(visible);
   }
 }

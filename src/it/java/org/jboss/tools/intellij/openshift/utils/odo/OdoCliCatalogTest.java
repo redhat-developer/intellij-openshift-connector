@@ -27,7 +27,9 @@ public class OdoCliCatalogTest extends OdoCliTest {
 
     @Test
     public void checkGetServiceTemplates() throws IOException {
-        List<ServiceTemplate> services = odo.getServiceTemplates();
-        assertTrue(services.size() > 0);
+        if (odo.isServiceCatalogAvailable(client)) {
+            List<ServiceTemplate> services = odo.getServiceTemplates();
+            assertTrue(services.size() > 0);
+        }
     }
 }

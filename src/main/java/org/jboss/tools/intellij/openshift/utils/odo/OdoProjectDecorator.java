@@ -285,6 +285,11 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
+    public boolean isServiceCatalogAvailable(OpenShiftClient client) {
+        return delegate.isServiceCatalogAvailable(client);
+    }
+
+    @Override
     public List<Project> getPreOdo10Projects(OpenShiftClient client) {
         return delegate.getPreOdo10Projects(client);
     }

@@ -14,10 +14,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
+import com.intellij.ui.treeStructure.Tree;
+import io.fabric8.openshift.client.OpenShiftClient;
+import java.awt.Component;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -27,10 +31,33 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CreateServiceAction extends OdoAction {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CreateServiceAction.class);
+
   public CreateServiceAction() {
     super(ApplicationNode.class, ProjectNode.class);
+  }
+
+  @Override
+  public boolean isVisible(Object selected) {
+      boolean visible = super.isVisible(selected);
+      if (visible) {
+        ApplicationsRootNode rootNode = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
+        if (rootNode != null) {
+          OpenShiftClient client = rootNode.getClient();
+          try {
+            Odo odo = rootNode.getOdo();
+            return odo.isServiceCatalogAvailable(client);
+          } catch (IOException ex) {
+            //silently catch the exception to make the action not visible
+          }
+        }
+    }
+    return false;
   }
 
   @Override

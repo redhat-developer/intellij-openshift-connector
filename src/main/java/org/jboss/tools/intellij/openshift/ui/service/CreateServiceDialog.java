@@ -27,6 +27,7 @@ public class CreateServiceDialog extends DialogWrapper {
     private JPanel contentPane;
     private JTextField nameField;
     private JComboBox serviceTemplatesComboBox;
+    private JTextField applicationTextField;
 
     public CreateServiceDialog(Component parent) {
         super(null, false, IdeModalityType.IDE);
@@ -49,7 +50,6 @@ public class CreateServiceDialog extends DialogWrapper {
             }
         });
         serviceTemplatesComboBox.setModel(new DefaultComboBoxModel(serviceTemplates));
-        serviceTemplatesComboBox.setSelectedIndex(-1);
         serviceTemplatesComboBox.setSelectedIndex(0);
     }
 
@@ -68,13 +68,19 @@ public class CreateServiceDialog extends DialogWrapper {
         if (nameField.getText().length() == 0) {
             validations.add(new ValidationInfo("Name must be provided", nameField));
         }
+        if (applicationTextField.getText().length() == 0) {
+            validations.add(new ValidationInfo("Application must be provided", applicationTextField));
+        }
         return validations;
     }
 
-    public static void main(String[] args) {
-        CreateServiceDialog dialog = new CreateServiceDialog(null);
-        dialog.show();
-        System.exit(0);
+    public void setApplication(String application){
+        applicationTextField.setText(application);
+        applicationTextField.setEditable(false);
+    }
+
+    public String getApplication(){
+        return applicationTextField.getText();
     }
 
     {

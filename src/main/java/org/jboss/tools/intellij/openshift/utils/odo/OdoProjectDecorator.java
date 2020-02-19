@@ -24,6 +24,11 @@ public class OdoProjectDecorator implements Odo {
     private final Odo delegate;
     private final ApplicationTreeModel model;
 
+    public OdoProjectDecorator(Odo delegate, ApplicationTreeModel model) {
+        this.delegate = delegate;
+        this.model = model;
+    }
+
     private LocalConfig.ComponentSettings findComponent(String project, String application, String component) {
         Optional<ApplicationTreeModel.ComponentDescriptor> comp = model.getComponents().values().stream().filter(c -> c.getProject().equals(project) && c.getApplication().equals(application) && c.getName().equals(component)).findFirst();
         try {
@@ -35,11 +40,6 @@ public class OdoProjectDecorator implements Odo {
         } catch (IOException e) {
             return null;
         }
-    }
-
-    public OdoProjectDecorator(Odo delegate, ApplicationTreeModel model) {
-        this.delegate = delegate;
-        this.model = model;
     }
 
     @Override
@@ -206,9 +206,9 @@ public class OdoProjectDecorator implements Odo {
     public List<Application> getApplications(String project) throws IOException {
         List<Application> applications = delegate.getApplications(project);
         model.getComponents().forEach((path, component) -> {
-           if (component.getProject().equals(project) && applications.stream().noneMatch(application -> application.getName().equals(component.getApplication()))) {
-               applications.add(Application.of(component.getApplication()));
-           }
+            if (component.getProject().equals(project) && applications.stream().noneMatch(application -> application.getName().equals(component.getApplication()))) {
+                applications.add(Application.of(component.getApplication()));
+            }
         });
         return applications;
     }
@@ -281,7 +281,7 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        delegate.debug(project, application, component, context, port);
+        delegate.debug(project, application, context, component, port);
     }
 
     @Override

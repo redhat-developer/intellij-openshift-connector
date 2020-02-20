@@ -62,11 +62,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.BuildConfigResource;
 import io.fabric8.openshift.client.dsl.DeployableScalableResource;
 import me.snowdrop.servicecatalog.api.client.ServiceCatalogClient;
-import me.snowdrop.servicecatalog.api.client.internal.ClusterServicePlanResource;
 import me.snowdrop.servicecatalog.api.client.internal.ServiceInstanceResource;
-import me.snowdrop.servicecatalog.api.model.ClusterServicePlan;
-import me.snowdrop.servicecatalog.api.model.ClusterServicePlanList;
-import me.snowdrop.servicecatalog.api.model.DoneableClusterServicePlan;
 import me.snowdrop.servicecatalog.api.model.DoneableServiceInstance;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import me.snowdrop.servicecatalog.api.model.ServiceInstanceFluent;
@@ -625,16 +621,7 @@ public class OdoCli implements Odo {
 
   @Override
   public boolean isServiceCatalogAvailable(OpenShiftClient client){
-    try {
-      ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-      NonNamespaceOperation<ClusterServicePlan, ClusterServicePlanList, DoneableClusterServicePlan, ClusterServicePlanResource> plans = sc.clusterServicePlans();
-      if (plans.list().getItems().isEmpty()) {
-        return false;
-      }
-    }catch (KubernetesClientException e){
-      return false;
-    }
-    return true;
+    return client.isAdaptable(ServiceCatalogClient.class);
   }
 
   @Override

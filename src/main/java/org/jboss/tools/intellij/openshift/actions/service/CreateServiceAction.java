@@ -12,11 +12,8 @@ package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
-import com.intellij.ui.treeStructure.Tree;
 import io.fabric8.openshift.client.OpenShiftClient;
-import java.awt.Component;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
@@ -31,8 +28,6 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CreateServiceAction extends OdoAction {
 

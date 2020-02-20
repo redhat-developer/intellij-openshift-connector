@@ -15,7 +15,6 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.awt.Component;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;

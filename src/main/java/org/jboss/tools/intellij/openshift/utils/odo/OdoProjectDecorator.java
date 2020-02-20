@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -282,6 +282,11 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void debug(String project, String application, String context, String component, Integer port) throws IOException {
         delegate.debug(project, application, context, component, port);
+    }
+
+    @Override
+    public boolean isServiceCatalogAvailable(OpenShiftClient client) {
+        return delegate.isServiceCatalogAvailable(client);
     }
 
     @Override

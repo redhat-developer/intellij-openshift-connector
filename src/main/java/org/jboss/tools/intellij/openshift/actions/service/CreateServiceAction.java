@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -12,12 +12,13 @@ package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -29,51 +30,70 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateServiceAction extends OdoAction {
-  public CreateServiceAction() {
-    super(ApplicationNode.class, ProjectNode.class);
-  }
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    final String applicationName;
-    String projectName;
-    if (selected instanceof ApplicationNode) {
-      applicationName = selected.toString();
-      projectName =  ((LazyMutableTreeNode)selected).getParent().toString();
-    } else { // selected is ProjectNode
-      applicationName = "";
-      projectName = selected.toString();
+    public CreateServiceAction() {
+        super(ApplicationNode.class, ProjectNode.class);
     }
-    CompletableFuture.runAsync(() -> {
-      try {
-        List<ServiceTemplate> templates = odo.getServiceTemplates();
-        if (!templates.isEmpty()) {
-          CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates, applicationName));
-          if (dialog.isOK()) {
-            createService(odo, projectName, dialog.getApplication(), dialog);
-            ((LazyMutableTreeNode)selected).reload();
-          }
-        } else {
-          UIHelper.executeInUI(() -> Messages.showWarningDialog("No templates available", "Create service"));
+
+    @Override
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
+        if (visible) {
+            ApplicationsRootNode rootNode = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
+            if (rootNode != null) {
+                OpenShiftClient client = rootNode.getClient();
+                try {
+                    Odo odo = rootNode.getOdo();
+                    return odo.isServiceCatalogAvailable(client);
+                } catch (IOException ex) {
+                    //silently catch the exception to make the action not visible
+                }
+            }
         }
-      } catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create service"));
-      }
-    });
-  }
-
-  private void createService(Odo odo, String project, String application, CreateServiceDialog dialog) throws IOException{
-    odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplate().getPlan(), dialog.getName());
-  }
-
-  protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {
-    CreateServiceDialog dialog = new CreateServiceDialog(null);
-    dialog.setServiceTemplates(templates.toArray(new ServiceTemplate[templates.size()]));
-    if (StringUtils.isNotEmpty(application)) {
-      dialog.setApplication(application);
+        return false;
     }
-    dialog.show();
-    return dialog;
-  }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        final String applicationName;
+        String projectName;
+        if (selected instanceof ApplicationNode) {
+            applicationName = selected.toString();
+            projectName = ((LazyMutableTreeNode) selected).getParent().toString();
+        } else { // selected is ProjectNode
+            applicationName = "";
+            projectName = selected.toString();
+        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                List<ServiceTemplate> templates = odo.getServiceTemplates();
+                if (!templates.isEmpty()) {
+                    CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates, applicationName));
+                    if (dialog.isOK()) {
+                        createService(odo, projectName, dialog.getApplication(), dialog);
+                        ((LazyMutableTreeNode) selected).reload();
+                    }
+                } else {
+                    UIHelper.executeInUI(() -> Messages.showWarningDialog("No templates available", "Create service"));
+                }
+            } catch (IOException e) {
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create service"));
+            }
+        });
+    }
+
+    private void createService(Odo odo, String project, String application, CreateServiceDialog dialog) throws IOException {
+        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplate().getPlan(), dialog.getName());
+    }
+
+    protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {
+        CreateServiceDialog dialog = new CreateServiceDialog(null);
+        dialog.setServiceTemplates(templates.toArray(new ServiceTemplate[templates.size()]));
+        if (StringUtils.isNotEmpty(application)) {
+            dialog.setApplication(application);
+        }
+        dialog.show();
+        return dialog;
+    }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -620,6 +620,11 @@ public class OdoCli implements Odo {
   }
 
   @Override
+  public boolean isServiceCatalogAvailable(OpenShiftClient client){
+    return client.isAdaptable(ServiceCatalogClient.class);
+  }
+
+  @Override
   public List<Project> getPreOdo10Projects(OpenShiftClient client) {
     return getProjects(client).stream().filter(project -> isLegacyProject(client, project)).collect(Collectors.toList());
   }
@@ -821,4 +826,5 @@ public class OdoCli implements Odo {
       return client.getMasterUrl() + "console";
     }
   }
+
 }

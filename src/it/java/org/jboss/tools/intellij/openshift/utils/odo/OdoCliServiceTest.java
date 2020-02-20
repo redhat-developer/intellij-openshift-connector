@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -26,7 +26,9 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            odo.createService(project, application, "postgresql-persistent", "default", service);
+            if (odo.isServiceCatalogAvailable(client)) {
+                odo.createService(project, application, "postgresql-persistent", "default", service);
+            }
         } finally {
             try {
                 odo.deleteProject(project);
@@ -41,10 +43,12 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            odo.createService(project, application, "postgresql-persistent", "default", service);
-            String template = odo.getServiceTemplate(client, project, application, service);
-            assertNotNull(template);
-            assertEquals("postgresql-persistent", template);
+            if (odo.isServiceCatalogAvailable(client)) {
+                odo.createService(project, application, "postgresql-persistent", "default", service);
+                String template = odo.getServiceTemplate(client, project, application, service);
+                assertNotNull(template);
+                assertEquals("postgresql-persistent", template);
+            }
         } finally {
             try {
                 odo.deleteProject(project);
@@ -59,8 +63,10 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            odo.createService(project, application, "postgresql-persistent", "default", service);
-            odo.deleteService(project, application, service);
+            if (odo.isServiceCatalogAvailable(client)) {
+                odo.createService(project, application, "postgresql-persistent", "default", service);
+                odo.deleteService(project, application, service);
+            }
         } finally {
             try {
                 odo.deleteProject(project);

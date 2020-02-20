@@ -45,7 +45,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
     * Credentials : Log in to the given server with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
 * `List catalog components` - List all available Component Types from OpenShift's Image Builder.
-* `List catalog services` - Lists all available Services e.g. mysql-persistent.
+* `List catalog services` - Lists all available Services e.g. mysql-persistent. Only visible if the Service Catalog is enabled on the cluster.
 * `New Project` - Create new project inside the OpenShift Cluster.
 * `About` - Provides the information about the OpenShift tools.
 * `Log out` - Logs out of the current OpenShift Cluster.
@@ -91,7 +91,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Open in Browser` - Open the exposed URL in browser.
    * `Push` - Push the source code to a Component.
    * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
-   * `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more
+   * `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more.
     details.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Delete` - Delete an existing Component from the cluster and removes the local config also.
@@ -140,7 +140,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 #### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.2/)
+* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
 
 > If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically. 
 The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.

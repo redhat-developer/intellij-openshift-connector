@@ -29,12 +29,13 @@ public abstract class LoggedInClusterAction extends OdoAction {
     Component comp = getTree(e);
     if (comp instanceof Tree) {
       TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
-      Object selected = selectPath.getLastPathComponent();
-      if (selected instanceof ApplicationsRootNode) {
-        e.getPresentation().setVisible(((ApplicationsRootNode)selected).isLogged());
+      if (selectPath != null) {
+        Object selected = selectPath.getLastPathComponent();
+        if (selected instanceof ApplicationsRootNode) {
+          e.getPresentation().setVisible(((ApplicationsRootNode) selected).isLogged());
+        }
       }
     }
-
 
   }
 }

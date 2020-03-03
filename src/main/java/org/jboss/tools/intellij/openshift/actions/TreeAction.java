@@ -39,7 +39,9 @@ public abstract class TreeAction extends AnAction {
 
         if (comp instanceof Tree) {
             TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
-            visible = isVisible(selectPath.getLastPathComponent());
+            if (selectPath != null) {
+                visible = isVisible(selectPath.getLastPathComponent());
+            }
         }
         e.getPresentation().setVisible(visible);
     }

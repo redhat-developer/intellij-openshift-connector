@@ -16,6 +16,12 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.ui.Messages;
+import com.twelvemonkeys.lang.Platform;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.DoneableSecret;
@@ -35,6 +41,8 @@ import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.VersionInfo;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
@@ -702,10 +710,23 @@ public class OdoCli implements Odo {
   @Override
   public String consoleURL() throws IOException {
     try {
-      ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
-      return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
-    } catch (KubernetesClientException e) {
+      VersionInfo version = client.getVersion();
+      if (version == null) { // means v4 ?
+        ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
+        return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+      } else if ("3".equals(version.getMajor())){
+        ConfigMap configMap = client.configMaps().inNamespace("openshift-web-console").withName("webconsole-config").get();
+        String config = configMap.getData().get("webconsole-config.yaml");
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        //read JSON like DOM Parser
+        return objectMapper.readTree(config).path("clusterInfo").path("consolePublicURL").asText();
+
+      }
       return client.getMasterUrl() + "console";
+    } catch (KubernetesClientException e) {
+      return client.getMasterUrl().toExternalForm();
     }
   }
+
 }

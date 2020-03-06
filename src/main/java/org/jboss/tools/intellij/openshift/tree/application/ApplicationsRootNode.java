@@ -15,32 +15,27 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoCli;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProjectDecorator;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
 import java.util.List;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.getWarningIcon;
-import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
 import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_ERROR_MESSAGE;
 import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_MESSAGE;
 import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_TITLE;
+import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
 import static org.jboss.tools.intellij.openshift.Constants.UPDATE_LABEL;
 
 public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTreeNode {

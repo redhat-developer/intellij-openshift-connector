@@ -11,12 +11,17 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
+import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
+import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
+import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import io.fabric8.kubernetes.api.model.AuthInfo;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import org.apache.commons.lang.StringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,11 +36,23 @@ import static org.mockito.Mockito.verify;
 public class ApplicationTreeModelConfigUpdateTest {
 
     private Project project;
+    private CodeInsightTestFixture myFixture;
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         this.project = mock(Project.class);
+        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
+        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
+        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
+        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
+        myFixture.setUp();
     }
+
+    @After
+    public void after() throws Exception {
+        myFixture.tearDown();
+    }
+
 
     @Test
     public void shouldNotRefreshIfContextDoesntChange() {

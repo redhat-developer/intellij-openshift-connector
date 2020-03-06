@@ -23,7 +23,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateStorageAction extends ContextAwareComponentAction {
@@ -50,9 +49,5 @@ public class CreateStorageAction extends ContextAwareComponentAction {
     CreateStorageDialog dialog = new CreateStorageDialog(null);
     dialog.show();
     return dialog;
-  }
-
-  public List<Integer> loadServicePorts(Odo odo, LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, LazyMutableTreeNode componentNode) {
-    return odo.getServicePorts(projectNode.toString(), applicationNode.toString(), componentNode.toString());
   }
 }

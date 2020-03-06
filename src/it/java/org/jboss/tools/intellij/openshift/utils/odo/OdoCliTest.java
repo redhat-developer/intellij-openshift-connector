@@ -46,12 +46,7 @@ public abstract class OdoCliTest extends BaseTest {
 
     @Before
     public void init() throws Exception {
-        previousTestDialog = Messages.setTestDialog(new TestDialog() {
-            @Override
-            public int show(String message) {
-                return 0;
-            }
-        });
+        previousTestDialog = Messages.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo();
     }
 

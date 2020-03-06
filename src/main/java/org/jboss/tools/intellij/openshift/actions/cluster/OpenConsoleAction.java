@@ -22,7 +22,6 @@ import java.io.IOException;
 public class OpenConsoleAction extends LoggedInClusterAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     try {
       String url = odo.consoleURL();
       BrowserUtil.open(url);

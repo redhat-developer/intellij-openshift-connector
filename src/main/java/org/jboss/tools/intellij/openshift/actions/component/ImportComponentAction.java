@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -59,7 +59,7 @@ public class ImportComponentAction extends CreateComponentAction {
         ApplicationsRootNode root = (ApplicationsRootNode)((LazyMutableTreeNode)selected).getRoot();
         ApplicationTreeModel rootModel = root.getModel();
         Project project = rootModel.getProject();
-        ComponentInfo info = odo.getComponentInfo(root.getClient(), projectNode.toString(), applicationNode.toString(), component.getName());
+        ComponentInfo info = odo.getComponentInfo(projectNode.toString(), applicationNode.toString(), component.getName());
         CreateComponentModel model = getModel(project, odo.getComponentTypes(), applicationNode.toString(), component.getName(), info);
         process((LazyMutableTreeNode) selected, odo, projectNode.toString(), Optional.of(applicationNode.toString()), rootModel, model);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -15,12 +15,10 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -49,10 +47,10 @@ public class LinkComponentAction extends OdoAction {
     return visible;
   }
 
-  protected String getSelectedTargetComponent(Odo odo, OpenShiftClient client, String project, String application, String component) {
+  protected String getSelectedTargetComponent(Odo odo, String project, String application, String component) {
     String targetComponent = null;
 
-    List<Component> components = odo.getComponents(client, project, application)
+    List<Component> components = odo.getComponents(project, application)
             .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
     if (!components.isEmpty()) {
       if (components.size() == 1) {
@@ -65,10 +63,10 @@ public class LinkComponentAction extends OdoAction {
     return targetComponent;
   }
 
-  protected Integer getSelectedPort(Odo odo, OpenShiftClient client, String project, String application, String component) {
+  protected Integer getSelectedPort(Odo odo, String project, String application, String component) {
     Integer port = null;
 
-    List<Integer> ports = odo.getServicePorts(client, project, application, component);
+    List<Integer> ports = odo.getServicePorts(project, application, component);
     if (!ports.isEmpty()) {
       if (ports.size() == 1) {
         port = ports.get(0);
@@ -89,12 +87,11 @@ public class LinkComponentAction extends OdoAction {
     Component sourceComponent = (Component) componentNode.getUserObject();
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
     CompletableFuture.runAsync(() -> {
       try {
-        String targetComponent = getSelectedTargetComponent(odo, client, projectNode.toString(), applicationNode.toString(), sourceComponent.getName());
+        String targetComponent = getSelectedTargetComponent(odo, projectNode.toString(), applicationNode.toString(), sourceComponent.getName());
           if (targetComponent != null) {
-            Integer port = getSelectedPort(odo, client, projectNode.toString(), applicationNode.toString(), targetComponent);
+            Integer port = getSelectedPort(odo, projectNode.toString(), applicationNode.toString(), targetComponent);
             if (port != null) {
               Notification notification = new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Linking component to " + targetComponent,
                       NotificationType.INFORMATION);

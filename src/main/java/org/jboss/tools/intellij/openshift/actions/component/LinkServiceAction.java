@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -15,13 +15,11 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.openshift.client.OpenShiftClient;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -56,10 +54,9 @@ public class LinkServiceAction extends OdoAction {
     Component component = (Component) componentNode.getUserObject();
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
     CompletableFuture.runAsync(() -> {
       try {
-        List<ServiceInstance> services = odo.getServices(client, projectNode.toString(), applicationNode.toString());
+        List<ServiceInstance> services = odo.getServices(projectNode.toString(), applicationNode.toString());
         if (!services.isEmpty()) {
           String service;
           if (services.size() == 1) {

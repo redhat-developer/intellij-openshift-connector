@@ -13,15 +13,14 @@ package org.jboss.tools.intellij.openshift.actions.service;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import org.apache.commons.lang.StringUtils;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 
 import javax.swing.tree.TreePath;
@@ -41,10 +40,9 @@ public class CreateServiceAction extends OdoAction {
         if (visible) {
             ApplicationsRootNode rootNode = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
             if (rootNode != null) {
-                OpenShiftClient client = rootNode.getClient();
                 try {
                     Odo odo = rootNode.getOdo();
-                    return odo.isServiceCatalogAvailable(client);
+                    return odo.isServiceCatalogAvailable();
                 } catch (IOException ex) {
                     //silently catch the exception to make the action not visible
                 }

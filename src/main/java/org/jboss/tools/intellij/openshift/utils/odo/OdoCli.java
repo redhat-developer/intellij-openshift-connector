@@ -65,7 +65,6 @@ import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import me.snowdrop.servicecatalog.api.model.ServiceInstanceFluent;
 import me.snowdrop.servicecatalog.api.model.ServiceInstanceList;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.NetworkUtils;
@@ -91,6 +90,7 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
+import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
@@ -231,7 +231,7 @@ public class OdoCli implements Odo {
    * ensure that $HOME/.odo/config.yaml file exists so thar we can use service related commands.
    */
   private void ensureDefaultOdoConfigFileExists() {
-    File dir = new File(HOME_FOLDER, Constants.PLUGIN_FOLDER);
+    File dir = new File(HOME_FOLDER, PLUGIN_FOLDER);
     File config = new File(dir, "config.yaml");
     try {
       if (!config.exists()) {

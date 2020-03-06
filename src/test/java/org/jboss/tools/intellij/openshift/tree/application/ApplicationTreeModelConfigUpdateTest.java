@@ -11,6 +11,8 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.TestDialog;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
@@ -37,6 +39,7 @@ public class ApplicationTreeModelConfigUpdateTest {
 
     private Project project;
     private CodeInsightTestFixture myFixture;
+    private TestDialog previousTestDialog;
 
     @Before
     public void before() throws Exception {
@@ -46,11 +49,13 @@ public class ApplicationTreeModelConfigUpdateTest {
         IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
         myFixture.setUp();
+        previousTestDialog = Messages.setTestDialog(TestDialog.OK);
     }
 
     @After
     public void after() throws Exception {
         myFixture.tearDown();
+        Messages.setTestDialog(previousTestDialog);
     }
 
 

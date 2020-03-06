@@ -15,6 +15,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
@@ -28,13 +29,18 @@ import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.LocalConfig;
+import org.jboss.tools.intellij.openshift.utils.odo.OkHttpClientProxy;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -46,6 +52,9 @@ import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 
 public class ApplicationTreeModel extends BaseTreeModel<Object>
         implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationTreeModel.class);
+
     private ApplicationsRootNode ROOT;
     private final Project project;
     private Config config;
@@ -175,9 +184,21 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
 
     @Override
     public List<Object> getChildren(Object o) {
+        final String HTTP = "http";
+
         if (o instanceof LazyMutableTreeNode) {
             LazyMutableTreeNode node = (LazyMutableTreeNode) o;
             if (!node.isLoaded()) {
+                final String url = node.toString();
+                final String lowerCaseUrl = url.toLowerCase();
+
+                if (lowerCaseUrl.startsWith(HTTP)) {
+                    try {
+                        ExecHelper.setProxyEnvironmentVariables(OkHttpClientProxy.buildEnvironmentVariables(url));
+                    } catch (URISyntaxException e) {
+                        LOG.error("Not valid URL " + url + " - details: " + e.getLocalizedMessage());
+                    }
+                }
                 node.load();
             }
             return Collections.list((Enumeration) ((MutableTreeNode)o).children());

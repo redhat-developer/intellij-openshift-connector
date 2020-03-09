@@ -28,7 +28,7 @@ public class ListServicesAction extends LoggedInClusterAction {
         super.update(e);
         boolean visible = e.getPresentation().isVisible();
         if (visible) {
-            Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+            Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
             if (selectedPath.isPresent()) {
                 Object selected = selectedPath.get().getLastPathComponent();
                 try {

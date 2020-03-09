@@ -34,7 +34,7 @@ public abstract class TreeAction extends AnAction {
     @Override
     public void update(AnActionEvent e) {
         boolean visible = false;
-        Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+        Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
         if (selectedPath.isPresent()) {
             visible = isVisible(selectedPath.get().getLastPathComponent());
         }
@@ -47,14 +47,14 @@ public abstract class TreeAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+        Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
         if (selectedPath.isPresent()) {
             Object selected = selectedPath.get().getLastPathComponent();
             actionPerformed(e, selectedPath.get(), selected);
         }
     }
 
-    public Optional<TreePath> getselectedPath(Tree tree) {
+    public Optional<TreePath> getSelectedPath(Tree tree) {
         return Optional.ofNullable(tree.getSelectionModel().getSelectionPath());
     }
 

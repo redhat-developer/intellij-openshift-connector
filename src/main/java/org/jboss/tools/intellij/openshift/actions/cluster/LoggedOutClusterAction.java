@@ -26,7 +26,7 @@ public abstract class LoggedOutClusterAction extends OdoAction {
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
-        Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+        Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
         if (selectedPath.isPresent()) {
             Object selected = selectedPath.get().getLastPathComponent();
             if (selected instanceof ApplicationsRootNode) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,11 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.TestDialog;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.BaseTest;
+import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
@@ -26,8 +29,6 @@ public abstract class OdoCliTest extends BaseTest {
 
     public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
     protected Odo odo;
-
-    protected OpenShiftClient client;
 
     protected Random random = new Random();
 
@@ -41,11 +42,17 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected static final String STORAGE_PREFIX = "stor";
 
+    private TestDialog previousTestDialog;
+
     @Before
     public void init() throws Exception {
-        System.setProperty(OdoCli.ODO_DOWNLOAD_FLAG, Boolean.TRUE.toString());
-        odo = OdoCli.get();
-        client = new DefaultOpenShiftClient(new ConfigBuilder().build());
+        previousTestDialog = Messages.setTestDialog(TestDialog.OK);
+        odo = OdoCliFactory.getInstance().getOdo();
+    }
+
+    @After
+    public void shutdown() {
+        Messages.setTestDialog(previousTestDialog);
     }
 
     private void pause() throws InterruptedException {

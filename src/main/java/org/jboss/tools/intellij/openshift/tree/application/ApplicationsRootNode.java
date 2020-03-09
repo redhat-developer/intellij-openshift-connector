@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -15,35 +15,30 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoCli;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProjectDecorator;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
 import java.util.List;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.getWarningIcon;
-import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
 import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_ERROR_MESSAGE;
 import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_MESSAGE;
 import static org.jboss.tools.intellij.openshift.Constants.CLUSTER_MIGRATION_TITLE;
+import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
 import static org.jboss.tools.intellij.openshift.Constants.UPDATE_LABEL;
 
 public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTreeNode {
-  private OpenShiftClient client = loadClient();
   private boolean logged;
   private final ApplicationTreeModel model;
   private Odo odo;
@@ -53,16 +48,9 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
   private static final Logger LOG = LoggerFactory.getLogger(ApplicationsRootNode.class);
 
   public ApplicationsRootNode(ApplicationTreeModel model) {
-    setUserObject(client.getMasterUrl());
+    odo = new OdoProjectDecorator(OdoCliFactory.getInstance().getOdo(), model);
+    setUserObject(odo.getMasterUrl());
     this.model = model;
-  }
-
-  public OpenShiftClient getClient() {
-    return client;
-  }
-
-  private OpenShiftClient loadClient() {
-    return new DefaultOpenShiftClient(new ConfigBuilder().build());
   }
 
   public boolean isLogged() {
@@ -74,9 +62,6 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
   }
 
   public Odo getOdo() throws IOException {
-    if (odo == null) {
-        odo = new OdoProjectDecorator(OdoCli.get(), model);
-    }
     return odo;
   }
 
@@ -88,9 +73,8 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
   public void load() {
     super.load();
     try {
-      Odo odo = getOdo();
-      odo.getProjects(client).stream().forEach(p -> add(new ProjectNode(p)));
-      checkMigrate(odo, odo.getPreOdo10Projects(client));
+      odo.getProjects().stream().forEach(p -> add(new ProjectNode(p)));
+      checkMigrate(odo, odo.getPreOdo10Projects());
       setLogged(true);
     } catch (Exception e) {
       LOG.error(e.getLocalizedMessage(), e);
@@ -109,7 +93,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
 
                     @Override
                     protected List<Exception> compute(@NotNull ProgressIndicator indicator) throws Exception {
-                      return odo.migrateProjects(client, preOdo10Projects, (project, kind) -> {
+                      return odo.migrateProjects(preOdo10Projects, (project, kind) -> {
                         indicator.setText("Migrating " + kind + " for project " + project);
                         indicator.setFraction(counter++ / (preOdo10Projects.size() * 8));
                       });
@@ -130,7 +114,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
 
   @Override
   public void reload() {
-    client = loadClient();
+    odo = OdoCliFactory.getInstance().getOdo();
     super.reload();
   }
 

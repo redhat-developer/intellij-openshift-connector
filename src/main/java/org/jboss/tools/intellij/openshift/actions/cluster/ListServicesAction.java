@@ -13,13 +13,12 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
-import io.fabric8.openshift.client.OpenShiftClient;
-import java.awt.Component;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
+import java.awt.Component;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,9 +35,8 @@ public class ListServicesAction extends LoggedInClusterAction {
             if (visible) {
                 try {
                     ApplicationsRootNode rootNode = (ApplicationsRootNode) selected;
-                    OpenShiftClient client = rootNode.getClient();
                     Odo odo = rootNode.getOdo();
-                    visible = odo.isServiceCatalogAvailable(client);
+                    visible = odo.isServiceCatalogAvailable();
                 } catch (IOException | NullPointerException ex) {
                     //silently catch the exception to make the action not visible
                     visible = false;

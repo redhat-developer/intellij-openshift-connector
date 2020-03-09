@@ -15,11 +15,9 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -44,10 +42,9 @@ public class LinkComponentAction extends OdoAction {
     ServiceNode serviceNode = (ServiceNode) selected;
     ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    OpenShiftClient client = ((ApplicationsRootNode)serviceNode.getRoot()).getClient();
     CompletableFuture.runAsync(() -> {
       try {
-        List<Component> components = getTargetComponents(odo, client, projectNode.toString(), applicationNode.toString());
+        List<Component> components = getTargetComponents(odo, projectNode.toString(), applicationNode.toString());
         if (!components.isEmpty()) {
           Component component;
           if (components.size() == 1) {
@@ -71,7 +68,7 @@ public class LinkComponentAction extends OdoAction {
     });
   }
 
-  private List<Component> getTargetComponents(Odo odo, OpenShiftClient client, String project, String application) {
-    return odo.getComponents(client, project, application).stream().filter(component -> component.getState() == ComponentState.PUSHED).collect(Collectors.toList());
+  private List<Component> getTargetComponents(Odo odo, String project, String application) {
+    return odo.getComponents(project, application).stream().filter(component -> component.getState() == ComponentState.PUSHED).collect(Collectors.toList());
   }
 }

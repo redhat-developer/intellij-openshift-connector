@@ -15,11 +15,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.ui.Messages;
-import com.twelvemonkeys.lang.Platform;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.DoneableSecret;
@@ -37,6 +32,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceFluent;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -58,6 +54,7 @@ import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteFluent;
 import io.fabric8.openshift.api.model.RouteList;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.BuildConfigResource;
 import io.fabric8.openshift.client.dsl.DeployableScalableResource;
@@ -67,40 +64,25 @@ import me.snowdrop.servicecatalog.api.model.DoneableServiceInstance;
 import me.snowdrop.servicecatalog.api.model.ServiceInstance;
 import me.snowdrop.servicecatalog.api.model.ServiceInstanceFluent;
 import me.snowdrop.servicecatalog.api.model.ServiceInstanceList;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.CompressorException;
-import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
-import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
-import org.jboss.tools.intellij.openshift.utils.ToolsConfig;
-import org.jetbrains.annotations.NotNull;
+import org.jboss.tools.intellij.openshift.utils.NetworkUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
@@ -108,6 +90,7 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
+import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
@@ -118,7 +101,8 @@ import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSIO
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
 public class OdoCli implements Odo {
-  public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
 
@@ -128,133 +112,28 @@ public class OdoCli implements Odo {
     JSON_MAPPER.registerModule(module);
   }
 
-  /**
-   * Home sub folder for the plugin
-   */
-  public static final String PLUGIN_FOLDER = ".odo";
+  private final String command;
+  private Map<String, String> envVars;
 
-  private String command;
+  private final OpenShiftClient client;
 
-  private OdoCli() throws IOException {
-    command = getCommand();
-  }
-
-  private static Odo INSTANCE;
-
-  public static final Odo get() throws IOException {
-    if (INSTANCE == null) {
-      INSTANCE = new OdoCli();
-    }
-    return INSTANCE;
-  }
-
-  public String getCommand() throws IOException {
-    if (command == null) {
-      command = getOdoCommand();
-    }
-    return command;
-  }
-
-  private String getOdoVersion(String tool, String command) {
-    String version = "";
+  OdoCli(String command) {
+    this.command = command;
+    this.client = new DefaultOpenShiftClient(new ConfigBuilder().build());
     try {
-      Pattern pattern = Pattern.compile(tool + " v(\\d+[\\.\\d+]*(-.*)?)\\s.*");
-      String output = ExecHelper.execute(command, false, "version");
-      try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-        version = reader.lines().
-                map(line -> pattern.matcher(line)).
-                filter(matcher -> matcher.matches()).
-                map(matcher -> matcher.group(1)).
-                findFirst().orElse("");
-      }
-    } catch (IOException e) {}
-    return version;
-  }
-
-  private boolean areCompatible(String version, String requiredVersion) {
-    return version.equals(requiredVersion);
-  }
-
-  private String getOdoCommand() throws IOException {
-    ToolsConfig.Tool odoTool = ConfigHelper.loadToolsConfig().getTools().get("odo");
-    ToolsConfig.Platform platform = odoTool.getPlatforms().get(Platform.os().id());
-    String command = platform.getCmdFileName();
-    String version = getOdoVersion("odo" , command);
-    if (!areCompatible(version, odoTool.getVersion())) {
-      Path path = Paths.get(HOME_FOLDER, PLUGIN_FOLDER, "cache", odoTool.getVersion(), command);
-      if (!Files.exists(path)) {
-        final Path dlFilePath = path.resolveSibling(platform.getDlFileName());
-        final String cmd = path.toString();
-        if (isDownloadAllowed(version, odoTool.getVersion())) {
-          command = ProgressManager.getInstance().run(new Task.WithResult<String, IOException>(null, "Downloading Odo", true) {
-            @Override
-            public String compute(@NotNull ProgressIndicator progressIndicator) throws IOException {
-              OkHttpClient client = new OkHttpClient();
-              Request request = new Request.Builder().url(platform.getUrl()).build();
-              Response response = client.newCall(request).execute();
-              downloadFile(response.body().byteStream(), dlFilePath, progressIndicator, response.body().contentLength());
-              if (progressIndicator.isCanceled()) {
-                throw new IOException("Interrupted");
-              } else {
-                uncompress(dlFilePath, cmd);
-                return cmd;
-              }
-            }
-          });
-        }
-      } else {
-        command = path.toString();
-      }
-    }
-    return command;
-  }
-
-  public static boolean isDownloadAllowed(String currentVersion, String requiredVersion) {
-    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || Messages.showYesNoCancelDialog(StringUtils.isEmpty(currentVersion)?"Odo not found , do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ", do you want to download odo ?", "Odo tool required", Messages.getQuestionIcon()) == Messages.YES;
-  }
-
-  private void uncompress(Path dlFilePath, String cmd) throws IOException {
-    try (InputStream input = new BufferedInputStream(Files.newInputStream(dlFilePath))) {
-      try (CompressorInputStream gzStream = new CompressorStreamFactory().createCompressorInputStream(input)) {
-          try (TarArchiveInputStream  tarStream = new TarArchiveInputStream(gzStream)) {
-            TarArchiveEntry entry = tarStream.getNextTarEntry();
-            if (entry != null) {
-              try (OutputStream output = new FileOutputStream(cmd)) {
-                IOUtils.copy(tarStream, output);
-              }
-              if (!new File(cmd).setExecutable(true)) {
-                throw new IOException("Can't set " + cmd + " as executable");
-              }
-            }
-          }
-      }
-    } catch (CompressorException e) {
-      throw new IOException(e);
-    }
-  }
-
-
-  private static void downloadFile(InputStream input, Path dlFileName, ProgressIndicator progressIndicator, long size) throws IOException {
-    byte[] buffer = new byte[4096];
-    Files.createDirectories(dlFileName.getParent());
-    try (OutputStream output = Files.newOutputStream(dlFileName)) {
-      int lg;
-      long accumulated = 0;
-      while (((lg = input.read(buffer)) > 0) && !progressIndicator.isCanceled()) {
-        output.write(buffer, 0, lg);
-        accumulated += lg;
-        progressIndicator.setFraction((double) accumulated / size);
-      }
+      this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
+    } catch (URISyntaxException e) {
+      this.envVars = Collections.emptyMap();
     }
   }
 
   @Override
-  public List<Project> getProjects(OpenShiftClient client) {
+  public List<Project> getProjects() {
     return client.projects().list().getItems();
   }
 
-  private static String execute(File workingDirectory, String command, String ...args) throws IOException {
-    String output = ExecHelper.execute(command, workingDirectory, args);
+  private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
+    String output = ExecHelper.execute(command, workingDirectory, envs, args);
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
       BinaryOperator<String> reducer = new BinaryOperator<String>() {
         private boolean notificationFound = false;
@@ -264,54 +143,54 @@ public class OdoCli implements Odo {
           if (s2.startsWith("---")) {
             notificationFound = true;
           }
-          return notificationFound?s:s+s2+"\n";
+          return notificationFound ? s : s + s2 + "\n";
         }
       };
       return reader.lines().reduce("", reducer);
     }
   }
 
-  private static String execute(String command, String ...args) throws IOException {
-    return execute(new File(HOME_FOLDER), command, args);
+  private static String execute(String command, Map<String, String> envs, String... args) throws IOException {
+    return execute(new File(HOME_FOLDER), command, envs, args);
   }
 
   @Override
   public void describeApplication(String project, String application) throws IOException {
-    ExecHelper.executeWithTerminal(command, "app", "describe", application, "--project", project);
+    ExecHelper.executeWithTerminal(envVars, command, "app", "describe", application, "--project", project);
   }
 
   @Override
-  public void deleteApplication(OpenShiftClient client, String project, String application) throws IOException {
-    execute(command, "app", "delete", application, "-f", "--project", project);
+  public void deleteApplication(String project, String application) throws IOException {
+    execute(command, envVars, "app", "delete", application, "-f", "--project", project);
   }
 
   @Override
   public void push(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "push");
+    ExecHelper.executeWithTerminal(new File(context), envVars, command, "push");
   }
 
   @Override
   public void describeComponent(String project, String application, String context, String component) throws IOException {
     if (context != null) {
-      ExecHelper.executeWithTerminal(new File(context), command, "describe");
+      ExecHelper.executeWithTerminal(new File(context), envVars, command, "describe");
     } else {
-      ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, component);
+      ExecHelper.executeWithTerminal(envVars, command, "describe", "--project", project, "--app", application, component);
     }
 
   }
 
   @Override
   public void watch(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "watch");
+    ExecHelper.executeWithTerminal(new File(context), envVars, command, "watch");
   }
 
   @Override
   public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
     if (push) {
-      ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+      ExecHelper.executeWithTerminal(new File(source), envVars, command, "create", componentType + ':' + componentVersion, component,
               "--project", project, "--app", application, "--now");
     } else {
-      ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+      ExecHelper.executeWithTerminal(new File(source), envVars, command, "create", componentType + ':' + componentVersion, component,
               "--project", project, "--app", application);
     }
   }
@@ -320,18 +199,18 @@ public class OdoCli implements Odo {
   public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
     if (StringUtils.isNotBlank(reference)) {
       if (push) {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                 "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
       } else {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                 "--git", source, "--ref", reference, "--project", project, "--app", application);
       }
     } else {
       if (push) {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                 "--git", source, "--project", project, "--app", application, "--now");
       } else {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                 "--git", source, "--project", project, "--app", application);
       }
     }
@@ -340,10 +219,10 @@ public class OdoCli implements Odo {
   @Override
   public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
     if (push) {
-      ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+      ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
               "--binary", source, "--project", project, "--app", application, "--now");
     } else {
-      ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+      ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
               "--binary", source, "--project", project, "--app", application);
     }
   }
@@ -366,32 +245,33 @@ public class OdoCli implements Odo {
   @Override
   public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
     ensureDefaultOdoConfigFileExists();
-    ExecHelper.executeWithTerminal(new File(HOME_FOLDER), command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
+    ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
   }
 
 
   @Override
-  public String getServiceTemplate(OpenShiftClient client, String project, String application, String service) {
+  public String getServiceTemplate(String project, String application, String service) {
     ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
     return sc.serviceInstances().inNamespace(project).withName(service).get().getMetadata().getLabels().get(NAME_LABEL);
   }
 
   @Override
   public void deleteService(String project, String application, String service) throws IOException {
-    execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
+    execute(command, envVars, "service", "delete", "--project", project, "--app", application, service, "-f");
   }
 
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
-    return JSON_MAPPER.readValue(execute(command, "catalog", "list", "components", "-o", "json"), new TypeReference<List<ComponentType>>() {});
+    return JSON_MAPPER.readValue(execute(command, envVars, "catalog", "list", "components", "-o", "json"), new TypeReference<List<ComponentType>>() {
+    });
   }
 
   private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
       return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
-        .map(s -> s.split("\\|"))
-        .map(mapper)
-        .collect(Collectors.toList());
+              .map(s -> s.split("\\|"))
+              .map(mapper)
+              .collect(Collectors.toList());
     }
   }
 
@@ -411,17 +291,17 @@ public class OdoCli implements Odo {
 
   @Override
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
-    return loadList(execute(command, "catalog", "list", "services"), this::toServiceTemplate);
+    return loadList(execute(command, envVars, "catalog", "list", "services"), this::toServiceTemplate);
   }
 
   @Override
   public void describeServiceTemplate(String template) throws IOException {
     ensureDefaultOdoConfigFileExists();
-    ExecHelper.executeWithTerminal(command, "catalog", "describe", "service", template);
+    ExecHelper.executeWithTerminal(envVars, command, "catalog", "describe", "service", template);
   }
 
   @Override
-  public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
+  public List<Integer> getServicePorts(String project, String application, String component) {
     Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
     return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());
   }
@@ -430,7 +310,7 @@ public class OdoCli implements Odo {
     List<URL> result = new ArrayList<>();
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
-      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol")?item.get("spec").get("protocol").asText():"", item.get("spec").has("host")?item.get("spec").get("host").asText():"", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
+      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
     } catch (IOException e) {
     }
     return result;
@@ -441,10 +321,10 @@ public class OdoCli implements Odo {
     String output;
     try {
       if (context != null) {
-        output = execute(new File(context), command, "url", "list", "-o", "json");
+        output = execute(new File(context), command, envVars, "url", "list", "-o", "json");
       } else {
         ensureDefaultOdoConfigFileExists();
-        output = execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
+        output = execute(command, envVars, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
       }
 
     } catch (IOException e) {
@@ -454,7 +334,7 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component) throws IOException {
+  public ComponentInfo getComponentInfo(String project, String application, String component) throws IOException {
     List<DeploymentConfig> DCs = client.deploymentConfigs().inNamespace(project).withLabel(COMPONENT_NAME_LABEL, component).withLabel(APP_LABEL, application).list().getItems();
     if (DCs.size() == 1) {
       DeploymentConfig deploymentConfig = DCs.get(0);
@@ -476,24 +356,24 @@ public class OdoCli implements Odo {
   @Override
   public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
     if (name != null && !name.isEmpty()) {
-      ExecHelper.executeWithTerminal(new File(context), command, "url", "create", name, "--port", port.toString());
+      ExecHelper.executeWithTerminal(new File(context), envVars, command, "url", "create", name, "--port", port.toString());
     } else {
-      ExecHelper.executeWithTerminal(new File(context), command, "url", "create", "--port", port.toString());
+      ExecHelper.executeWithTerminal(new File(context), envVars, command, "url", "create", "--port", port.toString());
     }
   }
 
   @Override
   public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
-    execute(new File(context), command, "url", "delete", "-f", name);
+    execute(new File(context), command, envVars, "url", "delete", "-f", name);
   }
 
   @Override
   public void undeployComponent(String project, String application, String context, String component) throws IOException {
-      if (context != null) {
-          execute(new File(context), command, "delete", "-f");
-      } else {
-          execute(command, "delete", "-f", "--project", project, "--app", application, component);
-      }
+    if (context != null) {
+      execute(new File(context), command, envVars, "delete", "-f");
+    } else {
+      execute(command, envVars, "delete", "-f", "--project", project, "--app", application, component);
+    }
   }
 
   @Override
@@ -508,36 +388,36 @@ public class OdoCli implements Odo {
 
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "log", "-f");
+    ExecHelper.executeWithTerminal(new File(context), envVars, command, "log", "-f");
   }
 
   @Override
   public void log(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "log");
+    ExecHelper.executeWithTerminal(new File(context), envVars, command, "log");
   }
 
   @Override
   public void createProject(String project) throws IOException {
-    execute(command, "project", "create", project);
+    execute(command, envVars, "project", "create", project);
   }
 
   @Override
   public void deleteProject(String project) throws IOException {
-    execute(command, "project", "delete", project, "-f");
+    execute(command, envVars, "project", "delete", project, "-f");
   }
 
   @Override
   public void login(String url, String userName, char[] password, String token) throws IOException {
     if (token == null || token.isEmpty()) {
-      execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
+      execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
     } else {
-      execute(command, "login", url, "-t", token, " --insecure-skip-tls-verify");
+      execute(command, envVars, "login", url, "-t", token, " --insecure-skip-tls-verify");
     }
   }
 
   @Override
   public void logout() throws IOException {
-    execute(command, "logout");
+    execute(command, envVars, "logout");
   }
 
   private static List<Application> parseApplications(String json) {
@@ -545,34 +425,35 @@ public class OdoCli implements Odo {
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
       root.get("items").forEach(item -> result.add(Application.of(item.get("metadata").get("name").asText())));
-    } catch (IOException e) {}
+    } catch (IOException e) {
+    }
     return result;
   }
 
   @Override
   public List<Application> getApplications(String project) throws IOException {
-    return parseApplications(execute(command, "app", "list", "--project", project, "-o", "json"));
+    return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json"));
   }
 
   @Override
-  public List<Component> getComponents(OpenShiftClient client, String project, String application) {
+  public List<Component> getComponents(String project, String application) {
     return client.deploymentConfigs().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems().stream().map(dc -> Component.of(KubernetesLabels.getComponentName(dc))).collect(Collectors.toList());
   }
 
   @Override
-  public List<ServiceInstance> getServices(OpenShiftClient client, String project, String application) {
+  public List<ServiceInstance> getServices(String project, String application) {
     ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
     return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
   }
 
   protected LabelSelector getLabelSelector(String application, String component) {
     return new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application)
-      .addToMatchLabels(KubernetesLabels.COMPONENT_NAME_LABEL, component)
-      .build();
+            .addToMatchLabels(KubernetesLabels.COMPONENT_NAME_LABEL, component)
+            .build();
   }
 
   @Override
-  public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
+  public List<Storage> getStorages(String project, String application, String component) {
     return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
             .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
                     map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());
@@ -581,68 +462,74 @@ public class OdoCli implements Odo {
 
   @Override
   public void listComponents() throws IOException {
-    ExecHelper.executeWithTerminal(command, "catalog", "list", "components");
+    ExecHelper.executeWithTerminal(envVars, command, "catalog", "list", "components");
   }
 
   @Override
   public void listServices() throws IOException {
-    ExecHelper.executeWithTerminal(command, "catalog", "list", "services");
+    ExecHelper.executeWithTerminal(envVars, command, "catalog", "list", "services");
   }
 
   @Override
   public void about() throws IOException {
-    ExecHelper.executeWithTerminal(command, "version");
+    ExecHelper.executeWithTerminal(envVars, command, "version");
   }
 
   @Override
   public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
-    execute(new File(context), command, "storage", "create", name, "--path", mountPath, "--size", storageSize);
+    execute(new File(context), command, envVars, "storage", "create", name, "--path", mountPath, "--size", storageSize);
   }
 
   @Override
   public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
-    execute(new File(context), command, "storage", "delete", storage, "-f");
+    execute(new File(context), command, envVars, "storage", "delete", storage, "-f");
   }
 
   @Override
   public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
     if (port != null) {
-      execute(new File(context), command, "link", source, "--port", port.toString(), "--wait");
+      execute(new File(context), command, envVars, "link", source, "--port", port.toString(), "--wait");
     } else {
-      execute(new File(context), command, "link", source, "--wait");
+      execute(new File(context), command, envVars, "link", source, "--wait");
     }
   }
 
   @Override
   public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), false, command, "debug", "port-forward",
-        "--local-port", port.toString());
+    ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "debug", "port-forward",
+            "--local-port", port.toString());
   }
 
   @Override
-  public boolean isServiceCatalogAvailable(OpenShiftClient client){
+  public boolean isServiceCatalogAvailable() {
     return client.isAdaptable(ServiceCatalogClient.class);
   }
 
   @Override
-  public List<Project> getPreOdo10Projects(OpenShiftClient client) {
-    return getProjects(client).stream().filter(project -> isLegacyProject(client, project)).collect(Collectors.toList());
+  public java.net.URL getMasterUrl() {
+    return client.getMasterUrl();
   }
 
-  private boolean isLegacyProject(OpenShiftClient client, Project project) {
+  @Override
+  public List<Project> getPreOdo10Projects() {
+    return getProjects().stream().filter(project -> isLegacyProject(project)).collect(Collectors.toList());
+  }
+
+  private boolean isLegacyProject(Project project) {
     boolean hasLegacyResources = !client.deploymentConfigs().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
     if (!hasLegacyResources) {
       try {
         hasLegacyResources = !client.adapt(ServiceCatalogClient.class).serviceInstances().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
-      } catch (Exception e) {}
+      } catch (Exception e) {
+      }
     }
     return hasLegacyResources;
   }
 
   @Override
-  public List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects, BiConsumer<String, String> reporter) {
+  public List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter) {
     List<Exception> exceptions = new ArrayList<>();
-    for(Project project : projects) {
+    for (Project project : projects) {
       reporter.accept(project.getMetadata().getName(), "deployment configs");
       migrateDCs(client.deploymentConfigs().inNamespace(project.getMetadata().getName()), exceptions);
       reporter.accept(project.getMetadata().getName(), "routes");
@@ -690,7 +577,7 @@ public class OdoCli implements Odo {
 
   private void migrateDCs(NonNamespaceOperation<DeploymentConfig, DeploymentConfigList, DoneableDeploymentConfig, DeployableScalableResource<DeploymentConfig, DoneableDeploymentConfig>> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           DeploymentConfigFluent.MetadataNested<DoneableDeploymentConfig> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -707,7 +594,7 @@ public class OdoCli implements Odo {
 
   private void migrateRoutes(NonNamespaceOperation<Route, RouteList, DoneableRoute, Resource<Route, DoneableRoute>> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           RouteFluent.MetadataNested<DoneableRoute> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -723,7 +610,7 @@ public class OdoCli implements Odo {
 
   private void migrateBuildConfigs(NonNamespaceOperation<BuildConfig, BuildConfigList, DoneableBuildConfig, BuildConfigResource<BuildConfig, DoneableBuildConfig, Void, Build>> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           BuildConfigFluent.MetadataNested<DoneableBuildConfig> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -739,7 +626,7 @@ public class OdoCli implements Odo {
 
   private void migrateImageStreams(NonNamespaceOperation<ImageStream, ImageStreamList, DoneableImageStream, Resource<ImageStream, DoneableImageStream>> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           ImageStreamFluent.MetadataNested<DoneableImageStream> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -755,7 +642,7 @@ public class OdoCli implements Odo {
 
   private void migrateServices(NonNamespaceOperation<Service, ServiceList, DoneableService, Resource<Service, DoneableService>> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           ServiceFluent.MetadataNested<DoneableService> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -787,7 +674,7 @@ public class OdoCli implements Odo {
 
   private void migrateSecrets(NonNamespaceOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           SecretFluent.MetadataNested<DoneableSecret> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -803,7 +690,7 @@ public class OdoCli implements Odo {
 
   private void migrateServiceInstances(NonNamespaceOperation<ServiceInstance, ServiceInstanceList, DoneableServiceInstance, ServiceInstanceResource> operation, List<Exception> exceptions) {
     try {
-      for(HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
+      for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {
           ServiceInstanceFluent.MetadataNested<DoneableServiceInstance> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
           editLabels(edit.getLabels());
@@ -818,7 +705,7 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public String consoleURL(OpenShiftClient client) throws IOException {
+  public String consoleURL() throws IOException {
     try {
       ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
       return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
@@ -826,5 +713,4 @@ public class OdoCli implements Odo {
       return client.getMasterUrl() + "console";
     }
   }
-
 }

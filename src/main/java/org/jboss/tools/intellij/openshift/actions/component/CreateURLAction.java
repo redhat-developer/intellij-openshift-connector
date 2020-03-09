@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -12,15 +12,14 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.tree.application.*;
+import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.ui.url.CreateURLDialog;
+import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -50,8 +49,7 @@ public class CreateURLAction extends OdoAction {
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        final OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
-        if (createURL(odo, client, projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName())) {
+        if (createURL(odo, projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName())) {
           componentNode.reload();
         }
       } catch (IOException e) {
@@ -60,13 +58,13 @@ public class CreateURLAction extends OdoAction {
     });
   }
 
-  public static List<Integer> loadServicePorts(Odo odo, OpenShiftClient client, String project, String application, String component) {
-    return odo.getServicePorts(client, project, application, component);
+  public static List<Integer> loadServicePorts(Odo odo, String project, String application, String component) {
+    return odo.getServicePorts(project, application, component);
   }
 
-  public static boolean createURL(Odo odo, OpenShiftClient client, String project, String application, String context, String name) throws IOException {
+  public static boolean createURL(Odo odo, String project, String application, String context, String name) throws IOException {
     boolean done = false;
-    List<Integer> ports = loadServicePorts(odo, client, project, application, name);
+    List<Integer> ports = loadServicePorts(odo, project, application, name);
     if (!ports.isEmpty()) {
       CreateURLDialog dialog = UIHelper.executeInUI(() -> {
         CreateURLDialog dialog1 = new CreateURLDialog(null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -31,7 +31,7 @@ public class ComponentNode extends LazyMutableTreeNode implements IconTreeNode {
       try {
           Odo odo = clusterNode.getOdo();
           try {
-            odo.getStorages(clusterNode.getClient(), getParent().getParent().toString(), getParent().toString(), component.getName()).forEach(storage -> add(new PersistentVolumeClaimNode(storage)));
+            odo.getStorages(getParent().getParent().toString(), getParent().toString(), component.getName()).forEach(storage -> add(new PersistentVolumeClaimNode(storage)));
           } catch (KubernetesClientException e) {}
           try {
             odo.listURLs(getParent().getParent().toString(), getParent().toString(), component.getPath(), component.getName()).forEach(url -> add(new URLNode(url)));

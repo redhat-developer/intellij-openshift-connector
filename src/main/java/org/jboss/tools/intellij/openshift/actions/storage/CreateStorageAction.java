@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -12,10 +12,8 @@ package org.jboss.tools.intellij.openshift.actions.storage;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.jboss.tools.intellij.openshift.actions.component.ContextAwareComponentAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.ui.storage.CreateStorageDialog;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
@@ -25,7 +23,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateStorageAction extends ContextAwareComponentAction {
@@ -52,10 +49,5 @@ public class CreateStorageAction extends ContextAwareComponentAction {
     CreateStorageDialog dialog = new CreateStorageDialog(null);
     dialog.show();
     return dialog;
-  }
-
-  public List<Integer> loadServicePorts(Odo odo, LazyMutableTreeNode projectNode, LazyMutableTreeNode applicationNode, LazyMutableTreeNode componentNode) {
-    final OpenShiftClient client = ((ApplicationsRootNode)componentNode.getRoot()).getClient();
-    return odo.getServicePorts(client, projectNode.toString(), applicationNode.toString(), componentNode.toString());
   }
 }

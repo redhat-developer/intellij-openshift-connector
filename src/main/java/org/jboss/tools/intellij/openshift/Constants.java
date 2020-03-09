@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -32,4 +32,8 @@ public class Constants {
     public static final String OCP4_CONFIG_NAMESPACE = "openshift-config-managed";
     public static final String OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME = "console-public";
     public static final String OCP4_CONSOLE_URL_KEY_NAME = "consoleURL";
+    /**
+     * Home sub folder for the plugin
+     */
+    public static final String PLUGIN_FOLDER = ".odo";
 }

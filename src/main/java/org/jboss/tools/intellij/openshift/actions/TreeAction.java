@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -16,11 +16,10 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.ui.treeStructure.Tree;
 
 import javax.swing.tree.TreePath;
-import java.awt.Component;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class TreeAction extends AnAction {
-
 
     private Class[] filters;
 
@@ -35,13 +34,9 @@ public abstract class TreeAction extends AnAction {
     @Override
     public void update(AnActionEvent e) {
         boolean visible = false;
-        Component comp = getTree(e);
-
-        if (comp instanceof Tree) {
-            TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
-            if (selectPath != null) {
-                visible = isVisible(selectPath.getLastPathComponent());
-            }
+        Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+        if (selectedPath.isPresent()) {
+            visible = isVisible(selectedPath.get().getLastPathComponent());
         }
         e.getPresentation().setVisible(visible);
     }
@@ -50,13 +45,17 @@ public abstract class TreeAction extends AnAction {
         return Stream.of(filters).anyMatch(cl -> cl.isAssignableFrom(selected.getClass()));
     }
 
-
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent) {
-        Tree tree = getTree(anActionEvent);
-        TreePath selectedPath = tree.getSelectionModel().getSelectionPath();
-        Object selected = selectedPath.getLastPathComponent();
-        actionPerformed(anActionEvent, selectedPath, selected);
+    public void actionPerformed(AnActionEvent e) {
+        Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+        if (selectedPath.isPresent()) {
+            Object selected = selectedPath.get().getLastPathComponent();
+            actionPerformed(e, selectedPath.get(), selected);
+        }
+    }
+
+    public Optional<TreePath> getselectedPath(Tree tree) {
+        return Optional.ofNullable(tree.getSelectionModel().getSelectionPath());
     }
 
     public abstract void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected);

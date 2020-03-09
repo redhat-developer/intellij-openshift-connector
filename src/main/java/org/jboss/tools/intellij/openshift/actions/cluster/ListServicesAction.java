@@ -12,14 +12,13 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
-import java.awt.Component;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ListServicesAction extends LoggedInClusterAction {
@@ -27,12 +26,11 @@ public class ListServicesAction extends LoggedInClusterAction {
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
-        Component comp = getTree(e);
-        if (comp instanceof Tree) {
-            TreePath selectPath = ((Tree) comp).getSelectionModel().getSelectionPath();
-            Object selected = selectPath.getLastPathComponent();
-            boolean visible = e.getPresentation().isVisible();
-            if (visible) {
+        boolean visible = e.getPresentation().isVisible();
+        if (visible) {
+            Optional<TreePath> selectedPath = getselectedPath(getTree(e));
+            if (selectedPath.isPresent()) {
+                Object selected = selectedPath.get().getLastPathComponent();
                 try {
                     ApplicationsRootNode rootNode = (ApplicationsRootNode) selected;
                     Odo odo = rootNode.getOdo();
@@ -42,8 +40,8 @@ public class ListServicesAction extends LoggedInClusterAction {
                     visible = false;
                 }
             }
-            e.getPresentation().setVisible(visible);
         }
+        e.getPresentation().setVisible(visible);
     }
 
 

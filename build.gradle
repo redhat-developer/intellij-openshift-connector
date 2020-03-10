@@ -53,8 +53,8 @@ task integrationTest(type: Test) {
 }
 
 dependencies {
-    compile 'io.fabric8:openshift-client:3.2.0'
-    compile 'me.snowdrop:servicecatalog-client:1.0.1'
+    compile 'io.fabric8:openshift-client:4.8.0'
+    compile 'me.snowdrop:servicecatalog-client:1.1.1'
     compile 'org.apache.commons:commons-compress:1.19'
     compile 'org.apache.commons:commons-exec:1.3'
     compile 'org.apache.commons:commons-lang3:3.9'

@@ -36,6 +36,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.api.model.BuildConfigFluent;
@@ -58,12 +59,12 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.BuildConfigResource;
 import io.fabric8.openshift.client.dsl.DeployableScalableResource;
-import me.snowdrop.servicecatalog.api.client.ServiceCatalogClient;
-import me.snowdrop.servicecatalog.api.client.internal.ServiceInstanceResource;
-import me.snowdrop.servicecatalog.api.model.DoneableServiceInstance;
-import me.snowdrop.servicecatalog.api.model.ServiceInstance;
-import me.snowdrop.servicecatalog.api.model.ServiceInstanceFluent;
-import me.snowdrop.servicecatalog.api.model.ServiceInstanceList;
+import io.fabric8.servicecatalog.api.model.DoneableServiceInstance;
+import io.fabric8.servicecatalog.api.model.ServiceInstance;
+import io.fabric8.servicecatalog.api.model.ServiceInstanceFluent;
+import io.fabric8.servicecatalog.api.model.ServiceInstanceList;
+import io.fabric8.servicecatalog.client.ServiceCatalogClient;
+import io.fabric8.servicecatalog.client.internal.ServiceInstanceResource;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
@@ -640,7 +641,7 @@ public class OdoCli implements Odo {
     }
   }
 
-  private void migrateServices(NonNamespaceOperation<Service, ServiceList, DoneableService, Resource<Service, DoneableService>> operation, List<Exception> exceptions) {
+  private void migrateServices(NonNamespaceOperation<Service, ServiceList, DoneableService, ServiceResource<Service, DoneableService>> operation, List<Exception> exceptions) {
     try {
       for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
         try {

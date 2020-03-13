@@ -11,7 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import io.fabric8.openshift.api.model.Project;
-import me.snowdrop.servicecatalog.api.model.ServiceInstance;
+import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import java.io.IOException;
 import java.util.List;

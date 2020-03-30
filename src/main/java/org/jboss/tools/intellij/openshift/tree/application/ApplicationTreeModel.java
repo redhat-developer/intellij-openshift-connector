@@ -128,17 +128,19 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
     }
 
     private void addContext(VirtualFile modulePathFile) {
-        try {
-            VirtualFile file = modulePathFile.findFileByRelativePath(ODO_CONFIG_YAML);
-            if (file != null && file.isValid()) {
-                LocalConfig config = LocalConfig.load(new File(file.getPath()).toPath().toUri().toURL());
-                addContextToSettings(modulePathFile.getPath(), config.getComponentSettings());
-            }
-        } catch (IOException e) { }
+        if (modulePathFile != null && modulePathFile.isValid()) {
+            try {
+                VirtualFile file = modulePathFile.findFileByRelativePath(ODO_CONFIG_YAML);
+                if (file != null && file.isValid()) {
+                    LocalConfig config = LocalConfig.load(new File(file.getPath()).toPath().toUri().toURL());
+                    addContextToSettings(modulePathFile.getPath(), config.getComponentSettings());
+                }
+            } catch (IOException e) { }
+        }
     }
 
     public void addContext(String modulePath) {
-        addContext(LocalFileSystem.getInstance().findFileByPath(modulePath));
+        addContext(LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
     }
 
     private void removeContextFromSettings(String modulePath) {

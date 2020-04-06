@@ -32,6 +32,7 @@ import com.intellij.openapi.ui.Messages;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Objects;
+import java.util.Optional;
 import javax.swing.tree.TreePath;
 
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
@@ -90,15 +91,17 @@ public abstract class DebugComponentAction extends OdoAction {
         }
 
         RunManager runManager = RunManager.getInstance(project);
-        final Integer port = createOrFindPortFromConfiguration(runManager, component);
-        if (port == null) {
-            return;
+        final Optional<Integer> port = createOrFindPortFromConfiguration(runManager, component);
+        if (port.isPresent()) {
+            executeDebug(project, component, odo, applicationNode.toString(), projectNode.toString(), port.get());
         }
+    }
+
+    private void executeDebug(Project project, Component component, Odo odo, String applicationName,  String projectName , Integer port){
         ExecHelper.submit(() -> {
 
-            // test if the port is available before running odo,
-            // if not, it means odo is already running. //TODO use 'odo debug status'
-            if (isAvailable(port)) {
+            // test if the port is available before running odo
+            if (isAvailable(port) && checkOdoDebugStatus(component,odo,applicationName,projectName)) {
                 ProgressManager.getInstance().run(
                     new Task.Modal(project, "Starting odo", false) {
                         public void run(@NotNull ProgressIndicator indicator) {
@@ -107,20 +110,16 @@ public abstract class DebugComponentAction extends OdoAction {
                             indicator.setIndeterminate(true);
                             try {
                                 odo.debug(
-                                    projectNode.toString(),
-                                    applicationNode.toString(),
+                                    projectName,
+                                    applicationName,
                                     component.getPath(),
                                     component.getName(),
                                     port);
+
                             } catch (IOException e) {
                                 UIHelper.executeInUI(() -> Messages.showErrorDialog(
                                     "Error: " + e.getLocalizedMessage(), "Odo Debug"));
                                 return;
-                            }
-                            try {
-                                Thread.sleep(2000L);
-                            } catch (InterruptedException e) {
-                                LOG.error(e.getLocalizedMessage(), e);
                             }
                         }
                     });
@@ -151,7 +150,21 @@ public abstract class DebugComponentAction extends OdoAction {
 
     }
 
-    private Integer createOrFindPortFromConfiguration(RunManager runManager, Component component) {
+    private boolean checkOdoDebugStatus(Component component, Odo odo, String applicationName,  String projectName ) {
+        try {
+            odo.debugStatus(
+                    projectName,
+                    applicationName,
+                    component.getPath(),
+                    component.getName());
+            return true;
+        } catch (IOException e) {
+            LOG.error(e.getMessage(),e);
+            return false;
+        }
+    }
+
+    private Optional<Integer> createOrFindPortFromConfiguration(RunManager runManager, Component component) {
         ConfigurationType configurationType = getConfigurationType();
         String configurationName = component.getName() + " Remote Debug";
         Integer port;
@@ -175,19 +188,19 @@ public abstract class DebugComponentAction extends OdoAction {
             } catch (IOException e) {
                 Messages.showErrorDialog(
                     "Error: " + e.getLocalizedMessage(), "Odo Debug");
-                return null;
+                return Optional.empty();
             }
         } else {
             port = getPortFromConfiguration(runSettings.getConfiguration());
             if (port == -1) {
                 Messages.showErrorDialog(
                     "Error when retrieving local port from configuration.", "Odo Debug");
-                return null;
+                return Optional.empty();
             }
 
         }
         runManager.setSelectedConfiguration(runSettings);
-        return port;
+        return Optional.of(port);
     }
 
     private boolean isAvailable(Integer port) {

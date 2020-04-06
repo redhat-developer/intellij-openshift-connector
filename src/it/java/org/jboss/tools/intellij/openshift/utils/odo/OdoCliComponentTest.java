@@ -195,6 +195,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             ExecHelper.submit(() -> {
                 try {
                     odo.debug(project, application, COMPONENT_PATH, component,  debugPort);
+                    odo.debugStatus(project,application, COMPONENT_PATH, component);
                 } catch (IOException e) {
                     fail("Should not raise Exception");
                 }

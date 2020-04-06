@@ -481,6 +481,20 @@ public class OdoCli implements Odo {
   }
 
   @Override
+  public String debugStatus(String project, String application, String context, String component) throws IOException {
+    String output = ExecHelper.execute(command, new File(context), envVars, "debug","info");
+    /*try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+      version = reader.lines().
+              map(line -> pattern.matcher(line)).
+              filter(matcher -> matcher.matches()).
+              map(matcher -> matcher.group(1)).
+              findFirst().orElse("");
+    }*/
+    return output;
+  }
+
+
+  @Override
   public boolean isServiceCatalogAvailable() {
     return client.isAdaptable(ServiceCatalogClient.class);
   }

@@ -102,6 +102,8 @@ public interface Odo {
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
 
+    String debugStatus(String project, String application, String context, String component) throws IOException;
+
     boolean isServiceCatalogAvailable();
 
     java.net.URL getMasterUrl();

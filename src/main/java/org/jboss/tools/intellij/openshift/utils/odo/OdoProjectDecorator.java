@@ -284,6 +284,11 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
+    public String debugStatus(String project, String application, String context, String component) throws IOException {
+       return delegate.debugStatus(project, application, context, component);
+    }
+
+    @Override
     public boolean isServiceCatalogAvailable() {
         return delegate.isServiceCatalogAvailable();
     }

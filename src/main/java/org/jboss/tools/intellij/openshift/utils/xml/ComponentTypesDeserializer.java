@@ -8,12 +8,13 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.utils.odo;
+package org.jboss.tools.intellij.openshift.utils.xml;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -14,18 +14,17 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<ServiceTemplate>> {
     public ServiceTemplatesDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ServiceTemplate.class));
     }
+
     @Override
     public List<ServiceTemplate> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         List<ServiceTemplate> result = new ArrayList<>();
@@ -43,7 +42,9 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
                     }
 
                     @Override
-                    public String getPlan() { return plan; }
+                    public String getPlan() {
+                        return plan;
+                    }
                 });
             }
         }

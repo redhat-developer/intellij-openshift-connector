@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -83,7 +84,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
@@ -107,16 +107,11 @@ public class OdoCli implements Odo {
 
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
 
-  static {
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentTypesDeserializer());
-    JSON_MAPPER.registerModule(module);
-  }
-
   private final String command;
-  private Map<String, String> envVars;
 
   private final OpenShiftClient client;
+
+  private Map<String, String> envVars;
 
   OdoCli(String command) {
     this.command = command;
@@ -126,6 +121,12 @@ public class OdoCli implements Odo {
     } catch (URISyntaxException e) {
       this.envVars = Collections.emptyMap();
     }
+  }
+
+  private ObjectMapper configureObjectMapper(final JsonDeserializer deserializer) {
+    final SimpleModule module = new SimpleModule();
+    module.addDeserializer(List.class, deserializer);
+    return JSON_MAPPER.registerModule(module);
   }
 
   @Override
@@ -177,7 +178,6 @@ public class OdoCli implements Odo {
     } else {
       ExecHelper.executeWithTerminal(envVars, command, "describe", "--project", project, "--app", application, component);
     }
-
   }
 
   @Override
@@ -263,36 +263,16 @@ public class OdoCli implements Odo {
 
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
-    return JSON_MAPPER.readValue(execute(command, envVars, "catalog", "list", "components", "-o", "json"), new TypeReference<List<ComponentType>>() {
-    });
-  }
-
-  private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-      return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
-              .map(s -> s.split("\\|"))
-              .map(mapper)
-              .collect(Collectors.toList());
-    }
-  }
-
-  private ServiceTemplate toServiceTemplate(String[] line) {
-    return new ServiceTemplate() {
-      @Override
-      public String getName() {
-        return line[0];
-      }
-
-      @Override
-      public String getPlan() {
-        return line[1];
-      }
-    };
+    return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
+            execute(command, envVars, "catalog", "list", "components", "-o", "json"),
+            new TypeReference<List<ComponentType>>() {});
   }
 
   @Override
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
-    return loadList(execute(command, envVars, "catalog", "list", "services"), this::toServiceTemplate);
+    return configureObjectMapper(new ServiceTemplatesDeserializer()).readValue(
+            execute(command, envVars, "catalog", "list", "services", "-o", "json"),
+            new TypeReference<List<ServiceTemplate>>() {});
   }
 
   @Override
@@ -458,7 +438,6 @@ public class OdoCli implements Odo {
     return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
             .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
                     map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());
-
   }
 
   @Override

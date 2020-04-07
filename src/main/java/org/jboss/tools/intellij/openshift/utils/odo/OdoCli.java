@@ -70,8 +70,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.NetworkUtils;
-import org.jboss.tools.intellij.openshift.utils.xml.ComponentTypesDeserializer;
-import org.jboss.tools.intellij.openshift.utils.xml.ServiceTemplatesDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

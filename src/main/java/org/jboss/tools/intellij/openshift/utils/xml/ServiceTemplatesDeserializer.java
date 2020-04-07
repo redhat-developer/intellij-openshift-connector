@@ -33,9 +33,8 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
         if (items != null) {
             for (JsonNode item : items) {
                 String name = item.get("metadata").get("name").asText();
-                String plan = "";
-                //List<String> versions = new ArrayList<>();
-                //item.get("spec").get("nonHiddenTags").forEach(node -> versions.add(node.textValue()));
+                //TODO manage plan lists.
+                String plan = item.get("spec").get("planList").get(0).asText();
                 result.add(new ServiceTemplate() {
 
                     @Override

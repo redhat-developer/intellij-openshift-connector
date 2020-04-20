@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
+import org.jboss.tools.intellij.openshift.Constants;
 
 import java.io.IOException;
 import java.util.List;
@@ -102,7 +103,7 @@ public interface Odo {
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
 
-    String debugStatus(String project, String application, String context, String component) throws IOException;
+    Constants.DebugStatus debugStatus(String project, String application, String context, String component) throws IOException;
 
     boolean isServiceCatalogAvailable();
 

@@ -67,6 +67,7 @@ import io.fabric8.servicecatalog.api.model.ServiceInstanceList;
 import io.fabric8.servicecatalog.client.ServiceCatalogClient;
 import io.fabric8.servicecatalog.client.internal.ServiceInstanceResource;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.NetworkUtils;
@@ -84,6 +85,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
@@ -100,6 +102,7 @@ import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_L
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
+import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public class OdoCli implements Odo {
 
@@ -481,16 +484,13 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public String debugStatus(String project, String application, String context, String component) throws IOException {
-    String output = ExecHelper.execute(command, new File(context), envVars, "debug","info");
-    /*try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-      version = reader.lines().
-              map(line -> pattern.matcher(line)).
-              filter(matcher -> matcher.matches()).
-              map(matcher -> matcher.group(1)).
-              findFirst().orElse("");
-    }*/
-    return output;
+  public DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
+    String output = ExecHelper.execute(command, new File(context), envVars, "debug", "info");
+    if (output.startsWith("Debug is not running"))
+      return DebugStatus.NOT_RUNNING;
+    else if (output.startsWith("Debug is running"))
+      return DebugStatus.RUNNING;
+    return DebugStatus.UNKNOWN;
   }
 
 

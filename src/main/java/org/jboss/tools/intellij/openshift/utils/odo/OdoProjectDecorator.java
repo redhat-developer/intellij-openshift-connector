@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 
 import java.io.IOException;
@@ -284,8 +285,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public String debugStatus(String project, String application, String context, String component) throws IOException {
-       return delegate.debugStatus(project, application, context, component);
+    public Constants.DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
+        return delegate.debugStatus(project, application, context, component);
     }
 
     @Override

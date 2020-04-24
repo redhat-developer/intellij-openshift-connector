@@ -67,7 +67,6 @@ import io.fabric8.servicecatalog.api.model.ServiceInstanceList;
 import io.fabric8.servicecatalog.client.ServiceCatalogClient;
 import io.fabric8.servicecatalog.client.internal.ServiceInstanceResource;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.NetworkUtils;
@@ -85,7 +84,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;

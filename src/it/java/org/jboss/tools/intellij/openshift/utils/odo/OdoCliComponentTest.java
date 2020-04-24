@@ -11,6 +11,8 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import java.net.ServerSocket;
+
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,6 +26,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.junit.runners.Parameterized.*;
+import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
@@ -187,14 +190,15 @@ public class OdoCliComponentTest extends OdoCliTest {
             odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
-            URL url = urls.get(0);
             int debugPort;
             try (ServerSocket serverSocket = new ServerSocket(0)) {
                 debugPort = serverSocket.getLocalPort();
             }
             ExecHelper.submit(() -> {
                 try {
-                    odo.debug(project, application, COMPONENT_PATH, component,  debugPort);
+                    odo.debug(project, application, COMPONENT_PATH, component, debugPort);
+                    DebugStatus status = odo.debugStatus(project, application, COMPONENT_PATH, component);
+                    assertEquals(DebugStatus.RUNNING, status);
                 } catch (IOException e) {
                     fail("Should not raise Exception");
                 }

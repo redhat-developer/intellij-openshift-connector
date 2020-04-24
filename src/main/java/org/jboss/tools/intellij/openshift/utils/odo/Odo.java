@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
+
 public interface Odo {
     List<Project> getProjects();
 
@@ -101,6 +103,8 @@ public interface Odo {
     String consoleURL() throws IOException;
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
+
+    DebugStatus debugStatus(String project, String application, String context, String component) throws IOException;
 
     boolean isServiceCatalogAvailable();
 

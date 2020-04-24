@@ -100,6 +100,7 @@ import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_L
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
+import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public class OdoCli implements Odo {
 
@@ -291,7 +292,10 @@ public class OdoCli implements Odo {
     List<URL> result = new ArrayList<>();
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
-      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
+      JsonNode items = root.get("items");
+      if (items != null) {
+        root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
+      }
     } catch (IOException e) {
     }
     return result;
@@ -479,6 +483,17 @@ public class OdoCli implements Odo {
     ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "debug", "port-forward",
             "--local-port", port.toString());
   }
+
+  @Override
+  public DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
+    String output = ExecHelper.execute(command, new File(context), envVars, "debug", "info");
+    if (output.startsWith("Debug is not running"))
+      return DebugStatus.NOT_RUNNING;
+    else if (output.startsWith("Debug is running"))
+      return DebugStatus.RUNNING;
+    return DebugStatus.UNKNOWN;
+  }
+
 
   @Override
   public boolean isServiceCatalogAvailable() {

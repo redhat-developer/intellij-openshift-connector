@@ -36,4 +36,8 @@ public class Constants {
      * Home sub folder for the plugin
      */
     public static final String PLUGIN_FOLDER = ".odo";
+
+    public enum DebugStatus {
+        RUNNING, NOT_RUNNING, UNKNOWN
+    }
 }

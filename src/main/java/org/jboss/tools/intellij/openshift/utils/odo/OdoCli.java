@@ -16,12 +16,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.ui.Messages;
-import com.twelvemonkeys.lang.Platform;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.DoneableSecret;
@@ -42,7 +36,6 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
@@ -98,6 +91,9 @@ import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
+import static org.jboss.tools.intellij.openshift.Constants.OCP3_CONFIG_NAMESPACE;
+import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
+import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_YAML_FILE_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
@@ -108,6 +104,7 @@ import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_L
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
+
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public class OdoCli implements Odo {
@@ -711,17 +708,13 @@ public class OdoCli implements Odo {
   public String consoleURL() throws IOException {
     try {
       VersionInfo version = client.getVersion();
-      if (version == null) { // means v4 ?
+      if (version == null || "4".equals(version.getMajor())) { // assuming null version is version 4
         ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
         return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
-      } else if ("3".equals(version.getMajor())){
-        ConfigMap configMap = client.configMaps().inNamespace("openshift-web-console").withName("webconsole-config").get();
-        String config = configMap.getData().get("webconsole-config.yaml");
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        //read JSON like DOM Parser
-        return objectMapper.readTree(config).path("clusterInfo").path("consolePublicURL").asText();
-
+      } else if ("3".equals(version.getMajor())) {
+        ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
+        String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
+        return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
       }
       return client.getMasterUrl() + "console";
     } catch (KubernetesClientException e) {

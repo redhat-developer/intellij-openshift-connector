@@ -299,7 +299,12 @@ public class OdoCli implements Odo {
       JsonNode root = JSON_MAPPER.readTree(json);
       JsonNode items = root.get("items");
       if (items != null) {
-        root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
+        items.forEach(item -> {
+          //odo incorrecly reports urls created with the web ui without names
+          if (item.get("metadata").has("name")) {
+            result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").has("port")?item.get("spec").get("port").asText():"0", item.get("status").get("state").asText()));
+          }
+        });
       }
     } catch (IOException e) {
     }

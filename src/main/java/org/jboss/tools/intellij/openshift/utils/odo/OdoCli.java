@@ -313,19 +313,11 @@ public class OdoCli implements Odo {
 
   @Override
   public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
-    String output;
-    try {
       if (context != null) {
-        output = execute(new File(context), command, envVars, "url", "list", "-o", "json");
+        return parseURLs(execute(new File(context), command, envVars, "url", "list", "-o", "json"));
       } else {
-        ensureDefaultOdoConfigFileExists();
-        output = execute(command, envVars, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
+        return Collections.emptyList();
       }
-
-    } catch (IOException e) {
-      output = "";
-    }
-    return parseURLs(output);
   }
 
   @Override

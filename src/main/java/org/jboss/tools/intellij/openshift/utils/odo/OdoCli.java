@@ -302,7 +302,9 @@ public class OdoCli implements Odo {
         items.forEach(item -> {
           //odo incorrecly reports urls created with the web ui without names
           if (item.get("metadata").has("name")) {
-            result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").has("port")?item.get("spec").get("port").asText():"0", item.get("status").get("state").asText()));
+            result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ?
+                    item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ?
+                    item.get("spec").get("host").asText() : "", item.get("spec").has("port")?item.get("spec").get("port").asText():"0", item.get("status").get("state").asText(), item.get("spec").get("secure").asBoolean()));
           }
         });
       }
@@ -341,12 +343,21 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
-    if (name != null && !name.isEmpty()) {
-      ExecHelper.executeWithTerminal(new File(context), envVars, command, "url", "create", name, "--port", port.toString());
-    } else {
-      ExecHelper.executeWithTerminal(new File(context), envVars, command, "url", "create", "--port", port.toString());
+  public void createURL(String project, String application, String context, String component, String name, Integer port,
+                        boolean secure) throws IOException {
+    List<String> args = new ArrayList<>();
+    args.add(command);
+    args.add("url");
+    args.add("create");
+    if (StringUtils.isNotEmpty(name)) {
+      args.add(name);
     }
+    args.add("--port");
+    args.add(port.toString());
+    if (secure) {
+      args.add("--secure");
+    }
+    ExecHelper.executeWithTerminal(new File(context), args.toArray(new String[args.size()]));
   }
 
   @Override

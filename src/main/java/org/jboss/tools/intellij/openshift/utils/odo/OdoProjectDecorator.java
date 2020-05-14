@@ -141,7 +141,7 @@ public class OdoProjectDecorator implements Odo {
         if (settings != null) {
             settings.getUrls().forEach(url -> {
                 if (urls.stream().noneMatch(url1 -> url1.getName().equals(url.getName()))) {
-                    urls.add(URL.of(url.getName(), null, null, url.getPort(), ""));
+                    urls.add(URL.of(url.getName(), null, null, url.getPort(), "", url.isSecure()));
                 }
             });
         }
@@ -154,8 +154,9 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
-        delegate.createURL(project, application, context, component, name, port);
+    public void createURL(String project, String application, String context, String component, String name,
+                          Integer port, boolean secure) throws IOException {
+        delegate.createURL(project, application, context, component, name, port, secure);
     }
 
     @Override

@@ -29,6 +29,6 @@ public class URLNode extends LazyMutableTreeNode implements IconTreeNode {
 
   @Override
   public String getIconName() {
-    return "/images/url-node.png";
+    return ((URL)userObject).isSecure()?"/images/url-node-secure.png":"/images/url-node.png";
   }
 }

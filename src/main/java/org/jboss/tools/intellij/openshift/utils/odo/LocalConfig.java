@@ -91,6 +91,9 @@ public class LocalConfig {
         @JsonProperty("Port")
         private String port;
 
+        @JsonProperty("Secure")
+        private boolean secure;
+
         public String getName() {
             return name;
         }
@@ -105,6 +108,14 @@ public class LocalConfig {
 
         public void setPort(String port) {
             this.port = port;
+        }
+
+        public boolean isSecure() {
+            return secure;
+        }
+
+        public void setSecure(boolean secure) {
+            this.secure = secure;
         }
     }
 

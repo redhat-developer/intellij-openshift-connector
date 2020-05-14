@@ -75,8 +75,9 @@ public class CreateURLAction extends OdoAction {
       if (dialog.isOK()) {
         Integer port = dialog.getSelectedPort();
         String urlName = dialog.getName();
+        boolean secure = dialog.isSecure();
         if (port != null) {
-          odo.createURL(project, application, context, name, urlName, port);
+          odo.createURL(project, application, context, name, urlName, port, secure);
           done = true;
         }
       }

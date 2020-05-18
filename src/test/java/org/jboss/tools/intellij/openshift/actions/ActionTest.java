@@ -179,21 +179,21 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   public void testActionOnNotPushedURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Not Pushed"));
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Not Pushed", false));
     AnAction action = getAction();
     action.update(event);
     verifyNotPushedURL(event.getPresentation().isVisible());
   }
 
   public void testActionOnPushedURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Pushed"));
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Pushed", false));
     AnAction action = getAction();
     action.update(event);
     verifyPushedURL(event.getPresentation().isVisible());
   }
 
   public void testActionOnLocallyDeleteURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Locally Deleted"));
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Locally Deleted", false));
     AnAction action = getAction();
     action.update(event);
     verifyLocallyDeletedURL(event.getPresentation().isVisible());

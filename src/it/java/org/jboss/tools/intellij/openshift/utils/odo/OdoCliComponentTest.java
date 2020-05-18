@@ -74,14 +74,13 @@ public class OdoCliComponentTest extends OdoCliTest {
         }
     }
 
-    @Test
-    public void checkCreateComponentAndCreateURL() throws IOException, InterruptedException {
+    private void checkCreateComponentAndCreateURL(boolean secure) throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
         } finally {
@@ -92,13 +91,22 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndCreateAndDeleteURL() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateURL() throws IOException, InterruptedException {
+        checkCreateComponentAndCreateURL(false);
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateSecureURL() throws IOException, InterruptedException {
+        checkCreateComponentAndCreateURL(true);
+    }
+
+    private void checkCreateComponentAndCreateAndDeleteURL(boolean secure) throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080);
+            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
             odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
@@ -109,6 +117,16 @@ public class OdoCliComponentTest extends OdoCliTest {
                 odo.deleteProject(project);
             } catch (IOException e) {}
         }
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateAndDeleteURL() throws IOException, InterruptedException {
+        checkCreateComponentAndCreateAndDeleteURL(false);
+    }
+
+    @Test
+    public void checkCreateComponentAndCreateAndDeleteSecureURL() throws IOException, InterruptedException {
+        checkCreateComponentAndCreateAndDeleteURL(true);
     }
 
     @Test
@@ -186,7 +204,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false);
             odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());

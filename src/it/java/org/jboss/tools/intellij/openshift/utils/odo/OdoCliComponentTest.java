@@ -74,7 +74,6 @@ public class OdoCliComponentTest extends OdoCliTest {
         }
     }
 
-    @Test
     private void checkCreateComponentAndCreateURL(boolean secure) throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();

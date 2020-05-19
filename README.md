@@ -140,7 +140,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 #### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
+* odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
 
 > If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically. 
 The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.

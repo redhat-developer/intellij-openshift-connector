@@ -60,7 +60,8 @@ public interface Odo {
 
     ComponentInfo getComponentInfo(String project, String application, String component) throws IOException;
 
-    void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException;
+    void createURL(String project, String application, String context, String component, String name, Integer port,
+                   boolean secure) throws IOException;
 
     void deleteURL(String project, String application, String context, String component, String name) throws IOException;
 

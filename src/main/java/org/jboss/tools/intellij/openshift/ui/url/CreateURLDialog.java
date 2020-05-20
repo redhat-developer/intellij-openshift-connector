@@ -24,6 +24,7 @@ public class CreateURLDialog extends DialogWrapper {
     private JPanel contentPane;
     private JTextField nameTextField;
     private JComboBox portsComboBox;
+    private JCheckBox secureCheckBox;
 
     public CreateURLDialog(Component parent) {
         super(null, false, IdeModalityType.IDE);
@@ -39,6 +40,10 @@ public class CreateURLDialog extends DialogWrapper {
 
     public String getName() {
         return nameTextField.getText();
+    }
+
+    public boolean isSecure() {
+        return secureCheckBox.isSelected();
     }
 
     public void setPorts(List<Integer> ports) {

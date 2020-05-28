@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        IJ: [IU-2019.1, IU-2019.2, IU-2019.3, IU-2020.1]
+        IJ: [IU-2019.1.4, IU-2019.2, IU-2019.3, IU-2020.1]
 
     steps:
     - name: Checkout Code

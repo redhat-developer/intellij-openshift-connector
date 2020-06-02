@@ -17,13 +17,16 @@ targetCompatibility = '1.8'
 intellij {
     version ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName 'org.jboss.tools.intellij.openshift'
-    if (ideaVersion.substring(3) != "2019.1.4") {
+    if (ideaVersion.substring(3) != "2019.1") {
         plugins 'java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS'
     } else {
         plugins 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS'
     }
 	updateSinceUntilBuild false
 }
+
+//with this option enabled, build will fail about IDEA expiration builds
+buildSearchableOptions.enabled = false
 
 publishPlugin {
     token    jetBrainsToken

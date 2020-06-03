@@ -195,7 +195,7 @@ public abstract class DebugComponentAction extends OdoAction {
                 serverSocket.close();
                 // delegates configuration of run configuration
                 initConfiguration(runSettings.getConfiguration(), port);
-                runSettings.setSingleton(true);
+                runSettings.getConfiguration().setAllowRunningInParallel(false);
                 runManager.addConfiguration(runSettings);
             } catch (IOException e) {
                 Messages.showErrorDialog(
@@ -232,7 +232,6 @@ public abstract class DebugComponentAction extends OdoAction {
         try {
             Odo odo = ((ApplicationsRootNode) componentNode.getRoot()).getOdo();
             LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-            ApplicationsRootNode root = (ApplicationsRootNode) applicationNode.getRoot();
             ComponentInfo info = odo.getComponentInfo(
                     projectNode.toString(),
                     applicationNode.toString(),

@@ -718,7 +718,9 @@ public class OdoCli implements Odo {
       VersionInfo version = client.getVersion();
       if (version == null || "4".equals(version.getMajor())) { // assuming null version is version 4
         ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
-        return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+        if (configMap != null) {
+          return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+        }
       } else if ("3".equals(version.getMajor())) {
         ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
         String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);

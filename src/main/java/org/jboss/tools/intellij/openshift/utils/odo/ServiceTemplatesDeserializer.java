@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,24 +27,27 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
     @Override
     public List<ServiceTemplate> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         List<ServiceTemplate> result = new ArrayList<>();
-        JsonNode items = root.get("items");
-        if (items != null) {
-            for (JsonNode item : items) {
-                String name = item.get("metadata").get("name").asText();
-                //TODO manage plan lists.
-                String plan = item.get("spec").get("planList").get(0).asText();
-                result.add(new ServiceTemplate() {
+        JsonNode services = root.get("services");
+        if (services != null) {
+            JsonNode items = services.get("items");
+            if (items != null) {
+                for (JsonNode item : items) {
+                    String name = item.get("metadata").get("name").asText();
+                    //TODO manage plan lists.
+                    String plan = item.get("spec").get("planList").get(0).asText();
+                    result.add(new ServiceTemplate() {
 
-                    @Override
-                    public String getName() {
-                        return name;
-                    }
+                        @Override
+                        public String getName() {
+                            return name;
+                        }
 
-                    @Override
-                    public String getPlan() {
-                        return plan;
-                    }
-                });
+                        @Override
+                        public String getPlan() {
+                            return plan;
+                        }
+                    });
+                }
             }
         }
         return result;

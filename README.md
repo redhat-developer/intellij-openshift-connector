@@ -3,6 +3,7 @@
 [plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/12030-openshift-connector-by-red-hat.svg
 [plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/12030-openshift-connector-by-red-hat.svg
 
+[![Build status](https://github.com/redhat-developer/intellij-openshift-connector/workflows/Java%20CI%20with%20Gradle/badge.svg)](https://github.com/redhat-developer/intellij-openshift-connector/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
 [![Build Status](https://travis-ci.com/redhat-developer/intellij-openshift-connector.svg?branch=master)](https://travis-ci.com/redhat-developer/intellij-openshift-connector)
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]

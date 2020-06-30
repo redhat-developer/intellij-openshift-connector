@@ -28,6 +28,7 @@ public class CreateServiceDialog extends DialogWrapper {
     private JTextField nameField;
     private JComboBox serviceTemplatesComboBox;
     private JTextField applicationTextField;
+    private JComboBox servicePlanComboBox;
 
     public CreateServiceDialog(Component parent) {
         super(null, false, IdeModalityType.IDE);
@@ -45,12 +46,24 @@ public class CreateServiceDialog extends DialogWrapper {
         serviceTemplatesComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                value = ((ServiceTemplate) value).getName() + " " + ((ServiceTemplate) value).getPlan();
+                value = ((ServiceTemplate) value).getName();
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             }
         });
+        serviceTemplatesComboBox.addItemListener(item -> templateSelected((ServiceTemplate) item.getItem()));
         serviceTemplatesComboBox.setModel(new DefaultComboBoxModel(serviceTemplates));
+        serviceTemplatesComboBox.setSelectedIndex(-1);
         serviceTemplatesComboBox.setSelectedIndex(0);
+    }
+
+    private void templateSelected(ServiceTemplate template) {
+        servicePlanComboBox.setModel(new DefaultComboBoxModel(template.getPlans().toArray()));
+        servicePlanComboBox.setSelectedIndex(0);
+        if (template.getPlans().size() < 2) {
+            servicePlanComboBox.setEnabled(false);
+        } else {
+            servicePlanComboBox.setEnabled(true);
+        }
     }
 
     public String getName() {
@@ -59,6 +72,10 @@ public class CreateServiceDialog extends DialogWrapper {
 
     public ServiceTemplate getServiceTemplate() {
         return (ServiceTemplate) serviceTemplatesComboBox.getSelectedItem();
+    }
+
+    public String getServiceTemplatePlan() {
+        return (String) servicePlanComboBox.getSelectedItem();
     }
 
     @NotNull

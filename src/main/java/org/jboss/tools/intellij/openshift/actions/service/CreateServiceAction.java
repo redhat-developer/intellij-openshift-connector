@@ -81,7 +81,7 @@ public class CreateServiceAction extends OdoAction {
     }
 
     private void createService(Odo odo, String project, String application, CreateServiceDialog dialog) throws IOException {
-        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplate().getPlan(), dialog.getName());
+        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplatePlan(), dialog.getName());
     }
 
     protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {

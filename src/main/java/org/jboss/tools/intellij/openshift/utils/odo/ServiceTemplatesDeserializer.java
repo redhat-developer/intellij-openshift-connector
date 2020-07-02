@@ -33,8 +33,10 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
             if (items != null) {
                 for (JsonNode item : items) {
                     String name = item.get("metadata").get("name").asText();
-                    //TODO manage plan lists.
-                    String plan = item.get("spec").get("planList").get(0).asText();
+                    List<String> plans = new ArrayList<>();
+                    for(JsonNode plan : item.get("spec").get("planList")) {
+                        plans.add(plan.asText());
+                    }
                     result.add(new ServiceTemplate() {
 
                         @Override
@@ -43,8 +45,8 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
                         }
 
                         @Override
-                        public String getPlan() {
-                            return plan;
+                        public List<String> getPlans() {
+                            return plans;
                         }
                     });
                 }

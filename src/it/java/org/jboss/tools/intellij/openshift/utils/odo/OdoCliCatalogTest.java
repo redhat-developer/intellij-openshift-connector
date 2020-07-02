@@ -32,4 +32,12 @@ public class OdoCliCatalogTest extends OdoCliTest {
             assertTrue(services.size() > 0);
         }
     }
+
+    @Test
+    public void checkMultiPlansServiceTemplates() throws IOException {
+        if (odo.isServiceCatalogAvailable()) {
+            List<ServiceTemplate> services = odo.getServiceTemplates();
+            assertTrue(services.stream().filter(template -> template.getPlans().size() > 1).count() > 0);
+        }
+    }
 }

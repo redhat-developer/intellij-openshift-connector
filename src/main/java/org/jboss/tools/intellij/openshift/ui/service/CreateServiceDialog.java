@@ -52,8 +52,9 @@ public class CreateServiceDialog extends DialogWrapper {
         });
         serviceTemplatesComboBox.addItemListener(item -> templateSelected((ServiceTemplate) item.getItem()));
         serviceTemplatesComboBox.setModel(new DefaultComboBoxModel(serviceTemplates));
-        serviceTemplatesComboBox.setSelectedIndex(-1);
-        serviceTemplatesComboBox.setSelectedIndex(0);
+        if (serviceTemplates.length > 0) {
+            templateSelected(serviceTemplates[0]);
+        }
     }
 
     private void templateSelected(ServiceTemplate template) {

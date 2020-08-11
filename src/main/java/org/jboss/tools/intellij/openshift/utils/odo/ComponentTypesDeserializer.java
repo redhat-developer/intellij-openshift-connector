@@ -28,7 +28,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     @Override
     public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         List<ComponentType> result = new ArrayList<>();
-        JsonNode items = root.get("items");
+        JsonNode items = root.get("s2iItems");
         if (items != null) {
             for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
                 JsonNode item = it.next();

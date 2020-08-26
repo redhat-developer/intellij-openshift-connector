@@ -23,4 +23,14 @@ public class CreateURLActionTest extends ActionTest {
     protected void verifyPushedComponent(boolean visible) {
         assertTrue(visible);
     }
+
+    @Override
+    protected void verifyNotPushedComponent(boolean visible) {
+        assertTrue(visible);;
+    }
+
+    @Override
+    protected void verifyNoContextComponent(boolean visible) {
+        assertTrue(visible);;
+    }
 }

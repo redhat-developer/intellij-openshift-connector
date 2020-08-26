@@ -30,15 +30,11 @@ public class OdoProjectDecorator implements Odo {
         this.model = model;
     }
 
-    private LocalConfig.ComponentSettings findComponent(String project, String application, String component) {
-        Optional<ApplicationTreeModel.ComponentDescriptor> comp = model.getComponents().values().stream().filter(c -> c.getProject().equals(project) && c.getApplication().equals(application) && c.getName().equals(component)).findFirst();
-        try {
-            if (comp.isPresent()) {
-                return comp.get().getSettings();
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
+    private ComponentDescriptor findComponent(String project, String application, String component) {
+        Optional<ComponentDescriptor> comp = model.getComponents().values().stream().filter(c -> c.getProject().equals(project) && c.getApplication().equals(application) && c.getName().equals(component)).findFirst();
+        if (comp.isPresent()) {
+            return comp.get();
+        } else {
             return null;
         }
     }
@@ -131,20 +127,22 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public List<Integer> getServicePorts(String project, String application, String component) {
-        return delegate.getServicePorts(project, application, component);
+        List<Integer> ports = delegate.getServicePorts(project, application, component);
+        model.getComponents().forEach((path, comp) -> {
+            if (comp.getProject().equals(project) && comp.getApplication().equals(application) && comp.getName().equals(component)) {
+                comp.getPorts().forEach(port -> {
+                    if (!ports.contains(port)) {
+                        ports.add(port);
+                    }
+                });
+            }
+        });
+        return ports;
     }
 
     @Override
     public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
         List<URL> urls = delegate.listURLs(project, application, context, component);
-        LocalConfig.ComponentSettings settings = findComponent(project, application, component);
-        if (settings != null) {
-            settings.getUrls().forEach(url -> {
-                if (urls.stream().noneMatch(url1 -> url1.getName().equals(url.getName()))) {
-                    urls.add(URL.of(url.getName(), null, null, url.getPort(), "", url.isSecure()));
-                }
-            });
-        }
         return urls;
     }
 
@@ -238,16 +236,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<Storage> getStorages(String project, String application, String component) {
-        List<Storage> storages = delegate.getStorages(project, application, component);
-        LocalConfig.ComponentSettings settings = findComponent(project, application, component);
-        if (settings != null) {
-            settings.getStorages().forEach(storage -> {
-                if (storages.stream().noneMatch(storage1 -> storage1.getName().equals(storage.getName()))) {
-                    storages.add(Storage.of(storage.getName()));
-                }
-            });
-        }
+    public List<Storage> getStorages(String project, String application, String context, String component) throws IOException {
+        List<Storage> storages = delegate.getStorages(project, application, context, component);
         return storages;
     }
 
@@ -299,6 +289,11 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public java.net.URL getMasterUrl() {
         return delegate.getMasterUrl();
+    }
+
+    @Override
+    public List<ComponentDescriptor> discover(String path) throws IOException {
+        return delegate.discover(path);
     }
 
     @Override

@@ -94,7 +94,6 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_CONFIG_NAMESPACE;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_YAML_FILE_NAME;
-import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
@@ -290,7 +289,7 @@ public class OdoCli implements Odo {
   @Override
   public List<Integer> getServicePorts(String project, String application, String component) {
     Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
-    return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());
+    return service!=null?service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList()):new ArrayList<>();
   }
 
   private static List<URL> parseURLs(String json) {
@@ -365,23 +364,22 @@ public class OdoCli implements Odo {
     execute(new File(context), command, envVars, "url", "delete", "-f", name);
   }
 
-  @Override
-  public void undeployComponent(String project, String application, String context, String component) throws IOException {
+  private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig) throws IOException {
     if (context != null) {
-      execute(new File(context), command, envVars, "delete", "-f");
+      execute(new File(context), command, envVars, "delete", "-f", deleteConfig?"-a":"");
     } else {
-      execute(command, envVars, "delete", "-f", "--project", project, "--app", application, component);
+      execute(command, envVars, "delete", "-f", "--project", project, "--app", application, component, deleteConfig?"-a":"");
     }
   }
 
   @Override
+  public void undeployComponent(String project, String application, String context, String component) throws IOException {
+    undeployComponent(project, application, context, component, false);
+  }
+
+  @Override
   public void deleteComponent(String project, String application, String context, String component, boolean undeploy) throws IOException {
-    if (undeploy) {
-      undeployComponent(project, application, context, component);
-    }
-    if (context != null) {
-      new File(context, ODO_CONFIG_YAML).delete();
-    }
+    undeployComponent(project, application, context, component, true);
   }
 
   @Override
@@ -451,10 +449,15 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Storage> getStorages(String project, String application, String component) {
-    return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
-            .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
-                    map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());
+  public List<Storage> getStorages(String project, String application, String context, String component) throws IOException {
+    if (context != null) {
+      return configureObjectMapper(new StoragesDeserializer()).readValue(
+              execute(new File(context), command, envVars, "storage", "list", "-o", "json"),
+              new TypeReference<List<Storage>>() {});
+    } else {
+      return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
+                           .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
+                                   map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());    }
   }
 
   @Override
@@ -732,4 +735,10 @@ public class OdoCli implements Odo {
     }
   }
 
+  @Override
+  public List<ComponentDescriptor> discover(String path) throws IOException {
+    return configureObjectMapper(new ComponentDescriptorsDeserializer()).readValue(
+            execute(command, envVars, "list", "--path", path, "-o", "json"),
+            new TypeReference<List<ComponentDescriptor>>() {});
+  }
 }

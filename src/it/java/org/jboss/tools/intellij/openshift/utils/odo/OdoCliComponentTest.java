@@ -10,23 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import java.net.ServerSocket;
-
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.junit.runners.Parameterized.*;
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
@@ -52,6 +52,27 @@ public class OdoCliComponentTest extends OdoCliTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateAndDiscoverComponent() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        try {
+            createComponent(project, application, component, push);
+            List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
+            assertNotNull(components);
+            assertEquals(1, components.size());
+            assertEquals(new File(COMPONENT_PATH).getAbsolutePath(), components.get(0).getPath());
+            assertEquals(component, components.get(0).getName());
+            assertEquals(application, components.get(0).getApplication());
+            assertEquals(project, components.get(0).getProject());
         } finally {
             try {
                 odo.deleteProject(project);

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.component;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Predicate;
 
 public class CreateComponentModel extends WizardModel {
     private Project project;
@@ -36,6 +38,8 @@ public class CreateComponentModel extends WizardModel {
     private String binaryFilePath;
 
     private boolean importMode;
+
+    private Predicate<String> componentPredicate = x -> false;
 
     public CreateComponentModel(String title) {
         super(title);
@@ -146,6 +150,14 @@ public class CreateComponentModel extends WizardModel {
         this.importMode = importMode;
     }
 
+    public Predicate<String> getComponentPredicate() {
+        return componentPredicate;
+    }
+
+    public void setComponentPredicate(Predicate<String> componentPredicate) {
+        this.componentPredicate = componentPredicate;
+    }
+
     protected boolean isValidURL(String url) {
         try {
             new URL(url);
@@ -161,5 +173,9 @@ public class CreateComponentModel extends WizardModel {
                 (getSourceType() == ComponentSourceType.LOCAL ||
                         (getSourceType() == ComponentSourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
                         (getSourceType() == ComponentSourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));
+    }
+
+    public boolean hasComponent(String path) {
+        return componentPredicate.test(path);
     }
 }

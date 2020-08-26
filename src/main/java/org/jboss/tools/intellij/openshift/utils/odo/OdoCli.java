@@ -738,7 +738,7 @@ public class OdoCli implements Odo {
   @Override
   public List<ComponentDescriptor> discover(String path) throws IOException {
     return configureObjectMapper(new ComponentDescriptorsDeserializer()).readValue(
-            execute(command, envVars, "list", "--path", path, "-o", "json"),
+            execute(new File(path), command, envVars, "list", "--path", ".", "-o", "json"),
             new TypeReference<List<ComponentDescriptor>>() {});
   }
 }

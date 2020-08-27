@@ -28,7 +28,7 @@ import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
 import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
 import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
-import org.jboss.tools.intellij.openshift.utils.odo.LocalConfig;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.MutableTreeNode;
@@ -42,43 +42,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
-
 public class ApplicationTreeModel extends BaseTreeModel<Object>
         implements ConfigWatcher.Listener, RefreshableTreeModel, LazyMutableTreeNode.ChangeListener, ModuleListener {
     private ApplicationsRootNode ROOT;
     private final Project project;
     private Config config;
-
-    public static class ComponentDescriptor {
-        private final String path;
-        private final String project;
-        private final String application;
-        private final String name;
-
-        ComponentDescriptor(String project, String application, String path, String name) {
-            this.project = project;
-            this.application = application;
-            this.path = path;
-            this.name = name;
-        }
-
-        public String getProject() {
-            return project;
-        }
-
-        public String getApplication() {
-            return application;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public LocalConfig.ComponentSettings getSettings() throws IOException {
-            return LocalConfig.load(new File(path, ODO_CONFIG_YAML).toURI().toURL()).getComponentSettings();
-        }
-    }
 
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
 
@@ -120,9 +88,9 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
         removeContext(getModuleRoot(module));
     }
 
-    private void addContextToSettings(String path, LocalConfig.ComponentSettings componentSettings) {
+    private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
-            components.put(path, new ComponentDescriptor(componentSettings.getProject(), componentSettings.getApplication(), path, componentSettings.getName()));
+            components.put(path, descriptor);
             refresh();
         }
     }
@@ -130,11 +98,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
     private void addContext(VirtualFile modulePathFile) {
         if (modulePathFile != null && modulePathFile.isValid()) {
             try {
-                VirtualFile file = modulePathFile.findFileByRelativePath(ODO_CONFIG_YAML);
-                if (file != null && file.isValid()) {
-                    LocalConfig config = LocalConfig.load(new File(file.getPath()).toPath().toUri().toURL());
-                    addContextToSettings(modulePathFile.getPath(), config.getComponentSettings());
-                }
+                List<ComponentDescriptor> descriptors = ROOT.getOdo().discover(modulePathFile.getPath());
+                descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
             } catch (IOException e) { }
         }
     }
@@ -156,10 +121,7 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
     }
 
     private void removeContext(VirtualFile modulePathFile) {
-            VirtualFile file = modulePathFile.findFileByRelativePath(ODO_CONFIG_YAML);
-            if (file != null && file.isValid()) {
                 removeContextFromSettings(modulePathFile.getPath());
-            }
     }
 
     protected void registerProjectListener(Project project) {

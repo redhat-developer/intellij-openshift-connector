@@ -12,8 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import java.io.File;
 
-import static org.jboss.tools.intellij.openshift.Constants.ODO_CONFIG_YAML;
-
 public interface Component {
   String getName();
   ComponentState getState();
@@ -71,9 +69,5 @@ public interface Component {
 
   static Component of(String name, ComponentState state, String path) {
     return new ComponentImpl(name, state, path);
-  }
-
-  public static boolean hasComponent(String path) {
-    return new File(path, ODO_CONFIG_YAML).exists();
   }
 }

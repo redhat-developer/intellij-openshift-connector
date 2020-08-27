@@ -87,7 +87,7 @@ public interface Odo {
 
     List<ServiceInstance> getServices(String project, String application);
 
-    List<Storage> getStorages(String project, String application, String component);
+    List<Storage> getStorages(String project, String application, String context, String component) throws IOException;
 
     void listComponents() throws IOException;
 
@@ -110,4 +110,6 @@ public interface Odo {
     boolean isServiceCatalogAvailable();
 
     java.net.URL getMasterUrl();
+
+    List<ComponentDescriptor> discover(String path) throws IOException;
 }

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.component;
 
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
@@ -39,8 +40,6 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.Arrays;
-
-import static org.jboss.tools.intellij.openshift.utils.odo.Component.hasComponent;
 
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
     private JTextField nameTextField;
@@ -82,7 +81,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
         });
         browseModulesButton.addActionListener(e -> {
-            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !hasComponent(ApplicationTreeModel.getModuleRoot(m).getPath()));
+            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !model.hasComponent(VfsUtilCore.virtualToIoFile(ApplicationTreeModel.getModuleRoot(m)).getAbsolutePath()));
             dialog.show();
             if (dialog.isOK()) {
                 contextTextField.setText(ApplicationTreeModel.getModuleRoot(dialog.getSelectedModule()).getPath());
@@ -95,7 +94,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             chooser.setFileFilter(new FileFilter() {
                 @Override
                 public boolean accept(File f) {
-                    return !hasComponent(f.getPath());
+                    return !model.hasComponent(f.getPath());
                 }
 
                 @Override

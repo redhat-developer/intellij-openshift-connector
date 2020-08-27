@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 public class CreateComponentAction extends OdoAction {
   public CreateComponentAction() {
@@ -59,7 +60,7 @@ public class CreateComponentAction extends OdoAction {
     Project project = rootModel.getProject();
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentModel model = getModel(project, application, odo.getComponentTypes());
+        CreateComponentModel model = getModel(project, application, odo.getComponentTypes(), p -> rootModel.getComponents().containsKey(p));
         process((LazyMutableTreeNode) selected, odo, projectName, application, rootModel, model);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
@@ -97,13 +98,14 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @NotNull
-  protected CreateComponentModel getModel(Project project, Optional<String> application, List<ComponentType> types) {
+  protected CreateComponentModel getModel(Project project, Optional<String> application, List<ComponentType> types, Predicate<String> componentChecker) {
     CreateComponentModel model =  new CreateComponentModel("Create component");
     model.setProject(project);
     model.setComponentTypes(types.toArray(new ComponentType[types.size()]));
     if (application.isPresent()) {
       model.setApplication(application.get());
     }
+    model.setComponentPredicate(componentChecker);
     return model;
   }
 

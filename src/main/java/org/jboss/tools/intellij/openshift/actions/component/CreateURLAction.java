@@ -33,15 +33,6 @@ public class CreateURLAction extends OdoAction {
   }
 
   @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    if (visible) {
-      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
-    }
-    return visible;
-  }
-
-  @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = (Component) componentNode.getUserObject();

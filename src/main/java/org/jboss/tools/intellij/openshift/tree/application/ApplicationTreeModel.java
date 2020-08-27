@@ -98,8 +98,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
     private void addContext(VirtualFile modulePathFile) {
         if (modulePathFile != null && modulePathFile.isValid()) {
             try {
-                List<ComponentDescriptor> descriptorss = ROOT.getOdo().discover(modulePathFile.getPath());
-                descriptorss.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
+                List<ComponentDescriptor> descriptors = ROOT.getOdo().discover(modulePathFile.getPath());
+                descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
             } catch (IOException e) { }
         }
     }

@@ -30,15 +30,6 @@ public class OdoProjectDecorator implements Odo {
         this.model = model;
     }
 
-    private ComponentDescriptor findComponent(String project, String application, String component) {
-        Optional<ComponentDescriptor> comp = model.getComponents().values().stream().filter(c -> c.getProject().equals(project) && c.getApplication().equals(application) && c.getName().equals(component)).findFirst();
-        if (comp.isPresent()) {
-            return comp.get();
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public List<io.fabric8.openshift.api.model.Project> getProjects() {
         return delegate.getProjects();
@@ -142,8 +133,7 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
-        List<URL> urls = delegate.listURLs(project, application, context, component);
-        return urls;
+        return delegate.listURLs(project, application, context, component);
     }
 
     @Override
@@ -237,8 +227,7 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public List<Storage> getStorages(String project, String application, String context, String component) throws IOException {
-        List<Storage> storages = delegate.getStorages(project, application, context, component);
-        return storages;
+        return delegate.getStorages(project, application, context, component);
     }
 
     @Override

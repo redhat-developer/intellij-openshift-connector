@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,19 +21,26 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
+
+    private static final String S2I_ITEMS_FIELD = "s2iItems";
+    private static final String METADATA_FIELD = "metadata";
+    private static final String NAME_FIELD = "name";
+    private static final String SPEC_FIELD = "spec";
+    private static final String NON_HIDDEN_TAGS_FIELD = "nonHiddenTags";
+
     public ComponentTypesDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
     }
     @Override
     public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         List<ComponentType> result = new ArrayList<>();
-        JsonNode items = root.get("s2iItems");
+        JsonNode items = root.get(S2I_ITEMS_FIELD);
         if (items != null) {
             for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
                 JsonNode item = it.next();
-                String name = item.get("metadata").get("name").asText();
+                String name = item.get(METADATA_FIELD).get(NAME_FIELD).asText();
                 List<String> versions = new ArrayList<>();
-                item.get("spec").get("nonHiddenTags").forEach(node -> versions.add(node.textValue()));
+                item.get(SPEC_FIELD).get(NON_HIDDEN_TAGS_FIELD).forEach(node -> versions.add(node.textValue()));
                 result.add(new ComponentType() {
 
                     @Override

@@ -22,13 +22,24 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
+
+    public static final String ITEMS_FIELD = "items";
+    public static final String PORTS_FIELD = "ports";
+    public static final String METADATA_FIELD = "metadata";
+    public static final String SPEC_FIELD = "spec";
+    public static final String APP_FIELD = "app";
+    public static final String STATUS_FIELD = "status";
+    public static final String CONTEXT_FIELD = "context";
+    public static final String NAMESPACE_FIELD = "namespace";
+    public static final String NAME_FIELD = "name";
+
     public ComponentDescriptorsDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
     }
     @Override
     public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         List<ComponentDescriptor> result = new ArrayList<>();
-        JsonNode items = root.get("items");
+        JsonNode items = root.get(ITEMS_FIELD);
         if (items != null) {
             for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
                 JsonNode item = it.next();
@@ -41,8 +52,8 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
 
     private List<Integer> getPorts(JsonNode item) {
         List<Integer> ports = new ArrayList<>();
-        if (item.has("spec") && item.get("spec").has("ports")) {
-            for(JsonNode portNode : item.get("spec").get("ports")) {
+        if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(PORTS_FIELD)) {
+            for(JsonNode portNode : item.get(SPEC_FIELD).get(PORTS_FIELD)) {
                 String port = portNode.asText();
                 if (port.endsWith("/TCP")) {
                     ports.add(Integer.parseInt(port.substring(0, port.length() - 4)));
@@ -55,31 +66,31 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
     }
 
     private String getProject(JsonNode item) {
-        if (item.has("metadata") && item.get("metadata").has("namespace")) {
-            return item.get("metadata").get("namespace").asText();
+        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAMESPACE_FIELD)) {
+            return item.get(METADATA_FIELD).get(NAMESPACE_FIELD).asText();
         } else {
             return "";
         }
     }
 
     private String getApplication(JsonNode item) {
-        if (item.has("spec") && item.get("spec").has("app")) {
-            return item.get("spec").get("app").asText();
+        if (item.has(ComponentDescriptorsDeserializer.SPEC_FIELD) && item.get(ComponentDescriptorsDeserializer.SPEC_FIELD).has(APP_FIELD)) {
+            return item.get(ComponentDescriptorsDeserializer.SPEC_FIELD).get(APP_FIELD).asText();
         } else {
             return "";
         }
     }
 
     private String getPath(JsonNode item) {
-        if (item.has("status") && item.get("status").has("context")) {
-            return item.get("status").get("context").asText();
+        if (item.has(STATUS_FIELD) && item.get(STATUS_FIELD).has(CONTEXT_FIELD)) {
+            return item.get(STATUS_FIELD).get(CONTEXT_FIELD).asText();
         } else {
             return "";
         }
     }
     private String getName(JsonNode item) {
-        if (item.has("metadata") && item.get("metadata").has("name")) {
-            return item.get("metadata").get("name").asText();
+        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
+            return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
         } else {
             return "";
         }

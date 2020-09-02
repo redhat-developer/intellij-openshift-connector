@@ -299,7 +299,7 @@ public class OdoCli implements Odo {
       JsonNode items = root.get("items");
       if (items != null) {
         items.forEach(item -> {
-          //odo incorrecly reports urls created with the web ui without names
+          //odo incorrectly reports urls created with the web ui without names
           if (item.get("metadata").has("name")) {
             result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ?
                     item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ?

@@ -78,7 +78,7 @@ public class OdoCliFactory {
     }
 
     public static boolean isDownloadAllowed(String currentVersion, String requiredVersion) {
-        return Messages.showYesNoCancelDialog(StringUtils.isEmpty(currentVersion)?"Odo not found , do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ", do you want to download odo ?", "Odo tool required", Messages.getQuestionIcon()) == Messages.YES;
+        return Messages.showYesNoCancelDialog(StringUtils.isEmpty(currentVersion)?"Odo not found, do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ", do you want to download odo ?", "Odo tool required", Messages.getQuestionIcon()) == Messages.YES;
     }
     private String getOdoVersion(String tool, String command) {
         String version = "";

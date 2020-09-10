@@ -42,12 +42,23 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected static final String STORAGE_PREFIX = "stor";
 
+    protected static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
+
+    protected static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
+
+    protected static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
+
     private TestDialog previousTestDialog;
 
     @Before
     public void init() throws Exception {
         previousTestDialog = Messages.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo();
+
+        if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
+            odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
+            odo = OdoCliFactory.getInstance().getOdo();
+        }
     }
 
     @After

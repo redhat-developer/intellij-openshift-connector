@@ -10,64 +10,76 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import java.io.File;
-
 public interface Component {
-  String getName();
-  ComponentState getState();
-  void setState(ComponentState state);
-  String getPath();
-  void setPath(String path);
-  default boolean hasContext() {
-      return getPath() != null;
-  }
+    String getName();
 
-  class ComponentImpl implements Component {
-    private String name;
-    private ComponentState state;
-    private String path;
+    ComponentState getState();
 
-    private ComponentImpl(String name, ComponentState state, String path) {
-      this.name = name;
-      this.state = state;
-      this.path = path;
+    void setState(ComponentState state);
+
+    String getPath();
+
+    void setPath(String path);
+
+    default boolean hasContext() {
+        return getPath() != null;
     }
 
-    @Override
-    public String getName() {
-      return name;
+    ComponentInfo getInfo();
+
+    class ComponentImpl implements Component {
+        private final String name;
+        private ComponentState state;
+        private String path;
+        private final ComponentInfo info;
+
+        private ComponentImpl(String name, ComponentState state, String path, ComponentInfo info) {
+            this.name = name;
+            this.state = state;
+            this.path = path;
+            this.info = info;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public ComponentState getState() {
+            return state;
+        }
+
+        @Override
+        public void setState(ComponentState state) {
+            this.state = state;
+        }
+
+        @Override
+        public String getPath() {
+            return path;
+        }
+
+        @Override
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        @Override
+        public ComponentInfo getInfo() {
+            return info;
+        }
     }
 
-    @Override
-    public ComponentState getState() {
-      return state;
+    static Component of(String name) {
+        return of(name, ComponentState.NO_CONTEXT, null);
     }
 
-    @Override
-    public void setState(ComponentState state) {
-      this.state = state;
+    static Component of(String name, ComponentState state, ComponentInfo info) {
+        return of(name, state, null, info);
     }
 
-    @Override
-    public String getPath() {
-      return path;
+    static Component of(String name, ComponentState state, String path, ComponentInfo info) {
+        return new ComponentImpl(name, state, path, info);
     }
-
-    @Override
-    public void setPath(String path) {
-      this.path = path;
-    }
-  }
-
-  static Component of(String name) {
-    return of(name, ComponentState.NO_CONTEXT);
-  }
-
-  static Component of(String name, ComponentState state) {
-    return of(name, state, null);
-  }
-
-  static Component of(String name, ComponentState state, String path) {
-    return new ComponentImpl(name, state, path);
-  }
 }

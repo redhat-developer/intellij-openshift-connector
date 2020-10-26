@@ -93,7 +93,7 @@
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" text="Delete"/>
       <!-- component level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.component.CreateURLAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateURLAction" text="Create URL"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.url.CreateURLAction" id="org.jboss.tools.intellij.openshift.actions.url.CreateURLAction" text="Create URL"/>
       <action class="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" text="Create Storage"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" text="Describe"/>
@@ -103,7 +103,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" text="Link Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>
       <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.component.OpenInBrowserAction" text="Open in Browser"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
       <separator/>
@@ -118,6 +117,7 @@
       <!-- storage level -->
       <action class="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" text="Delete"/>
       <!-- URL level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" text="Open in Browser"/>
       <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>

@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jboss.tools.intellij.openshift.actions.url.CreateURLAction;
 
 public class CreateURLActionTest extends ActionTest {
     @Override

@@ -51,7 +51,7 @@ public class LinkComponentAction extends OdoAction {
             component = components.get(0);
           } else {
             String[] componentNames = components.stream().map(Component::getName).toArray(String[]::new);
-            String componentName = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link component", "Select component", Messages.getQuestionIcon(), componentNames, componentNames[0], null));
+            String componentName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link component", "Select component", Messages.getQuestionIcon(), componentNames, componentNames[0], null));
             component = components.get(Arrays.asList(componentNames).indexOf(componentName));
           }
           if (component != null) {
@@ -68,7 +68,7 @@ public class LinkComponentAction extends OdoAction {
     });
   }
 
-  private List<Component> getTargetComponents(Odo odo, String project, String application) {
+  private List<Component> getTargetComponents(Odo odo, String project, String application) throws IOException {
     return odo.getComponents(project, application).stream().filter(component -> component.getState() == ComponentState.PUSHED).collect(Collectors.toList());
   }
 }

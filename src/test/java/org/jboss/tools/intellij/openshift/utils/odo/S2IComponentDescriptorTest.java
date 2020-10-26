@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class ComponentDescriptorTest {
-  private static final URL url = ComponentDescriptorTest.class.getResource("/component-descriptor-test.json");
+public class S2IComponentDescriptorTest {
+  private static final URL url = S2IComponentDescriptorTest.class.getResource("/s2iComponent-descriptor-test.json");
 
   private static ObjectMapper MAPPER;
 

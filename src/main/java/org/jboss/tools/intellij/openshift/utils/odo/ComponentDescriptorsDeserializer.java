@@ -14,16 +14,17 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.intellij.icons.AllIcons;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
 
-    public static final String ITEMS_FIELD = "items";
+    public static final String S2I_FIELD = "s2iComponents";
+    public static final String DEVFILE_FIELD = "devfileComponents";
     public static final String PORTS_FIELD = "ports";
     public static final String METADATA_FIELD = "metadata";
     public static final String SPEC_FIELD = "spec";
@@ -36,12 +37,20 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
     public ComponentDescriptorsDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
     }
+
     @Override
-    public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) throws IOException {
         List<ComponentDescriptor> result = new ArrayList<>();
-        JsonNode items = root.get(ITEMS_FIELD);
-        if (items != null) {
-            for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
+        // two roots, s2i and devfiles
+        result.addAll(parseComponents(root.get(S2I_FIELD)));
+        result.addAll(parseComponents(root.get(DEVFILE_FIELD)));
+        return result;
+    }
+
+    private Collection<? extends ComponentDescriptor> parseComponents(JsonNode tree) {
+        List<ComponentDescriptor> result = new ArrayList<>();
+        if (tree != null) {
+            for (Iterator<JsonNode> it = tree.iterator(); it.hasNext(); ) {
                 JsonNode item = it.next();
                 result.add(new ComponentDescriptor(getProject(item), getApplication(item), getPath(item), getName(item),
                         getPorts(item)));
@@ -53,7 +62,7 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
     private List<Integer> getPorts(JsonNode item) {
         List<Integer> ports = new ArrayList<>();
         if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(PORTS_FIELD)) {
-            for(JsonNode portNode : item.get(SPEC_FIELD).get(PORTS_FIELD)) {
+            for (JsonNode portNode : item.get(SPEC_FIELD).get(PORTS_FIELD)) {
                 String port = portNode.asText();
                 if (port.endsWith("/TCP")) {
                     ports.add(Integer.parseInt(port.substring(0, port.length() - 4)));
@@ -88,6 +97,7 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
             return "";
         }
     }
+
     private String getName(JsonNode item) {
         if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
             return item.get(METADATA_FIELD).get(NAME_FIELD).asText();

@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,9 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
@@ -46,12 +43,26 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponent() throws IOException, InterruptedException {
+    public void checkCreateS2iComponent() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {}
+        }
+    }
+
+    @Test
+    public void checkCreateDevfileComponent() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
+        try {
+            createDevfileComponent(project, application, component, push);
         } finally {
             try {
                 odo.deleteProject(project);
@@ -65,7 +76,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
             List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
             assertNotNull(components);
             assertEquals(1, components.size());
@@ -86,7 +97,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
             odo.deleteComponent(project, application, COMPONENT_PATH, component, push);
         } finally {
             try {
@@ -100,7 +111,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
@@ -126,7 +137,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
             odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(1, urls.size());
@@ -151,16 +162,19 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore("not yet supported by odo")
     public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
-            odo.createService(project, application, "postgresql-persistent", "default", service);
-            odo.link(project, application, component, COMPONENT_PATH, service, null);
+            createS2iComponent(project, application, component, push);
+            if (odo.isServiceCatalogAvailable()) {
+                odo.createService(project, application, "postgresql-persistent", "default", service, true);
+                if (push) {
+                    odo.link(project, application, component, COMPONENT_PATH, service, null);
+                }
+            }
         } finally {
             try {
                 odo.deleteProject(project);
@@ -205,7 +219,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(0, urls.size());
         } finally {
@@ -224,7 +238,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createS2iComponent(project, application, component, push);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false);
             odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);

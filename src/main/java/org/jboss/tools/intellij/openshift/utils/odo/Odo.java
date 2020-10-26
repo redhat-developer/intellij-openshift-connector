@@ -42,7 +42,7 @@ public interface Odo {
 
     void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
-    void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException;
+    void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException;
 
     String getServiceTemplate(String project, String application, String service);
 
@@ -83,7 +83,7 @@ public interface Odo {
 
     List<Application> getApplications(String project) throws IOException;
 
-    List<Component> getComponents(String project, String application);
+    List<Component> getComponents(String project, String application) throws IOException;
 
     List<ServiceInstance> getServices(String project, String application);
 

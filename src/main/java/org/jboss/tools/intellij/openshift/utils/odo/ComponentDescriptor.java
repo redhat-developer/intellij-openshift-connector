@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentDescriptor {

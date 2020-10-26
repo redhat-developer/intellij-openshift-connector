@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.component;
+package org.jboss.tools.intellij.openshift.actions.url;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
@@ -18,7 +18,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.ui.url.CreateURLDialog;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreeNode;

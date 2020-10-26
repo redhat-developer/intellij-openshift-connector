@@ -19,7 +19,7 @@ public interface ComponentInfo {
     String getBinaryURL();
     boolean isMigrated();
 
-    public class Builder {
+    class Builder {
         private ComponentSourceType sourceType;
         private String componentTypeName;
         private String componentTypeVersion;

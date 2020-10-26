@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction;
 
 public class OpenInBrowserActionTest extends ActionTest {
   @Override

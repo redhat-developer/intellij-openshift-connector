@@ -12,9 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TestDialog;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.After;
@@ -51,7 +48,7 @@ public abstract class OdoCliTest extends BaseTest {
     private TestDialog previousTestDialog;
 
     @Before
-    public void init() throws Exception {
+    public void init() throws IOException {
         previousTestDialog = Messages.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo();
 
@@ -75,14 +72,25 @@ public abstract class OdoCliTest extends BaseTest {
         pause();
     }
 
-    protected void createComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
+    protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
         createProject(project);
-        FileUtils.deleteDirectory(new File(COMPONENT_PATH, ".odo"));
+        cleanLocalProjectDirectory();
         odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath(), push);
     }
 
+    protected void createDevfileComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
+        createProject(project);
+        cleanLocalProjectDirectory();
+        odo.createComponentLocal(project, application, "java-springboot", null, component, new File(COMPONENT_PATH).getAbsolutePath(), push);
+    }
+
     protected void createStorage(String project, String application, String component, boolean push, String storage) throws IOException, InterruptedException {
-        createComponent(project, application, component, push);
+        createS2iComponent(project, application, component, push);
         odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
+    }
+
+    private void cleanLocalProjectDirectory() throws IOException {
+        FileUtils.deleteDirectory(new File(COMPONENT_PATH, ".odo"));
+        FileUtils.deleteQuietly(new File(COMPONENT_PATH+"/devfile.yaml"));
     }
 }

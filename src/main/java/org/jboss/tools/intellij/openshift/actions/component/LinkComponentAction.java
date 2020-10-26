@@ -47,7 +47,7 @@ public class LinkComponentAction extends OdoAction {
     return visible;
   }
 
-  protected String getSelectedTargetComponent(Odo odo, String project, String application, String component) {
+  protected String getSelectedTargetComponent(Odo odo, String project, String application, String component) throws IOException {
     String targetComponent = null;
 
     List<Component> components = odo.getComponents(project, application)
@@ -57,7 +57,7 @@ public class LinkComponentAction extends OdoAction {
         targetComponent = components.get(0).getName();
       } else {
         String[] componentsArray = components.stream().map(Component::getName).toArray(String[]::new);
-        targetComponent = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select component", "Link component", Messages.getQuestionIcon(), componentsArray, componentsArray[0], null));
+        targetComponent = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select component", "Link component", Messages.getQuestionIcon(), componentsArray, componentsArray[0], null));
       }
     }
     return targetComponent;

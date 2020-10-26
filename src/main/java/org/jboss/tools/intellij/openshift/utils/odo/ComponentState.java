@@ -25,4 +25,13 @@ public enum ComponentState {
     public String toString() {
         return label;
     }
+
+    public static ComponentState fromState(String state) {
+        switch (state) {
+            case "Pushed":
+                return PUSHED;
+            default:
+                return NOT_PUSHED;
+        }
+    }
 }

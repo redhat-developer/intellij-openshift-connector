@@ -215,8 +215,14 @@ public class OdoCli implements Odo {
     @Override
     public void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException {
         ensureDefaultOdoConfigFileExists();
-        ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
-                "--plan", servicePlan, service, "--app", application, "--project", project, wait? "-w":"");
+        if (wait) {
+            ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
+                    "--plan", servicePlan, service, "--app", application, "--project", project, "-w");
+        }
+        else {
+            ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
+                    "--plan", servicePlan, service, "--app", application, "--project", project);
+        }
     }
 
 

@@ -44,25 +44,34 @@ public class ComponentDescriptorTest {
   public void verifyThatComponentDescriptorsReturnsComponentDescriptor() throws IOException {
     List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
     Assert.assertNotNull(descriptors);
-    Assert.assertEquals(1, descriptors.size());
+    Assert.assertEquals(2, descriptors.size());
     Assert.assertNotNull(descriptors.get(0));
+    Assert.assertNotNull(descriptors.get(1));
   }
 
   @Test
   public void verifyThatComponentDescriptorsReturnsComponentDescriptorProperties() throws IOException {
     List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
     Assert.assertNotNull(descriptors);
-    Assert.assertEquals(1, descriptors.size());
-    ComponentDescriptor descriptor = descriptors.get(0);
-    Assert.assertNotNull(descriptor);
-    Assert.assertEquals("sbapp", descriptor.getApplication());
-    Assert.assertEquals("testodo", descriptor.getProject());
-    Assert.assertEquals("sbcomp", descriptor.getName());
-    Assert.assertNotNull(descriptor.getPorts());
-    List<Integer> ports = descriptor.getPorts();
+    Assert.assertEquals(2, descriptors.size());
+    //S2iDescriptor
+    ComponentDescriptor s2iDescriptor = descriptors.get(0);
+    Assert.assertNotNull(s2iDescriptor);
+    Assert.assertEquals("sbapp", s2iDescriptor.getApplication());
+    Assert.assertEquals("testodo", s2iDescriptor.getProject());
+    Assert.assertEquals("sbcomp", s2iDescriptor.getName());
+    Assert.assertNotNull(s2iDescriptor.getPorts());
+    List<Integer> ports = s2iDescriptor.getPorts();
     Assert.assertEquals(3, ports.size());
     Assert.assertEquals(8080, ports.get(0).intValue());
     Assert.assertEquals(8443, ports.get(1).intValue());
     Assert.assertEquals(8778, ports.get(2).intValue());
+    //DevfileDescriptor
+    ComponentDescriptor devfileDescriptor = descriptors.get(1);
+    Assert.assertNotNull(devfileDescriptor);
+    Assert.assertEquals("dev-app", devfileDescriptor.getApplication());
+    Assert.assertEquals("devproj", devfileDescriptor.getProject());
+    Assert.assertEquals("devcomp", devfileDescriptor.getName());
+
   }
 }

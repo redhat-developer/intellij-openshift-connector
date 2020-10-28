@@ -40,12 +40,8 @@ public class CreateServiceAction extends OdoAction {
         if (visible) {
             ApplicationsRootNode rootNode = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
             if (rootNode != null) {
-                try {
-                    Odo odo = rootNode.getOdo();
-                    return odo.isServiceCatalogAvailable();
-                } catch (IOException ex) {
-                    //silently catch the exception to make the action not visible
-                }
+                Odo odo = rootNode.getOdo();
+                return odo.isServiceCatalogAvailable();
             }
         }
         return false;

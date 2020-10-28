@@ -35,7 +35,7 @@ public class ListServicesAction extends LoggedInClusterAction {
                     ApplicationsRootNode rootNode = (ApplicationsRootNode) selected;
                     Odo odo = rootNode.getOdo();
                     visible = odo.isServiceCatalogAvailable();
-                } catch (IOException | NullPointerException ex) {
+                } catch (NullPointerException ex) {
                     //silently catch the exception to make the action not visible
                     visible = false;
                 }

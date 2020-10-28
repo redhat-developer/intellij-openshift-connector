@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
@@ -39,7 +41,6 @@ public class OdoCliComponentTest extends OdoCliTest {
             {false, "not pushed"},
             {true, "pushed"}
         });
-
     }
 
     @Test

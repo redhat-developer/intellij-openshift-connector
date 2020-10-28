@@ -15,7 +15,7 @@ public enum ComponentState {
     NOT_PUSHED("\u25CE not pushed"),
     NO_CONTEXT("\u2718 no context");
 
-    private String label;
+    private final String label;
 
     ComponentState(String label) {
         this.label = label;
@@ -30,8 +30,10 @@ public enum ComponentState {
         switch (state) {
             case "Pushed":
                 return PUSHED;
-            default:
+            case "Not Pushed":
                 return NOT_PUSHED;
+            default:
+                return NO_CONTEXT;
         }
     }
 }

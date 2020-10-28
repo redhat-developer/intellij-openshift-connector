@@ -27,5 +27,25 @@
     }
   }
   ],
-  "devfileComponents": []
+  "devfileComponents": [
+    {
+      "kind": "DevfileComponent",
+      "apiVersion": "odo.dev/v1alpha1",
+      "metadata": {
+        "name": "devcomp",
+        "namespace": "devproj",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "componentName": "devcomp",
+        "app": "dev-app",
+        "sourceType": "local"
+      },
+      "status": {
+        "context": "/home/projects/nodejs-ex",
+        "state": "Pushed"
+      }
+    }
+  ]
+
 }                                                                                                                

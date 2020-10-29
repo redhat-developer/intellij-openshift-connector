@@ -259,8 +259,7 @@ public class OdoCli implements Odo {
         if (wait) {
             ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
                     "--plan", servicePlan, service, "--app", application, "--project", project, "-w");
-        }
-        else {
+        } else {
             ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
                     "--plan", servicePlan, service, "--app", application, "--project", project);
         }
@@ -353,22 +352,44 @@ public class OdoCli implements Odo {
         execute(new File(context), command, envVars, "url", "delete", "-f", name);
     }
 
-    private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig) throws IOException {
+    private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig, ComponentKind kind) throws IOException {
+        List<String> args = new ArrayList<>();
         if (context != null) {
-            execute(new File(context), command, envVars, "delete", "-f", deleteConfig ? "-a" : "");
+            args.add("delete");
+            args.add("-f");
+            if (deleteConfig) {
+                args.add("-a");
+            }
+            if (kind.equals(ComponentKind.S2I)) {
+                args.add("--s2i");
+            }
+            execute(new File(context), command, envVars, args.toArray(new String[0]));
         } else {
-            execute(command, envVars, "delete", "-f", "--project", project, "--app", application, component, deleteConfig ? "-a" : "");
+            args.add("delete");
+            args.add("-f");
+            args.add("--project");
+            args.add(project);
+            args.add("--app");
+            args.add(application);
+            args.add(component);
+            if (deleteConfig) {
+                args.add("-a");
+            }
+            if (kind.equals(ComponentKind.S2I)) {
+                args.add("--s2i");
+            }
+            execute(command, envVars, args.toArray(new String[0]));
         }
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component) throws IOException {
-        undeployComponent(project, application, context, component, false);
+    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        undeployComponent(project, application, context, component, false, kind);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component, boolean undeploy) throws IOException {
-        undeployComponent(project, application, context, component, true);
+    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        undeployComponent(project, application, context, component, true, kind);
     }
 
     @Override

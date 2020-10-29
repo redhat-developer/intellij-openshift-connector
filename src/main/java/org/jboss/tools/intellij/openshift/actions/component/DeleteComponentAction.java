@@ -18,7 +18,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreeNode;
@@ -44,7 +43,7 @@ public class DeleteComponentAction extends OdoAction {
 
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getState() != ComponentState.NOT_PUSHED);
+        odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getInfo().getComponentType().getKind());
         applicationNode.remove(componentNode);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete component"));

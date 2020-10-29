@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JSonParser {
@@ -22,6 +23,7 @@ public class JSonParser {
     private static final String SPEC_FIELD = "spec";
     private static final String SOURCE_TYPE_FIELD = "sourceType";
     private static final String TYPE_FIELD = "type";
+    private static final String KIND_FIELD = "kind";
 
     private final JsonNode root;
 
@@ -57,12 +59,17 @@ public class JSonParser {
     }
 
     public ComponentInfo parseComponent() {
-        if (root.has(SPEC_FIELD) && root.get(SPEC_FIELD).has(SOURCE_TYPE_FIELD)) {
+        ComponentInfo.Builder builder = new ComponentInfo.Builder();
+        ComponentType type = null;
+        if (root.has(SPEC_FIELD)) {
             String sourceType = root.get(SPEC_FIELD).get(SOURCE_TYPE_FIELD).asText();
-            String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
-            ComponentInfo.Builder builder = new ComponentInfo.Builder().withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentTypeName(componentTypeName);
-            return builder.build();
+            switch (root.get(KIND_FIELD).asText()){
+                case "DevfileComponent": type = new DevfileComponentType(root.get(SPEC_FIELD).get(TYPE_FIELD).asText()); break;
+                case "Component": type = new S2iComponentType(root.get(SPEC_FIELD).get(TYPE_FIELD).asText(), Collections.emptyList()); break;
+                default: break;
+            }
+            builder.withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentType(type);
         }
-        return new ComponentInfo.Builder().withSourceType(ComponentSourceType.LOCAL).build();
+        return builder.build();
     }
 }

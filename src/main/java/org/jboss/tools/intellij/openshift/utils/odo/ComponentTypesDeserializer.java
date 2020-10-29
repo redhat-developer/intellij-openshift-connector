@@ -15,10 +15,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
@@ -36,7 +34,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     }
 
     @Override
-    public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt){
         List<ComponentType> result = new ArrayList<>();
         result.addAll(parseS2iItems(root.get(S2I_ITEMS_FIELD)));
         result.addAll(parseDevfileItems(root.get(DEVFILE_ITEMS_FIELD)));
@@ -46,8 +44,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     private List<ComponentType> parseS2iItems(JsonNode items) {
         List<ComponentType> result = new ArrayList<>();
         if (items != null) {
-            for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
-                JsonNode item = it.next();
+            for (JsonNode item : items) {
                 String name = item.get(METADATA_FIELD).get(S2I_NAME_FIELD).asText();
                 List<String> versions = new ArrayList<>();
                 item.get(SPEC_FIELD).get(NON_HIDDEN_TAGS_FIELD).forEach(node -> versions.add(node.textValue()));
@@ -60,8 +57,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     private Collection<? extends ComponentType> parseDevfileItems(JsonNode items) {
         List<ComponentType> result = new ArrayList<>();
         if (items != null) {
-            for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
-                JsonNode item = it.next();
+            for (JsonNode item : items) {
                 String name = item.get(DEVFILE_NAME_FIELD).asText();
                 result.add(new DevfileComponentType(name));
             }

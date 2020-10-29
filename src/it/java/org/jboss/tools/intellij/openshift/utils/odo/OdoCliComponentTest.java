@@ -99,7 +99,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createS2iComponent(project, application, component, push);
-            odo.deleteComponent(project, application, COMPONENT_PATH, component, push);
+            odo.deleteComponent(project, application, COMPONENT_PATH, component, ComponentKind.S2I);
         } finally {
             try {
                 odo.deleteProject(project);

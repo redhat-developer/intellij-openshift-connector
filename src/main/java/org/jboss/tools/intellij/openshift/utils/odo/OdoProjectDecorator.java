@@ -45,7 +45,7 @@ public class OdoProjectDecorator implements Odo {
         final IOException[] exception = {null};
         getComponents(project, application).forEach(component -> {
             try {
-                deleteComponent(project, application, component.getPath(), component.getName(), component.getState() != ComponentState.NOT_PUSHED);
+                deleteComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentType().getKind());
             } catch (IOException e) {
                 exception[0] = e;
             }
@@ -152,13 +152,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component) throws IOException {
-        delegate.undeployComponent(project, application, context, component);
+    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        delegate.undeployComponent(project, application, context, component, kind);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component, boolean undeploy) throws IOException {
-        delegate.deleteComponent(project, application, context, component, undeploy);
+    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        delegate.deleteComponent(project, application, context, component, kind);
     }
 
     @Override

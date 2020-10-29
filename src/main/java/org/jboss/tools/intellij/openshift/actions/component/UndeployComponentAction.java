@@ -47,7 +47,7 @@ public class UndeployComponentAction extends OdoAction {
     LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        odo.undeployComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName());
+        odo.undeployComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getInfo().getComponentType().getKind());
         component.setState(ComponentState.NOT_PUSHED);
         componentNode.reload();
       } catch (IOException e) {

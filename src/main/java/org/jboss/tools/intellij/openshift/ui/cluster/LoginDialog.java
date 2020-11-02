@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.cluster;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -19,10 +18,18 @@ import org.jboss.tools.intellij.openshift.utils.OCCommandUtils;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -37,7 +44,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
     private JButton pasteLoginCommandButton;
 
     public LoginDialog(Component parent, String clusterURL) {
-        super((Project) null, parent, false, IdeModalityType.IDE);
+        super(null, parent, false, IdeModalityType.IDE);
         init();
         setTitle("Cluster login");
         clusterURLField.setText(clusterURL);

@@ -12,14 +12,22 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 public interface ComponentInfo {
     ComponentSourceType getSourceType();
+
     String getComponentTypeName();
+
     String getComponentTypeVersion();
+
     String getRepositoryURL();
+
     String getRepositoryReference();
+
     String getBinaryURL();
+
     boolean isMigrated();
 
-    ComponentType getComponentType();
+    ComponentKind getComponentKind();
+
+    Builder toBuilder();
 
     class Builder {
         private ComponentSourceType sourceType;
@@ -29,7 +37,7 @@ public interface ComponentInfo {
         private String repositoryReference;
         private String binaryURL;
         private boolean migrated;
-        private ComponentType componentType;
+        private ComponentKind componentKind;
 
         public Builder withSourceType(ComponentSourceType sourceType) {
             this.sourceType = sourceType;
@@ -37,7 +45,7 @@ public interface ComponentInfo {
         }
 
         public Builder withComponentTypeName(String componentTypeName) {
-            this.componentTypeName= componentTypeName;
+            this.componentTypeName = componentTypeName;
             return this;
         }
 
@@ -66,8 +74,8 @@ public interface ComponentInfo {
             return this;
         }
 
-        public Builder withComponentType(ComponentType type) {
-            this.componentType = type;
+        public Builder withComponentKind(ComponentKind kind) {
+            this.componentKind = kind;
             return this;
         }
 
@@ -109,9 +117,18 @@ public interface ComponentInfo {
                 }
 
                 @Override
-                public ComponentType getComponentType() {
-                    return componentType;
+                public ComponentKind getComponentKind() {
+                    return componentKind;
                 }
+
+                @Override
+                public Builder toBuilder() {
+                    return new Builder().withSourceType(sourceType).withComponentTypeName(
+                            componentTypeName).withComponentTypeVersion(componentTypeVersion).withRepositoryURL(
+                            repositoryURL).withRepositoryReference(repositoryReference).withBinaryURL(
+                            binaryURL).withMigrated(migrated).withComponentKind(componentKind);
+                }
+
             };
         }
     }

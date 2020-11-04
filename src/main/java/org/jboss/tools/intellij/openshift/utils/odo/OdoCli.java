@@ -95,8 +95,12 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
 public class OdoCli implements Odo {
 
@@ -321,7 +325,27 @@ public class OdoCli implements Odo {
 
     @Override
     public ComponentInfo getComponentInfo(String project, String application, String component) throws IOException {
-        return parseComponent(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
+        ComponentInfo componentInfo = parseComponent(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
+        if (componentInfo.getComponentKind().equals(ComponentKind.S2I)) {
+            List<DeploymentConfig> DCs = client.deploymentConfigs().inNamespace(project).withLabel(COMPONENT_NAME_LABEL, component).withLabel(APP_LABEL, application).list().getItems();
+            if (DCs.size() == 1) {
+                DeploymentConfig deploymentConfig = DCs.get(0);
+                String componentTypeVersion = deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL);
+                boolean migrated = deploymentConfig.getMetadata().getLabels().containsKey(ODO_MIGRATED_LABEL);
+                ComponentInfo.Builder builder = componentInfo.toBuilder().withComponentTypeVersion(componentTypeVersion).withMigrated(migrated);
+                if (componentInfo.getSourceType() == ComponentSourceType.LOCAL) {
+                    return builder.build();
+                } else if (componentInfo.getSourceType() == ComponentSourceType.BINARY) {
+                    return builder.withBinaryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).build();
+                } else {
+                    BuildConfig buildConfig = client.buildConfigs().inNamespace(project).withName(deploymentConfig.getMetadata().getName()).get();
+                    return builder.withRepositoryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).withRepositoryReference(buildConfig.getSpec().getSource().getGit().getRef()).build();
+                }
+            } else {
+                throw new IOException("Invalid number of deployment configs (" + DCs.size() + "), should be 1");
+            }
+        }
+        return componentInfo;
     }
 
     private ComponentInfo parseComponent(String json) throws IOException {

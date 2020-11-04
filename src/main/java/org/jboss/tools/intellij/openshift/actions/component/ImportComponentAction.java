@@ -75,13 +75,14 @@ public class ImportComponentAction extends CreateComponentAction {
     model.setProject(project);
     model.setApplication(application);
     model.setName(name);
-    model.setComponentTypes(types.toArray(new ComponentType[types.size()]));
+    model.setComponentTypesTree(types);
     model.setSourceType(info.getSourceType());
     model.setComponentTypeName(info.getComponentTypeName());
     model.setComponentTypeVersion(info.getComponentTypeVersion());
     model.setGitURL(info.getRepositoryURL());
     model.setGitReference(info.getRepositoryReference());
-    model.setBinaryFilePath(info.getBinaryURL()); //TODO
+    model.setBinaryFilePath(info.getBinaryURL());
+    model.setComponentKind(info.getComponentKind());
     model.setImportMode(true);
     return model;
 

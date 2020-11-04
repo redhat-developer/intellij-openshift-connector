@@ -101,7 +101,6 @@ public class CreateComponentAction extends OdoAction {
   protected CreateComponentModel getModel(Project project, Optional<String> application, List<ComponentType> types, Predicate<String> componentChecker) {
     CreateComponentModel model =  new CreateComponentModel("Create component");
     model.setProject(project);
-    model.setComponentTypes(types.toArray(new ComponentType[types.size()]));
     model.setComponentTypesTree(types);
     if (application.isPresent()) {
       model.setApplication(application.get());

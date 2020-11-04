@@ -37,11 +37,14 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.io.File;
+import java.util.Collections;
 
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
     private JTextField nameTextField;
@@ -181,13 +184,49 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         if (model.isImportMode()) {
             nameTextField.setEnabled(false);
             sourceTypeComboBox.setEnabled(false);
-            applicationTextField.setEnabled(false);
+            TreeNode[] path = searchNode();
+            if (path != null) {
+                componentTypeTree.setSelectionPath(new TreePath(path));
+                componentVersionComboBox.setSelectedItem(model.getComponentTypeVersion());
+            }
             componentTypeTree.setEnabled(false);
             componentVersionComboBox.setEnabled(false);
+            applicationTextField.setEnabled(false);
+            pushAfterCreateCheckBox.setSelected(false);
+            pushAfterCreateCheckBox.setEnabled(false);
         }
         if (StringUtils.isNotEmpty(model.getApplication())) {
             applicationTextField.setEnabled(false);
         }
+    }
+
+    /**
+     * search node for import mode only.
+     *
+     * @return path of the component
+     */
+    private TreeNode[] searchNode() {
+        TreeNode rootNode =null;
+        //first select the correct root
+        switch (model.getComponentKind()){
+            case DEVFILE:
+                rootNode = model.getComponentTypesTree().getChildAt(0);break;
+            case S2I:
+                rootNode = model.getComponentTypesTree().getChildAt(1);break;
+            default:
+                break;
+        }
+            // iterate over children to find the correct component
+        if (rootNode != null){
+            for (Object nodeObject : Collections.list(rootNode.children())){
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodeObject;
+                ComponentType type = (ComponentType) node.getUserObject();
+                if (type.getName().equals(model.getComponentTypeName())) {
+                    return node.getPath();
+                }
+            }
+        }
+        return null;
     }
 
     @Override

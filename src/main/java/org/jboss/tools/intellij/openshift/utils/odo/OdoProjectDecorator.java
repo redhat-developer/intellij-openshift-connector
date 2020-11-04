@@ -45,7 +45,7 @@ public class OdoProjectDecorator implements Odo {
         final IOException[] exception = {null};
         getComponents(project, application).forEach(component -> {
             try {
-                deleteComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentType().getKind());
+                deleteComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentKind());
             } catch (IOException e) {
                 exception[0] = e;
             }

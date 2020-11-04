@@ -32,6 +32,7 @@ public enum ComponentSourceType {
                 return GIT;
             case "binary":
                 return BINARY;
+            case "local":
             default:
                 return LOCAL;
         }

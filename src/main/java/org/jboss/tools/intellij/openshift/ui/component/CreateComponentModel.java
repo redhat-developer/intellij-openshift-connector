@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.ui.component;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
@@ -28,7 +29,6 @@ public class CreateComponentModel extends WizardModel {
     private String name = "";
     private ComponentSourceType sourceType = ComponentSourceType.LOCAL;
     private String context = "";
-    private ComponentType[] componentTypes;
     private String componentTypeName;
     private String componentTypeVersion;
     private String application = "";
@@ -38,6 +38,8 @@ public class CreateComponentModel extends WizardModel {
     private String gitReference;
 
     private String binaryFilePath;
+
+    private ComponentKind componentKind;
 
     private boolean importMode;
 
@@ -80,14 +82,6 @@ public class CreateComponentModel extends WizardModel {
 
     public void setContext(String context) {
         this.context = context;
-    }
-
-    public ComponentType[] getComponentTypes() {
-        return componentTypes;
-    }
-
-    public void setComponentTypes(ComponentType[] componentTypes) {
-        this.componentTypes = componentTypes;
     }
 
     public String getComponentTypeName() {
@@ -146,16 +140,20 @@ public class CreateComponentModel extends WizardModel {
         this.binaryFilePath = binaryFilePath;
     }
 
+    public ComponentKind getComponentKind() {
+        return componentKind;
+    }
+
+    public void setComponentKind(ComponentKind componentKind) {
+        this.componentKind = componentKind;
+    }
+
     public boolean isImportMode() {
         return importMode;
     }
 
     public void setImportMode(boolean importMode) {
         this.importMode = importMode;
-    }
-
-    public Predicate<String> getComponentPredicate() {
-        return componentPredicate;
     }
 
     public void setComponentPredicate(Predicate<String> componentPredicate) {
@@ -192,7 +190,7 @@ public class CreateComponentModel extends WizardModel {
         // creates the default Roots
         DefaultMutableTreeNode devfileComponents = new DefaultMutableTreeNode("DevFile Components");
         DefaultMutableTreeNode s2iComponents = new DefaultMutableTreeNode("S2I Components");
-        for (ComponentType type : componentTypes) {
+        for (ComponentType type : types) {
             switch (type.getKind()) {
                 case S2I:
                     s2iComponents.add(new DefaultMutableTreeNode(type,false));
@@ -205,4 +203,6 @@ public class CreateComponentModel extends WizardModel {
         top.add(devfileComponents);
         top.add(s2iComponents);
     }
+
+
 }

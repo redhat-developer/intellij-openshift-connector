@@ -13,7 +13,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class JSonParser {
@@ -60,15 +59,11 @@ public class JSonParser {
 
     public ComponentInfo parseComponent() {
         ComponentInfo.Builder builder = new ComponentInfo.Builder();
-        ComponentType type = null;
         if (root.has(SPEC_FIELD)) {
             String sourceType = root.get(SPEC_FIELD).get(SOURCE_TYPE_FIELD).asText();
-            switch (root.get(KIND_FIELD).asText()){
-                case "DevfileComponent": type = new DevfileComponentType(root.get(SPEC_FIELD).get(TYPE_FIELD).asText()); break;
-                case "Component": type = new S2iComponentType(root.get(SPEC_FIELD).get(TYPE_FIELD).asText(), Collections.emptyList()); break;
-                default: break;
-            }
-            builder.withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentType(type);
+            String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
+            ComponentKind kind = ComponentKind.fromAnnotation(root.get(KIND_FIELD).asText());
+            builder.withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentTypeName(componentTypeName).withComponentKind(kind);
         }
         return builder.build();
     }

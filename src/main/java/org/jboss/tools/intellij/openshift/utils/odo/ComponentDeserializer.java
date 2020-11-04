@@ -45,7 +45,7 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
         List<Component> result = new ArrayList<>();
         if (tree != null) {
             for (JsonNode item : tree) {
-                result.add(Component.of(getName(item), getState(item), getComponentInfo(item)));
+                result.add(Component.of(getName(item), getComponentInfo(item)));
             }
         }
         return result;
@@ -55,15 +55,6 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
         JSonParser parser = new JSonParser(item);
         return parser.parseComponent();
     }
-
-    private ComponentState getState(JsonNode item) {
-        if (item.has(STATUS_FIELD) && item.get(STATUS_FIELD).has(STATE_FIELD)) {
-            return ComponentState.fromState(item.get(STATUS_FIELD).get(STATE_FIELD).asText());
-        } else {
-            return ComponentState.NOT_PUSHED;
-        }
-    }
-
 
     private String getName(JsonNode item) {
         if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {

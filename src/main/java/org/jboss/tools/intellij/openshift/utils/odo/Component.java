@@ -71,8 +71,8 @@ public interface Component {
         }
     }
 
-    static Component of(String name) {
-        return of(name, ComponentState.NO_CONTEXT, null);
+    static Component of(String name, ComponentInfo info) {
+        return of(name, ComponentState.NO_CONTEXT, info);
     }
 
     static Component of(String name, ComponentState state, ComponentInfo info) {

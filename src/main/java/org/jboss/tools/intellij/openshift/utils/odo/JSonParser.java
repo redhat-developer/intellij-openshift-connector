@@ -57,13 +57,16 @@ public class JSonParser {
         return result;
     }
 
-    public ComponentInfo parseComponent() {
+    public ComponentInfo parseComponentInfo() {
         ComponentInfo.Builder builder = new ComponentInfo.Builder();
         if (root.has(SPEC_FIELD)) {
-            String sourceType = root.get(SPEC_FIELD).get(SOURCE_TYPE_FIELD).asText();
             String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
-            ComponentKind kind = ComponentKind.fromAnnotation(root.get(KIND_FIELD).asText());
-            builder.withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentTypeName(componentTypeName).withComponentKind(kind);
+            if (root.get(SPEC_FIELD).has(SOURCE_TYPE_FIELD)) {
+                String sourceType = root.get(SPEC_FIELD).get(SOURCE_TYPE_FIELD).asText();
+                builder.withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentTypeName(componentTypeName);
+            } else {
+                builder.withSourceType(ComponentSourceType.LOCAL).withComponentTypeName(componentTypeName);
+            }
         }
         return builder.build();
     }

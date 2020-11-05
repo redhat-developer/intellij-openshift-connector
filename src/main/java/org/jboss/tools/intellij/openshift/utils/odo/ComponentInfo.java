@@ -25,10 +25,6 @@ public interface ComponentInfo {
 
     boolean isMigrated();
 
-    ComponentKind getComponentKind();
-
-    Builder toBuilder();
-
     class Builder {
         private ComponentSourceType sourceType;
         private String componentTypeName;
@@ -37,7 +33,6 @@ public interface ComponentInfo {
         private String repositoryReference;
         private String binaryURL;
         private boolean migrated;
-        private ComponentKind componentKind;
 
         public Builder withSourceType(ComponentSourceType sourceType) {
             this.sourceType = sourceType;
@@ -71,11 +66,6 @@ public interface ComponentInfo {
 
         public Builder withMigrated(boolean migrated) {
             this.migrated = migrated;
-            return this;
-        }
-
-        public Builder withComponentKind(ComponentKind kind) {
-            this.componentKind = kind;
             return this;
         }
 
@@ -114,19 +104,6 @@ public interface ComponentInfo {
                 @Override
                 public boolean isMigrated() {
                     return migrated;
-                }
-
-                @Override
-                public ComponentKind getComponentKind() {
-                    return componentKind;
-                }
-
-                @Override
-                public Builder toBuilder() {
-                    return new Builder().withSourceType(sourceType).withComponentTypeName(
-                            componentTypeName).withComponentTypeVersion(componentTypeVersion).withRepositoryURL(
-                            repositoryURL).withRepositoryReference(repositoryReference).withBinaryURL(
-                            binaryURL).withMigrated(migrated).withComponentKind(componentKind);
                 }
 
             };

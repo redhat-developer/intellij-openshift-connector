@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -97,8 +98,10 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_LABEL;
+import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
@@ -324,18 +327,16 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component) throws IOException {
-        ComponentInfo componentInfo = parseComponent(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
-        if (componentInfo.getComponentKind().equals(ComponentKind.S2I)) {
+    public ComponentInfo getComponentInfo(String project, String application, String component, ComponentKind kind) throws IOException {
+        if (kind.equals(ComponentKind.S2I)) {
             List<DeploymentConfig> DCs = client.deploymentConfigs().inNamespace(project).withLabel(COMPONENT_NAME_LABEL, component).withLabel(APP_LABEL, application).list().getItems();
             if (DCs.size() == 1) {
                 DeploymentConfig deploymentConfig = DCs.get(0);
-                String componentTypeVersion = deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL);
-                boolean migrated = deploymentConfig.getMetadata().getLabels().containsKey(ODO_MIGRATED_LABEL);
-                ComponentInfo.Builder builder = componentInfo.toBuilder().withComponentTypeVersion(componentTypeVersion).withMigrated(migrated);
-                if (componentInfo.getSourceType() == ComponentSourceType.LOCAL) {
+                ComponentSourceType sourceType = ComponentSourceType.fromAnnotation(deploymentConfig.getMetadata().getAnnotations().get(COMPONENT_SOURCE_TYPE_ANNOTATION));
+                ComponentInfo.Builder builder = new ComponentInfo.Builder().withSourceType(sourceType).withComponentTypeName(deploymentConfig.getMetadata().getLabels().get(RUNTIME_NAME_LABEL)).withComponentTypeVersion(deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL)).withMigrated(deploymentConfig.getMetadata().getLabels().containsKey(ODO_MIGRATED_LABEL));
+                if (sourceType == ComponentSourceType.LOCAL) {
                     return builder.build();
-                } else if (componentInfo.getSourceType() == ComponentSourceType.BINARY) {
+                } else if (sourceType == ComponentSourceType.BINARY) {
                     return builder.withBinaryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).build();
                 } else {
                     BuildConfig buildConfig = client.buildConfigs().inNamespace(project).withName(deploymentConfig.getMetadata().getName()).get();
@@ -345,12 +346,12 @@ public class OdoCli implements Odo {
                 throw new IOException("Invalid number of deployment configs (" + DCs.size() + "), should be 1");
             }
         }
-        return componentInfo;
+        return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
     }
 
-    private ComponentInfo parseComponent(String json) throws IOException {
+    private ComponentInfo parseComponentInfo(String json) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponent();
+        return parser.parseComponentInfo();
     }
 
     @Override
@@ -457,7 +458,26 @@ public class OdoCli implements Odo {
 
     @Override
     public List<Application> getApplications(String project) throws IOException {
-        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json"));
+        String json = execute(command, envVars, "list", "--all-apps", "-o", "json");
+        JsonNode root = JSON_MAPPER.readTree(json);
+
+        List<String> applicationNames = new ArrayList<>();
+        if (root.has("s2iComponents")) {
+            root.get("s2iComponents").forEach(item -> {
+                if (item.get("metadata").get("namespace").asText().equals(project) && !applicationNames.contains(item.get("spec").get("app").asText())) {
+                    applicationNames.add(item.get("spec").get("app").asText());
+                }
+            });
+        }
+        if (root.has("devfileComponents")) {
+            root.get("devfileComponents").forEach(item -> {
+                if (item.get("metadata").get("namespace").asText().equals(project) && !applicationNames.contains(item.get("spec").get("app").asText())) {
+                    applicationNames.add(item.get("spec").get("app").asText());
+                }
+            });
+        }
+        return applicationNames.stream().map(s -> Application.of(s)).collect(Collectors.toList());
+        // return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correclty parse applciations from project.
     }
 
     @Override

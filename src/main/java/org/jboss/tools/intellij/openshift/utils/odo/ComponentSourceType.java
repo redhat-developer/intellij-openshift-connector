@@ -11,14 +11,16 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 public enum ComponentSourceType {
-    LOCAL("Local"),
-    GIT("Git"),
-    BINARY("Binary");
+    LOCAL("Local", "local"),
+    GIT("Git", "git"),
+    BINARY("Binary", "binary");
 
     private final String label;
+    private final String annotation;
 
-    ComponentSourceType(String label) {
+    ComponentSourceType(String label, String annotation) {
         this.label = label;
+        this.annotation = annotation;
     }
 
     @Override
@@ -27,14 +29,11 @@ public enum ComponentSourceType {
     }
 
     public static ComponentSourceType fromAnnotation(String annotation) {
-        switch (annotation) {
-            case "git":
-                return GIT;
-            case "binary":
-                return BINARY;
-            case "local":
-            default:
-                return LOCAL;
+        for(ComponentSourceType sourceType : values()) {
+            if (sourceType.annotation.equals(annotation)) {
+                return sourceType;
+            }
         }
+        return LOCAL;
     }
 }

@@ -43,7 +43,7 @@ public class DeleteComponentAction extends OdoAction {
 
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getComponentKind());
+        odo.deleteComponent(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), component.getInfo()!= null ? component.getInfo().getComponentKind(): null);
         applicationNode.remove(componentNode);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete component"));

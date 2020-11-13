@@ -15,10 +15,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
@@ -39,7 +37,7 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
     }
 
     @Override
-    public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) throws IOException {
+    public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) {
         List<ComponentDescriptor> result = new ArrayList<>();
         // two roots, s2i and devfiles
         result.addAll(parseComponents(root.get(S2I_FIELD)));
@@ -50,8 +48,7 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
     private Collection<? extends ComponentDescriptor> parseComponents(JsonNode tree) {
         List<ComponentDescriptor> result = new ArrayList<>();
         if (tree != null) {
-            for (Iterator<JsonNode> it = tree.iterator(); it.hasNext(); ) {
-                JsonNode item = it.next();
+            for (JsonNode item : tree) {
                 result.add(new ComponentDescriptor(getProject(item), getApplication(item), getPath(item), getName(item),
                         getPorts(item)));
             }

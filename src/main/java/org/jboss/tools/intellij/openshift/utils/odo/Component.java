@@ -27,21 +27,17 @@ public interface Component {
 
     ComponentInfo getInfo();
 
-    ComponentKind getComponentKind();
-
     class ComponentImpl implements Component {
         private final String name;
         private ComponentState state;
         private String path;
         private final ComponentInfo info;
-        private final ComponentKind kind;
 
-        private ComponentImpl(String name, ComponentState state, String path, ComponentInfo info, ComponentKind kind) {
+        private ComponentImpl(String name, ComponentState state, String path, ComponentInfo info) {
             this.name = name;
             this.state = state;
             this.path = path;
             this.info = info;
-            this.kind = kind;
         }
 
         @Override
@@ -73,22 +69,17 @@ public interface Component {
         public ComponentInfo getInfo() {
             return info;
         }
-
-        @Override
-        public ComponentKind getComponentKind() {
-            return kind;
-        }
     }
 
-    static Component of(String name, ComponentInfo info, ComponentKind kind) {
-        return of(name, ComponentState.NO_CONTEXT, info, kind);
+    static Component of(String name, ComponentInfo info) {
+        return of(name, ComponentState.NO_CONTEXT, info);
     }
 
-    static Component of(String name, ComponentState state, ComponentInfo info, ComponentKind kind) {
-        return of(name, state, null, info, kind);
+    static Component of(String name, ComponentState state, ComponentInfo info) {
+        return of(name, state, null, info);
     }
 
-    static Component of(String name, ComponentState state, String path, ComponentInfo info, ComponentKind kind) {
-        return new ComponentImpl(name, state, path, info, kind);
+    static Component of(String name, ComponentState state, String path, ComponentInfo info) {
+        return new ComponentImpl(name, state, path, info);
     }
 }

@@ -210,7 +210,7 @@ public class OdoCli implements Odo {
         if (push) {
             args.add("--now");
         }
-        ExecHelper.executeWithTerminal(new File(source), args.toArray(new String[0]));
+        ExecHelper.executeWithTerminal(new File(source), envVars, args.toArray(new String[0]));
     }
 
     @Override
@@ -346,12 +346,12 @@ public class OdoCli implements Odo {
                 throw new IOException("Invalid number of deployment configs (" + DCs.size() + "), should be 1");
             }
         }
-        return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
+        return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"), kind);
     }
 
-    private ComponentInfo parseComponentInfo(String json) throws IOException {
+    private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentInfo();
+        return parser.parseComponentInfo(kind);
     }
 
     @Override
@@ -369,7 +369,7 @@ public class OdoCli implements Odo {
         if (secure) {
             args.add("--secure");
         }
-        ExecHelper.executeWithTerminal(new File(context), args.toArray(new String[0]));
+        ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[0]));
     }
 
     @Override
@@ -385,7 +385,7 @@ public class OdoCli implements Odo {
             if (deleteConfig) {
                 args.add("-a");
             }
-            if (kind.equals(ComponentKind.S2I)) {
+            if (ComponentKind.S2I.equals(kind)) {
                 args.add("--s2i");
             }
             execute(new File(context), command, envVars, args.toArray(new String[0]));
@@ -400,7 +400,7 @@ public class OdoCli implements Odo {
             if (deleteConfig) {
                 args.add("-a");
             }
-            if (kind.equals(ComponentKind.S2I)) {
+            if (ComponentKind.S2I.equals(kind)) {
                 args.add("--s2i");
             }
             execute(command, envVars, args.toArray(new String[0]));
@@ -477,7 +477,7 @@ public class OdoCli implements Odo {
             });
         }
         return applicationNames.stream().map(s -> Application.of(s)).collect(Collectors.toList());
-        // return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correclty parse applciations from project.
+        // return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correctly parse applications from project.
     }
 
     @Override

@@ -18,21 +18,25 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class OdoCliApplicationTest extends OdoCliTest {
     private boolean push;
+    private ComponentKind kind;
 
-    public OdoCliApplicationTest(boolean push, String label) {
+    public OdoCliApplicationTest(boolean push, ComponentKind kind) {
         this.push = push;
+        this.kind = kind;
     }
 
-    @Parameterized.Parameters(name = "{1}")
+    @Parameterized.Parameters(name = "pushed: {0}, kind: {1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {false, "not pushed"},
-                {true, "pushed"}
+                {false, ComponentKind.S2I},
+                {true, ComponentKind.DEVFILE},
+                {false, ComponentKind.DEVFILE},
+                {true, ComponentKind.DEVFILE}
         });
     }
 
@@ -42,7 +46,7 @@ public class OdoCliApplicationTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createS2iComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
             List<Application> applications = odo.getApplications(project);
             assertTrue(push ? applications.size() > 0 : applications.size() == 0);
         } finally {

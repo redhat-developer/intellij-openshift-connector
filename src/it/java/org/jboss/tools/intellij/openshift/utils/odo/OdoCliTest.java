@@ -84,6 +84,15 @@ public abstract class OdoCliTest extends BaseTest {
         odo.createComponentLocal(project, application, "java-springboot", null, component, new File(COMPONENT_PATH).getAbsolutePath(), push);
     }
 
+    protected void createComponent(String project, String application, String component, boolean push, ComponentKind kind) throws IOException, InterruptedException {
+        switch (kind){
+            case S2I:
+                createS2iComponent(project,application, component, push); break;
+            case DEVFILE:
+                createDevfileComponent(project,application, component, push); break;
+        }
+    }
+
     protected void createStorage(String project, String application, String component, boolean push, String storage) throws IOException, InterruptedException {
         createS2iComponent(project, application, component, push);
         odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");

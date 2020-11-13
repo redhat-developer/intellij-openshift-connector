@@ -186,7 +186,7 @@ public abstract class DebugComponentAction extends OdoAction {
             try {
                 // find an available port and use it
                 ServerSocket serverSocket = new ServerSocket(0);
-                port = Integer.valueOf(serverSocket.getLocalPort());
+                port = serverSocket.getLocalPort();
                 serverSocket.close();
                 // delegates configuration of run configuration
                 initConfiguration(runSettings.getConfiguration(), port);

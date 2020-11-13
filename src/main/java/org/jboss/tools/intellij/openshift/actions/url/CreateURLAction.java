@@ -27,53 +27,52 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateURLAction extends OdoAction {
-  public CreateURLAction() {
-    super(ComponentNode.class);
-  }
-
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getUserObject();
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-        if (createURL(odo, projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName())) {
-          componentNode.reload();
-        }
-      } catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create URL"));
-      }
-    });
-  }
-
-  public static List<Integer> loadServicePorts(Odo odo, String project, String application, String component) {
-    return odo.getServicePorts(project, application, component);
-  }
-
-  public static boolean createURL(Odo odo, String project, String application, String context, String name) throws IOException {
-    boolean done = false;
-    List<Integer> ports = loadServicePorts(odo, project, application, name);
-    if (!ports.isEmpty()) {
-      CreateURLDialog dialog = UIHelper.executeInUI(() -> {
-        CreateURLDialog dialog1 = new CreateURLDialog(null);
-        dialog1.setPorts(ports);
-        dialog1.show();
-        return dialog1;
-      });
-      if (dialog.isOK()) {
-        Integer port = dialog.getSelectedPort();
-        String urlName = dialog.getName();
-        boolean secure = dialog.isSecure();
-        if (port != null) {
-          odo.createURL(project, application, context, name, urlName, port, secure);
-          done = true;
-        }
-      }
-    } else {
-      throw new IOException("Can't create url for component without ports");
+    public CreateURLAction() {
+        super(ComponentNode.class);
     }
-    return done;
-  }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        ComponentNode componentNode = (ComponentNode) selected;
+        Component component = (Component) componentNode.getUserObject();
+        LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
+        LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (createURL(odo, projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName())) {
+                    componentNode.reload();
+                }
+            } catch (IOException e) {
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create URL"));
+            }
+        });
+    }
+
+    public static List<Integer> loadServicePorts(Odo odo, String project, String application, String component) {
+        return odo.getServicePorts(project, application, component);
+    }
+
+    public static boolean createURL(Odo odo, String project, String application, String context, String name) throws IOException {
+        List<Integer> ports = loadServicePorts(odo, project, application, name);
+        if (!ports.isEmpty()) {
+            CreateURLDialog dialog = UIHelper.executeInUI(() -> {
+                CreateURLDialog dialog1 = new CreateURLDialog(null);
+                dialog1.setPorts(ports);
+                dialog1.show();
+                return dialog1;
+            });
+            if (dialog.isOK()) {
+                Integer port = dialog.getSelectedPort();
+                String urlName = dialog.getName();
+                boolean secure = dialog.isSecure();
+                if (port != null) {
+                    odo.createURL(project, application, context, name, urlName, port, secure);
+                    return true;
+                }
+            }
+        } else {
+            throw new IOException("Can't create url for component without ports");
+        }
+        return false;
+    }
 }

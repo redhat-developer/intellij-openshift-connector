@@ -45,7 +45,7 @@ public class OdoProjectDecorator implements Odo {
         final IOException[] exception = {null};
         getComponents(project, application).forEach(component -> {
             try {
-                deleteComponent(project, application, component.getPath(), component.getName(), component.getComponentKind());
+                deleteComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentKind());
             } catch (IOException e) {
                 exception[0] = e;
             }
@@ -212,7 +212,7 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setState(ComponentState.PUSHED);
                     found.get().setPath(path);
                 } else {
-                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, null, null));
+                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, null));
                 }
             }
         });

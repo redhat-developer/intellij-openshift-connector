@@ -146,10 +146,12 @@ public class OdoCliComponentTest extends OdoCliTest {
             odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
             urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             if (kind.equals(ComponentKind.DEVFILE)) {
-                if (push)
+                if (push) {
                     assertEquals(2, urls.size());
-                else
-                    assertEquals(1, urls.size());
+                    odo.push(project, application, COMPONENT_PATH, component);
+                    urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                }
+                assertEquals(1, urls.size());
             } else {
                 assertEquals(0, urls.size());
             }

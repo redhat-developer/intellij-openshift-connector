@@ -40,7 +40,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {false, ComponentKind.S2I},
-                {true, ComponentKind.DEVFILE},
+                {true, ComponentKind.S2I},
                 {false, ComponentKind.DEVFILE},
                 {true, ComponentKind.DEVFILE}
         });

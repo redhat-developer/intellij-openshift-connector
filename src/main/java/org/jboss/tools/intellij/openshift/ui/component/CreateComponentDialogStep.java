@@ -126,6 +126,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             Object nodeInfo = node.getUserObject();
             if (node.isLeaf()) {
                 if (((ComponentType)nodeInfo).getKind() == ComponentKind.S2I) {
+                    sourceTypeComboBox.setEnabled(true);
                     componentVersionComboBox.setEnabled(true);
                     componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
                     componentVersionComboBox.setSelectedIndex(-1);
@@ -133,6 +134,9 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                 }else {
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setEnabled(false);
+                    model.setSourceType(ComponentSourceType.LOCAL);
+                    sourceTypeComboBox.setSelectedItem(model.getSourceType());
+                    sourceTypeComboBox.setEnabled(false);
                 }
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());
             }else {

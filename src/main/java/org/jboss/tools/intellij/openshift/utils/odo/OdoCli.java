@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -458,26 +457,7 @@ public class OdoCli implements Odo {
 
     @Override
     public List<Application> getApplications(String project) throws IOException {
-        String json = execute(command, envVars, "list", "--all-apps", "-o", "json");
-        JsonNode root = JSON_MAPPER.readTree(json);
-
-        List<String> applicationNames = new ArrayList<>();
-        if (root.has("s2iComponents")) {
-            root.get("s2iComponents").forEach(item -> {
-                if (item.get("metadata").get("namespace").asText().equals(project) && !applicationNames.contains(item.get("spec").get("app").asText())) {
-                    applicationNames.add(item.get("spec").get("app").asText());
-                }
-            });
-        }
-        if (root.has("devfileComponents")) {
-            root.get("devfileComponents").forEach(item -> {
-                if (item.get("metadata").get("namespace").asText().equals(project) && !applicationNames.contains(item.get("spec").get("app").asText())) {
-                    applicationNames.add(item.get("spec").get("app").asText());
-                }
-            });
-        }
-        return applicationNames.stream().map(s -> Application.of(s)).collect(Collectors.toList());
-        // return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correctly parse applications from project.
+        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correctly parse applications from project.
     }
 
     @Override

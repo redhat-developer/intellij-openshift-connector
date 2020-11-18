@@ -18,6 +18,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.ui.url.CreateURLDialog;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreeNode;
@@ -39,7 +40,7 @@ public class CreateURLAction extends OdoAction {
         LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
         CompletableFuture.runAsync(() -> {
             try {
-                if (createURL(odo, projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName())) {
+                if (createURL(odo, projectNode.toString(), applicationNode.toString(), component)) {
                     componentNode.reload();
                 }
             } catch (IOException e) {
@@ -48,30 +49,38 @@ public class CreateURLAction extends OdoAction {
         });
     }
 
-    public static List<Integer> loadServicePorts(Odo odo, String project, String application, String component) {
-        return odo.getServicePorts(project, application, component);
-    }
+    public static boolean createURL(Odo odo, String project, String application, Component component) throws IOException {
+        CreateURLDialog dialog;
+        if (ComponentKind.S2I.equals(component.getInfo().getComponentKind())) {
+            List<Integer> ports = odo.getServicePorts(project, application, component.getName());
+            if (!ports.isEmpty()) {
+                dialog = UIHelper.executeInUI(() -> {
+                    CreateURLDialog dialog1 = new CreateURLDialog(null);
+                    dialog1.setPorts(ports);
+                    dialog1.setPortFieldVisible(false);
+                    dialog1.show();
+                    return dialog1;
+                });
 
-    public static boolean createURL(Odo odo, String project, String application, String context, String name) throws IOException {
-        List<Integer> ports = loadServicePorts(odo, project, application, name);
-        if (!ports.isEmpty()) {
-            CreateURLDialog dialog = UIHelper.executeInUI(() -> {
+            } else {
+                throw new IOException("Can't create url for component without ports");
+            }
+        } else {
+            dialog = UIHelper.executeInUI(() -> {
                 CreateURLDialog dialog1 = new CreateURLDialog(null);
-                dialog1.setPorts(ports);
+                dialog1.setPortFieldVisible(true);
                 dialog1.show();
                 return dialog1;
             });
-            if (dialog.isOK()) {
-                Integer port = dialog.getSelectedPort();
-                String urlName = dialog.getName();
-                boolean secure = dialog.isSecure();
-                if (port != null) {
-                    odo.createURL(project, application, context, name, urlName, port, secure);
-                    return true;
-                }
+        }
+        if (dialog.isOK()) {
+            Integer port = dialog.getSelectedPort();
+            String urlName = dialog.getName();
+            boolean secure = dialog.isSecure();
+            if (port != null) {
+                odo.createURL(project, application, component.getPath(), component.getName(), urlName, port, secure);
+                return true;
             }
-        } else {
-            throw new IOException("Can't create url for component without ports");
         }
         return false;
     }

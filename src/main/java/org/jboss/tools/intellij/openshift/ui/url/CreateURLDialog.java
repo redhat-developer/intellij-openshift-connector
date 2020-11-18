@@ -11,13 +11,24 @@
 package org.jboss.tools.intellij.openshift.ui.url;
 
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.CollectionComboBoxModel;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.time.temporal.ValueRange;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CreateURLDialog extends DialogWrapper {
@@ -25,11 +36,34 @@ public class CreateURLDialog extends DialogWrapper {
     private JTextField nameTextField;
     private JComboBox portsComboBox;
     private JCheckBox secureCheckBox;
+    private JTextField portField;
 
     public CreateURLDialog(Component parent) {
         super(null, false, IdeModalityType.IDE);
         init();
         setTitle("Create URL");
+    }
+
+    private String getPortFieldValue() {
+        return portField.getText().trim();
+    }
+
+    @NotNull
+    @Override
+    protected List<ValidationInfo> doValidateAll() {
+        List<ValidationInfo> validations = new ArrayList<>();
+        if (portField.isVisible()) {
+
+            try {
+                Integer value = Integer.valueOf(getPortFieldValue());
+                if (!ValueRange.of(1024, 65535).isValidIntValue(value)) {
+                    validations.add(new ValidationInfo("Port value must be between 1024 and 65535", portField));
+                }
+            } catch (NumberFormatException e) {
+                validations.add(new ValidationInfo("Port value must be an integer", portField));
+            }
+        }
+        return validations;
     }
 
     @Nullable
@@ -52,8 +86,16 @@ public class CreateURLDialog extends DialogWrapper {
         portsComboBox.setSelectedIndex(0);
     }
 
+    public void setPortFieldVisible(boolean visible) {
+        portField.setVisible(visible);
+        portsComboBox.setVisible(!visible);
+    }
+
     public Integer getSelectedPort() {
-        return (Integer) portsComboBox.getSelectedItem();
+        if (getPortFieldValue().isEmpty()) {
+            return (Integer) portsComboBox.getSelectedItem();
+        } else
+            return Integer.valueOf(getPortFieldValue());
     }
 
     public static void main(String[] args) {

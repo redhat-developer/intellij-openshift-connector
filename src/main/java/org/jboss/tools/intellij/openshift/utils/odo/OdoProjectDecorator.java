@@ -16,6 +16,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -205,17 +206,26 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Component> getComponents(String project, String application) throws IOException {
         List<Component> components = delegate.getComponents(project, application);
-        model.getComponents().forEach((path, comp) -> {
+        for (Map.Entry<String, ComponentDescriptor> entry : model.getComponents().entrySet()) {
+            String path = entry.getKey();
+            ComponentDescriptor comp = entry.getValue();
             if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
                 Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(comp.getName())).findFirst();
                 if (found.isPresent()) {
                     found.get().setState(ComponentState.PUSHED);
                     found.get().setPath(path);
                 } else {
-                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, null));
+                    try {
+                        ComponentKind kind = getComponentKind(path);
+                        ComponentInfo.Builder builder = new ComponentInfo.Builder();
+                        ComponentInfo info = builder.withComponentKind(kind).build();
+                        components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, info));
+                    } catch (IOException e) {
+                       throw e;
+                    }
                 }
             }
-        });
+        }
         return components;
     }
 
@@ -282,6 +292,11 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<ComponentDescriptor> discover(String path) throws IOException {
         return delegate.discover(path);
+    }
+
+    @Override
+    public ComponentKind getComponentKind(String context) throws IOException {
+        return delegate.getComponentKind(context);
     }
 
     @Override

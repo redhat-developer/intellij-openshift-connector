@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,23 +25,25 @@ import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
     private boolean push;
+    private ComponentKind kind;
 
-    public OdoCliComponentTest(boolean push, String label) {
+    public OdoCliComponentTest(boolean push, ComponentKind kind) {
         this.push = push;
+        this.kind = kind;
     }
 
-    @Parameters(name = "{1}")
+    @Parameterized.Parameters(name = "pushed: {0}, kind: {1}")
     public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-            {false, "not pushed"},
-            {true, "pushed"}
+        return Arrays.asList(new Object[][]{
+                {false, ComponentKind.S2I},
+                {true, ComponentKind.S2I},
+                {false, ComponentKind.DEVFILE},
+                {true, ComponentKind.DEVFILE}
         });
-
     }
 
     @Test
@@ -51,11 +52,12 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -65,7 +67,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
             List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
             assertNotNull(components);
             assertEquals(1, components.size());
@@ -76,7 +78,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -86,12 +89,13 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
-            odo.deleteComponent(project, application, COMPONENT_PATH, component, push);
+            createComponent(project, application, component, push, kind);
+            odo.deleteComponent(project, application, COMPONENT_PATH, component, kind);
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -100,14 +104,19 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(1, urls.size());
+            if (kind.equals(ComponentKind.DEVFILE)) {
+                assertEquals(2, urls.size());
+            } else {
+                assertEquals(1, urls.size());
+            }
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -126,17 +135,31 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(1, urls.size());
+            if (kind.equals(ComponentKind.DEVFILE)) {
+                assertEquals(2, urls.size());
+            } else {
+                assertEquals(1, urls.size());
+            }
             odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
             urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(0, urls.size());
+            if (kind.equals(ComponentKind.DEVFILE)) {
+                if (push) {
+                    assertEquals(2, urls.size());
+                    odo.push(project, application, COMPONENT_PATH, component);
+                    urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                }
+                assertEquals(1, urls.size());
+            } else {
+                assertEquals(0, urls.size());
+            }
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -151,20 +174,24 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore("not yet supported by odo")
     public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
-            odo.createService(project, application, "postgresql-persistent", "default", service);
-            odo.link(project, application, component, COMPONENT_PATH, service, null);
+            createComponent(project, application, component, push, kind);
+            if (odo.isServiceCatalogAvailable()) {
+                odo.createService(project, application, "postgresql-persistent", "default", service, true);
+                if (push) {
+                    odo.link(project, application, component, COMPONENT_PATH, service, null);
+                }
+            }
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -179,7 +206,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -195,7 +223,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -205,13 +234,18 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(0, urls.size());
+            if (kind.equals(ComponentKind.DEVFILE)) {
+                assertEquals(1, urls.size());
+            } else {
+                assertEquals(0, urls.size());
+            }
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -224,11 +258,15 @@ public class OdoCliComponentTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push);
+            createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false);
             odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(1, urls.size());
+            if (kind.equals(ComponentKind.DEVFILE)) {
+                assertEquals(2, urls.size());
+            } else {
+                assertEquals(1, urls.size());
+            }
             int debugPort;
             try (ServerSocket serverSocket = new ServerSocket(0)) {
                 debugPort = serverSocket.getLocalPort();
@@ -246,7 +284,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         } finally {
             try {
                 odo.deleteProject(project);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
 }

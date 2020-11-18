@@ -27,7 +27,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         try {
             createProject(project);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service);
+                odo.createService(project, application, "postgresql-persistent", "default", service, false);
             }
         } finally {
             try {
@@ -44,7 +44,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         try {
             createProject(project);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service);
+                odo.createService(project, application, "postgresql-persistent", "default", service,false);
                 String template = odo.getServiceTemplate(project, application, service);
                 assertNotNull(template);
                 assertEquals("postgresql-persistent", template);
@@ -64,7 +64,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         try {
             createProject(project);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service);
+                odo.createService(project, application, "postgresql-persistent", "default", service, false);
                 odo.deleteService(project, application, service);
             }
         } finally {

@@ -119,7 +119,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   public void testActionOnPushedComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.PUSHED, "."));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.PUSHED, ".", null));
     verifyPushedComponent(event.getPresentation().isVisible());
   }
 
@@ -128,7 +128,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   public void testActionOnNotPushedComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NOT_PUSHED, "."));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NOT_PUSHED, ".", null));
     verifyNotPushedComponent(event.getPresentation().isVisible());
   }
 
@@ -137,7 +137,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   public void testActionOnNoContextComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NO_CONTEXT));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NO_CONTEXT, null));
     verifyNoContextComponent(event.getPresentation().isVisible());
   }
 

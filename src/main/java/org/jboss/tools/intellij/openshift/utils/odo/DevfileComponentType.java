@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,7 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-public interface ComponentType {
-  String getName();
-  ComponentKind getKind();
+public final class DevfileComponentType extends AbstractComponentType {
+
+    public DevfileComponentType(String name) {
+        super(name);
+    }
+
+    @Override
+    public ComponentKind getKind() {
+        return ComponentKind.DEVFILE;
+    }
+
 }

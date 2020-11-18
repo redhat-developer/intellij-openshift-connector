@@ -45,7 +45,7 @@ public class OdoProjectDecorator implements Odo {
         final IOException[] exception = {null};
         getComponents(project, application).forEach(component -> {
             try {
-                deleteComponent(project, application, component.getPath(), component.getName(), component.getState() != ComponentState.NOT_PUSHED);
+                deleteComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentKind());
             } catch (IOException e) {
                 exception[0] = e;
             }
@@ -73,7 +73,6 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
         delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, push);
-
     }
 
     @Override
@@ -87,8 +86,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
-        delegate.createService(project, application, serviceTemplate, servicePlan, service);
+    public void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException {
+        delegate.createService(project, application, serviceTemplate, servicePlan, service, wait);
     }
 
     @Override
@@ -137,8 +136,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component) throws IOException {
-        return delegate.getComponentInfo(project, application, component);
+    public ComponentInfo getComponentInfo(String project, String application, String component, ComponentKind kind) throws IOException {
+        return delegate.getComponentInfo(project, application, component, kind);
     }
 
     @Override
@@ -153,13 +152,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component) throws IOException {
-        delegate.undeployComponent(project, application, context, component);
+    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        delegate.undeployComponent(project, application, context, component, kind);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component, boolean undeploy) throws IOException {
-        delegate.deleteComponent(project, application, context, component, undeploy);
+    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        delegate.deleteComponent(project, application, context, component, kind);
     }
 
     @Override
@@ -204,7 +203,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<Component> getComponents(String project, String application) {
+    public List<Component> getComponents(String project, String application) throws IOException {
         List<Component> components = delegate.getComponents(project, application);
         model.getComponents().forEach((path, comp) -> {
             if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
@@ -213,7 +212,7 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setState(ComponentState.PUSHED);
                     found.get().setPath(path);
                 } else {
-                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path));
+                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, null));
                 }
             }
         });

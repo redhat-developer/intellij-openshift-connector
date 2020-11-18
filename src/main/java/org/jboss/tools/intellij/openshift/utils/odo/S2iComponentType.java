@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,7 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-public interface ComponentType {
-  String getName();
-  ComponentKind getKind();
+import java.util.List;
+
+public class S2iComponentType extends AbstractComponentType {
+
+    private final List<String> versions;
+
+    public S2iComponentType(String name, List<String> versions){
+        super(name);
+        this.versions = versions;
+    }
+
+    public List<String> getVersions() {
+        return versions;
+    }
+
+    @Override
+    public ComponentKind getKind() {
+        return ComponentKind.S2I;
+    }
 }

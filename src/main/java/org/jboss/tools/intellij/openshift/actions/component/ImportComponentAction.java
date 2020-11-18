@@ -22,6 +22,7 @@ import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -35,55 +36,55 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ImportComponentAction extends CreateComponentAction {
-  public ImportComponentAction() {
-    super(ComponentNode.class);
-  }
-
-  @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    if (visible) {
-      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.NO_CONTEXT;
+    public ImportComponentAction() {
+        super(ComponentNode.class);
     }
-    return visible;
-  }
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getUserObject();
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-        ApplicationsRootNode root = (ApplicationsRootNode)((LazyMutableTreeNode)selected).getRoot();
-        ApplicationTreeModel rootModel = root.getModel();
-        Project project = rootModel.getProject();
-        ComponentInfo info = odo.getComponentInfo(projectNode.toString(), applicationNode.toString(), component.getName());
-        CreateComponentModel model = getModel(project, odo.getComponentTypes(), applicationNode.toString(), component.getName(), info);
-        process((LazyMutableTreeNode) selected, odo, projectNode.toString(), Optional.of(applicationNode.toString()), rootModel, model);
+    @Override
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
+        if (visible) {
+            visible = ((Component) ((ComponentNode) selected).getUserObject()).getState() == ComponentState.NO_CONTEXT;
+        }
+        return visible;
+    }
 
-      } catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
-      }
-    });
-  }
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        ComponentNode componentNode = (ComponentNode) selected;
+        Component component = (Component) componentNode.getUserObject();
+        ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
+        LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+        CompletableFuture.runAsync(() -> {
+            try {
+                ApplicationsRootNode root = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
+                ApplicationTreeModel rootModel = root.getModel();
+                Project project = rootModel.getProject();
+                ComponentInfo info = odo.getComponentInfo(projectNode.toString(), applicationNode.toString(), component.getName(), component.getInfo().getComponentKind());
+                CreateComponentModel model = getModel(project, odo.getComponentTypes(), applicationNode.toString(), component.getName(), info, component.getInfo().getComponentKind());
+                process((LazyMutableTreeNode) selected, odo, projectNode.toString(), Optional.of(applicationNode.toString()), rootModel, model);
 
-  @NotNull
-  private CreateComponentModel getModel(Project project, List<ComponentType> types, String application, String name, ComponentInfo info) {
-    CreateComponentModel model =  new CreateComponentModel("Import component");
-    model.setProject(project);
-    model.setApplication(application);
-    model.setName(name);
-    model.setComponentTypes(types.toArray(new ComponentType[types.size()]));
-    model.setSourceType(info.getSourceType());
-    model.setComponentTypeName(info.getComponentTypeName());
-    model.setComponentTypeVersion(info.getComponentTypeVersion());
-    model.setGitURL(info.getRepositoryURL());
-    model.setGitReference(info.getRepositoryReference());
-    model.setBinaryFilePath(info.getBinaryURL()); //TODO
-    model.setImportMode(true);
-    return model;
+            } catch (IOException e) {
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
+            }
+        });
+    }
 
-  }
+    @NotNull
+    private CreateComponentModel getModel(Project project, List<ComponentType> types, String application, String name, ComponentInfo info, ComponentKind kind) {
+        CreateComponentModel model = new CreateComponentModel("Import component");
+        model.setProject(project);
+        model.setApplication(application);
+        model.setName(name);
+        model.setComponentTypesTree(types);
+        model.setSourceType(info.getSourceType());
+        model.setComponentTypeName(info.getComponentTypeName());
+        model.setComponentTypeVersion(info.getComponentTypeVersion());
+        model.setGitURL(info.getRepositoryURL());
+        model.setGitReference(info.getRepositoryReference());
+        model.setBinaryFilePath(info.getBinaryURL());
+        model.setComponentKind(kind);
+        model.setImportMode(true);
+        return model;
+    }
 }

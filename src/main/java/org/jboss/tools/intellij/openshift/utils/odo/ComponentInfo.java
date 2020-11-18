@@ -12,14 +12,22 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 public interface ComponentInfo {
     ComponentSourceType getSourceType();
+
     String getComponentTypeName();
+
     String getComponentTypeVersion();
+
     String getRepositoryURL();
+
     String getRepositoryReference();
+
     String getBinaryURL();
+
     boolean isMigrated();
 
-    public class Builder {
+    ComponentKind getComponentKind();
+
+    class Builder {
         private ComponentSourceType sourceType;
         private String componentTypeName;
         private String componentTypeVersion;
@@ -27,6 +35,7 @@ public interface ComponentInfo {
         private String repositoryReference;
         private String binaryURL;
         private boolean migrated;
+        private ComponentKind kind;
 
         public Builder withSourceType(ComponentSourceType sourceType) {
             this.sourceType = sourceType;
@@ -34,7 +43,7 @@ public interface ComponentInfo {
         }
 
         public Builder withComponentTypeName(String componentTypeName) {
-            this.componentTypeName= componentTypeName;
+            this.componentTypeName = componentTypeName;
             return this;
         }
 
@@ -60,6 +69,11 @@ public interface ComponentInfo {
 
         public Builder withMigrated(boolean migrated) {
             this.migrated = migrated;
+            return this;
+        }
+
+        public Builder withComponentKind(ComponentKind kind) {
+            this.kind = kind;
             return this;
         }
 
@@ -99,6 +113,12 @@ public interface ComponentInfo {
                 public boolean isMigrated() {
                     return migrated;
                 }
+
+                @Override
+                public ComponentKind getComponentKind() {
+                    return kind;
+                }
+
             };
         }
     }

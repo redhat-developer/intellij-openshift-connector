@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.io.IOException;
 import java.util.List;
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
@@ -61,7 +60,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
     this.logged = logged;
   }
 
-  public Odo getOdo() throws IOException {
+  public Odo getOdo(){
     return odo;
   }
 
@@ -73,7 +72,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
   public void load() {
     super.load();
     try {
-      odo.getProjects().stream().forEach(p -> add(new ProjectNode(p)));
+      odo.getProjects().forEach(p -> add(new ProjectNode(p)));
       checkMigrate(odo, odo.getPreOdo10Projects());
       setLogged(true);
     } catch (Exception e) {
@@ -92,7 +91,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
                     private int counter = 0;
 
                     @Override
-                    protected List<Exception> compute(@NotNull ProgressIndicator indicator) throws Exception {
+                    protected List<Exception> compute(@NotNull ProgressIndicator indicator){
                       return odo.migrateProjects(preOdo10Projects, (project, kind) -> {
                         indicator.setText("Migrating " + kind + " for project " + project);
                         indicator.setFraction(counter++ / (preOdo10Projects.size() * 8));

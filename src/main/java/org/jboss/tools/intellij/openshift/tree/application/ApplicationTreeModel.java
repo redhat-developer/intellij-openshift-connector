@@ -165,8 +165,8 @@ public class ApplicationTreeModel extends BaseTreeModel<Object>
     }
 
     private boolean hasContextChanged(Config newConfig, Config currentConfig) {
-        Context currentContext = KubeConfigUtils.getCurrentContext(currentConfig);
-        Context newContext = KubeConfigUtils.getCurrentContext(newConfig);
+        Context currentContext = KubeConfigUtils.getCurrentContext(currentConfig).getContext();
+        Context newContext = KubeConfigUtils.getCurrentContext(newConfig).getContext();
         return hasServerChanged(newContext, currentContext)
                 || hasNewToken(newContext, newConfig, currentContext, currentConfig);
     }

@@ -40,12 +40,8 @@ public class CreateServiceAction extends OdoAction {
         if (visible) {
             ApplicationsRootNode rootNode = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
             if (rootNode != null) {
-                try {
-                    Odo odo = rootNode.getOdo();
-                    return odo.isServiceCatalogAvailable();
-                } catch (IOException ex) {
-                    //silently catch the exception to make the action not visible
-                }
+                Odo odo = rootNode.getOdo();
+                return odo.isServiceCatalogAvailable();
             }
         }
         return false;
@@ -81,7 +77,7 @@ public class CreateServiceAction extends OdoAction {
     }
 
     private void createService(Odo odo, String project, String application, CreateServiceDialog dialog) throws IOException {
-        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplatePlan(), dialog.getName());
+        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplatePlan(), dialog.getName(), false);
     }
 
     protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {

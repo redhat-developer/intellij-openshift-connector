@@ -184,10 +184,6 @@ public class ExecHelper {
         executeWithTerminal(workingDirectory, true, envs, command);
     }
 
-    public static void executeWithTerminal(File workingDirectory, String... command) throws IOException {
-        executeWithTerminal(workingDirectory, true, Collections.emptyMap(), command);
-    }
-
     public static void executeWithTerminal(File workingDirectory, boolean waitForProcessToExit, Map<String, String> envs, String... command) throws IOException {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             execute(command[0], workingDirectory, Arrays.stream(command)
@@ -198,16 +194,8 @@ public class ExecHelper {
         }
     }
 
-    public static void executeWithTerminal(File workingDirectory, boolean waitForProcessToExit, String... command) throws IOException {
-        executeWithTerminal(workingDirectory, waitForProcessToExit, Collections.emptyMap(), command);
-    }
-
     public static void executeWithTerminal(Map<String, String> envs, String... command) throws IOException {
         executeWithTerminal(new File(HOME_FOLDER), envs, command);
-    }
-
-    public static void executeWithTerminal(String... command) throws IOException {
-        executeWithTerminal(Collections.emptyMap(), command);
     }
 
     private static class RedirectedStream extends FilterInputStream {

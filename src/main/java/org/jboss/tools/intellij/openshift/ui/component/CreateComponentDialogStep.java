@@ -18,40 +18,45 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.S2iComponentType;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.event.DocumentEvent;
 import javax.swing.filechooser.FileFilter;
-import java.awt.Component;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
     private JTextField nameTextField;
     private JComboBox sourceTypeComboBox;
     private JTextField contextTextField;
-    private JComboBox componentTypeComboBox;
     private JComboBox componentVersionComboBox;
     private JTextField applicationTextField;
     private JCheckBox pushAfterCreateCheckBox;
     private JPanel root;
     private JButton browseModulesButton;
     private JButton browseFolderButton;
+    private JTree componentTypeTree;
     private final CreateComponentModel model;
 
     public CreateComponentDialogStep(CreateComponentModel model) {
@@ -106,21 +111,38 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                 contextTextField.setText(chooser.getSelectedFile().getAbsolutePath());
             }
         });
-        componentTypeComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                value = ((ComponentType) value).getName();
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
 
-        componentTypeComboBox.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                componentVersionComboBox.setModel(new DefaultComboBoxModel(((ComponentType) e.getItem()).getVersions()));
-                componentVersionComboBox.setSelectedIndex(-1);
-                componentVersionComboBox.setSelectedIndex(0);
-                model.setComponentTypeName(((ComponentType) e.getItem()).getName());
+        componentTypeTree.getSelectionModel().setSelectionMode
+                (TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        componentTypeTree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                    componentTypeTree.getLastSelectedPathComponent();
+
+            if (node == null)
+                //Nothing is selected.
+                return;
+
+            Object nodeInfo = node.getUserObject();
+            if (node.isLeaf()) {
+                if (((ComponentType)nodeInfo).getKind() == ComponentKind.S2I) {
+                    sourceTypeComboBox.setEnabled(true);
+                    componentVersionComboBox.setEnabled(true);
+                    componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
+                    componentVersionComboBox.setSelectedIndex(-1);
+                    componentVersionComboBox.setSelectedIndex(0);
+                }else {
+                    componentVersionComboBox.setSelectedIndex(-1);
+                    componentVersionComboBox.setEnabled(false);
+                    model.setSourceType(ComponentSourceType.LOCAL);
+                    sourceTypeComboBox.setSelectedItem(model.getSourceType());
+                    sourceTypeComboBox.setEnabled(false);
+                }
+                model.setComponentTypeName(((ComponentType) nodeInfo).getName());
+            }else {
+                model.setComponentTypeName(null);
             }
+            updateState();
         });
         componentVersionComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -157,22 +179,58 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         sourceTypeComboBox.setSelectedItem(model.getSourceType());
         contextTextField.setText(model.getContext());
         applicationTextField.setText(model.getApplication());
-        componentTypeComboBox.setModel(new DefaultComboBoxModel(model.getComponentTypes()));
-        componentTypeComboBox.setSelectedItem(null);
-        componentTypeComboBox.setSelectedItem(Arrays.stream(model.getComponentTypes()).filter(t -> t.getName().equals(model.getComponentTypeName())).findFirst().orElse(model.getComponentTypes()[0]));
+
+        componentTypeTree.setModel(new DefaultTreeModel(model.getComponentTypesTree()));
+
         componentVersionComboBox.setSelectedItem(null);
         componentVersionComboBox.setSelectedItem(model.getComponentTypeVersion());
         pushAfterCreateCheckBox.setSelected(model.isPushAfterCreate());
         if (model.isImportMode()) {
             nameTextField.setEnabled(false);
             sourceTypeComboBox.setEnabled(false);
-            applicationTextField.setEnabled(false);
-            componentTypeComboBox.setEnabled(false);
+            TreeNode[] path = searchNode();
+            if (path != null) {
+                componentTypeTree.setSelectionPath(new TreePath(path));
+                componentVersionComboBox.setSelectedItem(model.getComponentTypeVersion());
+            }
+            componentTypeTree.setEnabled(false);
             componentVersionComboBox.setEnabled(false);
+            applicationTextField.setEnabled(false);
+            pushAfterCreateCheckBox.setSelected(false);
+            pushAfterCreateCheckBox.setEnabled(false);
         }
         if (StringUtils.isNotEmpty(model.getApplication())) {
             applicationTextField.setEnabled(false);
         }
+    }
+
+    /**
+     * search node for import mode only.
+     *
+     * @return path of the component
+     */
+    private TreeNode[] searchNode() {
+        TreeNode rootNode =null;
+        //first select the correct root
+        switch (model.getComponentKind()){
+            case DEVFILE:
+                rootNode = model.getComponentTypesTree().getChildAt(0);break;
+            case S2I:
+                rootNode = model.getComponentTypesTree().getChildAt(1);break;
+            default:
+                break;
+        }
+            // iterate over children to find the correct component
+        if (rootNode != null){
+            for (Object nodeObject : Collections.list(rootNode.children())){
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodeObject;
+                ComponentType type = (ComponentType) node.getUserObject();
+                if (type.getName().equals(model.getComponentTypeName())) {
+                    return node.getPath();
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -233,8 +291,6 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         final JLabel label4 = new JLabel();
         label4.setText("Component type");
         panel1.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        componentTypeComboBox = new JComboBox();
-        panel1.add(componentTypeComboBox, new GridConstraints(3, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label5 = new JLabel();
         label5.setText("Component version");
         panel1.add(label5, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

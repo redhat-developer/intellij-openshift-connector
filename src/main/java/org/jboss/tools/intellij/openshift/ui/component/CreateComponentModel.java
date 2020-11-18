@@ -10,15 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.component;
 
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class CreateComponentModel extends WizardModel {
@@ -26,7 +29,6 @@ public class CreateComponentModel extends WizardModel {
     private String name = "";
     private ComponentSourceType sourceType = ComponentSourceType.LOCAL;
     private String context = "";
-    private ComponentType[] componentTypes;
     private String componentTypeName;
     private String componentTypeVersion;
     private String application = "";
@@ -37,9 +39,13 @@ public class CreateComponentModel extends WizardModel {
 
     private String binaryFilePath;
 
+    private ComponentKind componentKind;
+
     private boolean importMode;
 
     private Predicate<String> componentPredicate = x -> false;
+
+    private DefaultMutableTreeNode top = new DefaultMutableTreeNode("Top");
 
     public CreateComponentModel(String title) {
         super(title);
@@ -76,14 +82,6 @@ public class CreateComponentModel extends WizardModel {
 
     public void setContext(String context) {
         this.context = context;
-    }
-
-    public ComponentType[] getComponentTypes() {
-        return componentTypes;
-    }
-
-    public void setComponentTypes(ComponentType[] componentTypes) {
-        this.componentTypes = componentTypes;
     }
 
     public String getComponentTypeName() {
@@ -142,16 +140,20 @@ public class CreateComponentModel extends WizardModel {
         this.binaryFilePath = binaryFilePath;
     }
 
+    public ComponentKind getComponentKind() {
+        return componentKind;
+    }
+
+    public void setComponentKind(ComponentKind componentKind) {
+        this.componentKind = componentKind;
+    }
+
     public boolean isImportMode() {
         return importMode;
     }
 
     public void setImportMode(boolean importMode) {
         this.importMode = importMode;
-    }
-
-    public Predicate<String> getComponentPredicate() {
-        return componentPredicate;
     }
 
     public void setComponentPredicate(Predicate<String> componentPredicate) {
@@ -170,6 +172,7 @@ public class CreateComponentModel extends WizardModel {
     public boolean isValid() {
         return StringUtils.isNotBlank(getName()) && StringUtils.isNotBlank(getApplication()) &&
                 StringUtils.isNotBlank(getContext()) &&
+                StringUtils.isNotBlank(getComponentTypeName()) &&
                 (getSourceType() == ComponentSourceType.LOCAL ||
                         (getSourceType() == ComponentSourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
                         (getSourceType() == ComponentSourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));
@@ -178,4 +181,28 @@ public class CreateComponentModel extends WizardModel {
     public boolean hasComponent(String path) {
         return componentPredicate.test(path);
     }
+
+    public TreeNode getComponentTypesTree() {
+        return top;
+    }
+
+    public void setComponentTypesTree(List<ComponentType> types) {
+        // creates the default Roots
+        DefaultMutableTreeNode devfileComponents = new DefaultMutableTreeNode("DevFile Components");
+        DefaultMutableTreeNode s2iComponents = new DefaultMutableTreeNode("S2I Components");
+        for (ComponentType type : types) {
+            switch (type.getKind()) {
+                case S2I:
+                    s2iComponents.add(new DefaultMutableTreeNode(type,false));
+                    break;
+                case DEVFILE:
+                    devfileComponents.add(new DefaultMutableTreeNode(type, false));
+                    break;
+            }
+        }
+        top.add(devfileComponents);
+        top.add(s2iComponents);
+    }
+
+
 }

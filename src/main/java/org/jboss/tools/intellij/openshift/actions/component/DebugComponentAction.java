@@ -28,28 +28,25 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.Objects;
-import java.util.Optional;
-import javax.swing.tree.TreePath;
-
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.tree.TreePath;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.Objects;
+import java.util.Optional;
 
 public abstract class DebugComponentAction extends OdoAction {
 
@@ -69,7 +66,7 @@ public abstract class DebugComponentAction extends OdoAction {
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = (Component) componentNode.getUserObject();
-            return (isPushed(component) && isDebuggable(componentNode, component));
+            return (isPushed(component) && isDebuggable(component.getInfo().getComponentTypeName()));
         }
         return false;
     }
@@ -93,9 +90,7 @@ public abstract class DebugComponentAction extends OdoAction {
 
         RunManager runManager = RunManager.getInstance(project);
         final Optional<Integer> port = createOrFindPortFromConfiguration(runManager, component);
-        if (port.isPresent()) {
-            executeDebug(project, component, odo, applicationNode.toString(), projectNode.toString(), port.get());
-        }
+        port.ifPresent(portNumber -> executeDebug(project, component, odo, applicationNode.toString(), projectNode.toString(), portNumber));
     }
 
     private void executeDebug(Project project, Component component, Odo odo, String applicationName, String projectName, Integer port) {
@@ -225,23 +220,6 @@ public abstract class DebugComponentAction extends OdoAction {
             }
         }
         return environment;
-    }
-
-    private boolean isDebuggable(ComponentNode componentNode, Component component) {
-        ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
-        try {
-            Odo odo = ((ApplicationsRootNode) componentNode.getRoot()).getOdo();
-            LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-            ComponentInfo info = odo.getComponentInfo(
-                    projectNode.toString(),
-                    applicationNode.toString(),
-                    component.getName());
-            return isDebuggable(info.getComponentTypeName());
-        } catch (IOException e) {
-            UIHelper.executeInUI(() -> Messages.showErrorDialog(
-                    "Error: " + e.getLocalizedMessage(), "Debug"));
-        }
-        return false;
     }
 
     protected abstract boolean isDebuggable(String componentTypeName);

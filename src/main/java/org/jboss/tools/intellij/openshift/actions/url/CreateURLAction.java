@@ -55,9 +55,8 @@ public class CreateURLAction extends OdoAction {
             List<Integer> ports = odo.getServicePorts(project, application, component.getName());
             if (!ports.isEmpty()) {
                 dialog = UIHelper.executeInUI(() -> {
-                    CreateURLDialog dialog1 = new CreateURLDialog(null);
+                    CreateURLDialog dialog1 = new CreateURLDialog(false);
                     dialog1.setPorts(ports);
-                    dialog1.setPortFieldVisible(false);
                     dialog1.show();
                     return dialog1;
                 });
@@ -67,8 +66,7 @@ public class CreateURLAction extends OdoAction {
             }
         } else {
             dialog = UIHelper.executeInUI(() -> {
-                CreateURLDialog dialog1 = new CreateURLDialog(null);
-                dialog1.setPortFieldVisible(true);
+                CreateURLDialog dialog1 = new CreateURLDialog(true);
                 dialog1.show();
                 return dialog1;
             });

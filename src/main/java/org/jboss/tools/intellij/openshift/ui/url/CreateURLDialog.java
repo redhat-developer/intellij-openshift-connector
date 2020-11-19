@@ -24,7 +24,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.time.temporal.ValueRange;
@@ -38,10 +37,22 @@ public class CreateURLDialog extends DialogWrapper {
     private JCheckBox secureCheckBox;
     private JTextField portField;
 
-    public CreateURLDialog(Component parent) {
+    /**
+     * Constructor for CreateURL dialog.
+     * @param showPortField set to @true to show editable portField. Otherwise the port combo box will be used.
+     */
+    public CreateURLDialog(boolean showPortField) {
         super(null, false, IdeModalityType.IDE);
         init();
         setTitle("Create URL");
+        if (showPortField){
+            portField.setVisible(true);
+            portField.setText("1024");
+            portsComboBox.setVisible(false);
+        }else {
+            portField.setVisible(false);
+            portsComboBox.setVisible(true);
+        }
     }
 
     private String getPortFieldValue() {
@@ -53,7 +64,6 @@ public class CreateURLDialog extends DialogWrapper {
     protected List<ValidationInfo> doValidateAll() {
         List<ValidationInfo> validations = new ArrayList<>();
         if (portField.isVisible()) {
-
             try {
                 Integer value = Integer.valueOf(getPortFieldValue());
                 if (!ValueRange.of(1024, 65535).isValidIntValue(value)) {
@@ -86,22 +96,11 @@ public class CreateURLDialog extends DialogWrapper {
         portsComboBox.setSelectedIndex(0);
     }
 
-    public void setPortFieldVisible(boolean visible) {
-        portField.setVisible(visible);
-        portsComboBox.setVisible(!visible);
-    }
-
     public Integer getSelectedPort() {
         if (getPortFieldValue().isEmpty()) {
             return (Integer) portsComboBox.getSelectedItem();
         } else
             return Integer.valueOf(getPortFieldValue());
-    }
-
-    public static void main(String[] args) {
-        CreateURLDialog dialog = new CreateURLDialog(null);
-        dialog.show();
-        System.exit(0);
     }
 
     {

@@ -96,11 +96,6 @@ public class CreateURLDialog extends DialogWrapper {
         portsComboBox.setSelectedIndex(0);
     }
 
-    public void setPortFieldVisible(boolean visible) {
-        portField.setVisible(visible);
-        portsComboBox.setVisible(!visible);
-    }
-
     public Integer getSelectedPort() {
         if (getPortFieldValue().isEmpty()) {
             return (Integer) portsComboBox.getSelectedItem();

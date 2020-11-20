@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -321,7 +322,7 @@ public class OdoCli implements Odo {
         if (context != null) {
             return parseURLs(execute(new File(context), command, envVars, "url", "list", "-o", "json"));
         } else {
-            return Collections.emptyList();
+            return parseURLs(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
         }
     }
 
@@ -775,5 +776,18 @@ public class OdoCli implements Odo {
                 execute(new File(path), command, envVars, "list", "--path", ".", "-o", "json"),
                 new TypeReference<List<ComponentDescriptor>>() {
                 });
+    }
+
+    @Override
+    public ComponentKind getComponentKind(String context) throws IOException {
+        String json = execute(new File(context), command, envVars, "list", "--path", ".", "-o", "json");
+        JsonNode root = JSON_MAPPER.readTree(json);
+        if (root.get("s2iComponents").size() != 0) {
+            return ComponentKind.S2I;
+        }
+        if (root.get("devfileComponents").size() != 0) {
+            return ComponentKind.DEVFILE;
+        }
+        return null;
     }
 }

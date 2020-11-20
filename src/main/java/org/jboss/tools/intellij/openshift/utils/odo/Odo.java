@@ -112,4 +112,6 @@ public interface Odo {
     java.net.URL getMasterUrl();
 
     List<ComponentDescriptor> discover(String path) throws IOException;
+
+    ComponentKind getComponentKind(String context) throws IOException;
 }

@@ -140,18 +140,23 @@ public class OdoCliComponentTest extends OdoCliTest {
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             if (kind.equals(ComponentKind.DEVFILE)) {
                 assertEquals(2, urls.size());
+                assertEquals(push ? URL.State.PUSHED : URL.State.NOT_PUSHED, urls.get(0).getState());
+                assertEquals(URL.State.NOT_PUSHED, urls.get(1).getState());
             } else {
                 assertEquals(1, urls.size());
+                assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
             }
             odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
             urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             if (kind.equals(ComponentKind.DEVFILE)) {
                 if (push) {
                     assertEquals(2, urls.size());
-                    odo.push(project, application, COMPONENT_PATH, component);
-                    urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                    assertEquals(URL.State.LOCALLY_DELETED, urls.get(0).getState());
+                    assertEquals(URL.State.NOT_PUSHED, urls.get(1).getState());
+                } else {
+                    assertEquals(1, urls.size());
+                    assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
                 }
-                assertEquals(1, urls.size());
             } else {
                 assertEquals(0, urls.size());
             }

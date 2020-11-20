@@ -36,6 +36,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +67,7 @@ public abstract class DebugComponentAction extends OdoAction {
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = (Component) componentNode.getUserObject();
-            return (isPushed(component) && isDebuggable(component.getInfo().getComponentTypeName()));
+            return (isPushed(component) && isDebuggable(component.getInfo().getComponentKind(), component.getInfo().getComponentTypeName()));
         }
         return false;
     }
@@ -99,12 +100,17 @@ public abstract class DebugComponentAction extends OdoAction {
                 // run odo debug if not already running
                 if (checkOdoDebugNotRunning(odo, projectName, applicationName, component)) {
                     ProgressManager.getInstance().run(
-                            new Task.Modal(project, "Starting odo", false) {
+                            new Task.Modal(project, "Starting odo", true) {
                                 public void run(@NotNull ProgressIndicator indicator) {
                                     indicator.setText("Starting debugger session for the component "
-                                            + component.getName());
+                                            + component.getName() + ".");
                                     indicator.setIndeterminate(true);
                                     try {
+                                        if (ComponentKind.DEVFILE.equals(component.getInfo().getComponentKind())) {
+                                            indicator.setText2("Please wait while pushing the component with debug flag...");
+                                            odo.pushWithDebug(projectName, applicationName, component.getPath(), component.getName());
+                                            indicator.setText2("Component pushed!");
+                                        }
                                         odo.debug(
                                                 projectName,
                                                 applicationName,
@@ -133,7 +139,7 @@ public abstract class DebugComponentAction extends OdoAction {
                         Messages.showMessageDialog(
                                 "'" + runSettings.getName() + "' is single-instance run configuration "
                                         + "and is already running.",
-                                "Process '" + runSettings.getName() + "' Is Running",
+                                "Process '" + runSettings.getName() + "' is running",
                                 Messages.getInformationIcon()));
                 return;
             }
@@ -222,7 +228,7 @@ public abstract class DebugComponentAction extends OdoAction {
         return environment;
     }
 
-    protected abstract boolean isDebuggable(String componentTypeName);
+    protected abstract boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName);
 
     protected abstract ConfigurationType getConfigurationType();
 

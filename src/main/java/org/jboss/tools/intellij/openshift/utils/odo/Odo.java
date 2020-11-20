@@ -32,6 +32,8 @@ public interface Odo {
 
     void push(String project, String application, String context, String component) throws IOException;
 
+    void pushWithDebug(String project, String application, String context, String component) throws IOException;
+
     void describeComponent(String project, String application, String context, String component) throws IOException;
 
     void watch(String project, String application, String context, String component) throws IOException;

@@ -14,18 +14,28 @@ import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfiguration;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfigurationType;
-
-import java.lang.reflect.Field;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
 
 public class DebugNodeJSComponentAction extends DebugComponentAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(DebugNodeJSComponentAction.class);
 
+    private static final String NODE_JS = "nodejs";
+
     @Override
-    protected boolean isDebuggable(String componentTypeName) {
-        return "nodejs".equals(componentTypeName);
+    protected boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName) {
+        switch (kind) {
+            case S2I:
+                return NODE_JS.equals(componentTypeName);
+            case DEVFILE:
+                return componentTypeName.contains(NODE_JS);
+        }
+        return false;
     }
 
     @Override

@@ -172,7 +172,22 @@ public class OdoCli implements Odo {
 
     @Override
     public void push(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(new File(context), envVars, command, "push");
+        push(context, false);
+    }
+
+    @Override
+    public void pushWithDebug(String project, String application, String context, String component) throws IOException {
+        push(context, true);
+    }
+
+    private void push(String context, boolean debug) throws IOException {
+        List<String> args = new ArrayList<>();
+        args.add(command);
+        args.add("push");
+        if (debug) {
+            args.add("--debug");
+        }
+        ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[0]));
     }
 
     @Override
@@ -312,7 +327,7 @@ public class OdoCli implements Odo {
         return service != null ? service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList()) : new ArrayList<>();
     }
 
-    private static List<URL> parseURLs(String json) throws IOException {
+    private List<URL> parseURLs(String json) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
         return parser.parseURLS();
     }
@@ -451,7 +466,7 @@ public class OdoCli implements Odo {
         execute(command, envVars, "logout");
     }
 
-    private static List<Application> parseApplications(String json) throws IOException {
+    private List<Application> parseApplications(String json) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
         return parser.parseApplications();
     }
@@ -537,12 +552,16 @@ public class OdoCli implements Odo {
 
     @Override
     public DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
-        String output = ExecHelper.execute(command, new File(context), envVars, "debug", "info");
-        if (output.startsWith("Debug is not running"))
-            return DebugStatus.NOT_RUNNING;
-        else if (output.startsWith("Debug is running"))
-            return DebugStatus.RUNNING;
-        return DebugStatus.UNKNOWN;
+        try {
+            String json = execute(new File(context), command, envVars, "debug", "info", "-o", "json");
+            JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+            return parser.parseDebugStatus();
+        } catch (IOException e) {
+            if (e.getMessage().contains("debug is not running")) {
+                return DebugStatus.NOT_RUNNING;
+            }
+            throw e;
+        }
     }
 
 

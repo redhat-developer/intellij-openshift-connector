@@ -62,6 +62,11 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
+    public void pushWithDebug(String project, String application, String context, String component) throws IOException {
+        delegate.pushWithDebug(project, application, context, component);
+    }
+
+    @Override
     public void describeComponent(String project, String application, String context, String component) throws IOException {
         delegate.describeComponent(project, application, context, component);
     }

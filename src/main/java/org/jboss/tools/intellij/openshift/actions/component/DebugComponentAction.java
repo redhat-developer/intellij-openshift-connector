@@ -107,8 +107,9 @@ public abstract class DebugComponentAction extends OdoAction {
                                     indicator.setIndeterminate(true);
                                     try {
                                         if (ComponentKind.DEVFILE.equals(component.getInfo().getComponentKind())) {
-                                            indicator.setText2("Please wait while pushing the component with debug flag...");
+                                            indicator.setText2("Please wait while component is switching to debug mode...");
                                             odo.pushWithDebug(projectName, applicationName, component.getPath(), component.getName());
+                                            indicator.checkCanceled();
                                             indicator.setText2("Component pushed!");
                                         }
                                         odo.debug(
@@ -117,8 +118,10 @@ public abstract class DebugComponentAction extends OdoAction {
                                                 component.getPath(),
                                                 component.getName(),
                                                 port);
+                                        indicator.checkCanceled();
                                         while (!checkOdoDebugRunning(odo, projectName, applicationName, component)) {
                                             Thread.sleep(10L);
+                                            indicator.checkCanceled();
                                         }
                                     } catch (IOException | InterruptedException e) {
                                         UIHelper.executeInUI(() -> Messages.showErrorDialog(
@@ -137,9 +140,9 @@ public abstract class DebugComponentAction extends OdoAction {
             if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
                 UIHelper.executeInUI(() ->
                         Messages.showMessageDialog(
-                                "'" + runSettings.getName() + "' is single-instance run configuration "
-                                        + "and is already running.",
-                                "Process '" + runSettings.getName() + "' is running",
+                                "'" + runSettings.getName() + "' is a single-instance run configuration "
+                                        + "and already running.",
+                                "Process '" + runSettings.getName() + "' is already running",
                                 Messages.getInformationIcon()));
                 return;
             }

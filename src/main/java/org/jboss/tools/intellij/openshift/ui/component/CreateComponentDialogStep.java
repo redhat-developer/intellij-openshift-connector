@@ -83,6 +83,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             protected void textChanged(DocumentEvent e) {
                 model.setContext(contextTextField.getText());
                 componentTypeTree.setEnabled(!model.isProjectHasDevfile());
+                componentVersionComboBox.setEnabled(!model.isProjectHasDevfile());
                 updateState();
             }
         });
@@ -134,7 +135,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setSelectedIndex(0);
-                }else {
+                } else {
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setEnabled(false);
                     model.setSourceType(ComponentSourceType.LOCAL);

@@ -91,7 +91,7 @@ public class CreateComponentModel extends WizardModel {
 
     public void setContext(String context) {
         this.context = context;
-        File devfile = new File(context.concat(File.separator).concat(Constants.DEVFILE_NAME));
+        File devfile = new File(context, Constants.DEVFILE_NAME);
         projectHasDevfile = Files.exists(devfile.toPath());
     }
 

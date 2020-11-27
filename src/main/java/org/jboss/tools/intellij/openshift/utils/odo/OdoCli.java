@@ -172,23 +172,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void push(String project, String application, String context, String component) throws IOException {
-        push(context, false);
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "push");
     }
 
     @Override
     public void pushWithDebug(String project, String application, String context, String component) throws IOException {
-        push(context, true);
-    }
-
-    private void push(String context, boolean debug) throws IOException {
-        if (debug) {
-            ExecHelper.execute(command, true, new File(context), envVars, "push", "--debug");
-        } else {
-            List<String> args = new ArrayList<>();
-            args.add(command);
-            args.add("push");
-            ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[0]));
-        }
+        ExecHelper.execute(command, true, new File(context), envVars, "push", "--debug");
     }
 
     @Override

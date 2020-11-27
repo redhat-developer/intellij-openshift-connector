@@ -181,13 +181,14 @@ public class OdoCli implements Odo {
     }
 
     private void push(String context, boolean debug) throws IOException {
-        List<String> args = new ArrayList<>();
-        args.add(command);
-        args.add("push");
         if (debug) {
-            args.add("--debug");
+            ExecHelper.execute(command, true, new File(context), envVars, "push", "--debug");
+        } else {
+            List<String> args = new ArrayList<>();
+            args.add(command);
+            args.add("push");
+            ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[0]));
         }
-        ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[0]));
     }
 
     @Override

@@ -82,6 +82,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             @Override
             protected void textChanged(DocumentEvent e) {
                 model.setContext(contextTextField.getText());
+                componentTypeTree.setEnabled(!model.isProjectHasDevfile());
                 updateState();
             }
         });
@@ -91,6 +92,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             if (dialog.isOK()) {
                 contextTextField.setText(ApplicationTreeModel.getModuleRoot(dialog.getSelectedModule()).getPath());
             }
+            updateState();
         });
         browseFolderButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser(model.getContext());
@@ -110,6 +112,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             if (chooser.showOpenDialog(root.getParent()) == JFileChooser.APPROVE_OPTION) {
                 contextTextField.setText(chooser.getSelectedFile().getAbsolutePath());
             }
+            updateState();
         });
 
         componentTypeTree.getSelectionModel().setSelectionMode
@@ -144,10 +147,12 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
             updateState();
         });
+
         componentVersionComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 model.setComponentTypeVersion((String) e.getItem());
             }
+            updateState();
         });
 
         applicationTextField.getDocument().addDocumentListener(new DocumentAdapter() {

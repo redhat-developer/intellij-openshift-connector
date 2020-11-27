@@ -36,6 +36,8 @@ public class Constants {
     public static final String OCP3_WEBCONSOLE_CONFIG_MAP_NAME = "webconsole-config";
     public static final String OCP3_WEBCONSOLE_YAML_FILE_NAME = "webconsole-config.yaml";
 
+    public static final String DEVFILE_NAME = "devfile.yaml";
+
     /**
      * Home sub folder for the plugin
      */

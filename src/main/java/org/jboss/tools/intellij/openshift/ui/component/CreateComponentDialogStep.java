@@ -82,6 +82,8 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             @Override
             protected void textChanged(DocumentEvent e) {
                 model.setContext(contextTextField.getText());
+                componentTypeTree.setEnabled(!model.isProjectHasDevfile());
+                componentVersionComboBox.setEnabled(!model.isProjectHasDevfile());
                 updateState();
             }
         });
@@ -91,6 +93,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             if (dialog.isOK()) {
                 contextTextField.setText(ApplicationTreeModel.getModuleRoot(dialog.getSelectedModule()).getPath());
             }
+            updateState();
         });
         browseFolderButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser(model.getContext());
@@ -110,6 +113,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             if (chooser.showOpenDialog(root.getParent()) == JFileChooser.APPROVE_OPTION) {
                 contextTextField.setText(chooser.getSelectedFile().getAbsolutePath());
             }
+            updateState();
         });
 
         componentTypeTree.getSelectionModel().setSelectionMode
@@ -131,7 +135,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setSelectedIndex(0);
-                }else {
+                } else {
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setEnabled(false);
                     model.setSourceType(ComponentSourceType.LOCAL);
@@ -144,10 +148,12 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
             updateState();
         });
+
         componentVersionComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 model.setComponentTypeVersion((String) e.getItem());
             }
+            updateState();
         });
 
         applicationTextField.getDocument().addDocumentListener(new DocumentAdapter() {

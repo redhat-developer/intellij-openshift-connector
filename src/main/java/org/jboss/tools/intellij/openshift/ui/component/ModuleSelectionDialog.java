@@ -53,14 +53,6 @@ public class ModuleSelectionDialog extends DialogWrapper {
     return (Module) moduleList.getSelectedValue();
   }
 
-
-  public static void main(String[] args) {
-    ModuleSelectionDialog dialog = new ModuleSelectionDialog(null, null, null);
-    dialog.pack();
-    dialog.show();
-    System.exit(0);
-  }
-
   @Nullable
   @Override
   protected JComponent createCenterPanel() {

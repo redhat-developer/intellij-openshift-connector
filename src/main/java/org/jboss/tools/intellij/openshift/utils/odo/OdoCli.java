@@ -190,11 +190,14 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, boolean push) throws IOException {
         List<String> args = new ArrayList<>();
         args.add(command);
         args.add("create");
-        if (StringUtils.isNotBlank(componentVersion)) {
+        if (StringUtils.isNotBlank(devfile)) {
+            args.add("--devfile");
+            args.add(devfile);
+        }   else if (StringUtils.isNotBlank(componentVersion)) {
             args.add(componentType + ":" + componentVersion);
         } else {
             args.add(componentType);

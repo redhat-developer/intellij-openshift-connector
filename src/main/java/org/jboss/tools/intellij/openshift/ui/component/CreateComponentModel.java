@@ -13,14 +13,17 @@ package org.jboss.tools.intellij.openshift.ui.component;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -45,6 +48,8 @@ public class CreateComponentModel extends WizardModel {
 
     private Predicate<String> componentPredicate = x -> false;
 
+    private boolean projectHasDevfile = false;
+
     private DefaultMutableTreeNode top = new DefaultMutableTreeNode("Top");
 
     public CreateComponentModel(String title) {
@@ -58,6 +63,10 @@ public class CreateComponentModel extends WizardModel {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public boolean isProjectHasDevfile() {
+        return projectHasDevfile;
     }
 
     public String getName() {
@@ -82,6 +91,8 @@ public class CreateComponentModel extends WizardModel {
 
     public void setContext(String context) {
         this.context = context;
+        File devfile = new File(context, Constants.DEVFILE_NAME);
+        projectHasDevfile = Files.exists(devfile.toPath());
     }
 
     public String getComponentTypeName() {
@@ -172,7 +183,7 @@ public class CreateComponentModel extends WizardModel {
     public boolean isValid() {
         return StringUtils.isNotBlank(getName()) && StringUtils.isNotBlank(getApplication()) &&
                 StringUtils.isNotBlank(getContext()) &&
-                StringUtils.isNotBlank(getComponentTypeName()) &&
+                (isProjectHasDevfile() || StringUtils.isNotBlank(getComponentTypeName())) &&
                 (getSourceType() == ComponentSourceType.LOCAL ||
                         (getSourceType() == ComponentSourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
                         (getSourceType() == ComponentSourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));

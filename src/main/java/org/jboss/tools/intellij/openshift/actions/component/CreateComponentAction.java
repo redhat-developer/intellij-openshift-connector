@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
@@ -79,7 +80,7 @@ public class CreateComponentAction extends OdoAction {
 
   private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
     if (model.getSourceType() == ComponentSourceType.LOCAL) {
-      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isPushAfterCreate());
+      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null, model.isPushAfterCreate());
     } else if (model.getSourceType() == ComponentSourceType.GIT) {
       odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL(), model.getGitReference(), model.isPushAfterCreate());
     } else if (model.getSourceType() == ComponentSourceType.BINARY) {

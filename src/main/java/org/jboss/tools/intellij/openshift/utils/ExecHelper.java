@@ -243,7 +243,7 @@ public class ExecHelper {
             if (c == -1) {
                 if (delay) {
                     try {
-                        Thread.sleep(60000L);
+                        Thread.sleep(600000L);
                     } catch (InterruptedException e) {
                     }
                 }

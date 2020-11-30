@@ -11,6 +11,9 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,8 @@ public class JSonParser {
     private static final String SOURCE_TYPE_FIELD = "sourceType";
     private static final String TYPE_FIELD = "type";
     private static final String URLS_FIELD = "urls";
+    private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
+
 
     private final JsonNode root;
 
@@ -78,5 +83,15 @@ public class JSonParser {
             }
         }
         return builder.withComponentKind(kind).build();
+    }
+
+    public DebugStatus parseDebugStatus() {
+        if (root.has(SPEC_FIELD)&& root.get(SPEC_FIELD).has(DEBUG_PROCESS_ID_FIELD)){
+            String processID = root.get(SPEC_FIELD).get(DEBUG_PROCESS_ID_FIELD).asText();
+            if (StringUtils.isNumeric(processID)){
+                return DebugStatus.RUNNING;
+            }
+        }
+        return Constants.DebugStatus.UNKNOWN;
     }
 }

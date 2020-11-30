@@ -14,12 +14,23 @@ import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.remote.RemoteConfiguration;
 import com.intellij.execution.remote.RemoteConfigurationType;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
+import org.jetbrains.annotations.NotNull;
+
 
 public class DebugJavaComponentAction extends DebugComponentAction {
 
+    public static final String JAVA = "java";
+
     @Override
-    protected boolean isDebuggable(String componentTypeName) {
-        return "java".equals(componentTypeName);
+    protected boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName) {
+        switch (kind) {
+            case S2I:
+                return JAVA.equals(componentTypeName);
+            case DEVFILE:
+                return componentTypeName.contains(JAVA);
+        }
+        return false;
     }
 
     @Override

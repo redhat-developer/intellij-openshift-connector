@@ -53,6 +53,9 @@ public class OdoCliComponentTest extends OdoCliTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
+            List<Component> components = odo.getComponents(project, application);
+            assertNotNull(components);
+            assertEquals(1, components.size());
         } finally {
             try {
                 odo.deleteProject(project);

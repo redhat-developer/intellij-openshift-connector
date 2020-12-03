@@ -57,10 +57,11 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew integrationTest
-      - uses: actions/upload-artifact@v1
+      - name: Publish Test Report
+        uses: scacap/action-surefire-report@v1
         with:
-          name: linux-integration-test-reports
-          path: build/reports
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '**/build/test-results/**/TEST-*.xml'
 
   build-macos:
     runs-on: macos-latest
@@ -75,6 +76,11 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Publish Test Report
+      uses: scacap/action-surefire-report@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        report_paths: '**/build/test-results/**/TEST-*.xml'
 
   build-windows:
     runs-on: windows-latest
@@ -89,3 +95,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Publish Test Report
+      uses: scacap/action-surefire-report@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        report_paths: '**/build/test-results/**/TEST-*.xml'

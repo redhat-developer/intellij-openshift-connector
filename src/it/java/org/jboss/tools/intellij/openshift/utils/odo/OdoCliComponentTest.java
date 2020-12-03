@@ -55,7 +55,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             createComponent(project, application, component, push, kind);
             List<Component> components = odo.getComponents(project, application);
             assertNotNull(components);
-            assertEquals(1, components.size());
+            assertEquals(push ? 1 : 0, components.size());
         } finally {
             try {
                 odo.deleteProject(project);

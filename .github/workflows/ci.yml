@@ -22,7 +22,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --continue
     - name: Publish Test Report
       uses: scacap/action-surefire-report@v1
       with:
@@ -57,7 +57,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew integrationTest
+        run: ./gradlew integrationTest --continue
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:
@@ -77,7 +77,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --continue
     - name: Publish Test Report
       uses: scacap/action-surefire-report@v1
       with:
@@ -97,7 +97,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --continue
     - name: Publish Test Report
       uses: scacap/action-surefire-report@v1
       with:

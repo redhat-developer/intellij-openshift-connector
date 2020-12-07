@@ -61,7 +61,7 @@ jobs:
         continue-on-error: true
         run: ./gradlew integrationTest
       - name: Grant permission for Test Report
-        run: chmod -R777 /home/runner/work/intellij-openshift-connector/intellij-openshift-connector/
+        run: chmod -R 777 /home/runner/work/intellij-openshift-connector/intellij-openshift-connector/
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:

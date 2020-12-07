@@ -12,7 +12,6 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
     - uses: actions/checkout@v2
@@ -23,6 +22,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      continue-on-error: true
       run: ./gradlew build
     - name: Publish Test Report
       uses: scacap/action-surefire-report@v1
@@ -69,7 +69,6 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
-    continue-on-error: true
 
     steps:
     - uses: actions/checkout@v2
@@ -80,17 +79,17 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      continue-on-error: true
       run: ./gradlew build
     - name: Publish Test Report
       uses: scacap/action-surefire-report@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        report_paths: '**/build/test-results/**/TEST-*.xml'
+        report_paths: '/home/runner/work/intellij-openshift-connector/intellij-openshift-connector/build/test-results/**/TEST-*.xml'
         check_name: Test Report for macos-latest
 
   build-windows:
     runs-on: windows-latest
-    continue-on-error: true
 
     steps:
     - uses: actions/checkout@v2
@@ -101,6 +100,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      continue-on-error: true
       run: ./gradlew build
     - name: Publish Test Report
       uses: scacap/action-surefire-report@v1

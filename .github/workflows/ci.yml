@@ -64,8 +64,8 @@ jobs:
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Integration Test Report for ubuntu-latest
+          report_paths: '/home/runner/work/intellij-openshift-connector/intellij-openshift-connector/build/test-results/**/TEST-*.xml'
+          check_name: Integration Test Report
 
   build-macos:
     runs-on: macos-latest
@@ -85,7 +85,7 @@ jobs:
       uses: scacap/action-surefire-report@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        report_paths: '/home/runner/work/intellij-openshift-connector/intellij-openshift-connector/build/test-results/**/TEST-*.xml'
+        report_paths: '**/build/test-results/**/TEST-*.xml'
         check_name: Test Report for macos-latest
 
   build-windows:

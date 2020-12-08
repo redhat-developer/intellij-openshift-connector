@@ -60,8 +60,10 @@ jobs:
       - name: Build with Gradle
         continue-on-error: true
         run: ./gradlew integrationTest
-      - name: Grant permission for Test Report
-        run: chmod -R 777 /home/runner/work/intellij-openshift-connector/intellij-openshift-connector/
+      - name: Stop Cluster
+        run: |
+          oc cluster down
+          rm -rf openshift.local.clusterup
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:

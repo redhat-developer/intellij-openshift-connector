@@ -11,12 +11,12 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TestDialog;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import com.intellij.testFramework.fixtures.TestFixtureBuilder;
+import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import io.fabric8.kubernetes.api.model.AuthInfo;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
@@ -49,13 +49,13 @@ public class ApplicationTreeModelConfigUpdateTest {
         IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
         myFixture.setUp();
-        previousTestDialog = Messages.setTestDialog(TestDialog.OK);
+        previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
     }
 
     @After
     public void after() throws Exception {
         myFixture.tearDown();
-        Messages.setTestDialog(previousTestDialog);
+        MessagesHelper.setTestDialog(previousTestDialog);
     }
 
 

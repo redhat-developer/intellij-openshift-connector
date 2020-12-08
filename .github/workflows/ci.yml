@@ -60,10 +60,10 @@ jobs:
       - name: Build with Gradle
         continue-on-error: true
         run: ./gradlew integrationTest
-      - name: Stop Cluster
+      - name: Stop cluster and cleanup
         run: |
           oc cluster down
-          rm -rf openshift.local.clusterup
+          rm -rf ./openshift.local.clusterup/
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:

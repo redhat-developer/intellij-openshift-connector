@@ -63,7 +63,7 @@ jobs:
       - name: Stop cluster and cleanup
         run: |
           oc cluster down
-          rm -rf ./openshift.local.clusterup/
+          sudo rm -rf ./openshift.local.clusterup/
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:

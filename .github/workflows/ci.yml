@@ -22,7 +22,14 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      continue-on-error: true
       run: ./gradlew build
+    - name: Publish Test Report
+      uses: scacap/action-surefire-report@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        report_paths: '**/build/test-results/**/TEST-*.xml'
+        check_name: Test Report for ubuntu-latest
 
   openshift-integration-tests:
     runs-on: ubuntu-latest
@@ -51,11 +58,18 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
+        continue-on-error: true
         run: ./gradlew integrationTest
-      - uses: actions/upload-artifact@v1
+      - name: Stop cluster and cleanup
+        run: |
+          oc cluster down
+          sudo rm -rf ./openshift.local.clusterup/
+      - name: Publish Test Report
+        uses: scacap/action-surefire-report@v1
         with:
-          name: linux-integration-test-reports
-          path: build/reports
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '/home/runner/work/intellij-openshift-connector/intellij-openshift-connector/build/test-results/**/TEST-*.xml'
+          check_name: Integration Test Report
 
   build-macos:
     runs-on: macos-latest
@@ -69,7 +83,14 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      continue-on-error: true
       run: ./gradlew build
+    - name: Publish Test Report
+      uses: scacap/action-surefire-report@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        report_paths: '**/build/test-results/**/TEST-*.xml'
+        check_name: Test Report for macos-latest
 
   build-windows:
     runs-on: windows-latest
@@ -83,4 +104,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      continue-on-error: true
       run: ./gradlew build
+    - name: Publish Test Report
+      uses: scacap/action-surefire-report@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        report_paths: '**/build/test-results/**/TEST-*.xml'
+        check_name: Test Report for windows-latest

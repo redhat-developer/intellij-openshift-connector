@@ -34,10 +34,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - uses: manusa/actions-setup-openshift@v1.1.2
+      - uses: redhat-actions/oc-installer@v1
         name: Start cluster
         with:
-          oc version: 'v3.11.0'
+          oc version: '3.11.0'
           dns ip: '1.1.1.1'
       - name: Setup cluster
         run: |

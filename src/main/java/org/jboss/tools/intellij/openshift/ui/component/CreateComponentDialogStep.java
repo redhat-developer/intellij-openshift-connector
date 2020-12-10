@@ -82,6 +82,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             @Override
             protected void textChanged(DocumentEvent e) {
                 model.setContext(contextTextField.getText());
+                componentTypeTree.setToolTipText(model.isProjectHasDevfile() ? "Devfile already exists in context." : "");
                 componentTypeTree.setEnabled(!model.isProjectHasDevfile());
                 componentVersionComboBox.setEnabled(!model.isProjectHasDevfile());
                 updateState();
@@ -129,7 +130,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
             Object nodeInfo = node.getUserObject();
             if (node.isLeaf()) {
-                if (((ComponentType)nodeInfo).getKind() == ComponentKind.S2I) {
+                if (((ComponentType) nodeInfo).getKind() == ComponentKind.S2I) {
                     sourceTypeComboBox.setEnabled(true);
                     componentVersionComboBox.setEnabled(true);
                     componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
@@ -143,7 +144,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     sourceTypeComboBox.setEnabled(false);
                 }
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());
-            }else {
+            } else {
                 model.setComponentTypeName(null);
             }
             updateState();
@@ -216,19 +217,21 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
      * @return path of the component
      */
     private TreeNode[] searchNode() {
-        TreeNode rootNode =null;
+        TreeNode rootNode = null;
         //first select the correct root
-        switch (model.getComponentKind()){
+        switch (model.getComponentKind()) {
             case DEVFILE:
-                rootNode = model.getComponentTypesTree().getChildAt(0);break;
+                rootNode = model.getComponentTypesTree().getChildAt(0);
+                break;
             case S2I:
-                rootNode = model.getComponentTypesTree().getChildAt(1);break;
+                rootNode = model.getComponentTypesTree().getChildAt(1);
+                break;
             default:
                 break;
         }
-            // iterate over children to find the correct component
-        if (rootNode != null){
-            for (Object nodeObject : Collections.list(rootNode.children())){
+        // iterate over children to find the correct component
+        if (rootNode != null) {
+            for (Object nodeObject : Collections.list(rootNode.children())) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodeObject;
                 ComponentType type = (ComponentType) node.getUserObject();
                 if (type.getName().equals(model.getComponentTypeName())) {

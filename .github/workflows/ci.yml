@@ -24,11 +24,12 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Publish Test Report
-        uses: KyleAure/junit-report-annotations-action@1.5
+        uses: scacap/action-surefire-report@v1
         if: always()
         with:
-          path: '**/build/test-results/**/TEST-*.xml'
-          name: Test Report for ubuntu-latest
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          check_name: Test Report for ubuntu-latest
 
   openshift-integration-tests:
     runs-on: ubuntu-latest
@@ -64,11 +65,12 @@ jobs:
           oc cluster down
           sudo rm -rf ./openshift.local.clusterup/
       - name: Publish Test Report
-        uses: KyleAure/junit-report-annotations-action@1.5
+        uses: scacap/action-surefire-report@v1
         if: always()
         with:
-          path: '**/build/test-results/**/TEST-*.xml'
-          name: Integration Test Report
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          check_name: Integration Test Report
 
   build-macos:
     runs-on: macos-latest
@@ -85,10 +87,11 @@ jobs:
         continue-on-error: true
         run: ./gradlew build
       - name: Publish Test Report
-        uses: KyleAure/junit-report-annotations-action@1.5
+        uses: scacap/action-surefire-report@v1
         with:
-          path: '**/build/test-results/**/TEST-*.xml'
-          name: Test Report for macos-latest
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          check_name: Test Report for macos-latest
 
   build-windows:
     runs-on: windows-latest
@@ -104,8 +107,9 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Publish Test Report
-        uses: KyleAure/junit-report-annotations-action@1.5
+        uses: scacap/action-surefire-report@v1
         if: always()
         with:
-          path: '**/build/test-results/**/TEST-*.xml'
-          name: Test Report for windows-latest
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          check_name: Test Report for windows-latest

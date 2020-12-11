@@ -6,7 +6,7 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ master ]
-  pull_request:
+  pull_request_target:
     branches: [ master ]
 
 jobs:
@@ -22,13 +22,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      continue-on-error: true
       run: ./gradlew build
     - name: Publish Test Report
-      uses: scacap/action-surefire-report@v1
+      uses: EnricoMi/publish-unit-test-result-action@v1.6
+      if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        report_paths: '**/build/test-results/**/TEST-*.xml'
+        files: '**/build/test-results/**/TEST-*.xml'
         check_name: Test Report for ubuntu-latest
 
   openshift-integration-tests:
@@ -58,17 +58,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        continue-on-error: true
         run: ./gradlew integrationTest
-      - name: Stop cluster and cleanup
-        run: |
-          oc cluster down
-          sudo rm -rf ./openshift.local.clusterup/
       - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
+        uses: EnricoMi/publish-unit-test-result-action@v1.6
+        if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '/home/runner/work/intellij-openshift-connector/intellij-openshift-connector/build/test-results/**/TEST-*.xml'
+          files: '**/build/test-results/**/TEST-*.xml'
           check_name: Integration Test Report
 
   build-macos:
@@ -83,13 +79,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      continue-on-error: true
       run: ./gradlew build
     - name: Publish Test Report
-      uses: scacap/action-surefire-report@v1
+      uses: EnricoMi/publish-unit-test-result-action@v1.6
+      if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        report_paths: '**/build/test-results/**/TEST-*.xml'
+        files: '**/build/test-results/**/TEST-*.xml'
         check_name: Test Report for macos-latest
 
   build-windows:
@@ -107,8 +103,9 @@ jobs:
       continue-on-error: true
       run: ./gradlew build
     - name: Publish Test Report
-      uses: scacap/action-surefire-report@v1
+      uses: EnricoMi/publish-unit-test-result-action@v1.6
+      if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        report_paths: '**/build/test-results/**/TEST-*.xml'
+        files: '**/build/test-results/**/TEST-*.xml'
         check_name: Test Report for windows-latest

@@ -27,7 +27,6 @@ jobs:
         uses: KyleAure/junit-report-annotations-action@1.5
         if: always()
         with:
-          access-token: ${{ secrets.GITHUB_TOKEN }}
           path: '**/build/test-results/**/TEST-*.xml'
           name: Test Report for ubuntu-latest
 
@@ -68,7 +67,6 @@ jobs:
         uses: KyleAure/junit-report-annotations-action@1.5
         if: always()
         with:
-          access-token: ${{ secrets.GITHUB_TOKEN }}
           path: '**/build/test-results/**/TEST-*.xml'
           name: Integration Test Report
 
@@ -89,7 +87,6 @@ jobs:
       - name: Publish Test Report
         uses: KyleAure/junit-report-annotations-action@1.5
         with:
-          access-token: ${{ secrets.GITHUB_TOKEN }}
           path: '**/build/test-results/**/TEST-*.xml'
           name: Test Report for macos-latest
 
@@ -110,6 +107,5 @@ jobs:
         uses: KyleAure/junit-report-annotations-action@1.5
         if: always()
         with:
-          access-token: ${{ secrets.GITHUB_TOKEN }}
           path: '**/build/test-results/**/TEST-*.xml'
           name: Test Report for windows-latest

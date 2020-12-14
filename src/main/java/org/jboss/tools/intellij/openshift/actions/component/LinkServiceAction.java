@@ -15,6 +15,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
@@ -23,6 +24,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
@@ -43,7 +45,8 @@ public class LinkServiceAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
+      Component comp = (Component)((ComponentNode)selected).getUserObject();
+      visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
     }
     return visible;
   }
@@ -63,7 +66,7 @@ public class LinkServiceAction extends OdoAction {
             service = KubernetesLabels.getComponentName(services.get(0));
           } else {
             String[] servicesArray = services.stream().map(KubernetesLabels::getComponentName).toArray(String[]::new);
-            service = (String) UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
+            service = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
           }
           if (service != null) {
             Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service, NotificationType.INFORMATION);
@@ -76,7 +79,7 @@ public class LinkServiceAction extends OdoAction {
        } else {
           UIHelper.executeInUI(() -> Messages.showWarningDialog("No services to link to", "Link service"));
         }
-      } catch (IOException e) {
+      } catch (IOException | KubernetesClientException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link service"));
       }
     });

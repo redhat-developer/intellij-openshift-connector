@@ -466,7 +466,7 @@ public class OdoCli implements Odo {
 
     @Override
     public List<Application> getApplications(String project) throws IOException {
-        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correctly parse applications from project.
+        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json"));
     }
 
     @Override

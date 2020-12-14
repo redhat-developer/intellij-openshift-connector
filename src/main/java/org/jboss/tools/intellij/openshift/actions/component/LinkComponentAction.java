@@ -22,6 +22,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
@@ -42,7 +43,8 @@ public class LinkComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
+      Component comp = (Component)((ComponentNode)selected).getUserObject();
+      visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
     }
     return visible;
   }

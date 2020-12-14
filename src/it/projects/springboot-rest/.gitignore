@@ -10,3 +10,6 @@ target
 .project
 bin
 tmp
+
+.odo/
+devfile.yaml

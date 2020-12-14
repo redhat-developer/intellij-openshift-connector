@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - if: github.event_name == 'pull_request'
-        name: Checkout PR
+        name: PR Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - if: github.event_name == 'pull_request'
-        name: Checkout PR
+        name: PR Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - if: github.event_name == 'pull_request'
-        name: Checkout PR
+        name: PR Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -119,7 +119,7 @@ jobs:
 
     steps:
       - if: github.event_name == 'pull_request'
-        name: Checkout PR
+        name: PR Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}

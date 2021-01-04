@@ -6,7 +6,7 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ master ]
-  pull_request_target:
+  pull_request:
     branches: [ master ]
 
 jobs:
@@ -15,8 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
@@ -25,13 +23,6 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Test Report for ubuntu-latest
 
   openshift-integration-tests:
     runs-on: ubuntu-latest
@@ -66,13 +57,6 @@ jobs:
         run: |
           oc cluster down
           sudo rm -rf ./openshift.local.clusterup/
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Integration Test Report
 
   build-macos:
     runs-on: macos-latest
@@ -88,12 +72,6 @@ jobs:
       - name: Build with Gradle
         continue-on-error: true
         run: ./gradlew build
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Test Report for macos-latest
 
   build-windows:
     runs-on: windows-latest
@@ -108,11 +86,3 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Test Report for windows-latest
-

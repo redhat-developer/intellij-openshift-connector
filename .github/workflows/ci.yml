@@ -6,7 +6,7 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ master ]
-  pull_request_target:
+  pull_request:
     branches: [ master ]
 
 jobs:
@@ -15,23 +15,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Set up JDK 1.8
+      - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 11
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Test Report for ubuntu-latest
 
   openshift-integration-tests:
     runs-on: ubuntu-latest
@@ -39,10 +30,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
+      - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 11
       - uses: manusa/actions-setup-openshift@v1.1.2
         name: Start cluster
         with:
@@ -66,52 +57,32 @@ jobs:
         run: |
           oc cluster down
           sudo rm -rf ./openshift.local.clusterup/
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Integration Test Report
 
   build-macos:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
+      - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 11
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
         continue-on-error: true
         run: ./gradlew build
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Test Report for macos-latest
 
   build-windows:
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
+      - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 11
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Publish Test Report
-        uses: scacap/action-surefire-report@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-          check_name: Test Report for windows-latest

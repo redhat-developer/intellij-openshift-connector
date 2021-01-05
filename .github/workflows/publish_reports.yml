@@ -1,0 +1,40 @@
+name: Publish reports
+
+on:
+  workflow_run:
+    workflows: ["Java CI with Gradle"]
+    types:
+      - completed
+
+jobs:
+  publish:
+    name: Publish Test Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/github-script@v3.1.0
+        with:
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: ${{github.event.workflow_run.id}},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "linux-integration-test-reports"
+            })[0];
+            var download = await github.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: matchArtifact.id,
+              archive_format: 'zip',
+            });
+            var fs = require('fs');
+            fs.writeFileSync('${{github.workspace}}/reports.zip', Buffer.from(download.data));
+      - run: unzip reports.zip
+      - name : Publish Integration tests reports
+        uses: scacap/action-surefire-report@v1
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          report_paths: '**/TEST-*.xml'
+          commit: ${{github.event.workflow_run.event.commit}}

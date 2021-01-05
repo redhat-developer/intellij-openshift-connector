@@ -51,12 +51,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        continue-on-error: true
         run: ./gradlew integrationTest
-      - name: Stop cluster and cleanup
-        run: |
-          oc cluster down
-          sudo rm -rf ./openshift.local.clusterup/
 
   build-macos:
     runs-on: macos-latest

@@ -15,7 +15,6 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
@@ -79,7 +78,7 @@ public class LinkServiceAction extends OdoAction {
        } else {
           UIHelper.executeInUI(() -> Messages.showWarningDialog("No services to link to", "Link service"));
         }
-      } catch (IOException | KubernetesClientException e) {
+      } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link service"));
       }
     });

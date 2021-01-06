@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TestDialog;
+import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.After;
@@ -49,7 +49,7 @@ public abstract class OdoCliTest extends BaseTest {
 
     @Before
     public void init() throws IOException {
-        previousTestDialog = Messages.setTestDialog(TestDialog.OK);
+        previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo();
 
         if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
@@ -60,7 +60,7 @@ public abstract class OdoCliTest extends BaseTest {
 
     @After
     public void shutdown() {
-        Messages.setTestDialog(previousTestDialog);
+        MessagesHelper.setTestDialog(previousTestDialog);
     }
 
     private void pause() throws InterruptedException {

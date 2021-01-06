@@ -466,7 +466,7 @@ public class OdoCli implements Odo {
 
     @Override
     public List<Application> getApplications(String project) throws IOException {
-        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json")); //TODO issue with odo 2.0.0 and 2.0.1 to correctly parse applications from project.
+        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json"));
     }
 
     @Override
@@ -479,8 +479,12 @@ public class OdoCli implements Odo {
 
     @Override
     public List<ServiceInstance> getServices(String project, String application) {
-        ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-        return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+        try {
+            ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
+            return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+        } catch (KubernetesClientException e) {
+            return Collections.emptyList();
+        }
     }
 
     protected LabelSelector getLabelSelector(String application, String component) {

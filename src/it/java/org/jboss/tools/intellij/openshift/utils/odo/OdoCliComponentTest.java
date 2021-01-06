@@ -53,6 +53,9 @@ public class OdoCliComponentTest extends OdoCliTest {
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
+            List<Component> components = odo.getComponents(project, application);
+            assertNotNull(components);
+            assertEquals(push ? 1 : 0, components.size());
         } finally {
             try {
                 odo.deleteProject(project);
@@ -188,7 +191,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             createComponent(project, application, component, push, kind);
             if (odo.isServiceCatalogAvailable()) {
                 odo.createService(project, application, "postgresql-persistent", "default", service, true);
-                if (push) {
+                if (push && kind == ComponentKind.S2I) { // TODO remove kind test when link with devfile is supported.
                     odo.link(project, application, component, COMPONENT_PATH, service, null);
                 }
             }

@@ -2,7 +2,7 @@
 
 node('rhel7'){
 	def javaHome = tool 'openjdk-11'
-	env.JAVA_HOME = "${javaHome}/bin"
+	env.JAVA_HOME = "${javaHome}"
 
 	stage('Checkout repo') {
 		deleteDir()

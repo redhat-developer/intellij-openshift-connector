@@ -1,9 +1,9 @@
 #!/usr/bin/env groovy
 
 node('rhel7'){
-	tools {
-		jdk 'openjdk-11'
-	}
+	def javaHome = tool 'openjdk-11'
+	env.JAVA_HOME = "${mvnHome}/bin"
+
 	stage('Checkout repo') {
 		deleteDir()
 		git url: 'https://github.com/redhat-developer/intellij-openshift-connector',

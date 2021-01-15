@@ -17,56 +17,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.DoneableSecret;
-import io.fabric8.kubernetes.api.model.DoneableService;
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimFluent;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretFluent;
-import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceFluent;
-import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.client.dsl.ServiceResource;
-import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.api.model.BuildConfig;
-import io.fabric8.openshift.api.model.BuildConfigFluent;
-import io.fabric8.openshift.api.model.BuildConfigList;
 import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.api.model.DeploymentConfigFluent;
-import io.fabric8.openshift.api.model.DeploymentConfigList;
-import io.fabric8.openshift.api.model.DoneableBuildConfig;
-import io.fabric8.openshift.api.model.DoneableDeploymentConfig;
-import io.fabric8.openshift.api.model.DoneableImageStream;
-import io.fabric8.openshift.api.model.DoneableRoute;
-import io.fabric8.openshift.api.model.ImageStream;
-import io.fabric8.openshift.api.model.ImageStreamFluent;
-import io.fabric8.openshift.api.model.ImageStreamList;
 import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.api.model.Route;
-import io.fabric8.openshift.api.model.RouteFluent;
-import io.fabric8.openshift.api.model.RouteList;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-import io.fabric8.openshift.client.dsl.BuildConfigResource;
-import io.fabric8.openshift.client.dsl.DeployableScalableResource;
-import io.fabric8.servicecatalog.api.model.DoneableServiceInstance;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
-import io.fabric8.servicecatalog.api.model.ServiceInstanceFluent;
-import io.fabric8.servicecatalog.api.model.ServiceInstanceList;
 import io.fabric8.servicecatalog.client.ServiceCatalogClient;
-import io.fabric8.servicecatalog.client.internal.ServiceInstanceResource;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.utils.ExecHelper;
@@ -83,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
@@ -570,200 +533,6 @@ public class OdoCli implements Odo {
     @Override
     public java.net.URL getMasterUrl() {
         return client.getMasterUrl();
-    }
-
-    @Override
-    public List<Project> getPreOdo10Projects() {
-        return getProjects().stream().filter(this::isLegacyProject).collect(Collectors.toList());
-    }
-
-    private boolean isLegacyProject(Project project) {
-        boolean hasLegacyResources = !client.deploymentConfigs().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
-        if (!hasLegacyResources) {
-            try {
-                hasLegacyResources = !client.adapt(ServiceCatalogClient.class).serviceInstances().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
-            } catch (Exception e) {
-            }
-        }
-        return hasLegacyResources;
-    }
-
-    @Override
-    public List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter) {
-        List<Exception> exceptions = new ArrayList<>();
-        for (Project project : projects) {
-            reporter.accept(project.getMetadata().getName(), "deployment configs");
-            migrateDCs(client.deploymentConfigs().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "routes");
-            migrateRoutes(client.routes().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "build configs");
-            migrateBuildConfigs(client.buildConfigs().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "image streams");
-            migrateImageStreams(client.imageStreams().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "services");
-            migrateServices(client.services().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "storages");
-            migratePVCs(client.persistentVolumeClaims().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "secrets");
-            migrateSecrets(client.secrets().inNamespace(project.getMetadata().getName()), exceptions);
-            reporter.accept(project.getMetadata().getName(), "service instances");
-            migrateServiceInstances(client.adapt(ServiceCatalogClient.class).serviceInstances().inNamespace(project.getMetadata().getName()), exceptions);
-        }
-        return exceptions;
-    }
-
-    private void editLabels(Map<String, String> labels) {
-        String name = labels.get(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10);
-        if (name != null) {
-            labels.put(KubernetesLabels.COMPONENT_NAME_LABEL, name);
-        }
-        name = labels.get(NAME_LABEL);
-        if (name != null) {
-            labels.put(KubernetesLabels.APP_LABEL, name);
-        }
-        name = labels.get(KubernetesLabels.COMPONENT_TYPE_LABEL);
-        if (name != null) {
-            labels.put(KubernetesLabels.NAME_LABEL, name);
-        }
-        name = labels.get(KubernetesLabels.COMPONENT_VERSION_LABEL);
-        if (name != null) {
-            labels.put(KubernetesLabels.RUNTIME_VERSION_LABEL, name);
-        }
-        name = labels.get(KubernetesLabels.URL_NAME_LABEL);
-        if (name != null) {
-            labels.put(KubernetesLabels.ODO_URL_NAME, name);
-        }
-        labels.put(ODO_MIGRATED_LABEL, "true");
-        labels.remove(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10);
-    }
-
-    private void migrateDCs(NonNamespaceOperation<DeploymentConfig, DeploymentConfigList, DoneableDeploymentConfig, DeployableScalableResource<DeploymentConfig, DoneableDeploymentConfig>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    DeploymentConfigFluent.MetadataNested<DoneableDeploymentConfig> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-
-    private void migrateRoutes(NonNamespaceOperation<Route, RouteList, DoneableRoute, Resource<Route, DoneableRoute>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    RouteFluent.MetadataNested<DoneableRoute> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-    private void migrateBuildConfigs(NonNamespaceOperation<BuildConfig, BuildConfigList, DoneableBuildConfig, BuildConfigResource<BuildConfig, DoneableBuildConfig, Void, Build>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    BuildConfigFluent.MetadataNested<DoneableBuildConfig> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-    private void migrateImageStreams(NonNamespaceOperation<ImageStream, ImageStreamList, DoneableImageStream, Resource<ImageStream, DoneableImageStream>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    ImageStreamFluent.MetadataNested<DoneableImageStream> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-    private void migrateServices(NonNamespaceOperation<Service, ServiceList, DoneableService, ServiceResource<Service, DoneableService>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    ServiceFluent.MetadataNested<DoneableService> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-    private void migratePVCs(NonNamespaceOperation<PersistentVolumeClaim, PersistentVolumeClaimList, DoneablePersistentVolumeClaim, Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    PersistentVolumeClaimFluent.MetadataNested<DoneablePersistentVolumeClaim> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-    private void migrateSecrets(NonNamespaceOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    SecretFluent.MetadataNested<DoneableSecret> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            exceptions.add(e);
-        }
-    }
-
-    private void migrateServiceInstances(NonNamespaceOperation<ServiceInstance, ServiceInstanceList, DoneableServiceInstance, ServiceInstanceResource> operation, List<Exception> exceptions) {
-        try {
-            for (HasMetadata dc : operation.withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems()) {
-                try {
-                    ServiceInstanceFluent.MetadataNested<DoneableServiceInstance> edit = operation.withName(dc.getMetadata().getName()).edit().editMetadata();
-                    editLabels(edit.getLabels());
-                    edit.endMetadata().done();
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            }
-        } catch (Exception e) {
-            //TODO: exception is skipped because of non catalog aware cluster, need to find a way to better deal with that
-        }
     }
 
     @Override

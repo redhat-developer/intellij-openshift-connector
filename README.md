@@ -18,7 +18,7 @@ A JetBrains IntelliJ plugin for interacting with Red Hat OpenShift cluster. This
 To run the instance of OpenShift cluster locally, developers can use the following:
 
 * OpenShift 4.x - [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned)
-* OpenShift 3.x - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
+* OpenShift 3.x - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). For detail analysis of how to set up and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
 The extension also supports OpenShift running on Azure, AWS. 
 
@@ -28,7 +28,7 @@ The extension also supports OpenShift running on Azure, AWS.
 Post `0.1.1` releases contains breaking changes mentioned below.
 
 * The Components created with previous versions(<=0.0.6) will no longer be visible in OpenShift Application Explorer view.
-* New Component, Url and Storage objects are created locally in context folder and not immediatly pushed to the cluster.
+* New Component, Url and Storage objects are created locally in context folder and not immediately pushed to the cluster.
 
 > **Please follow the [migration](https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
 
@@ -54,20 +54,20 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 #### Actions available for an OpenShift Cluster Project
 
    * `New Component` - Create a new Component from the Project.
-        * local - Use local directory as a source for the Component.
+        * local - Use a local directory as a source for the Component.
         * git - Use a git repository as the source for the Component.
-        * binary - Use binary file as a source for the Component
+        * binary - Use a binary file as a source for the Component
    * `New Service` - Perform Service Catalog operations when it is enabled.
    * `Delete` - Delete an existing Project.
 
 #### Actions available for an Application in a Project
 
    * `New Component` - Create a new Component inside the selected Application.
-        * local - Use local directory as a source for the Component.
+        * local - Use a local directory as a source for the Component.
         * git - Use a git repository as the source for the Component.
-        * binary - Use binary file as a source for the Component
+        * binary - Use a binary file as a source for the Component
    * `New Service` - Perform Service Catalog operations when it is enabled.
-   * `Describe` - Describe the given Application in terminal window.
+   * `Describe` - Describe the given Application in a terminal window.
    * `Delete` - Delete an existing Application.
 
 #### Actions available for a Component in an Application
@@ -82,18 +82,17 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
    * `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
    * `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-   * `Describe` - Describe the given Component in terminal window.
+   * `Describe` - Describe the given Component in a terminal window.
    * `Show Log` - Retrieve the log for the given Component.
    * `Follow Log` - Follow logs for the given Component.
    * `Link Component` - Link Component to another Component.
    * `Link Service` - Link Component to a Service.
    * `Unlink` - Unlink Component from Component/Service.
-   * `Open in Browser` - Open the exposed URL in browser.
+   * `Open in Browser` - Open the exposed URL in a browser.
    * `Push` - Push the source code to a Component.
-   * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
-   * `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more.
-    details.
-   * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
+   * `Watch` - Watch for changes, update Component on change. This is not supported for Git based components.
+   * `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more details.
+   * `Undeploy` - Undeploy a Component from the cluster. The component still resides in the local config.
    * `Delete` - Delete an existing Component from the cluster and removes the local config also.
 
 #### Actions for a Not Pushed Component
@@ -105,9 +104,9 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions for a no context Component
 
-   * `Describe` - Describe the given Component in terminal window.
+   * `Describe` - Describe the given Component in a terminal window.
    * `Delete` - Delete an existing Component from the local config.
-   * `Import` - If the component was created using old version of the extension (`<=0.0.6`), users can use the `Import` action to migrate to latest version and import the metadata changes.
+   * `Import` - If the component was created using old version of the extension (`<=0.0.6`), users can use the `Import` action to migrate to the latest version and import the metadata changes.
 
 #### Actions available for a URL in a Component
 
@@ -127,13 +126,14 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Icons Representation
 
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" /><span style="margin: 20px">Cluster Resource Node</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" /><span style="margin: 20px">Project Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/application.png" width="15" height="15" /><span style="margin: 20px">Application Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" /><span style="margin: 20px">Component Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" /><span style="margin: 20px">Service Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/storage.png" width="15" height="15" /><span style="margin: 20px">Storage Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" /><span style="margin: 20px">URL Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" alt="Cluster Resource"/><span style="margin: 20px"> Cluster Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" alt="Project Resource"/><span style="margin: 20px"> Project Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/application.png" width="15" height="15" alt="Application Resource"/><span style="margin: 20px"> Application Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px"> Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" alt="Service Resource"/><span style="margin: 20px"> Service Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/storage.png" width="15" height="15" alt="Storage Resource"/><span style="margin: 20px"> Storage Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" alt="URL Resource"/><span style="margin: 20px"> URL Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node-secure.png" width="15" height="15" alt="Secure URL Resource"/><span style="margin: 20px"> Secure URL Resource</span></div>
 
 ### Dependencies
 
@@ -144,7 +144,7 @@ This extension uses the following CLI tool to interact with OpenShift cluster:
 * odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
 
 > If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically. 
-The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
+The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
 
 **NOTE:** This plugin is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
@@ -162,7 +162,7 @@ For information on getting started, refer to the [CONTRIBUTING instructions](CON
 
 Feedback & Questions
 ====================
-If you discover an issue please file a bug and we will fix it as soon as possible.
+If you discover an issue please file a bug, and we will fix it as soon as possible.
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/intellij-openshift-connector/issues).
 * Chat with us on [Gitter](https://gitter.im/redhat-developer/openshift-connector).
 

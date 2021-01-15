@@ -20,8 +20,20 @@ To run the instance of OpenShift cluster locally, developers can use the followi
 * OpenShift 4.x - [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned)
 * OpenShift 3.x - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). For detail analysis of how to set up and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-The extension also supports OpenShift running on Azure, AWS. 
+The extension also supports OpenShift running on Azure, AWS.
 
+## New features
+
+### Devfile support
+
+The plugin is now based on Odo 2.x, which brings support for Devfiles. A devfile is describing the way your component should be built, rebuilt, debugged. When creating a component, there is now two different choices:
+
+- Pick a devfile from a registry. The registry will contain devfiles specific to your component language, framework and variants (ex Java/Quarkus, Java/SpringBoot, Python/Django,...)
+- Your component has its own devfile and the plugin will automatically use it if it's there
+
+For more information about devfiles, see the [devfile docs](https://docs.devfile.io)
+
+![](images/0.4.0/openshift1.gif)
 
 ## WARNING !!! Breaking Changes
 

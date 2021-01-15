@@ -12,6 +12,9 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.4.0</b></p>
+  <p>Add support for devfile based components</p>
+  <p>Switch to Odo 2.0.3</p>
   <p><b>0.3.0</b></p>
   <p>Add support plan selection while creating services</p>
   <p>Switch to Odo 1.2.3</p>

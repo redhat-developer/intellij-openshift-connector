@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -220,14 +218,10 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setState(ComponentState.PUSHED);
                     found.get().setPath(path);
                 } else {
-                    try {
-                        ComponentKind kind = getComponentKind(path);
-                        ComponentInfo.Builder builder = new ComponentInfo.Builder();
-                        ComponentInfo info = builder.withComponentKind(kind).build();
-                        components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, info));
-                    } catch (IOException e) {
-                       throw e;
-                    }
+                    ComponentKind kind = getComponentKind(path);
+                    ComponentInfo.Builder builder = new ComponentInfo.Builder();
+                    ComponentInfo info = builder.withComponentKind(kind).build();
+                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, info));
                 }
             }
         }
@@ -302,16 +296,6 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public ComponentKind getComponentKind(String context) throws IOException {
         return delegate.getComponentKind(context);
-    }
-
-    @Override
-    public List<Project> getPreOdo10Projects() {
-        return delegate.getPreOdo10Projects();
-    }
-
-    @Override
-    public List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter) {
-        return delegate.migrateProjects(projects, reporter);
     }
 
     @Override

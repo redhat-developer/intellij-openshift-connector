@@ -15,16 +15,11 @@ import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public interface Odo {
     List<Project> getProjects();
-
-    List<Project> getPreOdo10Projects();
-
-    List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter);
 
     void describeApplication(String project, String application) throws IOException;
 

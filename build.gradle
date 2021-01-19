@@ -80,5 +80,13 @@ sonarqube {
     }
 }
 
+jacocoTestReport {
+    dependsOn integrationTest
+    dependsOn test
+    reports {
+        xml.enabled = true
+    }
+}
+
 group 'org.jboss.tools.intellij'
 version projectVersion // Plugin version

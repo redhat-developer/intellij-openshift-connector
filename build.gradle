@@ -10,6 +10,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repository.jboss.org' }
 }
 
 sourceCompatibility = '1.8'
@@ -68,6 +69,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.9'
     testCompile 'org.mockito:mockito-core:2.28.2'
     testCompile 'org.easytesting:fest-assert:1.4'
+    testCompile 'com.redhat.devtools.intellij:intellij-common:0.0.1-SNAPSHOT:test'
 }
 
 sonarqube {

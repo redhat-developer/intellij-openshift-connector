@@ -5,6 +5,7 @@ plugins {
     id "idea"
     id "java"
     id "jacoco"
+    id "org.sonarqube" version "3.0"
 }
 
 repositories {
@@ -69,6 +70,22 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.28.2'
     testCompile 'org.easytesting:fest-assert:1.4'
     testCompile 'com.redhat.devtools.intellij:intellij-common:0.0.1-SNAPSHOT:test'
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "redhat-developer_intellij-openshift-connector"
+        property "sonar.organization", "redhat-developer"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+jacocoTestReport {
+    dependsOn test
+    dependsOn integrationTest
+    reports {
+        xml.enabled = true
+    }
 }
 
 group 'org.jboss.tools.intellij'

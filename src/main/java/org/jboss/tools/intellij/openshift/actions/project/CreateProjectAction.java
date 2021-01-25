@@ -15,13 +15,13 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.ProjectBuilder;
 import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.UIHelper;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;

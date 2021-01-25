@@ -2,6 +2,10 @@
   "tools": {
     "odo": {
       "version": "2.0.3",
+      "versionCmd": "version --client",
+      "versionExtractRegExp": "odo v(\\d+[\\.\\d+]*(-.*)?)\\s.*",
+      "versionMatchRegExpr": "0\\..*",
+      "baseDir": "$HOME/.odo",
       "platforms": {
         "win": {
           "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.3/odo-windows-amd64.exe.tar.gz",

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
@@ -19,6 +20,7 @@ import org.junit.Before;
 
 public class BaseTest {
     private CodeInsightTestFixture myFixture;
+    protected Project project;
 
     @Before
     public void setUp() throws Exception {
@@ -27,6 +29,7 @@ public class BaseTest {
         IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
         myFixture.setUp();
+        project = myFixture.getProject();
     }
 
     @After

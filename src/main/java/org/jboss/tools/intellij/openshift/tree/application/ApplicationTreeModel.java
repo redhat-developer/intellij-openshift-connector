@@ -19,15 +19,15 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.BaseTreeModel;
 import com.intellij.util.messages.MessageBusConnection;
+import com.redhat.devtools.intellij.common.utils.ConfigHelper;
+import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.RefreshableTreeModel;
-import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
-import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jetbrains.annotations.NotNull;
 

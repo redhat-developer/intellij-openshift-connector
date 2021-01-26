@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
@@ -33,8 +35,6 @@ import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import io.fabric8.servicecatalog.client.ServiceCatalogClient;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
-import org.jboss.tools.intellij.openshift.utils.NetworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,15 +73,18 @@ public class OdoCli implements Odo {
     private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
+    private static final String WINDOW_TITLE = "OpenShift";
 
+    private final com.intellij.openapi.project.Project project;
     private final String command;
 
     private final OpenShiftClient client;
 
     private Map<String, String> envVars;
 
-    OdoCli(String command) {
+    OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
+        this.project = project;
         this.client = new DefaultOpenShiftClient(new ConfigBuilder().build());
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
@@ -125,7 +128,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void describeApplication(String project, String application) throws IOException {
-        ExecHelper.executeWithTerminal(envVars, command, "app", "describe", application, "--project", project);
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, false, envVars, command, "app", "describe", application, "--project", project);
     }
 
     @Override
@@ -135,7 +138,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void push(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(new File(context), envVars, command, "push");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "push");
     }
 
     @Override
@@ -146,15 +149,15 @@ public class OdoCli implements Odo {
     @Override
     public void describeComponent(String project, String application, String context, String component) throws IOException {
         if (context != null) {
-            ExecHelper.executeWithTerminal(new File(context), envVars, command, "describe");
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "describe");
         } else {
-            ExecHelper.executeWithTerminal(envVars, command, "describe", "--project", project, "--app", application, component);
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, false, envVars, command, "describe", "--project", project, "--app", application, component);
         }
     }
 
     @Override
     public void watch(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(new File(context), envVars, command, "watch");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "watch");
     }
 
     @Override
@@ -181,25 +184,25 @@ public class OdoCli implements Odo {
         if (push) {
             args.add("--now");
         }
-        ExecHelper.executeWithTerminal(new File(source), envVars, args.toArray(new String[0]));
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(source), true, envVars, args.toArray(new String[0]));
     }
 
     @Override
     public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
         if (StringUtils.isNotBlank(reference)) {
             if (push) {
-                ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
+                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
                         "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
             } else {
-                ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
+                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
                         "--git", source, "--ref", reference, "--project", project, "--app", application);
             }
         } else {
             if (push) {
-                ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
+                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
                         "--git", source, "--project", project, "--app", application, "--now");
             } else {
-                ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
+                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
                         "--git", source, "--project", project, "--app", application);
             }
         }
@@ -208,10 +211,10 @@ public class OdoCli implements Odo {
     @Override
     public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
         if (push) {
-            ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
                     "--binary", source, "--project", project, "--app", application, "--now");
         } else {
-            ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
                     "--binary", source, "--project", project, "--app", application);
         }
     }
@@ -235,14 +238,13 @@ public class OdoCli implements Odo {
     public void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException {
         ensureDefaultOdoConfigFileExists();
         if (wait) {
-            ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(HOME_FOLDER), true, envVars, command, "service", "create", serviceTemplate,
                     "--plan", servicePlan, service, "--app", application, "--project", project, "-w");
         } else {
-            ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate,
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(HOME_FOLDER), true, envVars, command, "service", "create", serviceTemplate,
                     "--plan", servicePlan, service, "--app", application, "--project", project);
         }
     }
-
 
     @Override
     public String getServiceTemplate(String project, String application, String service) {
@@ -274,7 +276,7 @@ public class OdoCli implements Odo {
     @Override
     public void describeServiceTemplate(String template) throws IOException {
         ensureDefaultOdoConfigFileExists();
-        ExecHelper.executeWithTerminal(envVars, command, "catalog", "describe", "service", template);
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "catalog", "describe", "service", template);
     }
 
     @Override
@@ -340,7 +342,7 @@ public class OdoCli implements Odo {
         if (secure) {
             args.add("--secure");
         }
-        ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[0]));
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, args.toArray(new String[0]));
     }
 
     @Override
@@ -390,12 +392,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void follow(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(new File(context), envVars, command, "log", "-f");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log", "-f");
     }
 
     @Override
     public void log(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(new File(context), envVars, command, "log");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log");
     }
 
     @Override
@@ -472,17 +474,17 @@ public class OdoCli implements Odo {
 
     @Override
     public void listComponents() throws IOException {
-        ExecHelper.executeWithTerminal(envVars, command, "catalog", "list", "components");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "catalog", "list", "components");
     }
 
     @Override
     public void listServices() throws IOException {
-        ExecHelper.executeWithTerminal(envVars, command, "catalog", "list", "services");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "catalog", "list", "services");
     }
 
     @Override
     public void about() throws IOException {
-        ExecHelper.executeWithTerminal(envVars, command, "version");
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "version");
     }
 
     @Override
@@ -506,7 +508,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "debug", "port-forward",
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "debug", "port-forward",
                 "--local-port", port.toString());
     }
 

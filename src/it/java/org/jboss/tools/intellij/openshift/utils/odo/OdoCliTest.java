@@ -50,11 +50,11 @@ public abstract class OdoCliTest extends BaseTest {
     @Before
     public void init() throws IOException {
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-        odo = OdoCliFactory.getInstance().getOdo();
+        odo = OdoCliFactory.getInstance().getOdo(project);
 
         if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
             odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
-            odo = OdoCliFactory.getInstance().getOdo();
+            odo = OdoCliFactory.getInstance().getOdo(project);
         }
     }
 

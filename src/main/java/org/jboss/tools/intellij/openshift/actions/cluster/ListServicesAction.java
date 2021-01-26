@@ -12,8 +12,8 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;

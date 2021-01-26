@@ -11,11 +11,11 @@
 package org.jboss.tools.intellij.openshift.tree;
 
 import com.intellij.ui.tree.BaseTreeModel;
+import com.redhat.devtools.intellij.common.utils.ConfigHelper;
+import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
-import org.jboss.tools.intellij.openshift.utils.ConfigHelper;
-import org.jboss.tools.intellij.openshift.utils.ConfigWatcher;
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;

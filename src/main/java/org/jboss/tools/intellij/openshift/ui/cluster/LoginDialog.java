@@ -14,8 +14,8 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.OCCommandUtils;
-import org.jboss.tools.intellij.openshift.utils.UIHelper;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JButton;

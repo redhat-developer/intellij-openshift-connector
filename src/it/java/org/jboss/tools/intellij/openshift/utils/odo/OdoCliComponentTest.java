@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.jboss.tools.intellij.openshift.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

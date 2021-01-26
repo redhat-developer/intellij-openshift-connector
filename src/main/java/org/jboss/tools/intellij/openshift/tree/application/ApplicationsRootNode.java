@@ -30,7 +30,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
   private static final Logger LOG = LoggerFactory.getLogger(ApplicationsRootNode.class);
 
   public ApplicationsRootNode(ApplicationTreeModel model) {
-    odo = new OdoProjectDecorator(OdoCliFactory.getInstance().getOdo(), model);
+    odo = new OdoProjectDecorator(OdoCliFactory.getInstance().getOdo(model.getProject()), model);
     setUserObject(odo.getMasterUrl());
     this.model = model;
   }
@@ -65,7 +65,7 @@ public class ApplicationsRootNode extends LazyMutableTreeNode implements IconTre
 
   @Override
   public void reload() {
-    odo = OdoCliFactory.getInstance().getOdo();
+    odo = OdoCliFactory.getInstance().getOdo(model.getProject());
     super.reload();
   }
 

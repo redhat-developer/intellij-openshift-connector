@@ -13,13 +13,16 @@ package org.jboss.tools.intellij.openshift.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
+import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-public class OdoAction extends TreeAction {
+public class OdoAction extends StructureTreeAction {
   public OdoAction(Class... filters) {
     super(filters);
   }
@@ -35,7 +38,7 @@ public class OdoAction extends TreeAction {
 
     private Odo getOdo(AnActionEvent anActionEvent) throws IOException {
         Tree tree = getTree(anActionEvent);
-        return ((ApplicationsRootNode)tree.getModel().getRoot()).getOdo();
+        return ((ApplicationsRootNode)((ApplicationsTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
     }
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {

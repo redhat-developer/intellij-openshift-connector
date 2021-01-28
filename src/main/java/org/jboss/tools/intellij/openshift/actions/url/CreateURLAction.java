@@ -13,15 +13,17 @@ package org.jboss.tools.intellij.openshift.actions.url;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.ui.url.CreateURLDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
@@ -35,13 +37,13 @@ public class CreateURLAction extends OdoAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = (Component) componentNode.getUserObject();
-        LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) ((TreeNode) selected).getParent();
-        LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+        Component component = (Component) componentNode.getComponent();
+        ApplicationNode applicationNode = componentNode.getParent();
+        NamespaceNode namespaceNode = applicationNode.getParent();
         CompletableFuture.runAsync(() -> {
             try {
-                if (createURL(odo, projectNode.toString(), applicationNode.toString(), component)) {
-                    componentNode.reload();
+                if (createURL(odo, namespaceNode.getName(), applicationNode.getName(), component)) {
+                    ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
                 }
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create URL"));

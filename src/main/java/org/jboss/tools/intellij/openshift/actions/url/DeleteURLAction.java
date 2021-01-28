@@ -13,13 +13,15 @@ package org.jboss.tools.intellij.openshift.actions.url;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -34,13 +36,13 @@ public class DeleteURLAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     URLNode urlNode = (URLNode) selected;
     ComponentNode componentNode = (ComponentNode) urlNode.getParent();
-    Component component = (Component) componentNode.getUserObject();
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    Component component = (Component) componentNode.getComponent();
+    ApplicationNode applicationNode = componentNode.getParent();
+    NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-          odo.deleteURL(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), ((URL)urlNode.getUserObject()).getName());
-          componentNode.reload();
+          odo.deleteURL(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), urlNode.getName());
+          ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
       }
       catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete URL"));

@@ -19,15 +19,14 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
@@ -44,7 +43,7 @@ public class LinkServiceAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      Component comp = (Component)((ComponentNode)selected).getUserObject();
+      Component comp = (Component)((ComponentNode)selected).getComponent();
       visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
     }
     return visible;
@@ -53,12 +52,12 @@ public class LinkServiceAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getUserObject();
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    Component component = (Component) componentNode.getComponent();
+    ApplicationNode applicationNode = componentNode.getParent();
+    NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        List<ServiceInstance> services = odo.getServices(projectNode.toString(), applicationNode.toString());
+        List<ServiceInstance> services = odo.getServices(namespaceNode.getName(), applicationNode.getName());
         if (!services.isEmpty()) {
           String service;
           if (services.size() == 1) {
@@ -70,7 +69,7 @@ public class LinkServiceAction extends OdoAction {
           if (service != null) {
             Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service, NotificationType.INFORMATION);
             Notifications.Bus.notify(notification);
-            odo.link(projectNode.toString(), applicationNode.toString(), component.getName(), component.getPath(), service, null);
+            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getPath(), service, null);
             notification.expire();
             Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service,
             NotificationType.INFORMATION));

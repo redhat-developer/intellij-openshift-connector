@@ -38,6 +38,8 @@ public class Constants {
 
     public static final String DEVFILE_NAME = "devfile.yaml";
 
+    public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
+
     /**
      * Home sub folder for the plugin
      */

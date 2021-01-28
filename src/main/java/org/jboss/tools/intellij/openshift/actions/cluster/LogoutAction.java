@@ -13,7 +13,9 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
@@ -28,7 +30,7 @@ public class LogoutAction extends LoggedInClusterAction {
         try {
           odo.logout();
           clusterNode.setLogged(false);
-          clusterNode.reload();
+            ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));
         }

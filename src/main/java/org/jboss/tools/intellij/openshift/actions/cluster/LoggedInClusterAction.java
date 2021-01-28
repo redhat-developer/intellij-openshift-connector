@@ -14,9 +14,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 
-import javax.swing.tree.TreePath;
-import java.util.Optional;
-
 public abstract class LoggedInClusterAction extends OdoAction {
 
     public LoggedInClusterAction() {
@@ -26,13 +23,9 @@ public abstract class LoggedInClusterAction extends OdoAction {
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
-        Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
-        if (selectedPath.isPresent()) {
-            Object selected = selectedPath.get().getLastPathComponent();
-            if (selected instanceof ApplicationsRootNode) {
-                e.getPresentation().setVisible(((ApplicationsRootNode) selected).isLogged());
-            }
+        Object selected = getSelected(getTree(e));
+        if (selected instanceof ApplicationsRootNode) {
+            e.getPresentation().setVisible(((ApplicationsRootNode) selected).isLogged());
         }
     }
-
 }

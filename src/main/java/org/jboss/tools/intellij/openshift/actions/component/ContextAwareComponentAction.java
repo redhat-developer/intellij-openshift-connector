@@ -28,7 +28,7 @@ public class ContextAwareComponentAction extends OdoAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             if (selected instanceof ComponentNode) {
-                Component component = (Component) ((ComponentNode)selected).getUserObject();
+                Component component = (Component) ((ComponentNode)selected).getComponent();
                 visible = component.hasContext();
             }
         }

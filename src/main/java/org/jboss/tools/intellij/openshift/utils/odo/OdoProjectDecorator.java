@@ -11,7 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,11 +22,11 @@ import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public class OdoProjectDecorator implements Odo {
     private final Odo delegate;
-    private final ApplicationTreeModel model;
+    private final ApplicationsRootNode root;
 
-    public OdoProjectDecorator(Odo delegate, ApplicationTreeModel model) {
+    public OdoProjectDecorator(Odo delegate, ApplicationsRootNode root) {
         this.delegate = delegate;
-        this.model = model;
+        this.root = root;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Integer> getServicePorts(String project, String application, String component) {
         List<Integer> ports = delegate.getServicePorts(project, application, component);
-        model.getComponents().forEach((path, comp) -> {
+        root.getComponents().forEach((path, comp) -> {
             if (comp.getProject().equals(project) && comp.getApplication().equals(application) && comp.getName().equals(component)) {
                 comp.getPorts().forEach(port -> {
                     if (!ports.contains(port)) {
@@ -198,7 +198,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Application> getApplications(String project) throws IOException {
         List<Application> applications = delegate.getApplications(project);
-        model.getComponents().forEach((path, component) -> {
+        root.getComponents().forEach((path, component) -> {
             if (component.getProject().equals(project) && applications.stream().noneMatch(application -> application.getName().equals(component.getApplication()))) {
                 applications.add(Application.of(component.getApplication()));
             }
@@ -209,7 +209,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Component> getComponents(String project, String application) throws IOException {
         List<Component> components = delegate.getComponents(project, application);
-        for (Map.Entry<String, ComponentDescriptor> entry : model.getComponents().entrySet()) {
+        for (Map.Entry<String, ComponentDescriptor> entry : root.getComponents().entrySet()) {
             String path = entry.getKey();
             ComponentDescriptor comp = entry.getValue();
             if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {

@@ -18,7 +18,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ListServicesAction extends LoggedInClusterAction {
@@ -28,22 +27,18 @@ public class ListServicesAction extends LoggedInClusterAction {
         super.update(e);
         boolean visible = e.getPresentation().isVisible();
         if (visible) {
-            Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
-            if (selectedPath.isPresent()) {
-                Object selected = selectedPath.get().getLastPathComponent();
-                try {
-                    ApplicationsRootNode rootNode = (ApplicationsRootNode) selected;
-                    Odo odo = rootNode.getOdo();
-                    visible = odo.isServiceCatalogAvailable();
-                } catch (NullPointerException ex) {
-                    //silently catch the exception to make the action not visible
-                    visible = false;
-                }
+            Object selected = getSelected(getTree(e));
+            try {
+                ApplicationsRootNode rootNode = (ApplicationsRootNode) selected;
+                Odo odo = rootNode.getOdo();
+                visible = odo.isServiceCatalogAvailable();
+            } catch (NullPointerException ex) {
+                //silently catch the exception to make the action not visible
+                visible = false;
             }
         }
         e.getPresentation().setVisible(visible);
     }
-
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {

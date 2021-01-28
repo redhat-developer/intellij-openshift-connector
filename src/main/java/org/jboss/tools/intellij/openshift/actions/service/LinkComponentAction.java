@@ -17,14 +17,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.Arrays;
@@ -40,11 +39,11 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    ApplicationNode applicationNode = serviceNode.getParent();
+    NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        List<Component> components = getTargetComponents(odo, projectNode.toString(), applicationNode.toString());
+        List<Component> components = getTargetComponents(odo, namespaceNode.getName(), applicationNode.getName());
         if (!components.isEmpty()) {
           Component component;
           if (components.size() == 1) {
@@ -55,7 +54,7 @@ public class LinkComponentAction extends OdoAction {
             component = components.get(Arrays.asList(componentNames).indexOf(componentName));
           }
           if (component != null) {
-            odo.link(projectNode.toString(), applicationNode.toString(), component.getName(), component.getPath(), serviceNode.toString(), null);
+            odo.link(namespaceNode.toString(), applicationNode.toString(), component.getName(), component.getPath(), serviceNode.toString(), null);
             Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Service linked to " + component,
             NotificationType.INFORMATION));
           }

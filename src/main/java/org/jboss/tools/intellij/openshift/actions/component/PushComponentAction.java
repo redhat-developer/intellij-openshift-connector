@@ -51,7 +51,6 @@ public class PushComponentAction extends ContextAwareComponentAction {
         if (checkMigrated(odo, namespaceNode.getName(), applicationNode.getName(), component)) {
           process(odo, namespaceNode.getName(), applicationNode.getName(), component);
           component.setState(ComponentState.PUSHED);
-          System.out.println("Sending fireUpdated for component " + componentNode);
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
         }
       } catch (IOException e) {

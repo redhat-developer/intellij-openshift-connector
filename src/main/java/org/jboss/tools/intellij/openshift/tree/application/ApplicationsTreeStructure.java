@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
     private final Project project;
@@ -40,17 +41,17 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private static final String LOGIN = "Please log in to the cluster";
     private static final String FAILED_TO_LOAD_APPLICATIONS = "Failed to load applications";
 
-    private static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/cluster.png", ApplicationsTreeStructure.class);
+    private static final Supplier<Icon> CLUSTER_ICON = () -> IconLoader.findIcon("/images/cluster.png", ApplicationsTreeStructure.class);
 
-    private static final Icon NAMESPACE_ICON = IconLoader.findIcon("/images/project.png", ApplicationsTreeStructure.class);
+    private static final Supplier<Icon> NAMESPACE_ICON = () -> IconLoader.findIcon("/images/project.png", ApplicationsTreeStructure.class);
 
-    private static final Icon APPLICATION_ICON = IconLoader.findIcon("/images/application.png", ApplicationsTreeStructure.class);
+    private static final Supplier<Icon> APPLICATION_ICON = () -> IconLoader.findIcon("/images/application.png", ApplicationsTreeStructure.class);
 
-    private static final Icon COMPONENT_ICON = IconLoader.findIcon("/images/component.png", ApplicationsTreeStructure.class);
+    private static final Supplier<Icon> COMPONENT_ICON = () -> IconLoader.findIcon("/images/component.png", ApplicationsTreeStructure.class);
 
-    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.png", ApplicationsTreeStructure.class);
+    private static final Supplier<Icon> SERVICE_ICON = () -> IconLoader.findIcon("/images/service.png", ApplicationsTreeStructure.class);
 
-    private static final Icon STORAGE_ICON = IconLoader.findIcon("/images/storage.png", ApplicationsTreeStructure.class);
+    private static final Supplier<Icon> STORAGE_ICON = () -> IconLoader.findIcon("/images/storage.png", ApplicationsTreeStructure.class);
 
     private static final Icon URL_ICON = IconLoader.findIcon("/images/url-node.png", ApplicationsTreeStructure.class);
     private static final Icon URL_SECURE_ICON = IconLoader.findIcon("/images/url-node-secure.png", ApplicationsTreeStructure.class);
@@ -69,7 +70,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @Override
     public Object[] getChildElements(@NotNull Object element) {
-        System.out.println("getChildElements element=" + element);
         Odo odo = root.getOdo();
         if (odo != null) {
             if (element instanceof ApplicationsRootNode) {
@@ -150,30 +150,29 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     public NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
         if (element instanceof ApplicationsRootNode) {
             Odo odo = ((ApplicationsRootNode)element).getOdo();
-            return new LabelAndIconDescriptor(project, element, odo != null?odo.getMasterUrl().toString():"Loading", CLUSTER_ICON,
+            return new LabelAndIconDescriptor(project, element, () -> odo != null?odo.getMasterUrl().toString():"Loading", CLUSTER_ICON,
                     parentDescriptor);
         } else if (element instanceof NamespaceNode) {
-            return new LabelAndIconDescriptor(project, element, ((NamespaceNode)element).getName(), NAMESPACE_ICON,
+            return new LabelAndIconDescriptor(project, element, ((NamespaceNode)element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
         } else if (element instanceof ApplicationNode) {
-            return new LabelAndIconDescriptor(project, element, ((ApplicationNode)element).getName(), APPLICATION_ICON,
+            return new LabelAndIconDescriptor(project, element, ((ApplicationNode)element)::getName, APPLICATION_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
-            System.out.println("Returning descriptor for component " + element + " " + ((ComponentNode)element).getComponent().getState());
             return new LabelAndIconDescriptor(project, element,
-                    ((ComponentNode)element).getName() + ' ' + ((ComponentNode)element).getComponent().getState(),
+                    () -> ((ComponentNode)element).getName() + ' ' + ((ComponentNode)element).getComponent().getState(),
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
             return new LabelAndIconDescriptor(project, element,
-                    ((ServiceNode)element).getName(), SERVICE_ICON, parentDescriptor);
+                    ((ServiceNode)element)::getName, SERVICE_ICON, parentDescriptor);
         } else if (element instanceof PersistentVolumeClaimNode) {
             return new LabelAndIconDescriptor(project, element,
-                    ((PersistentVolumeClaimNode)element).getName(), STORAGE_ICON, parentDescriptor);
+                    ((PersistentVolumeClaimNode)element)::getName, STORAGE_ICON, parentDescriptor);
         } else if (element instanceof URLNode) {
             URL url = ((URLNode)element).getUrl();
             return new LabelAndIconDescriptor(project, element,
-                    url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
-                    url.isSecure()?URL_SECURE_ICON:URL_ICON, parentDescriptor);
+                    () -> url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
+                    () -> url.isSecure()?URL_SECURE_ICON:URL_ICON, parentDescriptor);
         }
         return null;
     }

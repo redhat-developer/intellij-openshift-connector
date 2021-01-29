@@ -173,6 +173,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new LabelAndIconDescriptor(project, element,
                     () -> url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
                     () -> url.isSecure()?URL_SECURE_ICON:URL_ICON, parentDescriptor);
+        } else if (element instanceof MessageNode) {
+            return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
         }
         return null;
     }

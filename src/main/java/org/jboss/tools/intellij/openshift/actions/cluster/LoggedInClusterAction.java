@@ -21,11 +21,11 @@ public abstract class LoggedInClusterAction extends OdoAction {
     }
 
     @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        Object selected = getSelected(getTree(e));
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
         if (selected instanceof ApplicationsRootNode) {
-            e.getPresentation().setVisible(((ApplicationsRootNode) selected).isLogged());
+            visible = ((ApplicationsRootNode) selected).isLogged();
         }
+        return visible;
     }
 }

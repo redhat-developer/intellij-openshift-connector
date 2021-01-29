@@ -65,7 +65,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
 
   private boolean checkMigrated(Odo odo, String project, String application, Component component) throws IOException {
     if (component.getState() == ComponentState.PUSHED) {
-      ComponentInfo info = odo.getComponentInfo(project, application, component.getName(), component.getInfo().getComponentKind());
+      ComponentInfo info = odo.getComponentInfo(project, application, component.getName(), component.getPath(), component.getInfo().getComponentKind());
       if (info.isMigrated()) {
         int choice = UIHelper.executeInUI(() -> Messages.showDialog(COMPONENT_MIGRATION_MESSAGE, COMPONENT_MIGRATION_TITLE, new String[]{UNDEPLOY_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon()));
         if (choice == 0) {

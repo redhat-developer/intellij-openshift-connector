@@ -141,8 +141,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, ComponentKind kind) throws IOException {
-        return delegate.getComponentInfo(project, application, component, kind);
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException {
+        return delegate.getComponentInfo(project, application, component, path, kind);
     }
 
     @Override
@@ -221,9 +221,8 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setPath(path);
                 } else {
                     ComponentKind kind = getComponentKind(path);
-                    ComponentInfo.Builder builder = new ComponentInfo.Builder();
-                    ComponentInfo info = builder.withComponentKind(kind).build();
-                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, info));
+                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path,
+                            getComponentInfo(project, application, comp.getName(), path, kind)));
                 }
             }
         }

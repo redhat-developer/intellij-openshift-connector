@@ -300,26 +300,12 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, ComponentKind kind) throws IOException {
-        if (kind.equals(ComponentKind.S2I)) {
-            List<DeploymentConfig> DCs = client.deploymentConfigs().inNamespace(project).withLabel(COMPONENT_NAME_LABEL, component).withLabel(APP_LABEL, application).list().getItems();
-            if (DCs.size() == 1) {
-                DeploymentConfig deploymentConfig = DCs.get(0);
-                ComponentSourceType sourceType = ComponentSourceType.fromAnnotation(deploymentConfig.getMetadata().getAnnotations().get(COMPONENT_SOURCE_TYPE_ANNOTATION));
-                ComponentInfo.Builder builder = new ComponentInfo.Builder().withSourceType(sourceType).withComponentTypeName(deploymentConfig.getMetadata().getLabels().get(RUNTIME_NAME_LABEL)).withComponentTypeVersion(deploymentConfig.getMetadata().getLabels().get(RUNTIME_VERSION_LABEL)).withMigrated(deploymentConfig.getMetadata().getLabels().containsKey(ODO_MIGRATED_LABEL));
-                if (sourceType == ComponentSourceType.LOCAL) {
-                    return builder.build();
-                } else if (sourceType == ComponentSourceType.BINARY) {
-                    return builder.withBinaryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).build();
-                } else {
-                    BuildConfig buildConfig = client.buildConfigs().inNamespace(project).withName(deploymentConfig.getMetadata().getName()).get();
-                    return builder.withRepositoryURL(deploymentConfig.getMetadata().getAnnotations().get(VCS_URI_ANNOTATION)).withRepositoryReference(buildConfig.getSpec().getSource().getGit().getRef()).build();
-                }
-            } else {
-                throw new IOException("Invalid number of deployment configs (" + DCs.size() + "), should be 1");
-            }
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException {
+        if (path != null) {
+            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"), kind);
+        } else {
+            return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"), kind);
         }
-        return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"), kind);
     }
 
     private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {

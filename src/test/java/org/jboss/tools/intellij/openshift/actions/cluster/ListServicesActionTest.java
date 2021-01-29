@@ -19,4 +19,8 @@ public class ListServicesActionTest extends ActionTest {
     return new ListServicesAction();
   }
 
+  @Override
+  protected void verifyLoggedInCluster(boolean visible) {
+    assertTrue(visible);
+  }
 }

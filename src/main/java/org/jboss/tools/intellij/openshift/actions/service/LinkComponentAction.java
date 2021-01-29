@@ -54,8 +54,8 @@ public class LinkComponentAction extends OdoAction {
             component = components.get(Arrays.asList(componentNames).indexOf(componentName));
           }
           if (component != null) {
-            odo.link(namespaceNode.toString(), applicationNode.toString(), component.getName(), component.getPath(), serviceNode.toString(), null);
-            Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Service linked to " + component,
+            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getPath(), serviceNode.getName(), null);
+            Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Service linked to " + component.getName(),
             NotificationType.INFORMATION));
           }
        } else {

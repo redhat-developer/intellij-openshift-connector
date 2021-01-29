@@ -15,6 +15,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
@@ -53,7 +54,6 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         this.structure = structure;
         initConfigWatcher();
         config = loadConfig();
-        loadProjectModel(project);
         registerProjectListener(project);
     }
 
@@ -66,7 +66,10 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public CompletableFuture<Odo> initializeOdo() {
-        return OdoCliFactory.getInstance().getOdo(project).whenComplete((odo, err) -> this.odo = new OdoProjectDecorator(odo, this));
+        return OdoCliFactory.getInstance().getOdo(project).whenComplete((odo, err) -> {
+            this.odo = new OdoProjectDecorator(odo, this);
+            loadProjectModel(project);
+        });
     }
 
     public Odo getOdo() {
@@ -97,7 +100,13 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public static VirtualFile getModuleRoot(Module module) {
-        return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
+        ModuleRootManager manager = ModuleRootManager.getInstance(module);
+        VirtualFile[] roots = manager.getContentRoots();
+        if (roots.length > 0) {
+            return roots[0];
+        } else {
+            return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
+        }
     }
 
     protected void loadProjectModel(Project project) {
@@ -119,7 +128,6 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
             components.put(path, descriptor);
-
         }
     }
 
@@ -128,7 +136,8 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
             try {
                 List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.getPath());
                 descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -142,7 +151,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
             structure.fireModified(this);
         }
     }
-    private void removeContext(File file) {
+    public void removeContext(File file) {
         if (file.exists()) {
             removeContextFromSettings(file.getPath());
         }

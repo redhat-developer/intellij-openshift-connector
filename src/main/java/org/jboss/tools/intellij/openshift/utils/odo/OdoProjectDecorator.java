@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -162,6 +163,7 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        root.removeContext(new File(context));
         delegate.deleteComponent(project, application, context, component, kind);
     }
 

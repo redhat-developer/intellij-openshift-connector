@@ -30,7 +30,7 @@ public class OdoAction extends StructureTreeAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     try {
-      this.actionPerformed(anActionEvent, path, selected, getOdo(anActionEvent));
+      this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
     } catch (IOException e) {
       Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
     }

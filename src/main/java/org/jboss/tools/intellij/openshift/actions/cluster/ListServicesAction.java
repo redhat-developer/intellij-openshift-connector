@@ -23,11 +23,9 @@ import java.util.concurrent.CompletableFuture;
 public class ListServicesAction extends LoggedInClusterAction {
 
     @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        boolean visible = e.getPresentation().isVisible();
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
         if (visible) {
-            Object selected = getSelected(getTree(e));
             try {
                 ApplicationsRootNode rootNode = (ApplicationsRootNode) selected;
                 Odo odo = rootNode.getOdo();
@@ -37,7 +35,7 @@ public class ListServicesAction extends LoggedInClusterAction {
                 visible = false;
             }
         }
-        e.getPresentation().setVisible(visible);
+        return visible;
     }
 
     @Override

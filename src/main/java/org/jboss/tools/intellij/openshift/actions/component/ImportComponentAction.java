@@ -59,7 +59,7 @@ public class ImportComponentAction extends CreateComponentAction {
                 ApplicationsRootNode root = componentNode.getRoot();
                 Project project = root.getProject();
                 ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getInfo().getComponentKind());
-                CreateComponentModel model = getModel(project, odo.getComponentTypes(), applicationNode.toString(), component.getName(), info, component.getInfo().getComponentKind());
+                CreateComponentModel model = getModel(project, odo.getComponentTypes(), applicationNode.getName(), component.getName(), info, component.getInfo().getComponentKind());
                 process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, anActionEvent);
 
             } catch (IOException e) {

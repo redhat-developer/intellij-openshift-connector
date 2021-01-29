@@ -57,6 +57,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     public ApplicationsTreeStructure(Project project) {
         this.project = project;
+        this.root = new ApplicationsRootNode(project, this);
     }
 
     @Override
@@ -68,6 +69,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @Override
     public Object[] getChildElements(@NotNull Object element) {
+        System.out.println("getChildElements element=" + element);
         Odo odo = root.getOdo();
         if (odo != null) {
             if (element instanceof ApplicationsRootNode) {
@@ -114,7 +116,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             } catch (KubernetesClientException e) {
                 results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
             }
-            odo.getServices(element.getParent().toString(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
+            odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
         } catch (IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application"));
         }
@@ -157,6 +159,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new LabelAndIconDescriptor(project, element, ((ApplicationNode)element).getName(), APPLICATION_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
+            System.out.println("Returning descriptor for component " + element + " " + ((ComponentNode)element).getComponent().getState());
             return new LabelAndIconDescriptor(project, element,
                     ((ComponentNode)element).getName() + ' ' + ((ComponentNode)element).getComponent().getState(),
                     COMPONENT_ICON, parentDescriptor);

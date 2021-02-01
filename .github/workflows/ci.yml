@@ -23,6 +23,10 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-test-reports
+          path: build/test-results
 
   openshift-integration-tests:
     runs-on: ubuntu-latest
@@ -52,6 +56,10 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew integrationTest
+      - uses: actions/upload-artifact@v2
+        with:
+          name: linux-integration-test-reports
+          path: build/test-results
 
   build-macos:
     runs-on: macos-latest
@@ -65,8 +73,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        continue-on-error: true
         run: ./gradlew build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: macos-test-reports
+          path: build/test-results
 
   build-windows:
     runs-on: windows-latest
@@ -81,3 +92,7 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: windows-test-reports
+          path: build/test-results

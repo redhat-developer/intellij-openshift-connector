@@ -11,57 +11,10 @@ jobs:
     name: Publish Test Report
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/github-script@v3.1.0
-        with:
-          script: |
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: ${{github.event.workflow_run.id}},
-            });
-            var linux-integration-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "linux-integration-test-reports"
-            })[0];
-            var windows-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "windows-test-reports"
-            })[0];
-            var macos-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "macos-test-reports"
-            })[0];
-            var ubuntu-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "ubuntu-test-reports"
-            })[0];
-            var download-linux-integration-test = await github.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: linux-integration-test-reports-artifact.id,
-              archive_format: 'zip',
-            });
-            var download-ubuntu-test = await github.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: ubuntu-test-reports-artifact.id,
-              archive_format: 'zip',
-            });
-            var download-windows-test = await github.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: windows-test-reports-artifact.id,
-              archive_format: 'zip',
-            });
-            var download-macos-test = await github.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: macos-test-reports-artifact.id,
-              archive_format: 'zip',
-            });
-            var fs = require('fs');
-            fs.writeFileSync('${{github.workspace}}/linux-integration-test-reports.zip', Buffer.from(download-linux-integration-test.data));
-            fs.writeFileSync('${{github.workspace}}/ubuntu-test-reports.zip', Buffer.from(download-ubuntu-test.data));
-            fs.writeFileSync('${{github.workspace}}/macos-test-reports.zip', Buffer.from(download-macos-test.data));
-            fs.writeFileSync('${{github.workspace}}/windows-test-reports.zip', Buffer.from(download-windows-test.data));
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v2
       - run: |
+          ls
           unzip linux-integration-test-reports.zip -d ${{github.workspace}}/linux-integration-test-reports/
           unzip ubuntu-test-reports.zip -d ${{github.workspace}}/ubuntu-test-reports/
           unzip macos-test-reports.zip -d ${{github.workspace}}/macos-test-reports/

@@ -20,6 +20,7 @@ jobs:
                 repo: context.repo.repo,
                 run_id: ${{github.event.workflow_run.id}},
             });
+            console.log(artifacts)
             var linux-integration-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "linux-integration-test-reports"
             })[0];

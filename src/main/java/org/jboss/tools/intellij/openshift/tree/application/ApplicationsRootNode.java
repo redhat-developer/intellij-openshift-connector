@@ -78,7 +78,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
 
     public void load() {
         OdoCliFactory.getInstance().resetOdo();
-        initializeOdo();
+        initializeOdo().thenAccept(odo -> structure.fireModified(this));
     }
 
     public Project getProject() {
@@ -204,10 +204,9 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         return !StringUtils.equals(newToken, currentToken);
     }
 
-    protected void refresh() {
+    public void refresh() {
         try {
             load();
-            structure.fireModified(this);
         } catch (Exception e) {
         }
     }

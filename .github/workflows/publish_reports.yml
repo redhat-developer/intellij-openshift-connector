@@ -28,7 +28,12 @@ jobs:
                 archive_format: 'zip',
               });
               var fs = require('fs');
-              const pathFile = path.join('${{github.workspace}}', '${artifact.name}.zip');
+              var path = require('path');
+              var pathFile = path.format({
+                root: '${{github.workspace}}',
+                name: artifact.name,
+                ext: 'zip'
+              });  
               console.log(pathFile);
             }
           debug: true

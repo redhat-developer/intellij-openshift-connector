@@ -30,16 +30,14 @@ jobs:
               var fs = require('fs');
               var path = require('path');
               var pathFile = path.format({
-                root: '${{github.workspace}}',
+                root: '${{github.workspace}}/',
                 name: artifact.name,
-                ext: 'zip'
+                ext: '.zip'
               });  
-              console.log(pathFile);
+              fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
             }
-          debug: true
       - run: |
-          ls
-          
+          unzip *.zip -d ${{github.workspace}}
       - name: Publish MacOS tests reports
         uses: scacap/action-surefire-report@v1
         with:

@@ -28,8 +28,7 @@ jobs:
                 archive_format: 'zip',
               });
               var fs = require('fs');
-              var path = ${{github.workspace}}+'/'+artifact.name+'.zip';
-              console.log(path);
+              var path = ${{github.workspace}}/artifact.name;
               fs.writeFileSync(path, Buffer.from(zipfile.data));
             }
           debug: true

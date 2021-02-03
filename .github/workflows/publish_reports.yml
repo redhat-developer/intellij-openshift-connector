@@ -28,8 +28,9 @@ jobs:
                 archive_format: 'zip',
               });
               var fs = require('fs');
-              fs.writeFileSync('${{github.workspace}}/${{artifact.name}}.zip', Buffer.from(zipfile.data));
-            } 
+              var path = ${{github.workspace}}+'/'+artifact.name+'.zip';
+              console.log(path);
+            }
       - name : Publish MacOS tests reports
         uses: scacap/action-surefire-report@v1
         with:

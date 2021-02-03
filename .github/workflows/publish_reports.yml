@@ -28,8 +28,9 @@ jobs:
                 archive_format: 'zip',
               });
               var fs = require('fs');
-              console.log(artifact);
-              console.log(zipfile);
+              var path = ${{github.workspace}}+'/'+artifact.name+'.zip';
+              console.log(path);
+              fs.writeFileSync(path, Buffer.from(zipfile.data));
             }
           debug: true
       - name : Publish MacOS tests reports

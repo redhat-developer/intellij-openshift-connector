@@ -20,47 +20,47 @@ jobs:
                 repo: context.repo.repo,
                 run_id: ${{github.event.workflow_run.id}},
             });
-            var linux-integration-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
+            var linux_integration_test_reports_artifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "linux-integration-test-reports"
             })[0];
-            var windows-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
+            var windows_test_reports_artifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "windows-test-reports"
             })[0];
-            var macos-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
+            var macos_test_reports_artifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "macos-test-reports"
             })[0];
-            var ubuntu-test-reports-artifact = artifacts.data.artifacts.filter((artifact) => {
+            var ubuntu_test_reports_artifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "ubuntu-test-reports"
             })[0];
-            var download-linux-integration-test = await github.actions.downloadArtifact({
+            var download_linux_integration_test = await github.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              artifact_id: linux-integration-test-reports-artifact.id,
+              artifact_id: linux_integration_test_reports_artifact.id,
               archive_format: 'zip',
             });
-            var download-ubuntu-test = await github.actions.downloadArtifact({
+            var download_ubuntu_test = await github.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              artifact_id: ubuntu-test-reports-artifact.id,
+              artifact_id: ubuntu_test_reports_artifact.id,
               archive_format: 'zip',
             });
-            var download-windows-test = await github.actions.downloadArtifact({
+            var download_windows_test = await github.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              artifact_id: windows-test-reports-artifact.id,
+              artifact_id: windows_test_reports_artifact.id,
               archive_format: 'zip',
             });
-            var download-macos-test = await github.actions.downloadArtifact({
+            var download_macos_test = await github.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              artifact_id: macos-test-reports-artifact.id,
+              artifact_id: macos_test_reports_artifact.id,
               archive_format: 'zip',
             });
             var fs = require('fs');
-            fs.writeFileSync('${{github.workspace}}/linux-integration-test-reports.zip', Buffer.from(download-linux-integration-test.data));
-            fs.writeFileSync('${{github.workspace}}/ubuntu-test-reports.zip', Buffer.from(download-ubuntu-test.data));
-            fs.writeFileSync('${{github.workspace}}/macos-test-reports.zip', Buffer.from(download-macos-test.data));
-            fs.writeFileSync('${{github.workspace}}/windows-test-reports.zip', Buffer.from(download-windows-test.data));
+            fs.writeFileSync('${{github.workspace}}/linux-integration-test-reports.zip', Buffer.from(download_linux_integration_test.data));
+            fs.writeFileSync('${{github.workspace}}/ubuntu-test-reports.zip', Buffer.from(download_ubuntu_test.data));
+            fs.writeFileSync('${{github.workspace}}/macos-test-reports.zip', Buffer.from(download_macos_test.data));
+            fs.writeFileSync('${{github.workspace}}/windows-test-reports.zip', Buffer.from(download_windows_test.data));
       - run: |
           unzip linux-integration-test-reports.zip -d ${{github.workspace}}/linux-integration-test-reports/
           unzip ubuntu-test-reports.zip -d ${{github.workspace}}/ubuntu-test-reports/

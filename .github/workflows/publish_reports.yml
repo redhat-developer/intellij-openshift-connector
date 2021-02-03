@@ -20,13 +20,16 @@ jobs:
                 repo: context.repo.repo,
                 run_id: ${{github.event.workflow_run.id}},
             });
-            console.log(artifacts)
-      - run: |
-          ls
-          unzip linux-integration-test-reports.zip -d ${{github.workspace}}/linux-integration-test-reports/
-          unzip ubuntu-test-reports.zip -d ${{github.workspace}}/ubuntu-test-reports/
-          unzip macos-test-reports.zip -d ${{github.workspace}}/macos-test-reports/
-          unzip windows-test-reports.zip -d ${{github.workspace}}/windows-test-reports/
+            for (var artifact of artifatcs) {
+              var zipfile = await github.actions.downloadArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+                archive_format: 'zip',
+              });
+              var fs = require('fs');
+              fs.writeFileSync('${{github.workspace}}/${{artifact.name}}.zip', Buffer.from(zipfile.data));
+            } 
       - name : Publish MacOS tests reports
         uses: scacap/action-surefire-report@v1
         with:

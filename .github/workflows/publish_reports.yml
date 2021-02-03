@@ -20,7 +20,7 @@ jobs:
                 repo: context.repo.repo,
                 run_id: ${{github.event.workflow_run.id}},
             });
-            for (var artifact of artifatcs) {
+            for (var artifact of artifacts) {
               var zipfile = await github.actions.downloadArtifact({
                 owner: context.repo.owner,
                 repo: context.repo.repo,

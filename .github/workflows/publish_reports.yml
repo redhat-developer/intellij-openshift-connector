@@ -39,25 +39,24 @@ jobs:
               }
             }
       - run: |
-          pwd
-          find . -name '*.zip' -exec sh -c 'echo unzip -d "${{github.workspace}}/${1%.*}" "$1"' _ {} \;
+          find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
       - name: Publish MacOS tests reports
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/macos-test-reports/**/TEST-*.xml'
+          report_paths: '${{github.workspace}}/macos-*/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.event.commit}}
       - name: Publish Windows tests reports
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/windows-test-reports/**/TEST-*.xml'
+          report_paths: '${{github.workspace}}/windows-*/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.event.commit}}
       - name: Publish Ubuntu tests reports
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/ubuntu-test-reports/**/TEST-*.xml'
+          report_paths: '${{github.workspace}}/ubuntu-*/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.event.commit}}
       - name: Publish Integration tests reports
         uses: scacap/action-surefire-report@v1

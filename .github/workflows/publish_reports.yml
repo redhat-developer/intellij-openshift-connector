@@ -39,7 +39,7 @@ jobs:
               }
             }
       - run: |
-          unzip '*.zip' -d ${{github.workspace}}
+          find . -name '*.zip' -exec sh -c 'echo unzip -d "${{github.workspace}}/${1%.*}" "$1"' _ {} \;
       - name: Publish MacOS tests reports
         uses: scacap/action-surefire-report@v1
         with:

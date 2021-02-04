@@ -21,7 +21,7 @@ jobs:
                 run_id: ${{github.event.workflow_run.id}},
             });
             for (var artifact of artifacts.data.artifacts) {
-              if (artifact.endsWith('test-reports') {
+              if (artifact.endsWith('test-reports')) {
                 var zipfile = await github.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

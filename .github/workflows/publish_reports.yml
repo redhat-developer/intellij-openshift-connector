@@ -21,23 +21,25 @@ jobs:
                 run_id: ${{github.event.workflow_run.id}},
             });
             for (var artifact of artifacts.data.artifacts) {
-              var zipfile = await github.actions.downloadArtifact({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                artifact_id: artifact.id,
-                archive_format: 'zip',
-              });
-              var fs = require('fs');
-              var path = require('path');
-              var pathFile = path.format({
-                root: '${{github.workspace}}/',
-                name: artifact.name,
-                ext: '.zip'
-              });  
-              fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
+              if (artifact.endsWith('test-reports') {
+                var zipfile = await github.actions.downloadArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                  archive_format: 'zip',
+                });
+                var fs = require('fs');
+                var path = require('path');
+                var pathFile = path.format({
+                  root: '${{github.workspace}}/',
+                  name: artifact.name,
+                  ext: '.zip'
+                });
+                fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
+              }
             }
       - run: |
-          unzip *.zip -d ${{github.workspace}}
+          unzip '*.zip' -d ${{github.workspace}}
       - name: Publish MacOS tests reports
         uses: scacap/action-surefire-report@v1
         with:

@@ -45,7 +45,7 @@ jobs:
             }
       - name: Unzip artifacts
         run: |
-          unzip -d ${{github.workspace}} linux-integration-test-reports.zip;
+          unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip;
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

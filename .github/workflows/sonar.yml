@@ -26,7 +26,7 @@ jobs:
                 run_id: ${{github.event.workflow_run.id}},
             });
             for (var artifact of artifacts.data.artifacts) {
-              if (artifact.name == 'linux-integration-test-reports') {
+              if (artifact.name == 'linux-integration-test-reports' || artifact.name == 'ubuntu-latest-test-reports') {
                 var zipfile = await github.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -46,6 +46,7 @@ jobs:
       - name: Unzip artifacts
         run: |
           unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip;
+          unzip -d ${{github.workspace}}/build ubuntu-latest-test-reports.zip;
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -26,7 +26,7 @@ jobs:
                 run_id: ${{github.event.workflow_run.id}},
             });
             for (var artifact of artifacts.data.artifacts) {
-              if (artifact.name == 'linux-integration-test-reports')) {
+              if (artifact.name == 'linux-integration-test-reports') {
                 var zipfile = await github.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

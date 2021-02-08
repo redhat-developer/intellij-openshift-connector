@@ -388,12 +388,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void createProject(String project) throws IOException {
-        execute(command, envVars, "project", "create", project);
+        execute(command, envVars, "project", "create", project, "-w");
     }
 
     @Override
     public void deleteProject(String project) throws IOException {
-        execute(command, envVars, "project", "delete", project, "-f");
+        execute(command, envVars, "project", "delete", project, "-f", "-w");
     }
 
     @Override

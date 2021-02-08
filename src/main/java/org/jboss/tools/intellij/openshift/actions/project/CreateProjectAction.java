@@ -43,7 +43,6 @@ public class CreateProjectAction extends LoggedInClusterAction {
           odo.createProject(projectName);
           notif.expire();
           Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Create project", "Project " + projectName + " successfully created", NotificationType.INFORMATION));
-          Project project = new ProjectBuilder().editOrNewMetadata().withName(projectName).endMetadata().build();
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(clusterNode);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create project"));

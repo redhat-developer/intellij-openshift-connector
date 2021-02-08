@@ -11,7 +11,7 @@ jobs:
     name: Publish Test Report
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
+      - name: Download artifacts
         uses: actions/github-script@v3.1.0
         with:
           script: |
@@ -38,9 +38,10 @@ jobs:
                 fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
               }
             }
-      - run: |
+      - name: Unzip artifacts
+        run: |
           find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
-      - name: Publish Aggregated tests reports
+      - name: Publish aggregated tests reports
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}

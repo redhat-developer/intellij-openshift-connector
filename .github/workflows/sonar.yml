@@ -16,8 +16,41 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Download artifacts
+        uses: actions/github-script@v3.1.0
+        with:
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: ${{github.event.workflow_run.id}},
+            });
+            for (var artifact of artifacts.data.artifacts) {
+              if (artifact.name == 'linux-integration-test-reports' || artifact.name == 'ubuntu-latest-test-reports') {
+                var zipfile = await github.actions.downloadArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                  archive_format: 'zip',
+                });
+                var fs = require('fs');
+                var path = require('path');
+                var pathFile = path.format({
+                  root: '${{github.workspace}}/',
+                  name: artifact.name,
+                  ext: '.zip'
+                });
+                fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
+              }
+            }
+      - name: Unzip artifacts
+        run: |
+          unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip;
+          unzip -d ${{github.workspace}}/build ubuntu-latest-test-reports.zip;
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew jacocoTestReport sonarqube --info
+        run: |
+          ./gradlew jacocoTestReport
+          ./gradlew sonarqube

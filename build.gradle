@@ -82,8 +82,7 @@ sonarqube {
 }
 
 jacocoTestReport {
-    dependsOn test
-    dependsOn integrationTest
+    getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
         xml.enabled = true
     }

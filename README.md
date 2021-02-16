@@ -35,7 +35,15 @@ For more information about devfiles, see the [devfile docs](https://docs.devfile
 
 ![](images/0.4.0/openshift1.gif)
 
-## WARNING !!! Breaking Changes
+## WARNING
+
+### Known issues
+
+When creating a new project, it is possible that the newly created project will not immediately
+appear in the Application Explorer tree. This is caused by a synchronization issue in the underlying
+CLI tool odo. A workaround is to refresh the tree.
+
+### Breaking Changes
 
 Post `0.1.1` releases contains breaking changes mentioned below.
 

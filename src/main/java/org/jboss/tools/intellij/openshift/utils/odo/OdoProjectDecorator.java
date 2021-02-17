@@ -11,8 +11,9 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,11 @@ import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public class OdoProjectDecorator implements Odo {
     private final Odo delegate;
-    private final ApplicationTreeModel model;
+    private final ApplicationsRootNode root;
 
-    public OdoProjectDecorator(Odo delegate, ApplicationTreeModel model) {
+    public OdoProjectDecorator(Odo delegate, ApplicationsRootNode root) {
         this.delegate = delegate;
-        this.model = model;
+        this.root = root;
     }
 
     @Override
@@ -122,7 +123,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Integer> getServicePorts(String project, String application, String component) {
         List<Integer> ports = delegate.getServicePorts(project, application, component);
-        model.getComponents().forEach((path, comp) -> {
+        root.getComponents().forEach((path, comp) -> {
             if (comp.getProject().equals(project) && comp.getApplication().equals(application) && comp.getName().equals(component)) {
                 comp.getPorts().forEach(port -> {
                     if (!ports.contains(port)) {
@@ -140,8 +141,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, ComponentKind kind) throws IOException {
-        return delegate.getComponentInfo(project, application, component, kind);
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException {
+        return delegate.getComponentInfo(project, application, component, path, kind);
     }
 
     @Override
@@ -162,6 +163,7 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        root.removeContext(new File(context));
         delegate.deleteComponent(project, application, context, component, kind);
     }
 
@@ -198,7 +200,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Application> getApplications(String project) throws IOException {
         List<Application> applications = delegate.getApplications(project);
-        model.getComponents().forEach((path, component) -> {
+        root.getComponents().forEach((path, component) -> {
             if (component.getProject().equals(project) && applications.stream().noneMatch(application -> application.getName().equals(component.getApplication()))) {
                 applications.add(Application.of(component.getApplication()));
             }
@@ -209,7 +211,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<Component> getComponents(String project, String application) throws IOException {
         List<Component> components = delegate.getComponents(project, application);
-        for (Map.Entry<String, ComponentDescriptor> entry : model.getComponents().entrySet()) {
+        for (Map.Entry<String, ComponentDescriptor> entry : root.getComponents().entrySet()) {
             String path = entry.getKey();
             ComponentDescriptor comp = entry.getValue();
             if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
@@ -219,9 +221,8 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setPath(path);
                 } else {
                     ComponentKind kind = getComponentKind(path);
-                    ComponentInfo.Builder builder = new ComponentInfo.Builder();
-                    ComponentInfo info = builder.withComponentKind(kind).build();
-                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path, info));
+                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path,
+                            getComponentInfo(project, application, comp.getName(), path, kind)));
                 }
             }
         }

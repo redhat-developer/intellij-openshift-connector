@@ -16,11 +16,11 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
+import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 
 public class CreateComponentAction extends OdoAction {
   public CreateComponentAction() {
-    super(ApplicationNode.class, ProjectNode.class);
+    super(ApplicationNode.class, NamespaceNode.class);
   }
 
   protected CreateComponentAction(Class... clazz) {
@@ -51,30 +51,31 @@ public class CreateComponentAction extends OdoAction {
     final Optional<String> application;
     String projectName;
     if (selected instanceof ApplicationNode) {
-      application = Optional.of(selected.toString());
-      projectName =  ((LazyMutableTreeNode)selected).getParent().toString();
+      application = Optional.of(((ApplicationNode) selected).getName());
+      projectName =  ((ApplicationNode)selected).getParent().getName();
     } else {
       application = Optional.empty();
-      projectName = selected.toString();
+      projectName = ((NamespaceNode)selected).getName();
     }
-    ApplicationTreeModel rootModel = ((ApplicationsRootNode)((LazyMutableTreeNode)selected).getRoot()).getModel();
-    Project project = rootModel.getProject();
+    ApplicationsRootNode rootNode = ((ApplicationsRootNode)((ParentableNode<Object>)selected).getRoot());
+    Project project = rootNode.getProject();
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentModel model = getModel(project, application, odo.getComponentTypes(), p -> rootModel.getComponents().containsKey(p));
-        process((LazyMutableTreeNode) selected, odo, projectName, application, rootModel, model);
+        CreateComponentModel model = getModel(project, application, odo.getComponentTypes(), p -> rootNode.getComponents().containsKey(p));
+        process((ParentableNode) selected, odo, projectName, application, rootNode, model, anActionEvent);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
       }
     });
   }
 
-  protected void process(LazyMutableTreeNode selected, Odo odo, String projectName, Optional<String> application, ApplicationTreeModel rootModel, CreateComponentModel model) throws IOException {
+  protected void process(ParentableNode selected, Odo odo, String projectName, Optional<String> application,
+                         ApplicationsRootNode rootNode, CreateComponentModel model, AnActionEvent anActionEvent) throws IOException {
     boolean doit = UIHelper.executeInUI(() -> showDialog(model));
     if (doit) {
       createComponent(odo, projectName, application.orElse(model.getApplication()), model);
-      rootModel.addContext(model.getContext());
-      selected.reload();
+      rootNode.addContext(model.getContext());
+      ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
     }
   }
 

@@ -14,11 +14,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
+import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
@@ -31,14 +33,14 @@ import java.util.concurrent.CompletableFuture;
 public class CreateServiceAction extends OdoAction {
 
     public CreateServiceAction() {
-        super(ApplicationNode.class, ProjectNode.class);
+        super(ApplicationNode.class, NamespaceNode.class);
     }
 
     @Override
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            ApplicationsRootNode rootNode = (ApplicationsRootNode) ((LazyMutableTreeNode) selected).getRoot();
+            ApplicationsRootNode rootNode = (ApplicationsRootNode) ((ParentableNode<Object>) selected).getRoot();
             if (rootNode != null) {
                 Odo odo = rootNode.getOdo();
                 return odo.isServiceCatalogAvailable();
@@ -52,11 +54,11 @@ public class CreateServiceAction extends OdoAction {
         final String applicationName;
         String projectName;
         if (selected instanceof ApplicationNode) {
-            applicationName = selected.toString();
-            projectName = ((LazyMutableTreeNode) selected).getParent().toString();
-        } else { // selected is ProjectNode
+            applicationName = ((ApplicationNode) selected).getName();
+            projectName = ((ApplicationNode) selected).getParent().getName();
+        } else { // selected is NamespaceNode
             applicationName = "";
-            projectName = selected.toString();
+            projectName = ((NamespaceNode)selected).getName();
         }
         CompletableFuture.runAsync(() -> {
             try {
@@ -65,7 +67,7 @@ public class CreateServiceAction extends OdoAction {
                     CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates, applicationName));
                     if (dialog.isOK()) {
                         createService(odo, projectName, dialog.getApplication(), dialog);
-                        ((LazyMutableTreeNode) selected).reload();
+                        ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
                     }
                 } else {
                     UIHelper.executeInUI(() -> Messages.showWarningDialog("No templates available", "Create service"));
@@ -89,5 +91,4 @@ public class CreateServiceAction extends OdoAction {
         dialog.show();
         return dialog;
     }
-
 }

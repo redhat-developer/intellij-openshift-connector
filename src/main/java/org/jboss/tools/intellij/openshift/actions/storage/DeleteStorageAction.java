@@ -13,9 +13,12 @@ package org.jboss.tools.intellij.openshift.actions.storage;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -33,17 +36,17 @@ public class DeleteStorageAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
     ComponentNode componentNode = (ComponentNode) storageNode.getParent();
-    Component component = (Component) componentNode.getUserObject();
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) componentNode.getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    if (Messages.NO == Messages.showYesNoDialog("Delete Storage '" + storageNode.toString() + "'.\nAre you sure?", "Delete Storage",
+    Component component = (Component) componentNode.getComponent();
+    ApplicationNode applicationNode = componentNode.getParent();
+    NamespaceNode namespaceNode = applicationNode.getParent();
+    if (Messages.NO == Messages.showYesNoDialog("Delete Storage '" + storageNode.getName() + "'.\nAre you sure?", "Delete Storage",
         Messages.getQuestionIcon())) {
         return;
     }
     CompletableFuture.runAsync(() -> {
       try {
-          odo.deleteStorage(projectNode.toString(), applicationNode.toString(), component.getPath(), component.getName(), storageNode.toString());
-          componentNode.reload();
+          odo.deleteStorage(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), storageNode.getName());
+          ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(storageNode);
       }
       catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete storage"));

@@ -19,8 +19,8 @@ import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -45,6 +45,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
     when(path.getLastPathComponent()).thenReturn(selected);
     when(tree.getSelectionModel()).thenReturn(model);
     when(model.getSelectionPath()).thenReturn(path);
+    when(model.getSelectionPaths()).thenReturn(new TreePath[] {path});
     when(event.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
     when(event.getPresentation()).thenReturn(presentation);
     return event;
@@ -79,7 +80,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   public void testActionOnProject() {
-    ProjectNode projectNode = mock(ProjectNode.class);
+    NamespaceNode projectNode = mock(NamespaceNode.class);
     AnActionEvent event = createEvent(projectNode);
     AnAction action = getAction();
     action.update(event);
@@ -104,7 +105,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
 
   private AnActionEvent setupActionOnComponent(Component component) {
     ComponentNode componentNode = mock(ComponentNode.class);
-    when(componentNode.getUserObject()).thenReturn(component);
+    when(componentNode.getComponent()).thenReturn(component);
     AnActionEvent event = createEvent(componentNode);
     AnAction action = getAction();
     action.update(event);
@@ -113,7 +114,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
 
   private AnActionEvent setupActionOnURL(URL url) {
     URLNode urlNode = mock(URLNode.class);
-    when(urlNode.getUserObject()).thenReturn(url);
+    when(urlNode.getUrl()).thenReturn(url);
     AnActionEvent event = createEvent(urlNode);
     AnAction action = getAction();
     action.update(event);

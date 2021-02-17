@@ -35,7 +35,15 @@ For more information about devfiles, see the [devfile docs](https://docs.devfile
 
 ![](images/0.4.0/openshift1.gif)
 
-## WARNING !!! Breaking Changes
+## WARNING
+
+### Known issues
+
+When creating a new project, it is possible that the newly created project will not immediately
+appear in the Application Explorer tree. This is caused by a synchronization [issue](https://github.com/openshift/odo/issues/4426) in the underlying
+CLI tool odo. A workaround is to refresh the tree.
+
+### Breaking Changes
 
 Post `0.1.1` releases contains breaking changes mentioned below.
 
@@ -56,12 +64,13 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 * `Log in to cluster` - Log in to your server and save login for subsequent use.
     * Credentials : Log in to the given server with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
+* `Log out` - Logs out of the current OpenShift Cluster.
 * `List catalog components` - List all available Component Types from OpenShift's Image Builder.
 * `List catalog services` - Lists all available Services e.g. mysql-persistent. Only visible if the Service Catalog is enabled on the cluster.
 * `New Project` - Create new project inside the OpenShift Cluster.
-* `About` - Provides the information about the OpenShift tools.
-* `Log out` - Logs out of the current OpenShift Cluster.
 * `Open Console` - Opens the OpenShift webconsole URL.
+* `Refresh`- Refresh the tree with latest resources from the cluster.
+* `About` - Provides the information about the OpenShift tools.
 
 #### Actions available for an OpenShift Cluster Project
 

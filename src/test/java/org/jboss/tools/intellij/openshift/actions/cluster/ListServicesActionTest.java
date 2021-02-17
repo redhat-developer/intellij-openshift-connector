@@ -18,5 +18,4 @@ public class ListServicesActionTest extends ActionTest {
   public AnAction getAction() {
     return new ListServicesAction();
   }
-
 }

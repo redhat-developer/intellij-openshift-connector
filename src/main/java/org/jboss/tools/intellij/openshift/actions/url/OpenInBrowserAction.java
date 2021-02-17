@@ -28,7 +28,7 @@ public class OpenInBrowserAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      URL url = (URL) ((URLNode)selected).getUserObject();
+      URL url = (URL) ((URLNode)selected).getUrl();
       visible = url.getState() != URL.State.NOT_PUSHED;
     }
     return visible;
@@ -36,10 +36,8 @@ public class OpenInBrowserAction extends OdoAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-      BrowserUtil.open(getURL(((URL)((URLNode)selected).getUserObject())));
+      BrowserUtil.open(getURL(((URL)((URLNode)selected).getUrl())));
   }
-
-
 
   protected String getURL(URL url) {
     return url.getProtocol() + "://" + url.getHost();

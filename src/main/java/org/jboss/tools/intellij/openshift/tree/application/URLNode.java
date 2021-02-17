@@ -10,25 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 
-public class URLNode extends LazyMutableTreeNode implements IconTreeNode {
-  public URLNode(URL url) {
-    super(url);
+public class URLNode extends ParentableNode<ComponentNode> {
+  private final URL url;
+
+  public URLNode(ComponentNode parent, URL url) {
+    super(parent.getRoot(), parent, url.getName());
+    this.url = url;
   }
 
-
-  @Override
-  public String toString() {
-    URL url = (URL) userObject;
-    return url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')';
-  }
-
-  @Override
-  public String getIconName() {
-    return ((URL)userObject).isSecure()?"/images/url-node-secure.png":"/images/url-node.png";
+  public URL getUrl() {
+    return url;
   }
 }

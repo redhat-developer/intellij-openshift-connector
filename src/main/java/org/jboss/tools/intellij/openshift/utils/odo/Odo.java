@@ -55,7 +55,7 @@ public interface Odo {
 
     List<URL> listURLs(String project, String application, String context, String component) throws IOException;
 
-    ComponentInfo getComponentInfo(String project, String application, String component, ComponentKind kind) throws IOException;
+    ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException;
 
     void createURL(String project, String application, String context, String component, String name, Integer port,
                    boolean secure) throws IOException;

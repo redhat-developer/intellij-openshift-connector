@@ -15,8 +15,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
@@ -48,7 +48,7 @@ public class CreateProjectActionTest extends ActionTest {
   }
 
   public void testActionOnProject() {
-    ProjectNode projectNode = mock(ProjectNode.class);
+    NamespaceNode projectNode = mock(NamespaceNode.class);
     AnActionEvent event = createEvent(projectNode);
     AnAction action = getAction();
     action.update(event);

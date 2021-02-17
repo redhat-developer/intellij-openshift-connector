@@ -70,7 +70,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo(token);
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationTreeModel model = createApplicationTreeModel(project, cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(project, cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo(token);
@@ -87,7 +87,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         Context context = createContext();
         doReturn("papa-smurf","smurfette").when(context).getUser();
         Config config = createConfig(context);
-        ApplicationTreeModel model = createApplicationTreeModel(project, config);
+        ApplicationsRootNode model = createApplicationsRootNode(project, config);
         // when
         model.onUpdate(null, config);
         // then
@@ -100,7 +100,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         Context context = createContext();
         doReturn("localhost","www.openshift.com").when(context).getCluster();
         Config config = createConfig(context);
-        ApplicationTreeModel model = createApplicationTreeModel(project, config);
+        ApplicationsRootNode model = createApplicationsRootNode(project, config);
         // when
         model.onUpdate(null, config);
         // then
@@ -117,7 +117,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo("token1");
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationTreeModel model = createApplicationTreeModel(project, cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(project, cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo("token2");
@@ -138,7 +138,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo("token1");
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationTreeModel model = createApplicationTreeModel(project, cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(project, cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo(null);
@@ -149,8 +149,8 @@ public class ApplicationTreeModelConfigUpdateTest {
         verify(model, never()).refresh();
     }
 
-    protected ApplicationTreeModel createApplicationTreeModel(Project project, Config config) {
-        return spy(new ApplicationTreeModel(project) {
+    protected ApplicationsRootNode createApplicationsRootNode(Project project, Config config) {
+        return spy(new ApplicationsRootNode(project, null) {
             @Override
             protected void initConfigWatcher() {
             }

@@ -22,7 +22,7 @@ public class WatchComponentAction extends PushComponentAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((Component)((ComponentNode)selected).getUserObject()).getState() == ComponentState.PUSHED;
+      visible = ((Component)((ComponentNode)selected).getComponent()).getState() == ComponentState.PUSHED;
     }
     return visible;
   }

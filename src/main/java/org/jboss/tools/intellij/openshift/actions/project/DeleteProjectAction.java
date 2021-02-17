@@ -16,9 +16,10 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
-import org.jboss.tools.intellij.openshift.tree.application.ProjectNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
@@ -29,24 +30,24 @@ import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
 public class DeleteProjectAction extends OdoAction {
   public DeleteProjectAction() {
-    super(ProjectNode.class);
+    super(NamespaceNode.class);
   }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ProjectNode projectNode = (ProjectNode) selected;
-    if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + projectNode.toString() + "'.\nAre you sure?", "Delete Project",
+    NamespaceNode namespaceNode = (NamespaceNode) selected;
+    if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + namespaceNode.getName() + "'.\nAre you sure?", "Delete Project",
         Messages.getQuestionIcon())) {
         return;
     }
     CompletableFuture.runAsync(() -> {
         try {
-          Notification notif = new Notification(GROUP_DISPLAY_ID, "Delete project", "Deleting project " + selected.toString(), NotificationType.INFORMATION);
+          Notification notif = new Notification(GROUP_DISPLAY_ID, "Delete project", "Deleting project " + namespaceNode.getName(), NotificationType.INFORMATION);
           Notifications.Bus.notify(notif);
-          odo.deleteProject(selected.toString());
+          odo.deleteProject(namespaceNode.getName());
           notif.expire();
-          Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Delete project", "Project " + selected + " has been successfully deleted", NotificationType.INFORMATION));
-          ((LazyMutableTreeNode)projectNode.getParent()).remove(projectNode);
+          Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Delete project", "Project " + namespaceNode.getName() + " has been successfully deleted", NotificationType.INFORMATION));
+          ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(namespaceNode);
         } catch (IOException e) {
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete project"));
         }

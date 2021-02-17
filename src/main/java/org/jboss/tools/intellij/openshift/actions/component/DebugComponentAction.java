@@ -32,9 +32,9 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
@@ -66,7 +66,7 @@ public abstract class DebugComponentAction extends OdoAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
-            Component component = (Component) componentNode.getUserObject();
+            Component component = (Component) componentNode.getComponent();
             return (isPushed(component) && isDebuggable(component.getInfo().getComponentKind(), component.getInfo().getComponentTypeName()));
         }
         return false;
@@ -80,9 +80,9 @@ public abstract class DebugComponentAction extends OdoAction {
     public void actionPerformed(AnActionEvent anActionEvent,
                                 TreePath path, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = (Component) componentNode.getUserObject();
+        Component component = (Component) componentNode.getComponent();
         ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
-        LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+        NamespaceNode namespaceNode = applicationNode.getParent();
 
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
@@ -91,7 +91,7 @@ public abstract class DebugComponentAction extends OdoAction {
 
         RunManager runManager = RunManager.getInstance(project);
         final Optional<Integer> port = createOrFindPortFromConfiguration(runManager, component);
-        port.ifPresent(portNumber -> executeDebug(project, component, odo, applicationNode.toString(), projectNode.toString(), portNumber));
+        port.ifPresent(portNumber -> executeDebug(project, component, odo, applicationNode.getName(), namespaceNode.getName(), portNumber));
     }
 
     private void executeDebug(Project project, Component component, Odo odo, String applicationName, String projectName, Integer port) {

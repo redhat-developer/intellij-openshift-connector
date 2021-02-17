@@ -28,7 +28,7 @@ public class LogoutAction extends LoggedInClusterAction {
         try {
           odo.logout();
           clusterNode.setLogged(false);
-          clusterNode.reload();
+          clusterNode.refresh();
         } catch (IOException e) {
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));
         }

@@ -10,22 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import org.jboss.tools.intellij.openshift.tree.IconTreeNode;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Storage;
 
-public class PersistentVolumeClaimNode extends LazyMutableTreeNode implements IconTreeNode {
-  public PersistentVolumeClaimNode(Storage storage) {
-    super(storage);
-  }
-
-  @Override
-  public String getIconName() {
-    return "/images/storage.png";
-  }
-
-  @Override
-  public String toString() {
-    return ((Storage)getUserObject()).getName();
+public class PersistentVolumeClaimNode extends ParentableNode<ComponentNode> {
+  public PersistentVolumeClaimNode(ComponentNode parent, Storage storage) {
+    super(parent.getRoot(), parent, storage.getName());
   }
 }

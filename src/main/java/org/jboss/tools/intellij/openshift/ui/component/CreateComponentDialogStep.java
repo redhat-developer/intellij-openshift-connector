@@ -17,7 +17,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationTreeModel;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
@@ -89,10 +89,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
         });
         browseModulesButton.addActionListener(e -> {
-            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !model.hasComponent(VfsUtilCore.virtualToIoFile(ApplicationTreeModel.getModuleRoot(m)).getAbsolutePath()));
+            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !model.hasComponent(VfsUtilCore.virtualToIoFile(ApplicationsRootNode.getModuleRoot(m)).getAbsolutePath()));
             dialog.show();
             if (dialog.isOK()) {
-                contextTextField.setText(ApplicationTreeModel.getModuleRoot(dialog.getSelectedModule()).getPath());
+                contextTextField.setText(ApplicationsRootNode.getModuleRoot(dialog.getSelectedModule()).getPath());
             }
             updateState();
         });

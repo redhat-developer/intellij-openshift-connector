@@ -14,8 +14,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
@@ -29,11 +29,11 @@ public class DescribeApplicationAction extends OdoAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    LazyMutableTreeNode applicationNode = (LazyMutableTreeNode) selected;
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
+    ApplicationNode applicationNode = (ApplicationNode) selected;
+    NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        odo.describeApplication(projectNode.toString(), applicationNode.toString());
+        odo.describeApplication(namespaceNode.getName(), applicationNode.getName());
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe application"));
       }

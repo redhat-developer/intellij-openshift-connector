@@ -13,13 +13,14 @@ package org.jboss.tools.intellij.openshift.actions.service;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.LazyMutableTreeNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -32,16 +33,16 @@ public class DeleteServiceAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
-    ApplicationNode applicationNode = (ApplicationNode) ((TreeNode) selected).getParent();
-    LazyMutableTreeNode projectNode = (LazyMutableTreeNode) applicationNode.getParent();
-    if (Messages.NO == Messages.showYesNoDialog("Delete Service '" + serviceNode.toString() + "'.\nAre you sure?", "Delete Service",
+    ApplicationNode applicationNode = serviceNode.getParent();
+    NamespaceNode namespaceNode = applicationNode.getParent();
+    if (Messages.NO == Messages.showYesNoDialog("Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
       Messages.getQuestionIcon())) {
       return;
     }
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteService(projectNode.toString(), applicationNode.toString(), serviceNode.toString());
-        applicationNode.remove(serviceNode);
+        odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getName());
+        ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(serviceNode);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete service"));
       }

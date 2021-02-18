@@ -27,7 +27,8 @@ public class JSonParser {
     private static final String TYPE_FIELD = "type";
     private static final String URLS_FIELD = "urls";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
-
+    private static final String DATA_FIELD = "Data";
+    private static final String STARTER_PROJECTS_FIELD = "starterProjects";
 
     private final JsonNode root;
 
@@ -93,5 +94,20 @@ public class JSonParser {
             }
         }
         return Constants.DebugStatus.UNKNOWN;
+    }
+
+    public List<String> parseComponentTypeInfo() {
+        List<String> result = new ArrayList<>();
+        if (root.has(DATA_FIELD)) {
+            JsonNode data = root.get(DATA_FIELD);
+            if (data.has(STARTER_PROJECTS_FIELD)) {
+                for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
+                    if (starter.has(NAME_FIELD)) {
+                        result.add(starter.get(NAME_FIELD).asText());
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

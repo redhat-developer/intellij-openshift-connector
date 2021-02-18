@@ -21,6 +21,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.S2iComponentType;
 
 import javax.swing.DefaultComboBoxModel;
@@ -44,7 +45,9 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
     private JTextField nameTextField;
@@ -57,6 +60,8 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private JButton browseModulesButton;
     private JButton browseFolderButton;
     private JTree componentTypeTree;
+    private JComboBox componentStartersCombo;
+    private JLabel informationLabel;
     private final CreateComponentModel model;
 
     public CreateComponentDialogStep(CreateComponentModel model) {
@@ -82,9 +87,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             @Override
             protected void textChanged(DocumentEvent e) {
                 model.setContext(contextTextField.getText());
-                componentTypeTree.setToolTipText(model.isProjectHasDevfile() ? "Devfile already exists in context." : "");
+                informationLabel.setVisible(model.isProjectHasDevfile() || model.isProjectIsEmpty());
                 componentTypeTree.setEnabled(!model.isProjectHasDevfile());
                 componentVersionComboBox.setEnabled(!model.isProjectHasDevfile());
+                componentStartersCombo.setEnabled(model.isProjectIsEmpty());
                 updateState();
             }
         });
@@ -136,12 +142,25 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setSelectedIndex(0);
+                    componentStartersCombo.setEnabled(false);
+                    componentStartersCombo.setSelectedIndex(-1);
                 } else {
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setEnabled(false);
                     model.setSourceType(ComponentSourceType.LOCAL);
                     sourceTypeComboBox.setSelectedItem(model.getSourceType());
                     sourceTypeComboBox.setEnabled(false);
+                    componentStartersCombo.setEnabled(true);
+                    // get starters to refactor. odo calls for each selection
+                    List<String> starters ;
+                    try {
+                        starters = model.getOdo().getComponentStarters(((DevfileComponentType) nodeInfo).getName());
+                    } catch (IOException ioException) {
+                        starters = Collections.emptyList();
+                    }
+                    componentStartersCombo.setModel(new DefaultComboBoxModel(starters.toArray()));
+                    componentStartersCombo.setSelectedIndex(-1);
+                    componentStartersCombo.setSelectedIndex(0);
                 }
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());
             } else {
@@ -157,6 +176,12 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             updateState();
         });
 
+        componentStartersCombo.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                model.setSelectedComponentStarter((String) e.getItem());
+            }
+        });
+
         applicationTextField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
             protected void textChanged(DocumentEvent e) {
@@ -168,6 +193,13 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     }
 
     private void updateState() {
+        // update informationLabel
+        if (model.isProjectIsEmpty()) {
+            informationLabel.setText("Context is empty, you can initialize it from starters (templates).");
+        }
+        if (model.isProjectHasDevfile()) {
+            informationLabel.setText("Context already has a devfile, component type selection is not required.");
+        }
         WizardNavigationState state = model.getCurrentNavigationState();
         state.FINISH.setEnabled(model.isValid());
         if (model.getSourceType() != ComponentSourceType.LOCAL && model.getName().length() > 0 && model.getContext().length() > 0 && model.getApplication().length() > 0) {
@@ -239,7 +271,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                 }
             }
         }
-        return null;
+        return new TreeNode[0];
     }
 
     @Override

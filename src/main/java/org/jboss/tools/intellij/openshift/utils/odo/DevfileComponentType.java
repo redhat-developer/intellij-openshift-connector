@@ -20,5 +20,4 @@ public final class DevfileComponentType extends AbstractComponentType {
     public ComponentKind getKind() {
         return ComponentKind.DEVFILE;
     }
-
 }

@@ -76,8 +76,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, boolean push) throws IOException {
-        delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, push);
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
+        delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, starter, push);
     }
 
     @Override
@@ -297,6 +297,11 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public ComponentKind getComponentKind(String context) throws IOException {
         return delegate.getComponentKind(context);
+    }
+
+    @Override
+    public List<String> getComponentStarters(String componentType) throws IOException {
+        return delegate.getComponentStarters(componentType);
     }
 
     @Override

@@ -69,3 +69,11 @@ jobs:
           path: |
             build/test-results/**/*.xml
             build/jacoco/
+      - name: Save Sonar config
+        run: |
+          mkdir -p ./prInfo
+          echo ${{ github.event.number }} > ./prInfo/NR
+      - uses: actions/upload-artifact@v2
+        with:
+          name: prInfo
+          path: prInfo/

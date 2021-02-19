@@ -47,6 +47,14 @@ jobs:
         run: |
           unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip;
           unzip -d ${{github.workspace}}/build ubuntu-latest-test-reports.zip;
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
       - name: Analyze code
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

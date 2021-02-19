@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.validation;
 
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
@@ -17,6 +18,7 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,10 +46,19 @@ public class DevfileSchemasTest {
         myFixture.tearDown();
     }
 
+    private boolean shouldRun() {
+        ApplicationInfo info = ApplicationInfo.getInstance();
+        return !"2019".equals(info.getMajorVersion()) || !"2".equals(info.getMinorVersion());
+    }
+
     @Test
     public void testQuarkusDevfile() {
-        myFixture.configureByFile("devfiles/java-quarkus.yaml");
-        myFixture.checkHighlighting();
+        if (shouldRun()) {
+            myFixture.configureByFile("devfiles/java-quarkus.yaml");
+            myFixture.checkHighlighting();
+        } else {
+            Assume.assumeFalse(true);
+        }
     }
 
 }

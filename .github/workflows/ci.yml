@@ -70,10 +70,12 @@ jobs:
             build/test-results/**/*.xml
             build/jacoco/
       - name: Save Sonar config
+        if: always()
         run: |
           mkdir -p ./prInfo
           echo ${{ github.event.number }} > ./prInfo/NR
       - uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: prInfo
           path: prInfo/

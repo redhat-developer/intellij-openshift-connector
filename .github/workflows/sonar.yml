@@ -47,7 +47,13 @@ jobs:
         run: |
           unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip
           unzip -d ${{github.workspace}}/build ubuntu-latest-test-reports.zip
-          unzip pr.zip
+          if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
+            unzip pr.zip
+          fi
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Create Coverage report
         run: |
           ./gradlew jacocoTestReport

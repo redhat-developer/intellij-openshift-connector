@@ -19,6 +19,8 @@ import static org.junit.Assert.assertNotNull;
 
 public class OdoCliServiceTest extends OdoCliTest {
 
+    public static final String SERVICE_TEMPLATE = "jenkins-ephemeral";
+
     @Test
     public void checkCreateService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
@@ -27,7 +29,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         try {
             createProject(project);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service, false);
+                odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
             }
         } finally {
             try {
@@ -44,10 +46,10 @@ public class OdoCliServiceTest extends OdoCliTest {
         try {
             createProject(project);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service,false);
+                odo.createService(project, application, SERVICE_TEMPLATE, "default", service,false);
                 String template = odo.getServiceTemplate(project, application, service);
                 assertNotNull(template);
-                assertEquals("postgresql-persistent", template);
+                assertEquals(SERVICE_TEMPLATE, template);
             }
         } finally {
             try {
@@ -64,7 +66,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         try {
             createProject(project);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service, false);
+                odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
                 odo.deleteService(project, application, service);
             }
         } finally {

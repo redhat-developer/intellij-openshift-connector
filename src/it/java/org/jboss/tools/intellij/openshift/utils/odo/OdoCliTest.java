@@ -20,6 +20,7 @@ import org.junit.Before;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 
 public abstract class OdoCliTest extends BaseTest {
@@ -48,7 +49,7 @@ public abstract class OdoCliTest extends BaseTest {
     private TestDialog previousTestDialog;
 
     @Before
-    public void init() throws Exception {
+    public void init() throws IOException, ExecutionException, InterruptedException {
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo(project).get();
 
@@ -75,13 +76,13 @@ public abstract class OdoCliTest extends BaseTest {
     protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath(), null, , push);
+        odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
     protected void createDevfileComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponentLocal(project, application, "java-springboot", null, component, new File(COMPONENT_PATH).getAbsolutePath(), null, , push);
+        odo.createComponentLocal(project, application, "java-springboot", null, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
     protected void createComponent(String project, String application, String component, boolean push, ComponentKind kind) throws IOException, InterruptedException {

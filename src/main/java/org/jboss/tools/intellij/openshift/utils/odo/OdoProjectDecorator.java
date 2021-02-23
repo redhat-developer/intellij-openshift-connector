@@ -84,9 +84,11 @@ public class OdoProjectDecorator implements Odo {
         if (StringUtils.isNotBlank(starter)) {
             File tmpdir = Files.createTempDirectory("odotmp").toFile();
             delegate.createComponentLocal(project, application, componentType, componentVersion, component, tmpdir.getAbsolutePath(), devfile, starter, push);
-            FileUtils.copyDirectory(tmpdir, new File(source));
+            File sourceDir = new File(source);
+            FileUtils.copyDirectory(tmpdir, sourceDir);
             FileUtils.deleteQuietly(tmpdir);
-            VfsUtil.markDirtyAndRefresh(false, true, true, new File(source));
+            File[] files = new File[] {sourceDir};
+            VfsUtil.markDirtyAndRefresh(false, true, true, files);
         } else {
             delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, starter, push);
         }

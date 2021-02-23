@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -87,7 +88,7 @@ public class OdoProjectDecorator implements Odo {
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);
             FileUtils.deleteQuietly(tmpdir);
-            File[] files = new File[] {sourceDir};
+            VirtualFile[] files = new VirtualFile[] {VfsUtil.findFileByIoFile(sourceDir,true)};
             VfsUtil.markDirtyAndRefresh(false, true, true, files);
         } else {
             delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, starter, push);

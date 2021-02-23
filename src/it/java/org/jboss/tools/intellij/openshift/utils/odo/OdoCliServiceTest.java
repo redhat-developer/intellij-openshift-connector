@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class OdoCliServiceTest extends OdoCliTest {
 
-    public static final String SERVICE_TEMPLATE = "jenkins-ephemeral";
+    public static final String SERVICE_TEMPLATE = "jenkins-pipeline-example";
 
     @Test
     public void checkCreateService() throws IOException, InterruptedException {

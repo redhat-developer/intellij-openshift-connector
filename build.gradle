@@ -20,9 +20,9 @@ intellij {
     version ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName 'org.jboss.tools.intellij.openshift'
     if (ideaVersion.substring(3) != "2019.1") {
-        plugins 'java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS'
+        plugins 'java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml'
     } else {
-        plugins 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS'
+        plugins 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml'
     }
 	updateSinceUntilBuild false
 }

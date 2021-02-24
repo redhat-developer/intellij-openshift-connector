@@ -54,6 +54,13 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Setting env variables
+        if : github.event.workflow_run.event == 'pull_request'
+        run: |
+          cat prInfo/NR
+          echo "PR_NUMBER=$(cat prInfo/NR)" >> $GITHUB_ENV
+          echo "BASE_REF=$(cat prInfo/base_ref)" >> $GITHUB_ENV
+          echo "HEAD_REF=$(cat prInfo/head_ref)" >> $GITHUB_ENV
       - name: Create Coverage report
         run: |
           ./gradlew jacocoTestReport
@@ -61,11 +68,9 @@ jobs:
         env:        
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          PR_NUMBER: $(cat prInfo/NR)
         run: |
-          ./gradlew jacocoTestReport
           if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
-            ./gradlew sonarqube -Dsonar.pullrequest.base=${{github.event.workflow_run.pull_requests[0].base.ref}} -Dsonar.pullrequest.branch=${{github.event.workflow_run.pull_requests[0].head.ref}} -Dsonar.pullrequest.key=${PR_NUMBER} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=${{github.repository}}
+            ./gradlew sonarqube -Dsonar.pullrequest.base=${BASE_REF} -Dsonar.pullrequest.branch=${HEAD_REF} -Dsonar.pullrequest.key=${PR_NUMBER} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=${{github.repository}}
           else
             ./gradlew sonarqube
           fi

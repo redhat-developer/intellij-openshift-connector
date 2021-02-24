@@ -48,12 +48,8 @@ jobs:
           unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip
           unzip -d ${{github.workspace}}/build ubuntu-latest-test-reports.zip
           if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
-            unzip prInfo.zip
+            unzip -d ${{github.workspace}}/prInfo prInfo.zip
           fi
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
       - name: Setting env variables
         if : github.event.workflow_run.event == 'pull_request'
         run: |

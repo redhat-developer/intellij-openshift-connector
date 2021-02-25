@@ -60,7 +60,6 @@ jobs:
         run: |
           if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
             PR_NUMBER=$(<prInfo/PR)
-            echo "$PR_NUMBER"
             BASE_REF=$(<prInfo/base_ref)
             HEAD_REF=$(<prInfo/head_ref)
             ./gradlew sonarqube -Dsonar.pullrequest.base=$BASE_REF -Dsonar.pullrequest.branch=$HEAD_REF -Dsonar.pullrequest.key=$PR_NUMBER -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=${{github.repository}}

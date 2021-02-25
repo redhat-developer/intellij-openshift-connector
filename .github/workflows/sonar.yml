@@ -45,11 +45,7 @@ jobs:
             }
       - name: Unzip artifacts
         run: |
-          unzip -d ${{github.workspace}}/build linux-integration-test-reports.zip
-          unzip -d ${{github.workspace}}/build ubuntu-latest-test-reports.zip
-          if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
-            unzip -d ${{github.workspace}}/prInfo prInfo.zip
-          fi
+          find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
       - name: Create coverage report
         run: |
           ./gradlew jacocoTestReport

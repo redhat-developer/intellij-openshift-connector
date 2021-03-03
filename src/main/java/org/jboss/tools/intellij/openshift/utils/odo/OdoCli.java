@@ -426,7 +426,7 @@ public class OdoCli implements Odo {
     public List<ServiceInstance> getServices(String project, String application) {
         try {
             ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-             return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+            return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
         } catch (KubernetesClientException e) {
             return Collections.emptyList();
         }

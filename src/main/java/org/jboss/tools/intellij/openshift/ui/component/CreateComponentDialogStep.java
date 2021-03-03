@@ -89,8 +89,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                 model.setContext(contextTextField.getText());
                 informationLabel.setVisible(model.isProjectHasDevfile() || model.isProjectIsEmpty());
                 componentTypeTree.setEnabled(!model.isProjectHasDevfile());
+                componentTypeTree.clearSelection();
                 componentVersionComboBox.setEnabled(!model.isProjectHasDevfile());
                 componentStartersCombo.setEnabled(model.isProjectIsEmpty());
+                componentStartersCombo.removeAllItems();
                 updateState();
             }
         });
@@ -134,8 +136,8 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                 //Nothing is selected.
                 return;
 
-            Object nodeInfo = node.getUserObject();
             if (node.isLeaf()) {
+                Object nodeInfo = node.getUserObject();
                 if (((ComponentType) nodeInfo).getKind() == ComponentKind.S2I) {
                     sourceTypeComboBox.setEnabled(true);
                     componentVersionComboBox.setEnabled(true);
@@ -150,17 +152,21 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     model.setSourceType(ComponentSourceType.LOCAL);
                     sourceTypeComboBox.setSelectedItem(model.getSourceType());
                     sourceTypeComboBox.setEnabled(false);
-                    componentStartersCombo.setEnabled(true);
-                    // get starters to refactor. odo calls for each selection
-                    List<String> starters ;
-                    try {
-                        starters = model.getOdo().getComponentStarters(((DevfileComponentType) nodeInfo).getName());
-                    } catch (IOException ioException) {
-                        starters = Collections.emptyList();
+                    componentStartersCombo.setEnabled(model.isProjectIsEmpty());
+                    List<String> starters = Collections.emptyList();
+                    if (model.isProjectIsEmpty()) {
+                        try {
+                            // TODO: create a loader indicator as shown https://jetbrains.design/intellij/controls/progress_indicators/#05
+                            starters = model.getOdo().getComponentStarters(((DevfileComponentType) nodeInfo).getName());
+                        } catch (IOException ioException) {
+                            starters = Collections.emptyList();
+                        }
                     }
                     componentStartersCombo.setModel(new DefaultComboBoxModel(starters.toArray()));
                     componentStartersCombo.setSelectedIndex(-1);
-                    componentStartersCombo.setSelectedIndex(0);
+                    if (model.isProjectIsEmpty()) {
+                        componentStartersCombo.setSelectedIndex(0);
+                    }
                 }
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());
             } else {
@@ -263,7 +269,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         }
         // iterate over children to find the correct component
         if (rootNode != null) {
-            for (Object nodeObject : Collections.list(rootNode.children())) {
+            for (TreeNode nodeObject : Collections.list(rootNode.children())) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodeObject;
                 ComponentType type = (ComponentType) node.getUserObject();
                 if (type.getName().equals(model.getComponentTypeName())) {

@@ -145,7 +145,6 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setSelectedIndex(0);
                     componentStartersCombo.setEnabled(false);
-                    componentStartersCombo.setSelectedIndex(-1);
                 } else {
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setEnabled(false);
@@ -163,11 +162,8 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                         }
                     }
                     componentStartersCombo.setModel(new DefaultComboBoxModel(starters.toArray()));
-                    componentStartersCombo.setSelectedIndex(-1);
-                    if (model.isProjectIsEmpty()) {
-                        componentStartersCombo.setSelectedIndex(0);
-                    }
                 }
+                componentStartersCombo.setSelectedIndex(-1);
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());
             } else {
                 model.setComponentTypeName(null);

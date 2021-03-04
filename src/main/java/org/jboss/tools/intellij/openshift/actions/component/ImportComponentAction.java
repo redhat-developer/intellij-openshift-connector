@@ -24,13 +24,11 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -51,7 +49,7 @@ public class ImportComponentAction extends CreateComponentAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = (Component) componentNode.getComponent();
+        Component component = componentNode.getComponent();
         ApplicationNode applicationNode = componentNode.getParent();
         NamespaceNode namespaceNode = applicationNode.getParent();
         CompletableFuture.runAsync(() -> {
@@ -59,7 +57,7 @@ public class ImportComponentAction extends CreateComponentAction {
                 ApplicationsRootNode root = componentNode.getRoot();
                 Project project = root.getProject();
                 ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), null, component.getInfo().getComponentKind());
-                CreateComponentModel model = getModel(project, odo.getComponentTypes(), applicationNode.getName(), component.getName(), info, component.getInfo().getComponentKind());
+                CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info, component.getInfo().getComponentKind());
                 process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, anActionEvent);
 
             } catch (IOException e) {
@@ -69,12 +67,12 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @NotNull
-    private CreateComponentModel getModel(Project project, List<ComponentType> types, String application, String name, ComponentInfo info, ComponentKind kind) {
-        CreateComponentModel model = new CreateComponentModel("Import component");
+    private CreateComponentModel getModel(Project project, Odo odo, String application, String name, ComponentInfo info, ComponentKind kind) throws IOException {
+        CreateComponentModel model = new CreateComponentModel("Import component", odo);
         model.setProject(project);
         model.setApplication(application);
         model.setName(name);
-        model.setComponentTypesTree(types);
+        model.setComponentTypesTree(odo.getComponentTypes());
         model.setSourceType(info.getSourceType());
         model.setComponentTypeName(info.getComponentTypeName());
         model.setComponentTypeVersion(info.getComponentTypeVersion());

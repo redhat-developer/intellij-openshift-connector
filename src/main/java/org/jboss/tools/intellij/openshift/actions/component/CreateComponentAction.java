@@ -24,7 +24,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +31,6 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -57,19 +55,19 @@ public class CreateComponentAction extends OdoAction {
       application = Optional.empty();
       projectName = ((NamespaceNode)selected).getName();
     }
-    ApplicationsRootNode rootNode = ((ApplicationsRootNode)((ParentableNode<Object>)selected).getRoot());
+    ApplicationsRootNode rootNode = ((ParentableNode<Object>)selected).getRoot();
     Project project = rootNode.getProject();
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentModel model = getModel(project, application, odo.getComponentTypes(), p -> rootNode.getComponents().containsKey(p));
-        process((ParentableNode) selected, odo, projectName, application, rootNode, model, anActionEvent);
+        CreateComponentModel model = getModel(project, application, odo, p -> rootNode.getComponents().containsKey(p));
+        process((ParentableNode<Object>) selected, odo, projectName, application, rootNode, model, anActionEvent);
       } catch (IOException e) {
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
       }
     });
   }
 
-  protected void process(ParentableNode selected, Odo odo, String projectName, Optional<String> application,
+  protected void process(ParentableNode<Object> selected, Odo odo, String projectName, Optional<String> application,
                          ApplicationsRootNode rootNode, CreateComponentModel model, AnActionEvent anActionEvent) throws IOException {
     boolean doit = UIHelper.executeInUI(() -> showDialog(model));
     if (doit) {
@@ -81,7 +79,7 @@ public class CreateComponentAction extends OdoAction {
 
   private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
     if (model.getSourceType() == ComponentSourceType.LOCAL) {
-      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null, model.isPushAfterCreate());
+      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null, model.getSelectedComponentStarter(), model.isPushAfterCreate());
     } else if (model.getSourceType() == ComponentSourceType.GIT) {
       odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL(), model.getGitReference(), model.isPushAfterCreate());
     } else if (model.getSourceType() == ComponentSourceType.BINARY) {
@@ -100,13 +98,11 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @NotNull
-  protected CreateComponentModel getModel(Project project, Optional<String> application, List<ComponentType> types, Predicate<String> componentChecker) {
-    CreateComponentModel model =  new CreateComponentModel("Create component");
+  protected CreateComponentModel getModel(Project project, Optional<String> application, Odo odo, Predicate<String> componentChecker) throws IOException{
+    CreateComponentModel model =  new CreateComponentModel("Create component", odo);
     model.setProject(project);
-    model.setComponentTypesTree(types);
-    if (application.isPresent()) {
-      model.setApplication(application.get());
-    }
+    model.setComponentTypesTree(odo.getComponentTypes());
+    application.ifPresent(model::setApplication);
     model.setComponentPredicate(componentChecker);
     return model;
   }

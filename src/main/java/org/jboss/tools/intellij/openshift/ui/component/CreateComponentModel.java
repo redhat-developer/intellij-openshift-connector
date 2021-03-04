@@ -14,9 +14,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -50,10 +52,17 @@ public class CreateComponentModel extends WizardModel {
 
     private boolean projectHasDevfile = false;
 
-    private DefaultMutableTreeNode top = new DefaultMutableTreeNode("Top");
+    private boolean projectIsEmpty = false;
 
-    public CreateComponentModel(String title) {
+    private String selectedComponentStarter;
+
+    private final DefaultMutableTreeNode top = new DefaultMutableTreeNode("Top");
+
+    private final Odo odo;
+
+    public CreateComponentModel(String title, Odo odo) {
         super(title);
+        this.odo = odo;
         add(new CreateComponentDialogStep(this));
     }
 
@@ -67,6 +76,10 @@ public class CreateComponentModel extends WizardModel {
 
     public boolean isProjectHasDevfile() {
         return projectHasDevfile;
+    }
+
+    public boolean isProjectIsEmpty() {
+        return projectIsEmpty;
     }
 
     public String getName() {
@@ -93,6 +106,12 @@ public class CreateComponentModel extends WizardModel {
         this.context = context;
         File devfile = new File(context, Constants.DEVFILE_NAME);
         projectHasDevfile = Files.exists(devfile.toPath());
+        if (!context.isEmpty()) {
+            projectIsEmpty = ProjectUtils.isEmpty(new File(context));
+        }else {
+            projectIsEmpty = false;
+        }
+        setSelectedComponentStarter(null);
     }
 
     public String getComponentTypeName() {
@@ -204,7 +223,7 @@ public class CreateComponentModel extends WizardModel {
         for (ComponentType type : types) {
             switch (type.getKind()) {
                 case S2I:
-                    s2iComponents.add(new DefaultMutableTreeNode(type,false));
+                    s2iComponents.add(new DefaultMutableTreeNode(type, false));
                     break;
                 case DEVFILE:
                     devfileComponents.add(new DefaultMutableTreeNode(type, false));
@@ -215,5 +234,15 @@ public class CreateComponentModel extends WizardModel {
         top.add(s2iComponents);
     }
 
+    public Odo getOdo() {
+        return this.odo;
+    }
 
+    public String getSelectedComponentStarter() {
+        return selectedComponentStarter;
+    }
+
+    public void setSelectedComponentStarter(String selectedComponentStarter) {
+        this.selectedComponentStarter = selectedComponentStarter;
+    }
 }

@@ -11,6 +11,8 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import org.fest.util.Files;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -31,6 +33,12 @@ public class OdoCliComponentTest extends OdoCliTest {
     private boolean push;
     private ComponentKind kind;
 
+    private String project;
+    private String application;
+    private String component;
+    private String service;
+    private String storage;
+
     public OdoCliComponentTest(boolean push, ComponentKind kind) {
         this.push = push;
         this.kind = kind;
@@ -46,11 +54,17 @@ public class OdoCliComponentTest extends OdoCliTest {
         });
     }
 
+    @Before
+    public void initTestEnv() {
+        project = PROJECT_PREFIX + random.nextInt();
+        application = APPLICATION_PREFIX + random.nextInt();
+        component = COMPONENT_PREFIX + random.nextInt();
+        service = SERVICE_PREFIX + random.nextInt();
+        storage = STORAGE_PREFIX + random.nextInt();
+    }
+
     @Test
     public void checkCreateComponent() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             List<Component> components = odo.getComponents(project, application);
@@ -64,11 +78,9 @@ public class OdoCliComponentTest extends OdoCliTest {
         }
     }
 
+
     @Test
     public void checkCreateAndDiscoverComponent() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
@@ -88,9 +100,6 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateAndDeleteComponent() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             odo.deleteComponent(project, application, COMPONENT_PATH, component, kind);
@@ -103,9 +112,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     private void checkCreateComponentAndCreateURL(boolean secure) throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure);
@@ -134,9 +140,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     private void checkCreateComponentAndCreateAndDeleteURL(boolean secure) throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure);
@@ -183,14 +186,10 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
-        String service = SERVICE_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, "postgresql-persistent", "default", service, true);
+                odo.createService(project, application, "jenkins-pipeline-example", "default", service, true);
                 if (push && kind == ComponentKind.S2I) { // TODO remove kind test when link with devfile is supported.
                     odo.link(project, application, component, COMPONENT_PATH, service, null);
                 }
@@ -205,10 +204,6 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndCreateStorage() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
-        String storage = STORAGE_PREFIX + random.nextInt();
         try {
             createStorage(project, application, component, push, storage);
         } finally {
@@ -221,10 +216,6 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndCreateDeleteStorage() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
-        String storage = STORAGE_PREFIX + random.nextInt();
         try {
             createStorage(project, application, component, push, storage);
             odo.deleteStorage(project, application, COMPONENT_PATH, component, storage);
@@ -238,9 +229,6 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndListURLs() throws IOException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
@@ -262,9 +250,6 @@ public class OdoCliComponentTest extends OdoCliTest {
         if (!push) {
             return;
         }
-        String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         try {
             createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false);
@@ -289,6 +274,25 @@ public class OdoCliComponentTest extends OdoCliTest {
                 }
             });
 
+        } finally {
+            try {
+                odo.deleteProject(project);
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    @Test
+    public void checkCreateComponentStarter() throws IOException, InterruptedException {
+        if (kind != ComponentKind.DEVFILE) {
+            return;
+        }
+        try {
+            createProject(project);
+            odo.createComponentLocal(project, application, "java-springboot", null, component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
+            List<Component> components = odo.getComponents(project, application);
+            assertNotNull(components);
+            assertEquals(push ? 1 : 0, components.size());
         } finally {
             try {
                 odo.deleteProject(project);

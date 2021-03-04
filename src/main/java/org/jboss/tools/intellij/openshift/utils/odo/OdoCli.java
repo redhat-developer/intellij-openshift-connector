@@ -26,8 +26,6 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
-import io.fabric8.openshift.api.model.BuildConfig;
-import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -59,14 +57,7 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.APP_LABEL;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_NAME_LABEL;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.COMPONENT_SOURCE_TYPE_ANNOTATION;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.ODO_MIGRATED_LABEL;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_NAME_LABEL;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.RUNTIME_VERSION_LABEL;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.VCS_URI_ANNOTATION;
 
 public class OdoCli implements Odo {
 
@@ -161,16 +152,19 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, boolean push) throws IOException {
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
         List<String> args = new ArrayList<>();
         args.add(command);
         args.add("create");
         if (StringUtils.isNotBlank(devfile)) {
             args.add("--devfile");
             args.add(devfile);
-        }   else if (StringUtils.isNotBlank(componentVersion)) {
+        } else if (StringUtils.isNotBlank(componentVersion)) {
             args.add(componentType + ":" + componentVersion);
         } else {
+            if (StringUtils.isNotBlank(starter)) {
+                args.add("--starter=" + starter);
+            }
             args.add(componentType);
         }
         args.add(component);
@@ -562,5 +556,12 @@ public class OdoCli implements Odo {
             return ComponentKind.DEVFILE;
         }
         return null;
+    }
+
+    @Override
+    public List<String> getComponentStarters(String componentType) throws IOException {
+        String json = execute(command, envVars, "catalog", "describe", "component", componentType, "-o", "json");
+        JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+        return parser.parseComponentTypeInfo();
     }
 }

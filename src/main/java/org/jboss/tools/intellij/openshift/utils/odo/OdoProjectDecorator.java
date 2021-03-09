@@ -20,9 +20,13 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -83,7 +87,8 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
-            File tmpdir = Files.createTempDirectory("odotmp").toFile();
+            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("w+"));
+            File tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
             delegate.createComponentLocal(project, application, componentType, componentVersion, component, tmpdir.getAbsolutePath(), devfile, starter, push);
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);

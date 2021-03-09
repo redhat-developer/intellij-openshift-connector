@@ -46,7 +46,7 @@ jobs:
             }
       - name: Unzip artifacts
         run: |
-          find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
+          find . -name '*.zip' -exec sh -c 'unzip -d "${{github.workspace}}/build" "$1"' _ {} \;
       - name: Create coverage report
         run: |
           ./gradlew jacocoTestReport

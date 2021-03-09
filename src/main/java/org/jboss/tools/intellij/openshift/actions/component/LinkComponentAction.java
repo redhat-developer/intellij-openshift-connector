@@ -42,7 +42,7 @@ public class LinkComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      Component comp = (Component)((ComponentNode)selected).getComponent();
+      Component comp = ((ComponentNode)selected).getComponent();
       visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
     }
     return visible;
@@ -72,7 +72,7 @@ public class LinkComponentAction extends OdoAction {
       if (ports.size() == 1) {
         port = ports.get(0);
       } else {
-        String[] portsArray = ports.stream().map(p -> p.toString()).toArray(String[]::new);
+        String[] portsArray = ports.stream().map(Object::toString).toArray(String[]::new);
         String portStr = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select port", "Link component", Messages.getQuestionIcon(), portsArray, portsArray[0], null));
         if (portStr != null) {
           port = Integer.parseInt(portStr);
@@ -85,7 +85,7 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component sourceComponent = (Component) componentNode.getComponent();
+    Component sourceComponent = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
@@ -97,7 +97,7 @@ public class LinkComponentAction extends OdoAction {
               Notification notification = new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Linking component to " + targetComponent,
                       NotificationType.INFORMATION);
               Notifications.Bus.notify(notification);
-              odo.link(namespaceNode.getName(), applicationNode.getName(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port.intValue());
+              odo.link(namespaceNode.getName(), applicationNode.getName(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port);
               notification.expire();
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));

@@ -87,7 +87,7 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
-            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("w+"));
+            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr--r--"));
             File tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
             delegate.createComponentLocal(project, application, componentType, componentVersion, component, tmpdir.getAbsolutePath(), devfile, starter, push);
             File sourceDir = new File(source);

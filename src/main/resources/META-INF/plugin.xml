@@ -12,6 +12,10 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.5.0</b></p>
+  <p>Add support for starters for devfile based components<p>
+  <p>devfiles can be editied with syntax checking and content assist</p>
+  <p>Switch to odo 2.0.7</p>
   <p><b>0.4.0</b></p>
   <p>Add support for devfile based components</p>
   <p>Switch to Odo 2.0.3</p>

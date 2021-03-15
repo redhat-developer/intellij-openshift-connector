@@ -24,6 +24,21 @@ The extension also supports OpenShift running on Azure, AWS.
 
 ## New features
 
+### Starter projects
+
+When you create a component from a devfile, if the selected devfile contains starter projects (sample projects that contain source code that can be used to bootstrap your component) and if the selected local module is empty, you can optionally select one of those starter projects whose content will be copied to your local module before the component is created.
+
+![](images/0.5.0/openshift1.gif)
+
+## Enhanced devfile editing experience
+
+Devfile based components now have a local devfile added to the local module when the component is created. A devfile is a YAML file with a specific syntax. It is now possible for the end user to edit this file (in case specific settings needs to be updated or added).
+The YAML editor will now assist during edition of this file with syntax validation and code assist
+
+![](images/0.5.0/openshift2.gif)
+
+## Features
+
 ### Devfile support
 
 The plugin is now based on Odo 2.x, which brings support for Devfiles. A devfile is describing the way your component should be built, rebuilt, debugged. When creating a component, there is now two different choices:

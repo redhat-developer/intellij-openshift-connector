@@ -2,7 +2,7 @@ name: Validate against IJ versions
 
 on:
   pull_request:
-    branches: [ $default-branch ]
+    branches: [ main ]
 
 jobs:
   validate:

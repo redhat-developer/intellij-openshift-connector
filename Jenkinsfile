@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 node('rhel7'){
-	def recipientList = 'sbouchet@redhat.com, jmaury@redhat.com'
+	def recipientList = 'jbosstools-builds@lists.jboss.org'
 	def javaHome = tool 'openjdk-11'
 	env.JAVA_HOME = "${javaHome}"
 

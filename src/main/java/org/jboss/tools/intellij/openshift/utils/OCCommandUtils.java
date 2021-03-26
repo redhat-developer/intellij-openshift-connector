@@ -65,7 +65,7 @@ public class OCCommandUtils {
      * @return token
      */
     public static String getToken(String ocCommand) {
-        return applyPattern(ocCommand, "(?<=--token=)[a-zA-Z0-9:._-]+", 0);
+        return applyPattern(ocCommand, "(?<=--token=)[~a-zA-Z0-9:._-]+", 0);
     }
 
     /**

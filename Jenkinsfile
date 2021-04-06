@@ -50,6 +50,8 @@ node('rhel7'){
 					stage("Promote the build to stable") {
 						def zip = findFiles(glob: '**/*.zip')
 						sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${zip[0].path} ${UPLOAD_LOCATION}/stable/intellij-openshift-connector/"
+						currentBuild.keepLog = true
+						currentBuild.description = "${version}"
 					}
 				}
 			}

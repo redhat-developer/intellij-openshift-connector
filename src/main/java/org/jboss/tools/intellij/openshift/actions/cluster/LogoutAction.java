@@ -20,18 +20,26 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class LogoutAction extends LoggedInClusterAction {
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
-    CompletableFuture.runAsync(() -> {
-        try {
-          odo.logout();
-          clusterNode.setLogged(false);
-          clusterNode.refresh();
-        } catch (IOException e) {
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));
-        }
-      });
-  }
+
+    @Override
+    protected String getTelemetryActionName() { return "log out from cluster"; }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
+        CompletableFuture.runAsync(() -> {
+            try {
+                odo.logout();
+                clusterNode.setLogged(false);
+                clusterNode.refresh();
+                sendTelemetryResults(TelemetryResult.SUCCESS);
+            } catch (IOException e) {
+                sendTelemetryError(e);
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));
+            }
+        });
+    }
 }

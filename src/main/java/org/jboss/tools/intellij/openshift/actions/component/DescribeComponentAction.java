@@ -25,16 +25,21 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DescribeComponentAction extends OdoAction {
   public DescribeComponentAction() {
     super(ComponentNode.class);
   }
 
   @Override
+  protected String getTelemetryActionName() { return "describe component"; }
+
+  @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((Component)((ComponentNode)selected).getComponent()).getState() != ComponentState.NOT_PUSHED;
+      visible = ((ComponentNode)selected).getComponent().getState() != ComponentState.NOT_PUSHED;
     }
     return visible;
   }
@@ -42,13 +47,15 @@ public class DescribeComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getComponent();
+    Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
         odo.describeComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName());
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe"));
       }
     });

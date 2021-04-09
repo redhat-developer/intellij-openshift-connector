@@ -25,10 +25,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DeleteServiceAction extends OdoAction {
   public DeleteServiceAction() {
     super(ServiceNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "delete service"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -37,13 +42,16 @@ public class DeleteServiceAction extends OdoAction {
     NamespaceNode namespaceNode = applicationNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
       Messages.getQuestionIcon())) {
+      sendTelemetryResults(TelemetryResult.ABORTED);
       return;
     }
     CompletableFuture.runAsync(() -> {
       try {
         odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getName());
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(serviceNode);
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete service"));
       }
     });

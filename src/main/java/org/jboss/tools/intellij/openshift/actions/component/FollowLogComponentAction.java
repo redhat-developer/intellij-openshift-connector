@@ -23,17 +23,25 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class FollowLogComponentAction extends PushedComponentAction {
+
+  @Override
+  protected String getTelemetryActionName() { return "follow component log"; }
+
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getComponent();
-    ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
+    Component component = componentNode.getComponent();
+    ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
         odo.follow(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName());
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Follow Log"));
       }
     });

@@ -15,11 +15,13 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import org.jboss.tools.intellij.openshift.actions.TreeAction;
 import org.jboss.tools.intellij.openshift.tree.ClustersTreeModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class SetCurrentClusterAction extends TreeAction {
 
@@ -30,13 +32,18 @@ public class SetCurrentClusterAction extends TreeAction {
     }
 
     @Override
+    protected String getTelemetryActionName() { return "set current cluster"; }
+
+    @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
         NamedContext context = (NamedContext) selected;
         ClustersTreeModel model = (ClustersTreeModel) getTree(anActionEvent).getModel();
         model.getConfig().setCurrentContext(context.getName());
         try {
             ConfigHelper.saveKubeConfig(model.getConfig());
+            sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
+            sendTelemetryError(e);
             LOG.error(e.getLocalizedMessage(), e);
         }
     }

@@ -18,15 +18,22 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-public class OpenConsoleAction extends LoggedInClusterAction {
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    try {
-      String url = odo.consoleURL();
-      BrowserUtil.open(url);
-    } catch (IOException e) {
-      Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Open Console Dashboard");
-    }
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-  }
+public class OpenConsoleAction extends LoggedInClusterAction {
+
+    @Override
+    protected String getTelemetryActionName() { return "open console"; }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        try {
+            String url = odo.consoleURL();
+            BrowserUtil.open(url);
+            sendTelemetryResults(TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+            sendTelemetryError(e);
+            Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Open Console Dashboard");
+        }
+    }
 }

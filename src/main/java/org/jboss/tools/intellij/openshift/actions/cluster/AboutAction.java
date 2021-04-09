@@ -21,17 +21,24 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class AboutAction extends OdoAction {
   public AboutAction() {
     super(ApplicationsRootNode.class);
   }
 
   @Override
+  protected String getTelemetryActionName() { return "about"; }
+
+  @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     CompletableFuture.runAsync(() -> {
       try {
         odo.about();
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "About"));
       }
     });

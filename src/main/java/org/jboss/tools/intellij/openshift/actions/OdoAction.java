@@ -11,36 +11,53 @@
 package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
-import java.io.IOException;
 
-public class OdoAction extends StructureTreeAction {
-  public OdoAction(Class... filters) {
-    super(filters);
-  }
+public abstract class OdoAction extends StructureTreeAction implements TelemetryHandler {
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-    try {
-      this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
-    } catch (IOException e) {
-      Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
+    protected TelemetrySender telemetrySender;
+
+    protected OdoAction(Class... filters) {
+        super(filters);
     }
-  }
 
-    private Odo getOdo(AnActionEvent anActionEvent) throws IOException {
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+        telemetrySender = new TelemetrySender(getTelemetryActionName());
+        this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
+    }
+
+    private Odo getOdo(AnActionEvent anActionEvent) {
         Tree tree = getTree(anActionEvent);
-        return ((ApplicationsRootNode)((ApplicationsTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
+        return ((ApplicationsRootNode) ((ApplicationsTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
     }
 
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-  }
+    protected abstract void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo);
+
+    protected abstract String getTelemetryActionName();
+
+    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+        telemetrySender.sendTelemetryResults(result);
+    }
+
+    @Override
+    public void sendTelemetryError(String message) {
+        telemetrySender.sendTelemetryError(message);
+    }
+
+    @Override
+    public void sendTelemetryError(Exception exception) {
+        telemetrySender.sendTelemetryError(exception);
+    }
+
 }

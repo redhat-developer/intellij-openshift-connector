@@ -27,26 +27,32 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class DeleteURLAction extends OdoAction {
-  public DeleteURLAction() {
-    super(URLNode.class);
-  }
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    URLNode urlNode = (URLNode) selected;
-    ComponentNode componentNode = (ComponentNode) urlNode.getParent();
-    Component component = (Component) componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-          odo.deleteURL(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), urlNode.getName());
-          ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-      }
-      catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete URL"));
-      }
-    });
-  }
+public class DeleteURLAction extends OdoAction {
+    public DeleteURLAction() {
+        super(URLNode.class);
+    }
+
+    @Override
+    protected String getTelemetryActionName() { return "delete URL"; }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        URLNode urlNode = (URLNode) selected;
+        ComponentNode componentNode = urlNode.getParent();
+        Component component = componentNode.getComponent();
+        ApplicationNode applicationNode = componentNode.getParent();
+        NamespaceNode namespaceNode = applicationNode.getParent();
+        CompletableFuture.runAsync(() -> {
+            try {
+                odo.deleteURL(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), urlNode.getName());
+                ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                sendTelemetryResults(TelemetryResult.SUCCESS);
+            } catch (IOException e) {
+                sendTelemetryError(e);
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete URL"));
+            }
+        });
+    }
 }

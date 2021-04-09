@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class DebugJavaComponentAction extends DebugComponentAction {
 
-    public static final String JAVA = "java";
+    private static final String JAVA = "java";
 
     @Override
     protected boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName) {
@@ -31,6 +31,11 @@ public class DebugJavaComponentAction extends DebugComponentAction {
                 return componentTypeName.contains(JAVA);
         }
         return false;
+    }
+
+    @Override
+    protected String getDebugLanguage() {
+        return JAVA;
     }
 
     @Override

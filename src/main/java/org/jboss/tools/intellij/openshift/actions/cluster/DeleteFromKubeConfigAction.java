@@ -20,10 +20,15 @@ import org.jboss.tools.intellij.openshift.tree.ClustersTreeModel;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DeleteFromKubeConfigAction extends TreeAction {
     public DeleteFromKubeConfigAction() {
         super(NamedContext.class);
     }
+
+    @Override
+    protected String getTelemetryActionName() { return "delete cluster from config"; }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
@@ -31,12 +36,15 @@ public class DeleteFromKubeConfigAction extends TreeAction {
         ClustersTreeModel model = (ClustersTreeModel) getTree(anActionEvent).getModel();
         if (Messages.NO == Messages.showYesNoDialog("Delete Cluster '" + context.getName() + "'.\nAre you sure?", "Delete Cluster",
             Messages.getQuestionIcon())) {
+            sendTelemetryResults(TelemetryResult.ABORTED);
             return;
         }
         model.getConfig().getContexts().remove(context);
         try {
             ConfigHelper.saveKubeConfig(model.getConfig());
+            sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
+            sendTelemetryError(e);
             Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete from Kubernetes config");
         }
     }

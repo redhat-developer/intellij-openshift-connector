@@ -32,17 +32,22 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class LinkComponentAction extends OdoAction {
 
   public LinkComponentAction() {
     super(ComponentNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "link component to component"; }
   
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      Component comp = (Component)((ComponentNode)selected).getComponent();
+      Component comp = ((ComponentNode)selected).getComponent();
       visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
     }
     return visible;
@@ -72,7 +77,7 @@ public class LinkComponentAction extends OdoAction {
       if (ports.size() == 1) {
         port = ports.get(0);
       } else {
-        String[] portsArray = ports.stream().map(p -> p.toString()).toArray(String[]::new);
+        String[] portsArray = ports.stream().map(Object::toString).toArray(String[]::new);
         String portStr = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select port", "Link component", Messages.getQuestionIcon(), portsArray, portsArray[0], null));
         if (portStr != null) {
           port = Integer.parseInt(portStr);
@@ -85,7 +90,7 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component sourceComponent = (Component) componentNode.getComponent();
+    Component sourceComponent = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
@@ -101,13 +106,19 @@ public class LinkComponentAction extends OdoAction {
               notification.expire();
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
+              sendTelemetryResults(TelemetryResult.SUCCESS);
             } else {
-              UIHelper.executeInUI(() -> Messages.showWarningDialog("No ports to link to", "Link component"));
+              String message = "No ports to link to";
+              sendTelemetryError(message);
+              UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
             }
           } else {
-            UIHelper.executeInUI(() -> Messages.showWarningDialog("No components to link to", "Link component"));
+            String message = "No components to link to";
+            sendTelemetryError(message);
+            UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
           }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
       }
     });

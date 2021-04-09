@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class CreateServiceAction extends OdoAction {
 
     public CreateServiceAction() {
@@ -37,10 +39,13 @@ public class CreateServiceAction extends OdoAction {
     }
 
     @Override
+    protected String getTelemetryActionName() { return "create service"; }
+
+    @Override
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            ApplicationsRootNode rootNode = (ApplicationsRootNode) ((ParentableNode<Object>) selected).getRoot();
+            ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
             if (rootNode != null) {
                 Odo odo = rootNode.getOdo();
                 return odo.isServiceCatalogAvailable();
@@ -68,11 +73,17 @@ public class CreateServiceAction extends OdoAction {
                     if (dialog.isOK()) {
                         createService(odo, projectName, dialog.getApplication(), dialog);
                         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
+                        sendTelemetryResults(TelemetryResult.SUCCESS);
+                    } else {
+                        sendTelemetryResults(TelemetryResult.ABORTED);
                     }
                 } else {
-                    UIHelper.executeInUI(() -> Messages.showWarningDialog("No templates available", "Create service"));
+                    String message = "No templates available";
+                    sendTelemetryError(message);
+                    UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Create service"));
                 }
             } catch (IOException e) {
+                sendTelemetryError(e);
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create service"));
             }
         });

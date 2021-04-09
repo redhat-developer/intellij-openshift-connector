@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class LinkServiceAction extends OdoAction {
   public LinkServiceAction() {
@@ -40,10 +41,13 @@ public class LinkServiceAction extends OdoAction {
   }
 
   @Override
+  protected String getTelemetryActionName() { return "link component to service"; }
+
+  @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      Component comp = (Component)((ComponentNode)selected).getComponent();
+      Component comp = ((ComponentNode)selected).getComponent();
       visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
     }
     return visible;
@@ -52,7 +56,7 @@ public class LinkServiceAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getComponent();
+    Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
@@ -73,11 +77,15 @@ public class LinkServiceAction extends OdoAction {
             notification.expire();
             Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service,
             NotificationType.INFORMATION));
+            sendTelemetryResults(TelemetryResult.SUCCESS);
           }
        } else {
-          UIHelper.executeInUI(() -> Messages.showWarningDialog("No services to link to", "Link service"));
+          String message = "No services to link to";
+          sendTelemetryError(message);
+          UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link service"));
         }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link service"));
       }
     });

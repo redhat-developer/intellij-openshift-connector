@@ -29,23 +29,32 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class CreateURLAction extends OdoAction {
     public CreateURLAction() {
         super(ComponentNode.class);
     }
 
     @Override
+    protected String getTelemetryActionName() { return "create URL"; }
+
+    @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = (Component) componentNode.getComponent();
+        Component component = componentNode.getComponent();
         ApplicationNode applicationNode = componentNode.getParent();
         NamespaceNode namespaceNode = applicationNode.getParent();
         CompletableFuture.runAsync(() -> {
             try {
                 if (createURL(odo, namespaceNode.getName(), applicationNode.getName(), component)) {
                     ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                    sendTelemetryResults(TelemetryResult.SUCCESS);
+                } else {
+                    sendTelemetryResults(TelemetryResult.ABORTED);
                 }
             } catch (IOException e) {
+                sendTelemetryError(e);
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create URL"));
             }
         });

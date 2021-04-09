@@ -27,11 +27,17 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class CreateStorageAction extends ContextAwareComponentAction {
+
+  @Override
+  protected String getTelemetryActionName() { return "create storage"; }
+
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getComponent();
+    Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
@@ -40,8 +46,12 @@ public class CreateStorageAction extends ContextAwareComponentAction {
         if (dialog.isOK()) {
           odo.createStorage(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), dialog.getName(), dialog.getMountPath(), dialog.getStorageSize());
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } else {
+          sendTelemetryResults(TelemetryResult.ABORTED);
         }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create storage"));
       }
     });

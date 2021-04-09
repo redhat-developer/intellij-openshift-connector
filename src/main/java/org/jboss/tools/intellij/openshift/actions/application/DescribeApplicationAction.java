@@ -22,10 +22,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DescribeApplicationAction extends OdoAction {
   public DescribeApplicationAction() {
     super(ApplicationNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "describe application"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -34,7 +39,9 @@ public class DescribeApplicationAction extends OdoAction {
     CompletableFuture.runAsync(() -> {
       try {
         odo.describeApplication(namespaceNode.getName(), applicationNode.getName());
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe application"));
       }
     });

@@ -34,6 +34,7 @@ import static org.jboss.tools.intellij.openshift.Constants.COMPONENT_MIGRATION_M
 import static org.jboss.tools.intellij.openshift.Constants.COMPONENT_MIGRATION_TITLE;
 import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
 import static org.jboss.tools.intellij.openshift.Constants.UNDEPLOY_LABEL;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class PushComponentAction extends ContextAwareComponentAction {
   protected String getActionName() {
@@ -41,9 +42,12 @@ public class PushComponentAction extends ContextAwareComponentAction {
   }
 
   @Override
+  protected String getTelemetryActionName() { return "push component"; }
+
+  @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) ((ComponentNode) selected).getComponent();
+    Component component = ((ComponentNode) selected).getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
@@ -52,8 +56,12 @@ public class PushComponentAction extends ContextAwareComponentAction {
           process(odo, namespaceNode.getName(), applicationNode.getName(), component);
           component.setState(ComponentState.PUSHED);
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } else {
+          sendTelemetryResults(TelemetryResult.ABORTED);
         }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
       }
     });

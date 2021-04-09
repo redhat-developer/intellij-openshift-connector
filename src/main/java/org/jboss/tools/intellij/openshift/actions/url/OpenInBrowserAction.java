@@ -19,27 +19,35 @@ import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.tree.TreePath;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class OpenInBrowserAction extends OdoAction {
-  public OpenInBrowserAction() {
-    super(URLNode.class);
-  }
-
-  @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    if (visible) {
-      URL url = (URL) ((URLNode)selected).getUrl();
-      visible = url.getState() != URL.State.NOT_PUSHED;
+    public OpenInBrowserAction() {
+        super(URLNode.class);
     }
-    return visible;
-  }
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-      BrowserUtil.open(getURL(((URL)((URLNode)selected).getUrl())));
-  }
+    @Override
+    protected String getTelemetryActionName() {
+        return "open URL";
+    }
 
-  protected String getURL(URL url) {
-    return url.getProtocol() + "://" + url.getHost();
-  }
+    @Override
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
+        if (visible) {
+            URL url = ((URLNode) selected).getUrl();
+            visible = url.getState() != URL.State.NOT_PUSHED;
+        }
+        return visible;
+    }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        BrowserUtil.open(getURL(((URLNode) selected).getUrl()));
+        sendTelemetryResults(TelemetryResult.SUCCESS);
+    }
+
+    protected String getURL(URL url) {
+        return url.getProtocol() + "://" + url.getHost();
+    }
 }

@@ -39,6 +39,11 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
     }
 
     @Override
+    protected String getDebugLanguage() {
+        return NODE_JS;
+    }
+
+    @Override
     protected ConfigurationType getConfigurationType() {
         return new JSRemoteDebugConfigurationType();
     }
@@ -54,6 +59,7 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
                 portField.setAccessible(true);
                 portField.set(configuration, port);
             } catch (NoSuchFieldException | IllegalAccessException e) {
+                telemetrySender.error(e);
                 LOG.error(e.getLocalizedMessage(), e);
             }
         }
@@ -68,6 +74,8 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
                 f.setAccessible(true);
                 port = (Integer) f.get(configuration);
             } catch (NoSuchFieldException | IllegalAccessException e) {
+                telemetrySender.error(e);
+                LOG.error(e.getLocalizedMessage(), e);
                 return -1;
             }
             return port;

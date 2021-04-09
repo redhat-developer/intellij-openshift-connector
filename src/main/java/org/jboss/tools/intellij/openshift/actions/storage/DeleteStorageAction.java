@@ -27,30 +27,39 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class DeleteStorageAction extends OdoAction {
-  public DeleteStorageAction() {
-    super(PersistentVolumeClaimNode.class);
-  }
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
-    ComponentNode componentNode = (ComponentNode) storageNode.getParent();
-    Component component = (Component) componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
-    if (Messages.NO == Messages.showYesNoDialog("Delete Storage '" + storageNode.getName() + "'.\nAre you sure?", "Delete Storage",
-        Messages.getQuestionIcon())) {
-        return;
+public class DeleteStorageAction extends OdoAction {
+    public DeleteStorageAction() {
+        super(PersistentVolumeClaimNode.class);
     }
-    CompletableFuture.runAsync(() -> {
-      try {
-          odo.deleteStorage(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), storageNode.getName());
-          ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(storageNode);
-      }
-      catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete storage"));
-      }
-    });
-  }
+
+    @Override
+    protected String getTelemetryActionName() {
+        return "delete storage";
+    }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
+        ComponentNode componentNode = storageNode.getParent();
+        Component component = componentNode.getComponent();
+        ApplicationNode applicationNode = componentNode.getParent();
+        NamespaceNode namespaceNode = applicationNode.getParent();
+        if (Messages.NO == Messages.showYesNoDialog("Delete Storage '" + storageNode.getName() + "'.\nAre you sure?", "Delete Storage",
+                Messages.getQuestionIcon())) {
+            sendTelemetryResults(TelemetryResult.ABORTED);
+            return;
+        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                odo.deleteStorage(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), storageNode.getName());
+                ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(storageNode);
+                sendTelemetryResults(TelemetryResult.SUCCESS);
+            } catch (IOException e) {
+                sendTelemetryError(e);
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete storage"));
+            }
+        });
+    }
 }

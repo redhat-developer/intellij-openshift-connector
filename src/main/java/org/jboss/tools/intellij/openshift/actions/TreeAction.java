@@ -14,16 +14,21 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.ui.treeStructure.Tree;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 
 import javax.swing.tree.TreePath;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public abstract class TreeAction extends AnAction {
+public abstract class TreeAction extends AnAction implements TelemetryHandler {
 
     private Class[] filters;
 
-    public TreeAction(Class... filters) {
+    private TelemetrySender telemetrySender;
+
+    protected TreeAction(Class... filters) {
         this.filters = filters;
     }
 
@@ -50,6 +55,7 @@ public abstract class TreeAction extends AnAction {
         Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
         if (selectedPath.isPresent()) {
             Object selected = selectedPath.get().getLastPathComponent();
+            telemetrySender = new TelemetrySender(getTelemetryActionName());
             actionPerformed(e, selectedPath.get(), selected);
         }
     }
@@ -59,4 +65,21 @@ public abstract class TreeAction extends AnAction {
     }
 
     public abstract void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected);
+
+    protected abstract String getTelemetryActionName();
+
+    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+        telemetrySender.sendTelemetryResults(result);
+    }
+
+    @Override
+    public void sendTelemetryError(String message) {
+        telemetrySender.sendTelemetryError(message);
+    }
+
+    @Override
+    public void sendTelemetryError(Exception exception) {
+        telemetrySender.sendTelemetryError(exception);
+    }
+
 }

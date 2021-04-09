@@ -14,8 +14,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
@@ -35,76 +37,106 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class CreateComponentAction extends OdoAction {
-  public CreateComponentAction() {
-    super(ApplicationNode.class, NamespaceNode.class);
-  }
 
-  protected CreateComponentAction(Class... clazz) {
-    super(clazz);
-  }
-
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    final Optional<String> application;
-    String projectName;
-    if (selected instanceof ApplicationNode) {
-      application = Optional.of(((ApplicationNode) selected).getName());
-      projectName =  ((ApplicationNode)selected).getParent().getName();
-    } else {
-      application = Optional.empty();
-      projectName = ((NamespaceNode)selected).getName();
+    public CreateComponentAction() {
+        super(ApplicationNode.class, NamespaceNode.class);
     }
-    ApplicationsRootNode rootNode = ((ParentableNode<Object>)selected).getRoot();
-    Project project = rootNode.getProject();
-    CompletableFuture.runAsync(() -> {
-      try {
-        CreateComponentModel model = getModel(project, application, odo, p -> rootNode.getComponents().containsKey(p));
-        process((ParentableNode<Object>) selected, odo, projectName, application, rootNode, model, anActionEvent);
-      } catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
-      }
-    });
-  }
 
-  protected void process(ParentableNode<Object> selected, Odo odo, String projectName, Optional<String> application,
-                         ApplicationsRootNode rootNode, CreateComponentModel model, AnActionEvent anActionEvent) throws IOException {
-    boolean doit = UIHelper.executeInUI(() -> showDialog(model));
-    if (doit) {
-      createComponent(odo, projectName, application.orElse(model.getApplication()), model);
-      rootNode.addContext(model.getContext());
-      ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
+    protected CreateComponentAction(Class... clazz) {
+        super(clazz);
     }
-  }
 
-  private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
-    if (model.getSourceType() == ComponentSourceType.LOCAL) {
-      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null, model.getSelectedComponentStarter(), model.isPushAfterCreate());
-    } else if (model.getSourceType() == ComponentSourceType.GIT) {
-      odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL(), model.getGitReference(), model.isPushAfterCreate());
-    } else if (model.getSourceType() == ComponentSourceType.BINARY) {
-      Path binary = Paths.get(model.getBinaryFilePath());
-      if (binary.isAbsolute()) {
-       binary = Paths.get(model.getContext()).relativize(binary);
-      }
-      odo.createComponentBinary(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), binary.toString(), model.isPushAfterCreate());
+    @Override
+    protected String getTelemetryActionName() { return "create component"; }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+        final Optional<String> application;
+        String projectName;
+        if (selected instanceof ApplicationNode) {
+            application = Optional.of(((ApplicationNode) selected).getName());
+            projectName = ((ApplicationNode) selected).getParent().getName();
+        } else {
+            application = Optional.empty();
+            projectName = ((NamespaceNode) selected).getName();
+        }
+        ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
+        Project project = rootNode.getProject();
+        CompletableFuture.runAsync(() -> {
+            try {
+                CreateComponentModel model = getModel(project, application, odo, p -> rootNode.getComponents().containsKey(p));
+                process((ParentableNode<Object>) selected, odo, projectName, application, rootNode, model, anActionEvent);
+            } catch (IOException e) {
+                sendTelemetryError(e);
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
+            }
+        });
     }
-  }
 
-  protected boolean showDialog(CreateComponentModel model) {
-    CreateComponentDialog dialog = new CreateComponentDialog(model.getProject(), true, model);
-    dialog.show();
-    return dialog.isOK();
-  }
+    protected void process(ParentableNode<Object> selected, Odo odo, String projectName, Optional<String> application,
+                           ApplicationsRootNode rootNode, CreateComponentModel model, AnActionEvent anActionEvent) throws IOException {
+        if (UIHelper.executeInUI(() -> showDialog(model)).booleanValue()) {
+            createComponent(odo, projectName, application.orElse(model.getApplication()), model);
+            rootNode.addContext(model.getContext());
+            ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
+            sendTelemetryResults(TelemetryResult.SUCCESS);
+        } else {
+            sendTelemetryResults(TelemetryResult.ABORTED);
+        }
+    }
 
-  @NotNull
-  protected CreateComponentModel getModel(Project project, Optional<String> application, Odo odo, Predicate<String> componentChecker) throws IOException{
-    CreateComponentModel model =  new CreateComponentModel("Create component", odo);
-    model.setProject(project);
-    model.setComponentTypesTree(odo.getComponentTypes());
-    application.ifPresent(model::setApplication);
-    model.setComponentPredicate(componentChecker);
-    return model;
-  }
+    private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException {
+        computeTelemetry(model);
+        if (model.getSourceType() == ComponentSourceType.LOCAL) {
+            odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isProjectHasDevfile() ? Constants.DEVFILE_NAME : null, model.getSelectedComponentStarter(), model.isPushAfterCreate());
+        } else if (model.getSourceType() == ComponentSourceType.GIT) {
+            odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL(), model.getGitReference(), model.isPushAfterCreate());
+        } else if (model.getSourceType() == ComponentSourceType.BINARY) {
+            Path binary = Paths.get(model.getBinaryFilePath());
+            if (binary.isAbsolute()) {
+                binary = Paths.get(model.getContext()).relativize(binary);
+            }
+            odo.createComponentBinary(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), binary.toString(), model.isPushAfterCreate());
+        }
+    }
+
+    protected boolean showDialog(CreateComponentModel model) {
+        CreateComponentDialog dialog = new CreateComponentDialog(model.getProject(), true, model);
+        dialog.show();
+        return dialog.isOK();
+    }
+
+    @NotNull
+    protected CreateComponentModel getModel(Project project, Optional<String> application, Odo
+            odo, Predicate<String> componentChecker) throws IOException {
+        CreateComponentModel model = new CreateComponentModel("Create component", odo);
+        model.setProject(project);
+        model.setComponentTypesTree(odo.getComponentTypes());
+        application.ifPresent(model::setApplication);
+        model.setComponentPredicate(componentChecker);
+        return model;
+    }
+
+    private void computeTelemetry(CreateComponentModel model) {
+        telemetrySender
+                .addProperty(TelemetryService.PROP_COMPONENT_SOURCE_TYPE, model.getSourceType().toString());
+        telemetrySender
+                .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
+        telemetrySender
+                .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isPushAfterCreate()));
+        if (StringUtils.isNotBlank(model.getComponentTypeName())) {
+            String prefix = model.getComponentTypeVersion() == null ? "devfile:" : "s2i:";
+            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, prefix + model.getComponentTypeName());
+        }
+        if (StringUtils.isNotBlank(model.getComponentTypeVersion())) {
+            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_VERSION, model.getComponentTypeVersion());
+        }
+        if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {
+            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());
+        }
+    }
 
 }

@@ -156,21 +156,20 @@ public abstract class DebugComponentAction extends OdoAction {
                                 Messages.getInformationIcon()));
                 return;
             }
+            // if debugger not running, run the debug config
             ApplicationManager.getApplication().invokeLater(
                     () -> {
                         try {
                             Objects.requireNonNull(ProgramRunnerUtil.getRunner(
                                     DefaultDebugExecutor.getDebugExecutorInstance().getId(),
                                     runSettings)).execute(getEnvironment());
+                            sendTelemetryResults(TelemetryResult.SUCCESS);
                         } catch (ExecutionException e) {
                             sendTelemetryError(e);
                             LOG.error(e.getLocalizedMessage(), e);
-                            return;
                         }
                     });
-            sendTelemetryResults(TelemetryResult.SUCCESS);
         });
-
     }
 
     private boolean checkOdoDebugNotRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
@@ -179,7 +178,6 @@ public abstract class DebugComponentAction extends OdoAction {
                 applicationName,
                 component.getPath(),
                 component.getName()) == Constants.DebugStatus.NOT_RUNNING;
-
     }
 
     private boolean checkOdoDebugRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
@@ -188,7 +186,6 @@ public abstract class DebugComponentAction extends OdoAction {
                 applicationName,
                 component.getPath(),
                 component.getName()) == Constants.DebugStatus.RUNNING;
-
     }
 
     private Optional<Integer> createOrFindPortFromConfiguration(RunManager runManager, Component component) {
@@ -227,7 +224,6 @@ public abstract class DebugComponentAction extends OdoAction {
                 Messages.showErrorDialog(message, "Odo Debug");
                 return Optional.empty();
             }
-
         }
         runManager.setSelectedConfiguration(runSettings);
         return Optional.of(port);

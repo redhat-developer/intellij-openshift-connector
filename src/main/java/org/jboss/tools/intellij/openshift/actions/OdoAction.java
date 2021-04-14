@@ -31,27 +31,27 @@ public abstract class OdoAction extends StructureTreeAction  implements Telemetr
 
     protected TelemetrySender telemetrySender;
 
-    public OdoAction(Class... filters) {
-        super(filters);
-    }
+  public OdoAction(Class... filters) {
+    super(filters);
+  }
 
-    @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+  @Override
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     try {
-        telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-        this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
+      telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
+      this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
     } catch (IOException e) {
       Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
     }
-    }
+  }
 
     private Odo getOdo(AnActionEvent anActionEvent) throws IOException {
         Tree tree = getTree(anActionEvent);
-        return ((ApplicationsRootNode) ((ApplicationsTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
+        return ((ApplicationsRootNode)((ApplicationsTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
     }
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-    }
+  }
 
     protected abstract String getTelemetryActionName();
 

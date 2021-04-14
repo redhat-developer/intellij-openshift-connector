@@ -44,7 +44,7 @@ public class ImportComponentAction extends CreateComponentAction {
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            visible = ((ComponentNode) selected).getComponent().getState() == ComponentState.NO_CONTEXT;
+            visible = ((Component) ((ComponentNode) selected).getComponent()).getState() == ComponentState.NO_CONTEXT;
         }
         return visible;
     }
@@ -62,6 +62,7 @@ public class ImportComponentAction extends CreateComponentAction {
                 ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), null, component.getInfo().getComponentKind());
                 CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info, component.getInfo().getComponentKind());
                 process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, anActionEvent);
+
             } catch (IOException e) {
                 sendTelemetryError(e);
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));

@@ -45,7 +45,7 @@ public class CreateServiceAction extends OdoAction {
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
+            ApplicationsRootNode rootNode = (ApplicationsRootNode) ((ParentableNode<Object>) selected).getRoot();
             if (rootNode != null) {
                 Odo odo = rootNode.getOdo();
                 return odo.isServiceCatalogAvailable();

@@ -27,19 +27,19 @@ public class LogoutAction extends LoggedInClusterAction {
     @Override
     protected String getTelemetryActionName() { return "log out from cluster"; }
 
-    @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-        ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
-        CompletableFuture.runAsync(() -> {
-            try {
-                odo.logout();
-                clusterNode.setLogged(false);
-                clusterNode.refresh();
-                sendTelemetryResults(TelemetryResult.SUCCESS);
-            } catch (IOException e) {
-                sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));
-            }
-        });
-    }
+  @Override
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
+    CompletableFuture.runAsync(() -> {
+        try {
+          odo.logout();
+          clusterNode.setLogged(false);
+          clusterNode.refresh();
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Logout"));
+        }
+      });
+  }
 }

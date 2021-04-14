@@ -28,26 +28,26 @@ public class LoginAction extends LoggedOutClusterAction {
     @Override
     protected String getTelemetryActionName() { return "login to cluster"; }
 
-    @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
-        ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
-        CompletableFuture.runAsync(() -> {
-            try {
-                LoginDialog loginDialog = UIHelper.executeInUI(() -> {
-                    LoginDialog dialog = new LoginDialog(null, clusterNode.getOdo().getMasterUrl().toString());
-                    dialog.show();
-                    return dialog;
-                });
-                if (loginDialog.isOK()) {
-                    odo.login(loginDialog.getClusterURL(), loginDialog.getUserName(), loginDialog.getPassword(), loginDialog.getToken());
-                    sendTelemetryResults(TelemetryResult.SUCCESS);
-                } else {
-                    sendTelemetryResults(TelemetryResult.ABORTED);
-                }
-            } catch (IOException e) {
-                sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
-            }
-        });
-    }
+  @Override
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
+    CompletableFuture.runAsync(() -> {
+        try {
+          LoginDialog loginDialog = UIHelper.executeInUI(() -> {
+            LoginDialog dialog = new LoginDialog(null, clusterNode.getOdo().getMasterUrl().toString());
+            dialog.show();
+            return dialog;
+            });
+          if (loginDialog.isOK()) {
+            odo.login(loginDialog.getClusterURL(), loginDialog.getUserName(), loginDialog.getPassword(), loginDialog.getToken());
+            sendTelemetryResults(TelemetryResult.SUCCESS);
+          } else {
+            sendTelemetryResults(TelemetryResult.ABORTED);
+          }
+        } catch (IOException e) {
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
+        }
+      });
+  }
 }

@@ -22,13 +22,15 @@ import javax.swing.tree.TreePath;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
+
 public abstract class TreeAction extends AnAction implements TelemetryHandler {
 
     private Class[] filters;
 
     private TelemetrySender telemetrySender;
 
-    protected TreeAction(Class... filters) {
+    public TreeAction(Class... filters) {
         this.filters = filters;
     }
 
@@ -55,7 +57,7 @@ public abstract class TreeAction extends AnAction implements TelemetryHandler {
         Optional<TreePath> selectedPath = getSelectedPath(getTree(e));
         if (selectedPath.isPresent()) {
             Object selected = selectedPath.get().getLastPathComponent();
-            telemetrySender = new TelemetrySender(getTelemetryActionName());
+            telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
             actionPerformed(e, selectedPath.get(), selected);
         }
     }

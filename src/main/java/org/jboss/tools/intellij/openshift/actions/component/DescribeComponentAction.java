@@ -39,7 +39,7 @@ public class DescribeComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((ComponentNode)selected).getComponent().getState() != ComponentState.NOT_PUSHED;
+      visible = ((Component)((ComponentNode)selected).getComponent()).getState() != ComponentState.NOT_PUSHED;
     }
     return visible;
   }
@@ -47,7 +47,7 @@ public class DescribeComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = componentNode.getComponent();
+    Component component = (Component) componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {

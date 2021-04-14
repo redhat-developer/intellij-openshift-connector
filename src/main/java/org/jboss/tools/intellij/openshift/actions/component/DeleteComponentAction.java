@@ -39,8 +39,8 @@ public class DeleteComponentAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
+    Component component = (Component) componentNode.getComponent();
+    ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Component '" + component.getName() + "'.\nAre you sure?", "Delete Component",
       Messages.getQuestionIcon())) {

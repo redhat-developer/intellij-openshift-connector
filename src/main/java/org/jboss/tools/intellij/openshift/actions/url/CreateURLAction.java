@@ -42,7 +42,7 @@ public class CreateURLAction extends OdoAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = componentNode.getComponent();
+        Component component = (Component) componentNode.getComponent();
         ApplicationNode applicationNode = componentNode.getParent();
         NamespaceNode namespaceNode = applicationNode.getParent();
         CompletableFuture.runAsync(() -> {

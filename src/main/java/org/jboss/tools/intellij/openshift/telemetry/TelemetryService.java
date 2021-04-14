@@ -20,6 +20,7 @@ public class TelemetryService {
     }
 
     public static final String VALUE_ABORTED = "aborted";
+    public static final String PREFIX_ACTION = "ui/";
 
     public static final String PROP_COMPONENT_SOURCE_TYPE = "component_sourcetype";
     public static final String PROP_COMPONENT_KIND = "component_kind";

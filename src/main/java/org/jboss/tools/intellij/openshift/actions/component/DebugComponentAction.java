@@ -60,7 +60,7 @@ public abstract class DebugComponentAction extends OdoAction {
 
     private ExecutionEnvironment environment;
 
-    protected DebugComponentAction() {
+    public DebugComponentAction() {
         super(ComponentNode.class);
     }
 
@@ -72,7 +72,7 @@ public abstract class DebugComponentAction extends OdoAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
-            Component component = componentNode.getComponent();
+            Component component = (Component) componentNode.getComponent();
             return (isPushed(component) && isDebuggable(component.getInfo().getComponentKind(), component.getInfo().getComponentTypeName()));
         }
         return false;
@@ -83,10 +83,11 @@ public abstract class DebugComponentAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent,
+                                TreePath path, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = componentNode.getComponent();
-        ApplicationNode applicationNode = componentNode.getParent();
+        Component component = (Component) componentNode.getComponent();
+        ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
         NamespaceNode namespaceNode = applicationNode.getParent();
 
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
@@ -134,7 +135,6 @@ public abstract class DebugComponentAction extends OdoAction {
                                         sendTelemetryError(e);
                                         UIHelper.executeInUI(() -> Messages.showErrorDialog(
                                                 "Error: " + e.getLocalizedMessage(), "Odo Debug"));
-
                                     }
                                 }
                             });
@@ -149,10 +149,10 @@ public abstract class DebugComponentAction extends OdoAction {
             // check if local debugger process is already running.
             if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
                 UIHelper.executeInUI(() ->
-                    Messages.showMessageDialog(
+                        Messages.showMessageDialog(
                                 "'" + runSettings.getName() + "' is a single-instance run configuration "
                                         + "and already running.",
-                            "Process '" + runSettings.getName() + "' is already running",
+                                "Process '" + runSettings.getName() + "' is already running",
                                 Messages.getInformationIcon()));
                 return;
             }
@@ -170,6 +170,7 @@ public abstract class DebugComponentAction extends OdoAction {
                         }
                     });
         });
+
     }
 
     private boolean checkOdoDebugNotRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
@@ -178,6 +179,7 @@ public abstract class DebugComponentAction extends OdoAction {
                 applicationName,
                 component.getPath(),
                 component.getName()) == Constants.DebugStatus.NOT_RUNNING;
+
     }
 
     private boolean checkOdoDebugRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
@@ -186,6 +188,7 @@ public abstract class DebugComponentAction extends OdoAction {
                 applicationName,
                 component.getPath(),
                 component.getName()) == Constants.DebugStatus.RUNNING;
+
     }
 
     private Optional<Integer> createOrFindPortFromConfiguration(RunManager runManager, Component component) {
@@ -224,6 +227,7 @@ public abstract class DebugComponentAction extends OdoAction {
                 Messages.showErrorDialog(message, "Odo Debug");
                 return Optional.empty();
             }
+
         }
         runManager.setSelectedConfiguration(runSettings);
         return Optional.of(port);

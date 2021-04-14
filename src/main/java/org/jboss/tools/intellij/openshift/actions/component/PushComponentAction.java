@@ -47,7 +47,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = ((ComponentNode) selected).getComponent();
+    Component component = (Component) ((ComponentNode) selected).getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {

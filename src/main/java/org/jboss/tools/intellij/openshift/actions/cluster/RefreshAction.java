@@ -20,6 +20,8 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStruc
 
 import javax.swing.tree.TreePath;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
+
 public class RefreshAction extends StructureTreeAction {
     public RefreshAction() {
         super(ApplicationsRootNode.class);
@@ -27,7 +29,7 @@ public class RefreshAction extends StructureTreeAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().getBuilder().action("refresh cluster");
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().getBuilder().action(PREFIX_ACTION + "refresh cluster");
         selected = getElement(selected);
         ApplicationsTreeStructure structure = (ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY);
         structure.fireModified(selected);

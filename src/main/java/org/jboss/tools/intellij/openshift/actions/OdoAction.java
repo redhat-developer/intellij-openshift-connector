@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import org.jboss.tools.intellij.openshift.Constants;
@@ -22,27 +23,35 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStruc
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
+import java.io.IOException;
 
-public abstract class OdoAction extends StructureTreeAction implements TelemetryHandler {
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
+
+public abstract class OdoAction extends StructureTreeAction  implements TelemetryHandler {
 
     protected TelemetrySender telemetrySender;
 
-    protected OdoAction(Class... filters) {
+    public OdoAction(Class... filters) {
         super(filters);
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        telemetrySender = new TelemetrySender(getTelemetryActionName());
+    try {
+        telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
         this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
+    } catch (IOException e) {
+      Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
+    }
     }
 
-    private Odo getOdo(AnActionEvent anActionEvent) {
+    private Odo getOdo(AnActionEvent anActionEvent) throws IOException {
         Tree tree = getTree(anActionEvent);
         return ((ApplicationsRootNode) ((ApplicationsTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
     }
 
-    protected abstract void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo);
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    }
 
     protected abstract String getTelemetryActionName();
 

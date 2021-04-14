@@ -1,11 +1,3 @@
-package org.jboss.tools.intellij.openshift.telemetry;
-
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
-import org.jetbrains.annotations.NotNull;
-
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult.ERROR;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.VALUE_ABORTED;
-
 /*******************************************************************************
  * Copyright (c) 2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
@@ -16,6 +8,14 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.VALU
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
+package org.jboss.tools.intellij.openshift.telemetry;
+
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import org.jetbrains.annotations.NotNull;
+
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult.ERROR;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.VALUE_ABORTED;
+
 public class TelemetrySender implements TelemetryHandler {
 
     private final TelemetryMessageBuilder.ActionMessage telemetry;

@@ -31,7 +31,7 @@ public abstract class OdoAction extends StructureTreeAction  implements Telemetr
 
     protected TelemetrySender telemetrySender;
 
-  public OdoAction(Class... filters) {
+  protected OdoAction(Class... filters) {
     super(filters);
   }
 

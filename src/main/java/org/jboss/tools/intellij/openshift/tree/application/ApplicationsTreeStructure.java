@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.jboss.tools.intellij.openshift.utils.odo.Application;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
@@ -93,13 +94,21 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } catch (Exception e) {
             namespaces.add(new MessageNode(element, element, LOGIN));
         }
+        if (namespaces.isEmpty()) {
+            namespaces.add(new CreateNamespaceLinkNode(element));
+        }
         return namespaces.toArray();
     }
 
     private Object[] getApplications(NamespaceNode element) {
         List<Object> applications = new ArrayList<>();
         try {
-            element.getParent().getOdo().getApplications(element.getName()).forEach(app -> applications.add(new ApplicationNode(element, app.getName())));
+            List<Application> apps = element.getParent().getOdo().getApplications(element.getName());
+            if (apps.isEmpty()) {
+                applications.add(new CreateComponentLinkNode(element.getRoot(), element));
+            } else {
+                apps.forEach(app -> applications.add(new ApplicationNode(element, app.getName())));
+            }
         } catch (IOException e) {
             applications.add(new MessageNode(element.getRoot(), element, FAILED_TO_LOAD_APPLICATIONS));
         }
@@ -119,6 +128,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
         } catch (IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application"));
+        }
+        if (results.isEmpty()) {
+            results.add(new CreateComponentLinkNode(element.getRoot(), element));
         }
         return results.toArray();
     }

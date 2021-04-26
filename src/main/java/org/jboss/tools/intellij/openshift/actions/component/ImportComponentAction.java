@@ -14,8 +14,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
@@ -55,13 +57,14 @@ public class ImportComponentAction extends CreateComponentAction {
         Component component = componentNode.getComponent();
         ApplicationNode applicationNode = componentNode.getParent();
         NamespaceNode namespaceNode = applicationNode.getParent();
+        ApplicationsTreeStructure structure = (ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY);
         CompletableFuture.runAsync(() -> {
             try {
                 ApplicationsRootNode root = componentNode.getRoot();
                 Project project = root.getProject();
                 ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), null, component.getInfo().getComponentKind());
                 CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info, component.getInfo().getComponentKind());
-                process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, anActionEvent);
+                process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, structure);
 
             } catch (IOException e) {
                 sendTelemetryError(e);

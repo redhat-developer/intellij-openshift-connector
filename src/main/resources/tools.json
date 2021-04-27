@@ -4,7 +4,7 @@
       "version": "2.0.7",
       "versionCmd": "version --client",
       "versionExtractRegExp": "odo v(\\d+[\\.\\d+]*(-.*)?)\\s.*",
-      "versionMatchRegExpr": "0\\..*",
+      "versionMatchRegExpr": "2.0.7",
       "baseDir": "$HOME/.odo",
       "platforms": {
         "win": {

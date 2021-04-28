@@ -14,12 +14,12 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 
-public class ContextAwareComponentAction extends OdoAction {
-    public ContextAwareComponentAction() {
+public abstract class ContextAwareComponentAction extends OdoAction {
+    protected ContextAwareComponentAction() {
         super(ComponentNode.class);
     }
 
-    public ContextAwareComponentAction(Class... filters) {
+    protected ContextAwareComponentAction(Class... filters) {
         super(filters);
     }
 

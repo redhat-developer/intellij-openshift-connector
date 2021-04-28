@@ -31,10 +31,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class LinkComponentAction extends OdoAction {
   public LinkComponentAction() {
     super(ServiceNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "link service to component"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -57,11 +62,17 @@ public class LinkComponentAction extends OdoAction {
             odo.link(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getPath(), serviceNode.getName(), null);
             Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Service linked to " + component.getName(),
             NotificationType.INFORMATION));
+            sendTelemetryResults(TelemetryResult.SUCCESS);
+          } else {
+            sendTelemetryResults(TelemetryResult.ABORTED);
           }
        } else {
-          UIHelper.executeInUI(() -> Messages.showWarningDialog("No components to link to", "Link component"));
+          String message = "No components to link to";
+          sendTelemetryError(message);
+          UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
         }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
       }
     });

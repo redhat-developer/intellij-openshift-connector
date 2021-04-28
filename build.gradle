@@ -1,6 +1,6 @@
 
 plugins {
-    id "org.jetbrains.intellij" version "0.4.10"
+    id "org.jetbrains.intellij" version "0.7.2"
     id "com.adarshr.test-logger" version "1.7.0"
     id "idea"
     id "java"
@@ -19,11 +19,7 @@ targetCompatibility = '1.8'
 intellij {
     version ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName 'org.jboss.tools.intellij.openshift'
-    if (ideaVersion.substring(3) != "2019.1") {
-        plugins 'java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml'
-    } else {
-        plugins 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml'
-    }
+    plugins 'java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml', 'com.redhat.devtools.intellij.telemetry:0.0.1.9'
 	updateSinceUntilBuild false
 }
 
@@ -53,6 +49,7 @@ sourceSets {
 }
 
 task integrationTest(type: Test) {
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
     description = 'Runs the integration tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -86,6 +83,14 @@ jacocoTestReport {
     reports {
         xml.enabled = true
     }
+}
+
+runIde {
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+}
+
+runIdeForUiTests {
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
 }
 
 group 'org.jboss.tools.intellij'

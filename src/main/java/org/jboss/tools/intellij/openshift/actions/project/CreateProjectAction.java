@@ -16,8 +16,6 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.api.model.ProjectBuilder;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
@@ -29,8 +27,13 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateProjectAction extends LoggedInClusterAction {
+
+  @Override
+  protected String getTelemetryActionName() { return "create project"; }
+
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
@@ -44,10 +47,14 @@ public class CreateProjectAction extends LoggedInClusterAction {
           notif.expire();
           Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Create project", "Project " + projectName + " successfully created", NotificationType.INFORMATION));
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(clusterNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
+          sendTelemetryError(e);
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create project"));
         }
       });
+    } else {
+      sendTelemetryResults(TelemetryResult.ABORTED);
     }
   }
 }

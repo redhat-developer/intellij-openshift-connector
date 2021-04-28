@@ -15,6 +15,9 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -22,14 +25,20 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-public class OdoAction extends StructureTreeAction {
-  public OdoAction(Class... filters) {
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
+
+public abstract class OdoAction extends StructureTreeAction  implements TelemetryHandler {
+
+    protected TelemetrySender telemetrySender;
+
+  protected OdoAction(Class... filters) {
     super(filters);
   }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     try {
+      telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
       this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
     } catch (IOException e) {
       Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
@@ -43,4 +52,21 @@ public class OdoAction extends StructureTreeAction {
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
   }
+
+    protected abstract String getTelemetryActionName();
+
+    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+        telemetrySender.sendTelemetryResults(result);
+    }
+
+    @Override
+    public void sendTelemetryError(String message) {
+        telemetrySender.sendTelemetryError(message);
+    }
+
+    @Override
+    public void sendTelemetryError(Exception exception) {
+        telemetrySender.sendTelemetryError(exception);
+    }
+
 }

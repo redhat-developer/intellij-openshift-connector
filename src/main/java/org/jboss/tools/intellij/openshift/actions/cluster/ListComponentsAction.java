@@ -19,13 +19,21 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class ListComponentsAction extends LoggedInClusterAction {
+
+  @Override
+  protected String getTelemetryActionName() { return "list components"; }
+
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     CompletableFuture.runAsync(() -> {
       try {
         odo.listComponents();
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "List components"));
       }
     });

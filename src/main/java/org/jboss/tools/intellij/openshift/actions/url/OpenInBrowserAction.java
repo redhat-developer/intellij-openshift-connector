@@ -19,10 +19,15 @@ import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.tree.TreePath;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class OpenInBrowserAction extends OdoAction {
   public OpenInBrowserAction() {
     super(URLNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "open URL"; }
 
   @Override
   public boolean isVisible(Object selected) {
@@ -37,6 +42,7 @@ public class OpenInBrowserAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
       BrowserUtil.open(getURL(((URL)((URLNode)selected).getUrl())));
+      sendTelemetryResults(TelemetryResult.SUCCESS);
   }
 
   protected String getURL(URL url) {

@@ -20,7 +20,12 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class ListServicesAction extends LoggedInClusterAction {
+
+    @Override
+    protected String getTelemetryActionName() { return "list services"; }
 
     @Override
     public boolean isVisible(Object selected) {
@@ -43,7 +48,9 @@ public class ListServicesAction extends LoggedInClusterAction {
         CompletableFuture.runAsync(() -> {
             try {
                 odo.listServices();
+                sendTelemetryResults(TelemetryResult.SUCCESS);
             } catch (IOException e) {
+                sendTelemetryError(e);
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "List services"));
             }
         });

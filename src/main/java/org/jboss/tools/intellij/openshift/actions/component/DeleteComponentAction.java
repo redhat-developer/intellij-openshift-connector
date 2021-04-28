@@ -26,10 +26,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DeleteComponentAction extends OdoAction {
   public DeleteComponentAction() {
     super(ComponentNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "delete component"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -39,6 +44,7 @@ public class DeleteComponentAction extends OdoAction {
     NamespaceNode namespaceNode = applicationNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Component '" + component.getName() + "'.\nAre you sure?", "Delete Component",
       Messages.getQuestionIcon())) {
+      sendTelemetryResults(TelemetryResult.ABORTED);
       return;
     }
 
@@ -46,7 +52,9 @@ public class DeleteComponentAction extends OdoAction {
       try {
         odo.deleteComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), component.getInfo()!= null ? component.getInfo().getComponentKind(): null);
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(componentNode);
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete component"));
       }
     });

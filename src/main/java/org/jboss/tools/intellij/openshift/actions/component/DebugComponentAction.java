@@ -49,6 +49,9 @@ import java.net.ServerSocket;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PROP_DEBUG_COMPONENT_LANGUAGE;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public abstract class DebugComponentAction extends OdoAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(DebugComponentAction.class);
@@ -60,6 +63,9 @@ public abstract class DebugComponentAction extends OdoAction {
     public DebugComponentAction() {
         super(ComponentNode.class);
     }
+
+    @Override
+    protected String getTelemetryActionName() { return "debug component"; }
 
     @Override
     public boolean isVisible(Object selected) {
@@ -86,6 +92,7 @@ public abstract class DebugComponentAction extends OdoAction {
 
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
+            sendTelemetryResults(TelemetryResult.ABORTED);
             return;
         }
 
@@ -95,6 +102,7 @@ public abstract class DebugComponentAction extends OdoAction {
     }
 
     private void executeDebug(Project project, Component component, Odo odo, String applicationName, String projectName, Integer port) {
+        telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
         ExecHelper.submit(() -> {
             try {
                 // run odo debug if not already running
@@ -124,6 +132,7 @@ public abstract class DebugComponentAction extends OdoAction {
                                             indicator.checkCanceled();
                                         }
                                     } catch (IOException | InterruptedException e) {
+                                        sendTelemetryError(e);
                                         UIHelper.executeInUI(() -> Messages.showErrorDialog(
                                                 "Error: " + e.getLocalizedMessage(), "Odo Debug"));
                                     }
@@ -132,6 +141,7 @@ public abstract class DebugComponentAction extends OdoAction {
 
                 }
             } catch (IOException e) {
+                sendTelemetryError(e);
                 UIHelper.executeInUI(() -> Messages.showErrorDialog(
                         "Error: " + e.getLocalizedMessage(), "Odo Debug"));
                 return;
@@ -146,13 +156,16 @@ public abstract class DebugComponentAction extends OdoAction {
                                 Messages.getInformationIcon()));
                 return;
             }
+            // if debugger not running, run the debug config
             ApplicationManager.getApplication().invokeLater(
                     () -> {
                         try {
                             Objects.requireNonNull(ProgramRunnerUtil.getRunner(
                                     DefaultDebugExecutor.getDebugExecutorInstance().getId(),
                                     runSettings)).execute(getEnvironment());
+                            sendTelemetryResults(TelemetryResult.SUCCESS);
                         } catch (ExecutionException e) {
+                            sendTelemetryError(e);
                             LOG.error(e.getLocalizedMessage(), e);
                         }
                     });
@@ -202,15 +215,16 @@ public abstract class DebugComponentAction extends OdoAction {
                 runSettings.getConfiguration().setAllowRunningInParallel(false);
                 runManager.addConfiguration(runSettings);
             } catch (IOException e) {
-                Messages.showErrorDialog(
-                        "Error: " + e.getLocalizedMessage(), "Odo Debug");
+                telemetrySender.error(e);
+                Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Odo Debug");
                 return Optional.empty();
             }
         } else {
             port = getPortFromConfiguration(runSettings.getConfiguration());
             if (port == -1) {
-                Messages.showErrorDialog(
-                        "Error when retrieving local port from configuration.", "Odo Debug");
+                String message = "Error when retrieving local port from configuration.";
+                telemetrySender.error(message);
+                Messages.showErrorDialog(message, "Odo Debug");
                 return Optional.empty();
             }
 
@@ -225,6 +239,7 @@ public abstract class DebugComponentAction extends OdoAction {
                 environment = ExecutionEnvironmentBuilder.create(
                         DefaultDebugExecutor.getDebugExecutorInstance(), runSettings).build();
             } catch (ExecutionException e) {
+                telemetrySender.error(e);
                 LOG.error(e.getLocalizedMessage(), e);
             }
         }
@@ -232,6 +247,8 @@ public abstract class DebugComponentAction extends OdoAction {
     }
 
     protected abstract boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName);
+
+    protected abstract String getDebugLanguage();
 
     protected abstract ConfigurationType getConfigurationType();
 

@@ -23,10 +23,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DescribeServiceAction extends OdoAction {
   public DescribeServiceAction() {
     super(ServiceNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "describe service"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -37,7 +42,9 @@ public class DescribeServiceAction extends OdoAction {
       try {
         String template = odo.getServiceTemplate(namespaceNode.getName(), applicationNode.getName(), serviceNode.getName());
         odo.describeServiceTemplate(template);
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe service"));
       }
     });

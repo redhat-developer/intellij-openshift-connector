@@ -27,10 +27,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DeleteURLAction extends OdoAction {
   public DeleteURLAction() {
     super(URLNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "delete URL"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -43,8 +48,10 @@ public class DeleteURLAction extends OdoAction {
       try {
           odo.deleteURL(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), urlNode.getName());
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
       }
       catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete URL"));
       }
     });

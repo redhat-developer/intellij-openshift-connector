@@ -18,6 +18,10 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import java.io.IOException;
 
 public class WatchComponentAction extends PushComponentAction {
+
+  @Override
+  protected String getTelemetryActionName() { return "watch component"; }
+
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);

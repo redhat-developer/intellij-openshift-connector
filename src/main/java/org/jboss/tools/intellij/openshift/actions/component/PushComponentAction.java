@@ -34,11 +34,15 @@ import static org.jboss.tools.intellij.openshift.Constants.COMPONENT_MIGRATION_M
 import static org.jboss.tools.intellij.openshift.Constants.COMPONENT_MIGRATION_TITLE;
 import static org.jboss.tools.intellij.openshift.Constants.HELP_LABEL;
 import static org.jboss.tools.intellij.openshift.Constants.UNDEPLOY_LABEL;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class PushComponentAction extends ContextAwareComponentAction {
   protected String getActionName() {
     return "Push";
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "push component"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
@@ -52,8 +56,12 @@ public class PushComponentAction extends ContextAwareComponentAction {
           process(odo, namespaceNode.getName(), applicationNode.getName(), component);
           component.setState(ComponentState.PUSHED);
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } else {
+          sendTelemetryResults(TelemetryResult.ABORTED);
         }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
       }
     });

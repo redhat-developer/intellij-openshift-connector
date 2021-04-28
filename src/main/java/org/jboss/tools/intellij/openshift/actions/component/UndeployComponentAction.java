@@ -27,10 +27,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class UndeployComponentAction extends OdoAction {
   public UndeployComponentAction() {
     super(ComponentNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "undeploy component"; }
 
   @Override
   public boolean isVisible(Object selected) {
@@ -52,8 +57,10 @@ public class UndeployComponentAction extends OdoAction {
         odo.undeployComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), component.getInfo().getComponentKind());
         component.setState(ComponentState.NOT_PUSHED);
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete component"));
+        sendTelemetryError(e);
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Undeploy component"));
       }
     });
   }

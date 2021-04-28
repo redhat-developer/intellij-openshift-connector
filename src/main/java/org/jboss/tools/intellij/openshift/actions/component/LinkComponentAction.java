@@ -32,11 +32,16 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class LinkComponentAction extends OdoAction {
 
   public LinkComponentAction() {
     super(ComponentNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "link component to component"; }
   
   @Override
   public boolean isVisible(Object selected) {
@@ -101,13 +106,19 @@ public class LinkComponentAction extends OdoAction {
               notification.expire();
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
+              sendTelemetryResults(TelemetryResult.SUCCESS);
             } else {
-              UIHelper.executeInUI(() -> Messages.showWarningDialog("No ports to link to", "Link component"));
+              String message = "No ports to link to";
+              sendTelemetryError(message);
+              UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
             }
           } else {
-            UIHelper.executeInUI(() -> Messages.showWarningDialog("No components to link to", "Link component"));
+            String message = "No components to link to";
+            sendTelemetryError(message);
+            UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
           }
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
       }
     });

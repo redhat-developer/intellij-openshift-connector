@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class DeleteProjectAction extends OdoAction {
   public DeleteProjectAction() {
@@ -34,10 +35,14 @@ public class DeleteProjectAction extends OdoAction {
   }
 
   @Override
+  protected String getTelemetryActionName() { return "delete project"; }
+
+  @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
     NamespaceNode namespaceNode = (NamespaceNode) selected;
     if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + namespaceNode.getName() + "'.\nAre you sure?", "Delete Project",
         Messages.getQuestionIcon())) {
+        sendTelemetryResults(TelemetryResult.ABORTED);
         return;
     }
     CompletableFuture.runAsync(() -> {
@@ -48,7 +53,9 @@ public class DeleteProjectAction extends OdoAction {
           notif.expire();
           Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Delete project", "Project " + namespaceNode.getName() + " has been successfully deleted", NotificationType.INFORMATION));
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(namespaceNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
+          sendTelemetryError(e);
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete project"));
         }
       });

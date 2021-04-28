@@ -25,10 +25,15 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+
 public class DescribeComponentAction extends OdoAction {
   public DescribeComponentAction() {
     super(ComponentNode.class);
   }
+
+  @Override
+  protected String getTelemetryActionName() { return "describe component"; }
 
   @Override
   public boolean isVisible(Object selected) {
@@ -48,7 +53,9 @@ public class DescribeComponentAction extends OdoAction {
     CompletableFuture.runAsync(() -> {
       try {
         odo.describeComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName());
+        sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe"));
       }
     });

@@ -38,6 +38,9 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @Override
+    protected String getTelemetryActionName() { return "import component"; }
+
+    @Override
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
@@ -61,6 +64,7 @@ public class ImportComponentAction extends CreateComponentAction {
                 process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, anActionEvent);
 
             } catch (IOException e) {
+                sendTelemetryError(e);
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
             }
         });

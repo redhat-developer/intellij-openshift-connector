@@ -211,4 +211,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         }
     }
 
+    public ApplicationsTreeStructure getStructure() {
+        return structure;
+    }
 }

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -48,6 +49,19 @@ public class CreateComponentAction extends OdoAction {
     super(clazz);
   }
 
+  public static void execute(ParentableNode<? extends Object> parentNode) {
+    CreateComponentAction action = (CreateComponentAction) ActionManager.getInstance().getAction(CreateComponentAction.class.getName());
+    if (parentNode instanceof NamespaceNode) {
+      NamespaceNode namespaceNode = (NamespaceNode) parentNode;
+      action.doActionPerformed(namespaceNode, namespaceNode.getRoot().getOdo(), Optional.empty(), namespaceNode.getName(),
+              namespaceNode.getRoot(), namespaceNode.getRoot().getProject());
+    } else if (parentNode instanceof ApplicationNode) {
+      ApplicationNode applicationNode = (ApplicationNode) parentNode;
+      action.doActionPerformed(applicationNode, applicationNode.getRoot().getOdo(), Optional.of(applicationNode.getName()),
+              applicationNode.getNamespace(), applicationNode.getRoot(), applicationNode.getRoot().getProject());
+    }
+  }
+
   @Override
   protected String getTelemetryActionName() { return "create component"; }
 
@@ -64,10 +78,14 @@ public class CreateComponentAction extends OdoAction {
     }
     ApplicationsRootNode rootNode = ((ParentableNode<Object>)selected).getRoot();
     Project project = rootNode.getProject();
+    doActionPerformed((ParentableNode<Object>) selected, odo, application, projectName, rootNode, project);
+  }
+
+  private void doActionPerformed(ParentableNode<? extends Object> selected, Odo odo, Optional<String> application, String projectName, ApplicationsRootNode rootNode, Project project) {
     CompletableFuture.runAsync(() -> {
       try {
         CreateComponentModel model = getModel(project, application, odo, p -> rootNode.getComponents().containsKey(p));
-        process((ParentableNode<Object>) selected, odo, projectName, application, rootNode, model, anActionEvent);
+        process(selected, odo, projectName, application, rootNode, model, rootNode.getStructure());
       } catch (IOException e) {
         sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
@@ -75,13 +93,13 @@ public class CreateComponentAction extends OdoAction {
     });
   }
 
-  protected void process(ParentableNode<Object> selected, Odo odo, String projectName, Optional<String> application,
-                         ApplicationsRootNode rootNode, CreateComponentModel model, AnActionEvent anActionEvent) throws IOException {
+  protected void process(ParentableNode<? extends Object> selected, Odo odo, String projectName, Optional<String> application,
+                         ApplicationsRootNode rootNode, CreateComponentModel model, ApplicationsTreeStructure structure) throws IOException {
     boolean doit = UIHelper.executeInUI(() -> showDialog(model));
     if (doit) {
       createComponent(odo, projectName, application.orElse(model.getApplication()), model);
       rootNode.addContext(model.getContext());
-      ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
+      structure.fireModified(selected);
       sendTelemetryResults(TelemetryResult.SUCCESS);
     } else {
       sendTelemetryResults(TelemetryResult.ABORTED);

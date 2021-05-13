@@ -33,12 +33,12 @@ public abstract class OdoAction extends StructureTreeAction  implements Telemetr
 
   protected OdoAction(Class... filters) {
     super(filters);
+    telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
   }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     try {
-      telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
       this.actionPerformed(anActionEvent, path, getElement(selected), getOdo(anActionEvent));
     } catch (IOException e) {
       Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");

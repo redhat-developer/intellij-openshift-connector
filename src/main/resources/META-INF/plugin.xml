@@ -12,6 +12,10 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.6.0</b></p>
+  <p>Improved OpenShift Container Platform 4 compatibility<p>
+  <p>Improved navigation in the OpenShift view<p>
+  <p>Opt-in Telemetry data collection</p>
   <p><b>0.5.0</b></p>
   <p>Add support for starters for devfile based components<p>
   <p>devfiles can be editied with syntax checking and content assist</p>

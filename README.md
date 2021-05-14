@@ -24,20 +24,31 @@ The extension also supports OpenShift running on Azure, AWS.
 
 ## New features
 
+### Improved OpenShift Container Platform 4 compatibility
+
+Although previous versions of the plugin were compatible with OCP 4, there were some small issues that have been fixes (ie paste login command in the Login wizard)
+
+### Telemetry data collection
+
+The plugin collects anonymous usage data, if enabled, and sends it to Red Hat servers to help improve our products and services. 
+
+![](images/0.6.0/openshift1.png)
+
+
+## Features
+
 ### Starter projects
 
 When you create a component from a devfile, if the selected devfile contains starter projects (sample projects that contain source code that can be used to bootstrap your component) and if the selected local module is empty, you can optionally select one of those starter projects whose content will be copied to your local module before the component is created.
 
 ![](images/0.5.0/openshift1.gif)
 
-## Enhanced devfile editing experience
+### Enhanced devfile editing experience
 
 Devfile based components now have a local devfile added to the local module when the component is created. A devfile is a YAML file with a specific syntax. It is now possible for the end user to edit this file (in case specific settings needs to be updated or added).
 The YAML editor will now assist during edition of this file with syntax validation and code assist
 
 ![](images/0.5.0/openshift2.gif)
-
-## Features
 
 ### Devfile support
 
@@ -188,6 +199,12 @@ The plugin will detect these dependencies and prompt the user to install if they
 ## Release notes
 
 See the [change log][plugin-repo].
+
+Data and Telemetry
+==================
+The OpenShift plugin collects anonymous [usage data](USAGE_DATA.md) and sends it to Red Hat servers to help improve our products and services. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection) to learn more. This extension respects the Red Hat Telemetry setting which you can learn more about at [https://github.com/redhat-developer/intellij-redhat-telemetry#telemetry-reporting](https://github.com/redhat-developer/intellij-redhat-telemetry#telemetry-reporting)
+
+
 
 Contributing
 ============

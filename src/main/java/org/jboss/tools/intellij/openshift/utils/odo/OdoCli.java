@@ -391,11 +391,11 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void login(String url, String userName, char[] password, String token) throws IOException {
-        if (token == null || token.isEmpty()) {
+    public void login(String url, String userName, char[] password, char[] token) throws IOException {
+        if (token == null) {
             execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
         } else {
-            execute(command, envVars, "login", url, "-t", token, " --insecure-skip-tls-verify");
+            execute(command, envVars, "login", url, "-t", String.valueOf(token), " --insecure-skip-tls-verify");
         }
     }
 

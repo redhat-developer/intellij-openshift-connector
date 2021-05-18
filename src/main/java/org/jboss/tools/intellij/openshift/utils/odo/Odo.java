@@ -74,7 +74,7 @@ public interface Odo {
 
     void deleteProject(String project) throws IOException;
 
-    void login(String url, String userName, char[] password, String token) throws IOException;
+    void login(String url, String userName, char[] password, char[] token) throws IOException;
 
     void logout() throws IOException;
 

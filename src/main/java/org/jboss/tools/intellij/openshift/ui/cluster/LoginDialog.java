@@ -40,7 +40,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
     private JTextField userNameField;
     private JPasswordField passwordField;
     private JTextField clusterURLField;
-    private JTextField tokenField;
+    private JPasswordField tokenField;
     private JButton pasteLoginCommandButton;
 
     public LoginDialog(Component parent, String clusterURL) {
@@ -51,9 +51,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         userNameField.getDocument().addDocumentListener(this);
         passwordField.getDocument().addDocumentListener(this);
         tokenField.getDocument().addDocumentListener(this);
-        pasteLoginCommandButton.addActionListener(e -> {
-            parseLoginCommandFromClipboard();
-        });
+        pasteLoginCommandButton.addActionListener(e -> parseLoginCommandFromClipboard());
     }
 
     private void parseLoginCommandFromClipboard() {
@@ -115,8 +113,8 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         return clusterURLField.getText();
     }
 
-    public String getToken() {
-        return tokenField.getText();
+    public char[] getToken() {
+        return tokenField.getPassword();
     }
 
     @Override
@@ -135,12 +133,12 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
     }
 
     public void changed(DocumentEvent e) {
-        if (userNameField.getText().trim().length() > 0 || passwordField.getPassword().length > 0) {
+        if (getUserName().trim().length() > 0 || getPassword().length > 0) {
             tokenField.setEnabled(false);
         } else {
             tokenField.setEnabled(true);
         }
-        if (tokenField.getText().trim().length() > 0) {
+        if (getToken().length > 0) {
             userNameField.setEnabled(false);
             passwordField.setEnabled(false);
         } else {
@@ -189,7 +187,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         final JLabel label4 = new JLabel();
         label4.setText("Token");
         panel1.add(label4, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        tokenField = new JTextField();
+        tokenField = new JPasswordField();
         panel1.add(tokenField, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
     }
 

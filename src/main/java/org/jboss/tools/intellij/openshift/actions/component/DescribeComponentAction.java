@@ -21,7 +21,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -39,15 +38,15 @@ public class DescribeComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((Component)((ComponentNode)selected).getComponent()).getState() != ComponentState.NOT_PUSHED;
+      visible = ((ComponentNode)selected).getComponent().getState() != ComponentState.NOT_PUSHED;
     }
     return visible;
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getComponent();
+    Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {

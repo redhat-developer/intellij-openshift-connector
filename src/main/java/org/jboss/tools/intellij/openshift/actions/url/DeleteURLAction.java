@@ -23,7 +23,6 @@ import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,10 +37,10 @@ public class DeleteURLAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete URL"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     URLNode urlNode = (URLNode) selected;
-    ComponentNode componentNode = (ComponentNode) urlNode.getParent();
-    Component component = (Component) componentNode.getComponent();
+    ComponentNode componentNode = urlNode.getParent();
+    Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {

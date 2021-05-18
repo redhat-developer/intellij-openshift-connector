@@ -19,7 +19,6 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,7 +33,7 @@ public class DescribeServiceAction extends OdoAction {
   protected String getTelemetryActionName() { return "describe service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     ServiceNode serviceNode = (ServiceNode) selected;
     ApplicationNode applicationNode = serviceNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();

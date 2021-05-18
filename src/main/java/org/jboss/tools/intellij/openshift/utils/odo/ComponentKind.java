@@ -25,13 +25,4 @@ public enum ComponentKind {
         return label;
     }
 
-    public static ComponentKind fromAnnotation(String annotation) {
-        switch (annotation) {
-            case "DevfileComponent":
-                return DEVFILE;
-            case "Component":
-            default:
-                return S2I;
-        }
-    }
 }

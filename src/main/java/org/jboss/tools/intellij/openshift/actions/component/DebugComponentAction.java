@@ -60,7 +60,7 @@ public abstract class DebugComponentAction extends OdoAction {
 
     private ExecutionEnvironment environment;
 
-    public DebugComponentAction() {
+    protected DebugComponentAction() {
         super(ComponentNode.class);
     }
 
@@ -72,7 +72,7 @@ public abstract class DebugComponentAction extends OdoAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
-            Component component = (Component) componentNode.getComponent();
+            Component component = componentNode.getComponent();
             return (isPushed(component) && isDebuggable(component.getInfo().getComponentKind(), component.getInfo().getComponentTypeName()));
         }
         return false;
@@ -83,11 +83,10 @@ public abstract class DebugComponentAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent,
-                                TreePath path, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
         ComponentNode componentNode = (ComponentNode) selected;
-        Component component = (Component) componentNode.getComponent();
-        ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
+        Component component = componentNode.getComponent();
+        ApplicationNode applicationNode = componentNode.getParent();
         NamespaceNode namespaceNode = applicationNode.getParent();
 
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
@@ -135,6 +134,8 @@ public abstract class DebugComponentAction extends OdoAction {
                                         sendTelemetryError(e);
                                         UIHelper.executeInUI(() -> Messages.showErrorDialog(
                                                 "Error: " + e.getLocalizedMessage(), "Odo Debug"));
+                                        if (e instanceof InterruptedException)
+                                            Thread.currentThread().interrupt();
                                     }
                                 }
                             });

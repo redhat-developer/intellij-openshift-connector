@@ -17,7 +17,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.cluster.LoginDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,7 +28,7 @@ public class LoginAction extends LoggedOutClusterAction {
     protected String getTelemetryActionName() { return "login to cluster"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     CompletableFuture.runAsync(() -> {
         try {

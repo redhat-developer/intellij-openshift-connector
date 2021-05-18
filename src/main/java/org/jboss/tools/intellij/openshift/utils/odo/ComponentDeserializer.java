@@ -24,8 +24,6 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     public static final String S2I_FIELD = "s2iComponents";
     public static final String DEVFILE_FIELD = "devfileComponents";
     public static final String METADATA_FIELD = "metadata";
-    public static final String STATUS_FIELD = "status";
-    public static final String STATE_FIELD = "state";
     public static final String NAME_FIELD = "name";
 
     public ComponentDeserializer() {

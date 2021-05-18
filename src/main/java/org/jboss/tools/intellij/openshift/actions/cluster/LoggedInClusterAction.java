@@ -10,13 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.cluster;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 
 public abstract class LoggedInClusterAction extends OdoAction {
 
-    public LoggedInClusterAction() {
+    protected LoggedInClusterAction() {
         super(ApplicationsRootNode.class);
     }
 

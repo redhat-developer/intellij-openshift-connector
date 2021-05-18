@@ -15,7 +15,6 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +26,7 @@ public class ListComponentsAction extends LoggedInClusterAction {
   protected String getTelemetryActionName() { return "list components"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     CompletableFuture.runAsync(() -> {
       try {
         odo.listComponents();

@@ -24,13 +24,13 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class LinkComponentAction extends OdoAction {
@@ -42,7 +42,7 @@ public class LinkComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "link service to component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     ServiceNode serviceNode = (ServiceNode) selected;
     ApplicationNode applicationNode = serviceNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
@@ -60,7 +60,7 @@ public class LinkComponentAction extends OdoAction {
           }
           if (component != null) {
             odo.link(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getPath(), serviceNode.getName(), null);
-            Notifications.Bus.notify(new Notification("OpenShift", "Link component", "Service linked to " + component.getName(),
+            Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link component", "Service linked to " + component.getName(),
             NotificationType.INFORMATION));
             sendTelemetryResults(TelemetryResult.SUCCESS);
           } else {

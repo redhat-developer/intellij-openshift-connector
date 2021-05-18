@@ -30,7 +30,7 @@ public abstract class TreeAction extends AnAction implements TelemetryHandler {
 
     private TelemetrySender telemetrySender;
 
-    public TreeAction(Class... filters) {
+    protected TreeAction(Class... filters) {
         this.filters = filters;
     }
 
@@ -58,7 +58,7 @@ public abstract class TreeAction extends AnAction implements TelemetryHandler {
         if (selectedPath.isPresent()) {
             Object selected = selectedPath.get().getLastPathComponent();
             telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-            actionPerformed(e, selectedPath.get(), selected);
+            actionPerformed(e, selected);
         }
     }
 
@@ -66,7 +66,7 @@ public abstract class TreeAction extends AnAction implements TelemetryHandler {
         return Optional.ofNullable(tree.getSelectionModel().getSelectionPath());
     }
 
-    public abstract void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected);
+    public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected);
 
     protected abstract String getTelemetryActionName();
 

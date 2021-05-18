@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 
 public abstract class PushedComponentAction extends ContextAwareComponentAction {
@@ -19,7 +18,7 @@ public abstract class PushedComponentAction extends ContextAwareComponentAction 
     public boolean isVisible(Object selected) {
         boolean isVisible = super.isVisible(selected);
         if (isVisible) {
-            isVisible = ((Component)((ComponentNode)selected).getComponent()).getState() == ComponentState.PUSHED;
+            isVisible = ((ComponentNode)selected).getComponent().getState() == ComponentState.PUSHED;
         }
         return isVisible;
     }

@@ -4,6 +4,7 @@
 [plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/12030-openshift-connector-by-red-hat.svg
 
 [![Build status](https://github.com/redhat-developer/intellij-openshift-connector/workflows/Java%20CI%20with%20Gradle/badge.svg)](https://github.com/redhat-developer/intellij-openshift-connector/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
+[![Sonar Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=redhat-developer_intellij-openshift-connector&metric=alert_status)](https://sonarcloud.io/dashboard?id=redhat-developer_intellij-openshift-connector)
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
 
@@ -100,22 +101,22 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions available for an OpenShift Cluster Project
 
-   * `New Component` - Create a new Component from the Project.
-        * local - Use a local directory as a source for the Component.
-        * git - Use a git repository as the source for the Component.
-        * binary - Use a binary file as a source for the Component
-   * `New Service` - Perform Service Catalog operations when it is enabled.
-   * `Delete` - Delete an existing Project.
+* `New Component` - Create a new Component from the Project.
+    * local - Use a local directory as a source for the Component.
+    * git - Use a git repository as the source for the Component.
+    * binary - Use a binary file as a source for the Component
+* `New Service` - Perform Service Catalog operations when it is enabled.
+* `Delete` - Delete an existing Project.
 
 #### Actions available for an Application in a Project
 
-   * `New Component` - Create a new Component inside the selected Application.
-        * local - Use a local directory as a source for the Component.
-        * git - Use a git repository as the source for the Component.
-        * binary - Use a binary file as a source for the Component
-   * `New Service` - Perform Service Catalog operations when it is enabled.
-   * `Describe` - Describe the given Application in a terminal window.
-   * `Delete` - Delete an existing Application.
+* `New Component` - Create a new Component inside the selected Application.
+    * local - Use a local directory as a source for the Component.
+    * git - Use a git repository as the source for the Component.
+    * binary - Use a binary file as a source for the Component
+* `New Service` - Perform Service Catalog operations when it is enabled.
+* `Describe` - Describe the given Application in a terminal window.
+* `Delete` - Delete an existing Application.
 
 #### Actions available for a Component in an Application
 
@@ -127,47 +128,47 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions for a Pushed Component
 
-   * `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
-   * `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-   * `Describe` - Describe the given Component in a terminal window.
-   * `Show Log` - Retrieve the log for the given Component.
-   * `Follow Log` - Follow logs for the given Component.
-   * `Link Component` - Link Component to another Component.
-   * `Link Service` - Link Component to a Service.
-   * `Unlink` - Unlink Component from Component/Service.
-   * `Open in Browser` - Open the exposed URL in a browser.
-   * `Push` - Push the source code to a Component.
-   * `Watch` - Watch for changes, update Component on change. This is not supported for Git based components.
-   * `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more details.
-   * `Undeploy` - Undeploy a Component from the cluster. The component still resides in the local config.
-   * `Delete` - Delete an existing Component from the cluster and removes the local config also.
+* `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
+* `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
+* `Describe` - Describe the given Component in a terminal window.
+* `Show Log` - Retrieve the log for the given Component.
+* `Follow Log` - Follow logs for the given Component.
+* `Link Component` - Link Component to another Component.
+* `Link Service` - Link Component to a Service.
+* `Unlink` - Unlink Component from Component/Service.
+* `Open in Browser` - Open the exposed URL in a browser.
+* `Push` - Push the source code to a Component.
+* `Watch` - Watch for changes, update Component on change. This is not supported for Git based components.
+* `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more details.
+* `Undeploy` - Undeploy a Component from the cluster. The component still resides in the local config.
+* `Delete` - Delete an existing Component from the cluster and removes the local config also.
 
 #### Actions for a Not Pushed Component
 
-   * `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
-   * `Push` - Push the source code to a Component.
-   * `Delete` - Delete an existing Component from the local config.
+* `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
+* `Push` - Push the source code to a Component.
+* `Delete` - Delete an existing Component from the local config.
 
 
 #### Actions for a no context Component
 
-   * `Describe` - Describe the given Component in a terminal window.
-   * `Delete` - Delete an existing Component from the local config.
-   * `Import` - If the component was created using old version of the extension (`<=0.0.6`), users can use the `Import` action to migrate to the latest version and import the metadata changes.
+* `Describe` - Describe the given Component in a terminal window.
+* `Delete` - Delete an existing Component from the local config.
+* `Import` - If the component was created using old version of the extension (`<=0.0.6`), users can use the `Import` action to migrate to the latest version and import the metadata changes.
 
 #### Actions available for a URL in a Component
 
-   * `Delete` - Delete a URL from a Component.
-   * `Open URL` - Click on the icon opens the specific URL in Browser.
+* `Delete` - Delete a URL from a Component.
+* `Open URL` - Click on the icon opens the specific URL in Browser.
 
 #### Actions available for a Storage in a Component
 
-   * `Delete` - Delete a Storage from a Component.
+* `Delete` - Delete a Storage from a Component.
 
 #### Actions available for a Service in an Application
 
-   * `Describe` - Describe a Service Type for a selected Component
-   * `Delete` - Delete a Service from an Application
+* `Describe` - Describe a Service Type for a selected Component
+* `Delete` - Delete a Service from an Application
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
 
@@ -190,7 +191,7 @@ This extension uses the following CLI tool to interact with OpenShift cluster:
 
 * odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
 
-> If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically. 
+> If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically.
 The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
 

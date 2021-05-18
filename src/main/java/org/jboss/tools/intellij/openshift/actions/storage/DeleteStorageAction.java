@@ -23,7 +23,6 @@ import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaim
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,10 +37,10 @@ public class DeleteStorageAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete storage"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
     PersistentVolumeClaimNode storageNode = (PersistentVolumeClaimNode) selected;
-    ComponentNode componentNode = (ComponentNode) storageNode.getParent();
-    Component component = (Component) componentNode.getComponent();
+    ComponentNode componentNode = storageNode.getParent();
+    Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Storage '" + storageNode.getName() + "'.\nAre you sure?", "Delete Storage",

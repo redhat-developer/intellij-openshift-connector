@@ -15,26 +15,9 @@ import org.jboss.tools.intellij.openshift.KubernetesLabels;
 
 public interface Storage {
     public String getName();
-    public String getSize();
-    public String getPath();
 
     static Storage of(String name) {
-        return new Storage() {
-            @Override
-            public String getName() {
-                return name;
-            }
-
-            @Override
-            public String getSize() {
-                return "";
-            }
-
-            @Override
-            public String getPath() {
-                return "";
-            }
-        };
+        return () -> name;
     }
 
     public static String getStorageName(PersistentVolumeClaim pvc) {

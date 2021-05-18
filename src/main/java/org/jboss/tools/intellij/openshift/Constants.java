@@ -17,14 +17,9 @@ public class Constants {
 
     public static final String GROUP_DISPLAY_ID = "OpenShift Connector";
 
-    public static final String CLUSTER_MIGRATION_TITLE = "Cluster migration";
-    public static final String CLUSTER_MIGRATION_MESSAGE = "Some of the resources in cluster must be updated to work with latest release of OpenShift Connector plugin";
-    public static final String CLUSTER_MIGRATION_ERROR_MESSAGE = "Errors while migrating cluster resources";
     public static final String COMPONENT_MIGRATION_TITLE = "Component migrated";
     public static final String COMPONENT_MIGRATION_MESSAGE = "This component must be undeployed before new version is pushed, because it was created and deployed with previous version of OpenShift Connector plugin";
-    public static final String COMPONENT_MIGRATION_ERROR_MESSAGE = "Errors while undeploying migrated component";
 
-    public static final String UPDATE_LABEL = "Update";
     public static final String UNDEPLOY_LABEL = "Undeploy";
     public static final String HELP_LABEL = "Help";
 

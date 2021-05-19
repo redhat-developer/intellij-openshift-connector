@@ -203,7 +203,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void login(String url, String userName, char[] password, String token) throws IOException {
+    public void login(String url, String userName, char[] password, char[] token) throws IOException {
         delegate.login(url, userName, password, token);
     }
 

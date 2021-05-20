@@ -34,7 +34,7 @@ public class DeleteApplicationAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete application"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ApplicationNode applicationNode = (ApplicationNode) selected;
     NamespaceNode namespaceNode = applicationNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Application '" + applicationNode.getName() + "'.\nAre you sure?", "Delete Application",

@@ -44,7 +44,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
   protected String getTelemetryActionName() { return "push component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = ((ComponentNode) selected).getComponent();
     ApplicationNode applicationNode = componentNode.getParent();

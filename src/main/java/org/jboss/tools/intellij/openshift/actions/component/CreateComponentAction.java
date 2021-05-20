@@ -65,7 +65,7 @@ public class CreateComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "create component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     final Optional<String> application;
     String projectName;
     if (selected instanceof ApplicationNode) {

@@ -17,10 +17,8 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
@@ -39,7 +37,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
     action.doActioPerformed(rootNode);
   }
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     doActioPerformed(clusterNode);
   }

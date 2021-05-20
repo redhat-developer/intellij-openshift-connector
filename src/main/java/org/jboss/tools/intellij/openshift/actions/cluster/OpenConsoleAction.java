@@ -25,7 +25,7 @@ public class OpenConsoleAction extends LoggedInClusterAction {
   protected String getTelemetryActionName() { return "open console"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     try {
       String url = odo.consoleURL();
       BrowserUtil.open(url);

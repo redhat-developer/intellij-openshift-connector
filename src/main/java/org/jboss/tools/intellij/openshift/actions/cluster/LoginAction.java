@@ -28,7 +28,7 @@ public class LoginAction extends LoggedOutClusterAction {
     protected String getTelemetryActionName() { return "login to cluster"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     CompletableFuture.runAsync(() -> {
         try {

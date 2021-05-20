@@ -38,7 +38,7 @@ public class OpenInBrowserAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
       BrowserUtil.open(getURL(((URLNode)selected).getUrl()));
       sendTelemetryResults(TelemetryResult.SUCCESS);
   }

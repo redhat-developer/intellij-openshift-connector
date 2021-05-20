@@ -37,7 +37,7 @@ public class DeleteProjectAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete project"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     NamespaceNode namespaceNode = (NamespaceNode) selected;
     if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + namespaceNode.getName() + "'.\nAre you sure?", "Delete Project",
         Messages.getQuestionIcon())) {

@@ -45,7 +45,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
         return ((ApplicationsRootNode) ((ApplicationsTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getApplicationsRoot()).getOdo();
     }
 
-    public abstract void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected);
+    public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo);
 
     protected abstract String getTelemetryActionName();
 

@@ -37,7 +37,7 @@ public class DeleteURLAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete URL"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     URLNode urlNode = (URLNode) selected;
     ComponentNode componentNode = urlNode.getParent();
     Component component = componentNode.getComponent();

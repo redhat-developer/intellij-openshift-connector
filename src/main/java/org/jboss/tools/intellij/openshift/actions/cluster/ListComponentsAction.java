@@ -26,7 +26,7 @@ public class ListComponentsAction extends LoggedInClusterAction {
   protected String getTelemetryActionName() { return "list components"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     CompletableFuture.runAsync(() -> {
       try {
         odo.listComponents();

@@ -33,7 +33,7 @@ public class DescribeServiceAction extends OdoAction {
   protected String getTelemetryActionName() { return "describe service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     ApplicationNode applicationNode = serviceNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();

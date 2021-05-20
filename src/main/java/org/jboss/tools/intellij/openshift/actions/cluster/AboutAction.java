@@ -31,7 +31,7 @@ public class AboutAction extends OdoAction {
   protected String getTelemetryActionName() { return "about"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     CompletableFuture.runAsync(() -> {
       try {
         odo.about();

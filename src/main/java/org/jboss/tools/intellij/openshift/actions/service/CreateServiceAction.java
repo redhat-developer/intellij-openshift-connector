@@ -54,7 +54,7 @@ public class CreateServiceAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         final String applicationName;
         String projectName;
         if (selected instanceof ApplicationNode) {

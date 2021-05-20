@@ -43,7 +43,7 @@ public class ListServicesAction extends LoggedInClusterAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         CompletableFuture.runAsync(() -> {
             try {
                 odo.listServices();

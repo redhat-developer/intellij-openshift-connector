@@ -34,7 +34,7 @@ public class CreateStorageAction extends ContextAwareComponentAction {
   protected String getTelemetryActionName() { return "create storage"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     ApplicationNode applicationNode = componentNode.getParent();

@@ -32,7 +32,7 @@ public class DescribeApplicationAction extends OdoAction {
   protected String getTelemetryActionName() { return "describe application"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Odo odo, Object selected) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ApplicationNode applicationNode = (ApplicationNode) selected;
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {

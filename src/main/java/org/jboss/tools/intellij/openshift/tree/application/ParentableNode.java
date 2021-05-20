@@ -46,11 +46,12 @@ public abstract class ParentableNode<T> {
         while (!(element instanceof NamespaceNode)) {
             if (element instanceof ParentableNode) {
                 element = ((ParentableNode) element).getParent();
-            } else {
-                element = null;
+            }
+            if (element == null){
+                return "";
             }
         }
-        return element != null ? ((NamespaceNode) element).getName() : "";
+        return ((NamespaceNode)element).getName();
     }
 
     public String getDisplayName() {

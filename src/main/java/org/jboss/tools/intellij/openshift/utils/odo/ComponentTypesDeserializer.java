@@ -23,6 +23,9 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
 
     private static final String S2I_ITEMS_FIELD = "s2iItems";
     private static final String DEVFILE_ITEMS_FIELD = "devfileItems";
+    private static final String DEVFILE_REGISTRY = "Registry";
+    private static final String DEVFILE_DISPLAY_NAME_FIELD = "DisplayName";
+    private static final String DEVFILE_DESCRIPTION_FIELD = "Description";
     private static final String METADATA_FIELD = "metadata";
     private static final String S2I_NAME_FIELD = "name";
     private static final String DEVFILE_NAME_FIELD = "Name";
@@ -59,7 +62,10 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
         if (items != null) {
             for (JsonNode item : items) {
                 String name = item.get(DEVFILE_NAME_FIELD).asText();
-                result.add(new DevfileComponentType(name));
+                String displayName = item.get(DEVFILE_DISPLAY_NAME_FIELD).asText();
+                String description = item.get(DEVFILE_DESCRIPTION_FIELD).asText();
+                DevfileRegistry registry = DevfileRegistriesDeserializer.getRegistry(item.get(DEVFILE_REGISTRY));
+                result.add(new DevfileComponentType(name, displayName, description, registry));
             }
         }
         return result;

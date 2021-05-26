@@ -135,7 +135,10 @@
       <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
-   </group>
+      <!-- registry management -->
+      <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New registry"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" text="Delete"/>
+    </group>
   </actions>
 
 </idea-plugin>

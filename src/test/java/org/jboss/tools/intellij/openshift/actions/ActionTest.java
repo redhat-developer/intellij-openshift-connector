@@ -19,6 +19,8 @@ import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode;
+import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
@@ -211,4 +213,27 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
     assertFalse(visible);
   }
 
+  public void testActionOnRegistries() {
+    DevfileRegistriesNode registriesNode = mock(DevfileRegistriesNode.class);
+    AnActionEvent event = createEvent(registriesNode);
+    AnAction action = getAction();
+    action.update(event);
+    verifyRegistries(event.getPresentation().isVisible());
+  }
+
+  protected void verifyRegistries(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnRegistry() {
+    DevfileRegistryNode registryNode = mock(DevfileRegistryNode.class);
+    AnActionEvent event = createEvent(registryNode);
+    AnAction action = getAction();
+    action.update(event);
+    verifyRegistry(event.getPresentation().isVisible());
+  }
+
+  protected void verifyRegistry(boolean visible) {
+    assertFalse(visible);
+  }
 }

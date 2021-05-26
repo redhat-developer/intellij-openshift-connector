@@ -559,9 +559,39 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public List<String> getComponentStarters(String componentType) throws IOException {
+    public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
         String json = execute(command, envVars, "catalog", "describe", "component", componentType, "-o", "json");
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
         return parser.parseComponentTypeInfo();
+    }
+
+    @Override
+    public List<DevfileRegistry> listDevfileRegistries() throws IOException {
+        return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
+                execute(command, envVars, "registry", "list", "-o", "json"),
+                new TypeReference<List<DevfileRegistry>>() {});
+    }
+
+    @Override
+    public void createDevfileRegistry(String name, String url, String token) throws IOException {
+        if (StringUtils.isNotBlank(token)) {
+            execute(command, envVars, "registry", "add", name, url, "--token", token);
+        } else {
+            execute(command, envVars, "registry", "add", name, url);
+        }
+    }
+
+    @Override
+    public void deleteDevfileRegistry(String name) throws IOException {
+        execute(command, envVars, "registry", "delete", "-f", name);
+    }
+
+    @Override
+    public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
+        return getComponentTypes().stream().
+                filter(type -> type instanceof DevfileComponentType).
+                map(type -> (DevfileComponentType)type).
+                filter(type -> name.equals(type.getDevfileRegistry().getName())).
+                collect(Collectors.toList());
     }
 }

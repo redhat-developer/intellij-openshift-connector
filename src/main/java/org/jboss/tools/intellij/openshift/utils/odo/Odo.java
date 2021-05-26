@@ -112,5 +112,13 @@ public interface Odo {
 
     ComponentKind getComponentKind(String context) throws IOException;
 
-    List<String> getComponentStarters(String componentType) throws IOException;
+    ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException;
+
+    List<DevfileRegistry> listDevfileRegistries() throws IOException;
+
+    void createDevfileRegistry(String name, String url, String token) throws IOException;
+
+    void deleteDevfileRegistry(String name) throws IOException;
+
+    List<DevfileComponentType> getComponentTypes(String name) throws IOException;
 }

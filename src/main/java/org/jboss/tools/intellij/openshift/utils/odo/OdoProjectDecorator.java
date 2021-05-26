@@ -315,12 +315,32 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<String> getComponentStarters(String componentType) throws IOException {
-        return delegate.getComponentStarters(componentType);
+    public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
+        return delegate.getComponentTypeInfo(componentType);
     }
 
     @Override
     public String consoleURL() throws IOException {
         return delegate.consoleURL();
+    }
+
+    @Override
+    public List<DevfileRegistry> listDevfileRegistries() throws IOException {
+        return delegate.listDevfileRegistries();
+    }
+
+    @Override
+    public void createDevfileRegistry(String name, String url, String token) throws IOException {
+        delegate.createDevfileRegistry(name, url, token);
+    }
+
+    @Override
+    public void deleteDevfileRegistry(String name) throws IOException {
+        delegate.deleteDevfileRegistry(name);
+    }
+
+    @Override
+    public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
+        return delegate.getComponentTypes(name);
     }
 }

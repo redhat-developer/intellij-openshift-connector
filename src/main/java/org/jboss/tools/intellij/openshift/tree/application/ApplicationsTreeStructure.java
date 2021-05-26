@@ -19,6 +19,7 @@ import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.utils.odo.Application;
+import org.jboss.tools.intellij.openshift.utils.odo.DevfileRegistry;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private final ApplicationsRootNode root;
 
     private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
+    private DevfileRegistriesNode registries;
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
@@ -58,15 +60,29 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private static final Icon URL_ICON = IconLoader.findIcon("/images/url-node.png", ApplicationsTreeStructure.class);
     private static final Icon URL_SECURE_ICON = IconLoader.findIcon("/images/url-node-secure.png", ApplicationsTreeStructure.class);
 
+    private static final Icon COMPONENT_TYPE_ICON = IconLoader.findIcon("/images/component-type-light.png", ApplicationsTreeStructure.class);
+
+    private static final Icon STARTER_ICON = IconLoader.findIcon("/images/start-project-light.png", ApplicationsTreeStructure.class);
+
+    private static final Icon REGISTRY_ICON = IconLoader.findIcon("/images/registry.svg", ApplicationsTreeStructure.class);
+
     public ApplicationsTreeStructure(Project project) {
         this.project = project;
         this.root = new ApplicationsRootNode(project, this);
+        this.registries = new DevfileRegistriesNode(root);
     }
 
     @Override
     public @NotNull Object getRootElement() {
+        return this;
+    }
+
+    public Object getApplicationsRoot() {
         if (!initialized.getAndSet(true)) {
-            root.initializeOdo().thenAccept(tkn -> fireModified(root));
+            root.initializeOdo().thenAccept(odo -> {
+                fireModified(root);
+                fireModified(registries);
+            });
         }
         return root;
     }
@@ -74,6 +90,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     @NotNull
     @Override
     public Object[] getChildElements(@NotNull Object element) {
+        if (element == this) {
+            return new Object[] {getApplicationsRoot(), registries};
+        }
         Odo odo = root.getOdo();
         if (odo != null) {
             if (element instanceof ApplicationsRootNode) {
@@ -84,6 +103,12 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                 return getComponentsAndServices((ApplicationNode) element);
             } else if (element instanceof ComponentNode) {
                 return getStoragesAndURLs((ComponentNode) element);
+            } else if (element instanceof DevfileRegistriesNode) {
+                return getRegistries(root, odo);
+            } else if (element instanceof DevfileRegistryNode) {
+                return getRegistryComponentTypes((DevfileRegistryNode) element);
+            } else if (element instanceof DevfileRegistryComponentTypeNode) {
+                return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
             }
         }
         return new Object[0];
@@ -164,19 +189,50 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results.toArray();
     }
 
+    private Object[] getRegistries(ApplicationsRootNode root, Odo odo) {
+        List<DevfileRegistryNode> result = new ArrayList<>();
+
+        try {
+            odo.listDevfileRegistries().forEach(registry -> result.add(new DevfileRegistryNode(root, registries, registry)));
+        } catch (IOException e) {}
+        return result.toArray();
+    }
+
+    private Object[] getRegistryComponentTypes(DevfileRegistryNode element) {
+        List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
+        try {
+            element.getRoot().getOdo().getComponentTypes(element.getName()).forEach(type -> result.add(new DevfileRegistryComponentTypeNode(root, element, type)));
+        } catch (IOException e) {}
+        return result.toArray();
+    }
+
+    private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode element) {
+        List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
+        try {
+            element.getRoot().getOdo().getComponentTypeInfo(element.getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
+        } catch (IOException e) {}
+        return result.toArray();
+    }
+
     @Override
     public Object getParentElement(@NotNull Object element) {
         if (element instanceof ParentableNode) {
             return ((ParentableNode) element).getParent();
+        }
+        if (element instanceof ApplicationsRootNode) {
+            return this;
         }
         return null;
     }
 
     @Override
     public NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
-        if (element instanceof ApplicationsRootNode) {
-            Odo odo = ((ApplicationsRootNode) element).getOdo();
-            return new LabelAndIconDescriptor(project, element, () -> odo != null ? odo.getMasterUrl().toString() : "Loading", CLUSTER_ICON,
+        if (element == this) {
+            return new LabelAndIconDescriptor(project, element, "Root", null, parentDescriptor);
+        }
+        else if (element instanceof ApplicationsRootNode) {
+            ApplicationsRootNode root = (ApplicationsRootNode) element;
+            return new LabelAndIconDescriptor(project, element, () -> root.getOdo() != null?root.getOdo().getMasterUrl().toString():"Loading", CLUSTER_ICON,
                     parentDescriptor);
         } else if (element instanceof NamespaceNode) {
             return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
@@ -198,11 +254,19 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             URL url = ((URLNode) element).getUrl();
             return new LabelAndIconDescriptor(project, element,
                     () -> url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
-                    () -> url.isSecure() ? URL_SECURE_ICON : URL_ICON, parentDescriptor);
-        } else if (element instanceof MessageNode<?>) {
-            return new LabelAndIconDescriptor(project, element, ((MessageNode<?>) element).getName(), null, parentDescriptor);
+                    () -> url.isSecure()?URL_SECURE_ICON:URL_ICON, parentDescriptor);
+        } else if (element instanceof MessageNode) {
+            return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
+        } else if (element instanceof DevfileRegistriesNode) {
+            return new LabelAndIconDescriptor(project, element, "Devfile registries", REGISTRY_ICON, parentDescriptor);
+        } else if (element instanceof DevfileRegistryNode) {
+            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryNode)element).getName(), ((DevfileRegistryNode)element).getRegistry().getURL(), REGISTRY_ICON, parentDescriptor);
+        } else if (element instanceof DevfileRegistryComponentTypeNode) {
+            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeNode)element).getName(), ((DevfileRegistryComponentTypeNode)element).getComponentType().getDescription(), COMPONENT_TYPE_ICON, parentDescriptor);
+        } else if (element instanceof DevfileRegistryComponentTypeStarterNode) {
+            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeStarterNode)element).getName(), ((DevfileRegistryComponentTypeStarterNode)element).getStarter().getDescription(), STARTER_ICON, parentDescriptor);
         }
-        return null;
+        return new LabelAndIconDescriptor(project, element, element.toString(), null, parentDescriptor);
     }
 
     @Override

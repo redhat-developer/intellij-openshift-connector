@@ -40,6 +40,8 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected static final String STORAGE_PREFIX = "stor";
 
+    protected static final String REGISTRY_PREFIX = "reg";
+
     protected static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
 
     protected static final String CLUSTER_USER = System.getenv("CLUSTER_USER");

@@ -589,8 +589,8 @@ public class OdoCli implements Odo {
     @Override
     public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
         return getComponentTypes().stream().
-                filter(type -> type instanceof DevfileComponentType).
-                map(type -> (DevfileComponentType)type).
+                filter(DevfileComponentType.class::isInstance).
+                map(DevfileComponentType.class::cast).
                 filter(type -> name.equals(type.getDevfileRegistry().getName())).
                 collect(Collectors.toList());
     }

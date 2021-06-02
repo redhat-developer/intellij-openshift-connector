@@ -76,11 +76,6 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         return odo;
     }
 
-    public void load() {
-        OdoCliFactory.getInstance().resetOdo();
-        initializeOdo().thenAccept(odo -> structure.fireModified(this));
-    }
-
     public Project getProject() {
         return project;
     }
@@ -92,8 +87,6 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     protected Config loadConfig() {
         return ConfigHelper.safeLoadKubeConfig();
     }
-
-
 
     public Map<String, ComponentDescriptor> getComponents() {
         return components;
@@ -205,10 +198,8 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public void refresh() {
-        try {
-            load();
-        } catch (Exception e) {
-        }
+        OdoCliFactory.getInstance().resetOdo();
+        initializeOdo().thenAccept(odo -> structure.fireModified(this));
     }
 
     public ApplicationsTreeStructure getStructure() {

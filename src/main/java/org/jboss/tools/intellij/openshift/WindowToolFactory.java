@@ -42,11 +42,6 @@ public class WindowToolFactory implements ToolWindowFactory {
 
             JBPanel<JBPanel> panel = new JBPanel<>();
             panel.setLayout(new BorderLayout());
-            //Tree tree = new Tree(new ClustersTreeModel());
-           // tree.setCellRenderer(new ClustersTreeNodeCellRenderer());
-           // PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
-           // panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
-
             ApplicationsTreeStructure structure = new ApplicationsTreeStructure(project);
             StructureTreeModel<ApplicationsTreeStructure> model = buildModel(structure, project);
             new MutableModelSynchronizer<>(model, structure, structure);

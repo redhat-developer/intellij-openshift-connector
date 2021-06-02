@@ -27,9 +27,7 @@ public class OdoCliProjectTest extends OdoCliTest {
         try {
             createProject(project);
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
+            odo.deleteProject(project);
         }
     }
 
@@ -41,9 +39,7 @@ public class OdoCliProjectTest extends OdoCliTest {
             List<Project> projects = odo.getProjects();
             assertTrue(projects.size() > 0);
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
+            odo.deleteProject(project);
         }
     }
 }

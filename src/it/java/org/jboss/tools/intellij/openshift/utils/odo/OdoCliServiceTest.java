@@ -32,9 +32,7 @@ public class OdoCliServiceTest extends OdoCliTest {
                 odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
+            odo.deleteProject(project);
         }
     }
 
@@ -52,9 +50,7 @@ public class OdoCliServiceTest extends OdoCliTest {
                 assertEquals(SERVICE_TEMPLATE, template);
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
+            odo.deleteProject(project);
         }
     }
 
@@ -70,9 +66,7 @@ public class OdoCliServiceTest extends OdoCliTest {
                 odo.deleteService(project, application, service);
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {}
+            odo.deleteProject(project);
         }
     }
 }

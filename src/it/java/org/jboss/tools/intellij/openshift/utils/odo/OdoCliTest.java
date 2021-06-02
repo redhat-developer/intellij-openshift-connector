@@ -66,13 +66,8 @@ public abstract class OdoCliTest extends BaseTest {
         MessagesHelper.setTestDialog(previousTestDialog);
     }
 
-    private void pause() throws InterruptedException {
-        Thread.sleep(1000);
-    }
-
     protected void createProject(String project) throws IOException, InterruptedException {
         odo.createProject(project);
-        pause();
     }
 
     protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {

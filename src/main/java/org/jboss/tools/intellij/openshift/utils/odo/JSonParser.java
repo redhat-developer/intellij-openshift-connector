@@ -27,7 +27,7 @@ public class JSonParser {
     private static final String TYPE_FIELD = "type";
     private static final String URLS_FIELD = "urls";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
-    private static final String DATA_FIELD = "Data";
+    private static final String DEVFILE_FIELD = "Devfile";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
     private static final String DESCRIPTION_FIELD = "description";
 
@@ -97,10 +97,10 @@ public class JSonParser {
         return Constants.DebugStatus.UNKNOWN;
     }
 
-    public ComponentTypeInfo parseComponentTypeInfo() {
+    public List<String> parseComponentTypeInfo() {
         ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
-        if (root.has(DATA_FIELD)) {
-            JsonNode data = root.get(DATA_FIELD);
+        if (root.has(DEVFILE_FIELD)) {
+            JsonNode data = root.get(DEVFILE_FIELD);
             if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
                 builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
             }

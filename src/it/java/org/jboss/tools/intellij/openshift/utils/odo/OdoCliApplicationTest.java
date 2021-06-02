@@ -50,10 +50,7 @@ public class OdoCliApplicationTest extends OdoCliTest {
             List<Application> applications = odo.getApplications(project);
             assertTrue(push ? applications.size() > 0 : applications.size() == 0);
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 }

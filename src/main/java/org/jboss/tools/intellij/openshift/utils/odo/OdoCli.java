@@ -86,6 +86,7 @@ public class OdoCli implements Odo {
         this.client = new DefaultOpenShiftClient(new ConfigBuilder().build());
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
+            this.envVars.put("ODO_DISABLE_TELEMETRY", "true");
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
@@ -354,30 +355,19 @@ public class OdoCli implements Odo {
 
     private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig, ComponentKind kind) throws IOException {
         List<String> args = new ArrayList<>();
+        args.add("delete");
+        args.add("-f");
+        if (deleteConfig) {
+            args.add("-a");
+        }
         if (context != null) {
-            args.add("delete");
-            args.add("-f");
-            if (deleteConfig) {
-                args.add("-a");
-            }
-            if (ComponentKind.S2I.equals(kind)) {
-                args.add("--s2i");
-            }
             execute(new File(context), command, envVars, args.toArray(new String[0]));
         } else {
-            args.add("delete");
-            args.add("-f");
             args.add("--project");
             args.add(project);
             args.add("--app");
             args.add(application);
             args.add(component);
-            if (deleteConfig) {
-                args.add("-a");
-            }
-            if (ComponentKind.S2I.equals(kind)) {
-                args.add("--s2i");
-            }
             execute(command, envVars, args.toArray(new String[0]));
         }
     }

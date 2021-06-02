@@ -64,8 +64,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     @Override
-    public @NotNull
-    Object getRootElement() {
+    public @NotNull Object getRootElement() {
         if (!initialized.getAndSet(true)) {
             root.initializeOdo().thenAccept(tkn -> fireModified(root));
         }
@@ -91,7 +90,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     private Object[] getNamespaces(ApplicationsRootNode element) {
-        List<ParentableNode<?>> namespaces = new ArrayList<>();
+        List<Object> namespaces = new ArrayList<>();
         try {
             element.getOdo().getProjects().forEach(p -> namespaces.add(new NamespaceNode(element, p.getMetadata().getName())));
             element.setLogged(true);
@@ -99,14 +98,14 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             if (e instanceof KubernetesClientException) {
                 KubernetesClientException kce = (KubernetesClientException) e;
                 if (kce.getCode() == 401) {
-                    namespaces.add(new MessageNode<>(element, element, LOGIN));
+                    namespaces.add(new MessageNode(element, element, LOGIN));
                 } else if (kce.getCause() instanceof NoRouteToHostException) {
-                    namespaces.add(new MessageNode<>(element, element, kce.getCause().getMessage()));
+                    namespaces.add(new MessageNode(element, element, kce.getCause().getMessage()));
                 } else {
-                    namespaces.add(new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage()));
+                    namespaces.add(new MessageNode(element, element, "Unable to get namespaces: " + e.getMessage()));
                 }
             } else {
-                namespaces.add(new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage()));
+                namespaces.add(new MessageNode(element, element, "Unable to get namespaces: " + e.getMessage()));
             }
             element.setLogged(false);
         }
@@ -126,20 +125,20 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                 apps.forEach(app -> applications.add(new ApplicationNode(element, app.getName())));
             }
         } catch (IOException e) {
-            applications.add(new MessageNode<>(element.getRoot(), element, FAILED_TO_LOAD_APPLICATIONS));
+            applications.add(new MessageNode(element.getRoot(), element, FAILED_TO_LOAD_APPLICATIONS));
         }
         return applications.toArray();
     }
 
     private Object[] getComponentsAndServices(ApplicationNode element) {
-        List<ParentableNode<?>> results = new ArrayList<>();
+        List<Object> results = new ArrayList<>();
 
         ApplicationsRootNode rootNode = element.getRoot();
         Odo odo = rootNode.getOdo();
         try {
             odo.getComponents(element.getParent().getName(), element.getName()).forEach(dc -> results.add(new ComponentNode(element, dc)));
         } catch (KubernetesClientException | IOException e) {
-            results.add(new MessageNode<>(element.getRoot(), element, "Failed to load application deployment configs"));
+            results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
         }
         odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
 
@@ -168,40 +167,40 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     @Override
     public Object getParentElement(@NotNull Object element) {
         if (element instanceof ParentableNode) {
-            return ((ParentableNode<?>) element).getParent();
+            return ((ParentableNode) element).getParent();
         }
         return null;
     }
 
     @Override
-    public NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
+    public NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
         if (element instanceof ApplicationsRootNode) {
             Odo odo = ((ApplicationsRootNode) element).getOdo();
-            return new LabelAndIconDescriptor<>(project, element, () -> odo != null ? odo.getMasterUrl().toString() : "Loading", CLUSTER_ICON,
+            return new LabelAndIconDescriptor(project, element, () -> odo != null ? odo.getMasterUrl().toString() : "Loading", CLUSTER_ICON,
                     parentDescriptor);
         } else if (element instanceof NamespaceNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
+            return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
         } else if (element instanceof ApplicationNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((ApplicationNode) element)::getName, APPLICATION_ICON,
+            return new LabelAndIconDescriptor(project, element, ((ApplicationNode) element)::getName, APPLICATION_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
-            return new LabelAndIconDescriptor<>(project, element,
+            return new LabelAndIconDescriptor(project, element,
                     () -> ((ComponentNode) element).getName() + ' ' + ((ComponentNode) element).getComponent().getState(),
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
-            return new LabelAndIconDescriptor<>(project, element,
+            return new LabelAndIconDescriptor(project, element,
                     ((ServiceNode) element)::getName, SERVICE_ICON, parentDescriptor);
         } else if (element instanceof PersistentVolumeClaimNode) {
-            return new LabelAndIconDescriptor<>(project, element,
+            return new LabelAndIconDescriptor(project, element,
                     ((PersistentVolumeClaimNode) element)::getName, STORAGE_ICON, parentDescriptor);
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
-            return new LabelAndIconDescriptor<>(project, element,
+            return new LabelAndIconDescriptor(project, element,
                     () -> url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
                     () -> url.isSecure() ? URL_SECURE_ICON : URL_ICON, parentDescriptor);
         } else if (element instanceof MessageNode<?>) {
-            return new LabelAndIconDescriptor<>(project, element, ((MessageNode<?>) element).getName(), null, parentDescriptor);
+            return new LabelAndIconDescriptor(project, element, ((MessageNode<?>) element).getName(), null, parentDescriptor);
         }
         return null;
     }

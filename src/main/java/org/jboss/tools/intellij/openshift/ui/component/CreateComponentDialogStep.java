@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.ui.component;
 
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.SimpleListCellRenderer;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -23,6 +24,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.S2iComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.Starter;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -60,7 +62,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private JButton browseModulesButton;
     private JButton browseFolderButton;
     private JTree componentTypeTree;
-    private JComboBox componentStartersCombo;
+    private JComboBox<Starter> componentStartersCombo;
     private JLabel informationLabel;
     private final CreateComponentModel model;
 
@@ -152,16 +154,17 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     sourceTypeComboBox.setSelectedItem(model.getSourceType());
                     sourceTypeComboBox.setEnabled(false);
                     componentStartersCombo.setEnabled(model.isProjectIsEmpty());
-                    List<String> starters = Collections.emptyList();
+                    List<Starter> starters = Collections.emptyList();
                     if (model.isProjectIsEmpty()) {
                         try {
                             // TODO: create a loader indicator as shown https://jetbrains.design/intellij/controls/progress_indicators/#05
-                            starters = model.getOdo().getComponentStarters(((DevfileComponentType) nodeInfo).getName());
+                            starters = model.getOdo().getComponentTypeInfo(((DevfileComponentType) nodeInfo).getName()).getStarters();
                         } catch (IOException ioException) {
                             starters = Collections.emptyList();
                         }
                     }
                     componentStartersCombo.setModel(new DefaultComboBoxModel(starters.toArray()));
+                    componentStartersCombo.setRenderer(SimpleListCellRenderer.create("", st -> st.getName()));
                 }
                 componentStartersCombo.setSelectedIndex(-1);
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());
@@ -180,7 +183,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
         componentStartersCombo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                model.setSelectedComponentStarter((String) e.getItem());
+                model.setSelectedComponentStarter(((Starter)e.getItem()).getName());
             }
         });
 

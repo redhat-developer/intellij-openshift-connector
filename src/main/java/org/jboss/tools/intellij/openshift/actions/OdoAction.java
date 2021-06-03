@@ -47,7 +47,7 @@ public abstract class OdoAction extends StructureTreeAction  implements Telemetr
 
     private Odo getOdo(AnActionEvent anActionEvent) throws IOException {
         Tree tree = getTree(anActionEvent);
-        return ((ApplicationsRootNode)((ApplicationsTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getOdo();
+        return ((ApplicationsRootNode)((ApplicationsTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getApplicationsRoot()).getOdo();
     }
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {

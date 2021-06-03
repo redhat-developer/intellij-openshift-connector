@@ -12,12 +12,31 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 public final class DevfileComponentType extends AbstractComponentType {
 
-    public DevfileComponentType(String name) {
+    private final String displayName;
+    private final String description;
+    private final DevfileRegistry devfileRegistry;
+
+    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry) {
         super(name);
+        this.displayName = displayName;
+        this.description = description;
+        this.devfileRegistry = devfileRegistry;
     }
 
     @Override
     public ComponentKind getKind() {
         return ComponentKind.DEVFILE;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public DevfileRegistry getDevfileRegistry() {
+        return devfileRegistry;
     }
 }

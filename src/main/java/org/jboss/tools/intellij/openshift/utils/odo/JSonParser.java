@@ -29,6 +29,7 @@ public class JSonParser {
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
     private static final String DATA_FIELD = "Data";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
+    private static final String DESCRIPTION_FIELD = "description";
 
     private final JsonNode root;
 
@@ -96,18 +97,27 @@ public class JSonParser {
         return Constants.DebugStatus.UNKNOWN;
     }
 
-    public List<String> parseComponentTypeInfo() {
-        List<String> result = new ArrayList<>();
+    public ComponentTypeInfo parseComponentTypeInfo() {
+        ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
         if (root.has(DATA_FIELD)) {
             JsonNode data = root.get(DATA_FIELD);
+            if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
+                builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
+            }
             if (data.has(STARTER_PROJECTS_FIELD)) {
                 for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
-                    if (starter.has(NAME_FIELD)) {
-                        result.add(starter.get(NAME_FIELD).asText());
-                    }
+                    builder.withStarter(parseStarter(starter));
                 }
+
             }
         }
-        return result;
+        return builder.build();
+    }
+
+    public Starter parseStarter(JsonNode node) {
+        String name = node.get(NAME_FIELD).asText();
+        String description = node.has(DESCRIPTION_FIELD)?node.get(DESCRIPTION_FIELD).asText():"";
+        Starter.Builder builder = new Starter.Builder().withName(name).withDescription(description);
+        return builder.build();
     }
 }

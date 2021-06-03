@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.ui.component;
 
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.SimpleListCellRenderer;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -61,7 +62,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private JButton browseModulesButton;
     private JButton browseFolderButton;
     private JTree componentTypeTree;
-    private JComboBox componentStartersCombo;
+    private JComboBox<Starter> componentStartersCombo;
     private JLabel informationLabel;
     private final CreateComponentModel model;
 
@@ -163,6 +164,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                         }
                     }
                     componentStartersCombo.setModel(new DefaultComboBoxModel(starters.toArray()));
+                    componentStartersCombo.setRenderer(SimpleListCellRenderer.create("", st -> st.getName()));
                 }
                 componentStartersCombo.setSelectedIndex(-1);
                 model.setComponentTypeName(((ComponentType) nodeInfo).getName());

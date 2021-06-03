@@ -72,14 +72,14 @@
   <depends>com.intellij.modules.lang</depends>
   <depends>org.jetbrains.plugins.terminal</depends>
   <depends>com.redhat.devtools.intellij.telemetry</depends>
+  <depends>com.redhat.devtools.intellij.kubernetes</depends>
 
   <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
   <depends optional="true" config-file="withJavaScriptDebugger.xml">JavaScriptDebugger</depends>
   <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
-    <toolWindow id="OpenShift" anchor="left" factoryClass="org.jboss.tools.intellij.openshift.WindowToolFactory" icon="/META-INF/pluginIcon13x13.svg"/>
+    <toolWindow id="OpenShift" anchor="left" factoryClass="org.jboss.tools.intellij.openshift.WindowToolFactory" icon="/META-INF/OpenShiftPluginIcon13x13.svg"/>
   </extensions>
 
   <actions>
@@ -135,12 +135,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
-      <!-- cluster explorer -->
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" id="org.jboss.tools.intellij.openshift.actions.cluster.SetCurrentClusterAction" text="Set current"/>
-      <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.DeleteFromKubeConfigAction" id="org.jboss.tools.intellij.openshift.actions.cluster.DeleteFromKubeConfigAction" text="Delete"/>
-    </group>
-    <!-- Add your actions here -->
+   </group>
   </actions>
 
 </idea-plugin>

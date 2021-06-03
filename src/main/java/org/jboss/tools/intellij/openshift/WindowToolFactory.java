@@ -26,8 +26,6 @@ import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.common.tree.TreeHelper;
-import org.jboss.tools.intellij.openshift.tree.ClustersTreeModel;
-import org.jboss.tools.intellij.openshift.tree.ClustersTreeNodeCellRenderer;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,19 +42,14 @@ public class WindowToolFactory implements ToolWindowFactory {
 
             JBPanel<JBPanel> panel = new JBPanel<>();
             panel.setLayout(new BorderLayout());
-            Tree tree = new Tree(new ClustersTreeModel());
-            tree.setCellRenderer(new ClustersTreeNodeCellRenderer());
-            PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
-            panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
-
             ApplicationsTreeStructure structure = new ApplicationsTreeStructure(project);
             StructureTreeModel<ApplicationsTreeStructure> model = buildModel(structure, project);
             new MutableModelSynchronizer<>(model, structure, structure);
-            tree = new Tree(new AsyncTreeModel(model, project));
+            Tree tree = new Tree(new AsyncTreeModel(model, project));
             tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);
             tree.setCellRenderer(new NodeRenderer());
             PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
-            panel.add(new JBScrollPane(tree), BorderLayout.PAGE_START);
+            panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
             toolWindow.getContentManager().addContent(contentFactory.createContent(panel, "", false));
             TreeHelper.addLinkSupport(tree);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {

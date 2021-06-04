@@ -21,6 +21,7 @@ public class TelemetryService {
 
     public static final String VALUE_ABORTED = "aborted";
     public static final String PREFIX_ACTION = "ui-";
+    public static final String NAME_PREFIX_MISC = "misc-";
 
     public static final String PROP_COMPONENT_SOURCE_TYPE = "component_sourcetype";
     public static final String PROP_COMPONENT_KIND = "component_kind";
@@ -30,6 +31,10 @@ public class TelemetryService {
     public static final String PROP_COMPONENT_SELECTED_STARTER = "component_selected_starter";
 
     public static final String PROP_DEBUG_COMPONENT_LANGUAGE = "debug_component_language";
+
+    public static final String KUBERNETES_VERSION = "kubernetes_version";
+    public static final String IS_OPENSHIFT = "is_openshift";
+    public static final String OPENSHIFT_VERSION = "openshift_version";
 
     private static TelemetryService instance;
 

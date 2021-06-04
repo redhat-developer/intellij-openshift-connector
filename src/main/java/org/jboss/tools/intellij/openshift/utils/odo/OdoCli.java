@@ -16,8 +16,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
+import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
@@ -33,6 +36,7 @@ import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import io.fabric8.servicecatalog.client.ServiceCatalogClient;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +62,9 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_C
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.IS_OPENSHIFT;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.KUBERNETES_VERSION;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPENSHIFT_VERSION;
 
 public class OdoCli implements Odo {
 
@@ -82,7 +89,22 @@ public class OdoCli implements Odo {
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
+        reportTelemetry();
     }
+
+    private void reportTelemetry() {
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "login");
+        try {
+            ClusterInfo info = ClusterHelper.getClusterInfo(client);
+            telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
+            telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
+            telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
+            telemetry.send();
+        } catch (RuntimeException e) {
+            telemetry.error(e).send();
+        }
+    }
+
 
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
         final SimpleModule module = new SimpleModule();

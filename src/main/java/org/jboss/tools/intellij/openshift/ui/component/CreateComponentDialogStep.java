@@ -153,12 +153,13 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     model.setSourceType(ComponentSourceType.LOCAL);
                     sourceTypeComboBox.setSelectedItem(model.getSourceType());
                     sourceTypeComboBox.setEnabled(false);
+                    model.setDevFileRegistryName(((DevfileComponentType) nodeInfo).getDevfileRegistry().getName());
                     componentStartersCombo.setEnabled(model.isProjectIsEmpty());
                     List<Starter> starters = Collections.emptyList();
                     if (model.isProjectIsEmpty()) {
                         try {
                             // TODO: create a loader indicator as shown https://jetbrains.design/intellij/controls/progress_indicators/#05
-                            starters = model.getOdo().getComponentTypeInfo(((DevfileComponentType) nodeInfo).getName()).getStarters();
+                            starters = model.getOdo().getComponentTypeInfo(((DevfileComponentType) nodeInfo).getName(), ((DevfileComponentType) nodeInfo).getDevfileRegistry().getName()).getStarters();
                         } catch (IOException ioException) {
                             starters = Collections.emptyList();
                         }

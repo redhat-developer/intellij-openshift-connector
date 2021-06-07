@@ -109,7 +109,7 @@ public class CreateComponentAction extends OdoAction {
   private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
     computeTelemetry(model);
     if (model.getSourceType() == ComponentSourceType.LOCAL) {
-      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getContext(), model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null, model.getSelectedComponentStarter(), model.isPushAfterCreate());
+      odo.createComponentLocal(project, application, model.getComponentTypeName(), model.getComponentTypeVersion(), model.getDevFileRegistryName(),  model.getName(), model.getContext(), model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null, model.getSelectedComponentStarter(), model.isPushAfterCreate());
     } else if (model.getSourceType() == ComponentSourceType.GIT) {
       odo.createComponentGit(project, application, model.getContext(), model.getComponentTypeName(), model.getComponentTypeVersion(), model.getName(), model.getGitURL(), model.getGitReference(), model.isPushAfterCreate());
     } else if (model.getSourceType() == ComponentSourceType.BINARY) {

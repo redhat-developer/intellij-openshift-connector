@@ -60,6 +60,8 @@ public class CreateComponentModel extends WizardModel {
 
     private final Odo odo;
 
+    private String registryName;
+
     public CreateComponentModel(String title, Odo odo) {
         super(title);
         this.odo = odo;
@@ -219,7 +221,7 @@ public class CreateComponentModel extends WizardModel {
     public void setComponentTypesTree(List<ComponentType> types) {
         // creates the default Roots
         DefaultMutableTreeNode devfileComponents = new DefaultMutableTreeNode("DevFile Components");
-        DefaultMutableTreeNode s2iComponents = new DefaultMutableTreeNode("S2I Components");
+        DefaultMutableTreeNode s2iComponents = new DefaultMutableTreeNode("S2I Components (Deprecated)");
         for (ComponentType type : types) {
             switch (type.getKind()) {
                 case S2I:
@@ -244,5 +246,16 @@ public class CreateComponentModel extends WizardModel {
 
     public void setSelectedComponentStarter(String selectedComponentStarter) {
         this.selectedComponentStarter = selectedComponentStarter;
+    }
+
+    public String getDevFileRegistryName() {
+        if (getComponentKind().equals(ComponentKind.DEVFILE)){
+            return registryName;
+        }
+        return null;
+    }
+
+    public void setDevFileRegistryName(String registryName) {
+        this.registryName = registryName;
     }
 }

@@ -30,6 +30,7 @@ public class JSonParser {
     private static final String DEVFILE_FIELD = "Devfile";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
     private static final String DESCRIPTION_FIELD = "description";
+    private static final String REGISTRY_NAME_FIELD = "RegistryName";
 
     private final JsonNode root;
 
@@ -97,18 +98,22 @@ public class JSonParser {
         return Constants.DebugStatus.UNKNOWN;
     }
 
-    public List<String> parseComponentTypeInfo() {
+    public ComponentTypeInfo parseComponentTypeInfo(String registryName) {
         ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
-        if (root.has(DEVFILE_FIELD)) {
-            JsonNode data = root.get(DEVFILE_FIELD);
-            if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
-                builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
-            }
-            if (data.has(STARTER_PROJECTS_FIELD)) {
-                for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
-                    builder.withStarter(parseStarter(starter));
+        for (JsonNode element : root) {
+            if (element.has(REGISTRY_NAME_FIELD) && registryName.equals(element.get(REGISTRY_NAME_FIELD).asText())) {
+                if (element.has(DEVFILE_FIELD)) {
+                    JsonNode data = element.get(DEVFILE_FIELD);
+                    if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
+                        builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
+                    }
+                    if (data.has(STARTER_PROJECTS_FIELD)) {
+                        for (JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
+                            builder.withStarter(parseStarter(starter));
+                        }
+                    }
                 }
-
+                break;
             }
         }
         return builder.build();

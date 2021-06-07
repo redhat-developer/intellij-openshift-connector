@@ -175,7 +175,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
         List<String> args = new ArrayList<>();
         args.add(command);
         args.add("create");
@@ -189,6 +189,8 @@ public class OdoCli implements Odo {
                 args.add("--starter=" + starter);
             }
             args.add(componentType);
+            args.add("--registry");
+            args.add(registryName);
         }
         args.add(component);
         args.add("--project");
@@ -571,10 +573,10 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
+    public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
         String json = execute(command, envVars, "catalog", "describe", "component", componentType, "-o", "json");
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentTypeInfo();
+        return parser.parseComponentTypeInfo(registryName);
     }
 
     @Override

@@ -16,7 +16,7 @@ public class DevfileRegistryComponentTypeNode extends ParentableNode<DevfileRegi
   private final DevfileComponentType componentType;
 
   public DevfileRegistryComponentTypeNode(ApplicationsRootNode root, DevfileRegistryNode parent, DevfileComponentType componentType) {
-    super(root, parent, componentType.getName());
+    super(root, parent, componentType.getName(), componentType.getDisplayName());
     this.componentType = componentType;
   }
 

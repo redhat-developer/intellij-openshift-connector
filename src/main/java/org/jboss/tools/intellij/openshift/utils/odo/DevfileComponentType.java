@@ -39,4 +39,9 @@ public final class DevfileComponentType extends AbstractComponentType {
     public DevfileRegistry getDevfileRegistry() {
         return devfileRegistry;
     }
+
+    @Override
+    public String toString() {
+        return getDisplayName() + " (from " + devfileRegistry.getName() + ")";
+    }
 }

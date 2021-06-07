@@ -257,9 +257,11 @@ public class OdoCliComponentTest extends OdoCliTest {
         if (kind != ComponentKind.DEVFILE) {
             return;
         }
+
+        String registryName = odo.listDevfileRegistries().get(0).getName();
         try {
             createProject(project);
-            odo.createComponentLocal(project, application, "java-springboot", null, component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
+            odo.createComponentLocal(project, application, "java-springboot", null, registryName,component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
             List<Component> components = odo.getComponents(project, application);
             assertNotNull(components);
             assertEquals(push ? 1 : 0, components.size());

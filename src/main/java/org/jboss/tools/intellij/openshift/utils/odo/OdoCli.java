@@ -128,6 +128,8 @@ public class OdoCli implements Odo {
                 public String apply(String s, String s2) {
                     if (s2.startsWith("---")) {
                         notificationFound = true;
+                    } else if (s2.startsWith("W")) { // workaround for ingress warning in json
+                        return s;
                     }
                     return notificationFound ? s : s + s2 + "\n";
                 }
@@ -359,10 +361,10 @@ public class OdoCli implements Odo {
         List<String> args = new ArrayList<>();
         args.add("delete");
         args.add("-f");
-        if (deleteConfig) {
-            args.add("-a");
-        }
         if (context != null) {
+            if (deleteConfig) {
+                args.add("-a");
+            }
             execute(new File(context), command, envVars, args.toArray(new String[0]));
         } else {
             args.add("--project");

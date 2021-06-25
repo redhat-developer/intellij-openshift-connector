@@ -119,8 +119,8 @@ public class OdoCli implements Odo {
     }
 
     private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
-        String output = ExecHelper.execute(command, workingDirectory, envs, args);
-        try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+        ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
+        try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {
             BinaryOperator<String> reducer = new BinaryOperator<String>() {
                 private boolean notificationFound = false;
 
@@ -128,8 +128,6 @@ public class OdoCli implements Odo {
                 public String apply(String s, String s2) {
                     if (s2.startsWith("---")) {
                         notificationFound = true;
-                    } else if (s2.startsWith("W")) { // workaround for ingress warning in json
-                        return s;
                     }
                     return notificationFound ? s : s + s2 + "\n";
                 }

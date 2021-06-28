@@ -41,6 +41,11 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
+    public String getNamespace() throws IOException {
+        return delegate.getNamespace();
+    }
+
+    @Override
     public void describeApplication(String project, String application) throws IOException {
         delegate.describeApplication(project, application);
     }

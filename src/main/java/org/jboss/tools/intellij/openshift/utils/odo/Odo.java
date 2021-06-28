@@ -21,6 +21,14 @@ import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 public interface Odo {
     List<Project> getProjects();
 
+    /**
+     * Return the name of the current active namespace (project for OpenShift).
+     *
+     * @return the active namespace name
+     * @throws IOException if communication errored
+     */
+    String getNamespace() throws IOException;
+
     void describeApplication(String project, String application) throws IOException;
 
     void deleteApplication(String project, String application) throws IOException;

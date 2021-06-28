@@ -116,7 +116,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getNamespaces(ApplicationsRootNode element) {
         List<Object> namespaces = new ArrayList<>();
         try {
-            element.getOdo().getProjects().forEach(p -> namespaces.add(new NamespaceNode(element, p.getMetadata().getName())));
+            namespaces.add(new NamespaceNode(element, element.getOdo().getNamespace()));
             element.setLogged(true);
         } catch (Exception e) {
             if (e instanceof KubernetesClientException) {

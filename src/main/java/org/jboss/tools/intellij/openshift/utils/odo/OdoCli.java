@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.base.Strings;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -116,6 +117,15 @@ public class OdoCli implements Odo {
     @Override
     public List<Project> getProjects() {
         return client.projects().list().getItems();
+    }
+
+    @Override
+    public String getNamespace() throws IOException {
+        String namespace = client.getNamespace();
+        if (Strings.isNullOrEmpty(namespace)) {
+            namespace = "default";
+        }
+        return namespace;
     }
 
     private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {

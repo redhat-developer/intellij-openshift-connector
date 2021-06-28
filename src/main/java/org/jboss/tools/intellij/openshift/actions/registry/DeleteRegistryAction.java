@@ -20,7 +20,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStruc
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
@@ -34,7 +33,7 @@ public class DeleteRegistryAction extends OdoAction {
     protected String getTelemetryActionName() { return "delete registry"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         DevfileRegistryNode registryNode = (DevfileRegistryNode) selected;
         if (Messages.NO == Messages.showYesNoDialog("Delete registry '" + registryNode.getName() + "'.\nAre you sure?", "Delete registry",
                 Messages.getQuestionIcon())) {

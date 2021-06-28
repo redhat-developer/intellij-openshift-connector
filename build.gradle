@@ -82,18 +82,18 @@ sonarqube {
     }
 }
 
-jacocoTestReport {
-    executionData = files(mergedCoverageFile)
-    reports {
-        xml.enabled = true
-    }
-    dependsOn tasks.jacocoMerge
-}
-
 task jacocoMerge(type: JacocoMerge) {
     executionData = files("$buildDir/jacoco/test.exec", "$buildDir/jacoco/integrationTest.exec")
     destinationFile = file(mergedCoverageFile)
     dependsOn test, integrationTest
+}
+
+jacocoTestReport {
+    executionData.setFrom(files(mergedCoverageFile))
+    reports {
+        xml.enabled = true
+    }
+    dependsOn tasks.jacocoMerge
 }
 
 runIde {

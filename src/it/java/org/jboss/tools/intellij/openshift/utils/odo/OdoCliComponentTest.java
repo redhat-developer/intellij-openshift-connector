@@ -71,10 +71,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             assertNotNull(components);
             assertEquals(push ? 1 : 0, components.size());
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -91,10 +88,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             assertEquals(application, components.get(0).getApplication());
             assertEquals(project, components.get(0).getProject());
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -104,10 +98,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             createComponent(project, application, component, push, kind);
             odo.deleteComponent(project, application, COMPONENT_PATH, component, kind);
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -119,13 +110,10 @@ public class OdoCliComponentTest extends OdoCliTest {
             if (kind.equals(ComponentKind.DEVFILE)) {
                 assertEquals(2, urls.size());
             } else {
-                assertEquals(1, urls.size());
+                assertEquals(4, urls.size());
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -149,7 +137,7 @@ public class OdoCliComponentTest extends OdoCliTest {
                 assertEquals(push ? URL.State.PUSHED : URL.State.NOT_PUSHED, urls.get(0).getState());
                 assertEquals(URL.State.NOT_PUSHED, urls.get(1).getState());
             } else {
-                assertEquals(1, urls.size());
+                assertEquals(4, urls.size());
                 assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
             }
             odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
@@ -164,13 +152,10 @@ public class OdoCliComponentTest extends OdoCliTest {
                     assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
                 }
             } else {
-                assertEquals(0, urls.size());
+                assertEquals(3, urls.size());
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -195,10 +180,7 @@ public class OdoCliComponentTest extends OdoCliTest {
                 }
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -207,10 +189,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         try {
             createStorage(project, application, component, push, storage);
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -220,10 +199,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             createStorage(project, application, component, push, storage);
             odo.deleteStorage(project, application, COMPONENT_PATH, component, storage);
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -235,13 +211,10 @@ public class OdoCliComponentTest extends OdoCliTest {
             if (kind.equals(ComponentKind.DEVFILE)) {
                 assertEquals(1, urls.size());
             } else {
-                assertEquals(0, urls.size());
+                assertEquals(3, urls.size());
             }
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -258,7 +231,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             if (kind.equals(ComponentKind.DEVFILE)) {
                 assertEquals(2, urls.size());
             } else {
-                assertEquals(1, urls.size());
+                assertEquals(4, urls.size());
             }
             int debugPort;
             try (ServerSocket serverSocket = new ServerSocket(0)) {
@@ -275,10 +248,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             });
 
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 
@@ -287,17 +257,16 @@ public class OdoCliComponentTest extends OdoCliTest {
         if (kind != ComponentKind.DEVFILE) {
             return;
         }
+
+        String registryName = odo.listDevfileRegistries().get(0).getName();
         try {
             createProject(project);
-            odo.createComponentLocal(project, application, "java-springboot", null, component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
+            odo.createComponentLocal(project, application, "java-springboot", null, registryName,component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
             List<Component> components = odo.getComponents(project, application);
             assertNotNull(components);
             assertEquals(push ? 1 : 0, components.size());
         } finally {
-            try {
-                odo.deleteProject(project);
-            } catch (IOException e) {
-            }
+            odo.deleteProject(project);
         }
     }
 }

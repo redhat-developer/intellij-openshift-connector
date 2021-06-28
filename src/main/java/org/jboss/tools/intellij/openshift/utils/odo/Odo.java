@@ -33,7 +33,7 @@ public interface Odo {
 
     void watch(String project, String application, String context, String component) throws IOException;
 
-    void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException;
+    void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException;
 
     void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException;
 
@@ -112,7 +112,7 @@ public interface Odo {
 
     ComponentKind getComponentKind(String context) throws IOException;
 
-    ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException;
+    ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException;
 
     List<DevfileRegistry> listDevfileRegistries() throws IOException;
 

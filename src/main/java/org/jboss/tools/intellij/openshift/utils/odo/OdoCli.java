@@ -86,6 +86,7 @@ public class OdoCli implements Odo {
         this.client = new DefaultOpenShiftClient(new ConfigBuilder().build());
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
+            this.envVars.put("ODO_DISABLE_TELEMETRY", "true");
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
@@ -118,8 +119,8 @@ public class OdoCli implements Odo {
     }
 
     private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
-        String output = ExecHelper.execute(command, workingDirectory, envs, args);
-        try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+        ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
+        try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {
             BinaryOperator<String> reducer = new BinaryOperator<String>() {
                 private boolean notificationFound = false;
 
@@ -174,7 +175,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
         List<String> args = new ArrayList<>();
         args.add(command);
         args.add("create");
@@ -188,6 +189,8 @@ public class OdoCli implements Odo {
                 args.add("--starter=" + starter);
             }
             args.add(componentType);
+            args.add("--registry");
+            args.add(registryName);
         }
         args.add(component);
         args.add("--project");
@@ -354,30 +357,19 @@ public class OdoCli implements Odo {
 
     private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig, ComponentKind kind) throws IOException {
         List<String> args = new ArrayList<>();
+        args.add("delete");
+        args.add("-f");
         if (context != null) {
-            args.add("delete");
-            args.add("-f");
             if (deleteConfig) {
                 args.add("-a");
             }
-            if (ComponentKind.S2I.equals(kind)) {
-                args.add("--s2i");
-            }
             execute(new File(context), command, envVars, args.toArray(new String[0]));
         } else {
-            args.add("delete");
-            args.add("-f");
             args.add("--project");
             args.add(project);
             args.add("--app");
             args.add(application);
             args.add(component);
-            if (deleteConfig) {
-                args.add("-a");
-            }
-            if (ComponentKind.S2I.equals(kind)) {
-                args.add("--s2i");
-            }
             execute(command, envVars, args.toArray(new String[0]));
         }
     }
@@ -581,10 +573,10 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
+    public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
         String json = execute(command, envVars, "catalog", "describe", "component", componentType, "-o", "json");
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentTypeInfo();
+        return parser.parseComponentTypeInfo(registryName);
     }
 
     @Override

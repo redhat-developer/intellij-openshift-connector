@@ -66,25 +66,21 @@ public abstract class OdoCliTest extends BaseTest {
         MessagesHelper.setTestDialog(previousTestDialog);
     }
 
-    private void pause() throws InterruptedException {
-        Thread.sleep(1000);
-    }
-
     protected void createProject(String project) throws IOException, InterruptedException {
         odo.createProject(project);
-        pause();
     }
 
     protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponentLocal(project, application, "java", "8", component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
+        odo.createComponentLocal(project, application, "java", "8", null, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
     protected void createDevfileComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponentLocal(project, application, "java-springboot", null, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
+        String registryName = odo.listDevfileRegistries().get(0).getName();
+        odo.createComponentLocal(project, application, "java-springboot", null, registryName, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
     protected void createComponent(String project, String application, String component, boolean push, ComponentKind kind) throws IOException, InterruptedException {

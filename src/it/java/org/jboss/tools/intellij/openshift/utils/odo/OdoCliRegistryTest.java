@@ -21,7 +21,7 @@ public class OdoCliRegistryTest extends OdoCliTest {
 
 
     @Test
-    public void checkCreateRegistry() throws IOException, InterruptedException {
+    public void checkCreateRegistry() throws IOException {
         String registryName = REGISTRY_PREFIX + random.nextInt();
         try {
             odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
@@ -33,7 +33,7 @@ public class OdoCliRegistryTest extends OdoCliTest {
     }
 
     @Test
-    public void checkListRegistries() throws IOException, InterruptedException {
+    public void checkListRegistries() throws IOException {
         List<DevfileRegistry> registries = odo.listDevfileRegistries();
         assertTrue(registries.size() > 0);
     }

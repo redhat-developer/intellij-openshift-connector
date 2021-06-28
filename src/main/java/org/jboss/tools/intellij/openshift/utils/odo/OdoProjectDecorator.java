@@ -81,17 +81,17 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
             File tmpdir = Files.createTempDirectory("odotmp").toFile();
-            delegate.createComponentLocal(project, application, componentType, componentVersion, component, tmpdir.getAbsolutePath(), devfile, starter, push);
+            delegate.createComponentLocal(project, application, componentType, componentVersion, registryName, component, tmpdir.getAbsolutePath(), devfile, starter, push);
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);
             FileUtils.deleteQuietly(tmpdir);
             VirtualFile[] files = new VirtualFile[] {VfsUtil.findFileByIoFile(sourceDir,true)};
             VfsUtil.markDirtyAndRefresh(false, true, true, files);
         } else {
-            delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, starter, push);
+            delegate.createComponentLocal(project, application, componentType, componentVersion, registryName, component, source, devfile, starter, push);
         }
     }
 
@@ -178,7 +178,9 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-        root.removeContext(new File(context));
+        if (context != null) {
+            root.removeContext(new File(context));
+        }
         delegate.deleteComponent(project, application, context, component, kind);
     }
 
@@ -315,8 +317,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
-        return delegate.getComponentTypeInfo(componentType);
+    public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
+        return delegate.getComponentTypeInfo(componentType, registryName);
     }
 
     @Override

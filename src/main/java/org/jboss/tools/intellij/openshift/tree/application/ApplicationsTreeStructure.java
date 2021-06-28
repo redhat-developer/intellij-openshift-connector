@@ -208,7 +208,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode element) {
         List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
         try {
-            element.getRoot().getOdo().getComponentTypeInfo(element.getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
+            element.getRoot().getOdo().getComponentTypeInfo(element.getName(), element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
         } catch (IOException e) {}
         return result.toArray();
     }

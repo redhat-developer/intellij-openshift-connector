@@ -24,6 +24,28 @@ The extension also supports OpenShift running on Azure, AWS.
 
 ## New features
 
+### Devfile registries management
+
+The preferred way of developing components is now based on devfile, which is a YAML file that describe how to build the component and if required, launch other containers with other containers. When you create a component, you need to specify a devfile that describe your component. So either you component source contains its own devfile or you need to pick a devfile that is related to your component. In the second case, OpenShift Connector supports devfile registries that contains a set of different devfiles. There is a default registry (https://registry.devfile.io) but you may want to have your own registries. It is now possible to add and remove registries as you want.
+
+The registries are displayed in the OpenShift Application Explorer under the Devfile registries node:
+
+![](images/0.7.0/openshift1.png)
+
+Please note that expanding the registry node will list all devfiles from that registry with a description:
+
+![](images/0.7.0/openshift2.png)
+
+### Integration with the Kubernetes by Red Hat plugin
+
+Connection from the plugin to the cluster is managed through the well known kubeconfig file. in previous versions of this plugin, it was possible to switch between contexts inside this file but the features were very limited. In order to offer a better user experience for Kubernetes developers, all kubeconfig related features have been moved out from this plugin and delegated to the [Kubernetes by Red Hat plugin](https://plugins.jetbrains.com/plugin/15921-kubernetes-by-red-hat).
+
+So the Kubernetes by Red Hat plugin is now a required dependency of this plugin and you can access his features through the Kubernetes window:
+
+![](images/0.7.0/openshift3.gif)
+
+## Features
+
 ### Improved OpenShift Container Platform 4 compatibility
 
 Although previous versions of the plugin were compatible with OCP 4, there were some small issues that have been fixes (ie paste login command in the Login wizard)
@@ -33,9 +55,6 @@ Although previous versions of the plugin were compatible with OCP 4, there were 
 The plugin collects anonymous usage data, if enabled, and sends it to Red Hat servers to help improve our products and services. 
 
 ![](images/0.6.0/openshift1.png)
-
-
-## Features
 
 ### Starter projects
 

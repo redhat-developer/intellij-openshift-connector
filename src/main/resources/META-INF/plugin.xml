@@ -12,6 +12,9 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.7.0</b></p>
+  <p>Devfile registry management<p>
+  <p>Integration with Kubernetes by Red Hat plugin<p>
   <p><b>0.6.0</b></p>
   <p>Improved OpenShift Container Platform 4 compatibility<p>
   <p>Improved navigation in the OpenShift view<p>

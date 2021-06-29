@@ -71,29 +71,21 @@ dependencies {
     testCompile 'com.redhat.devtools.intellij:intellij-common:1.2.1:test'
 }
 
-def mergedCoverageFile = "$buildDir/jacoco/merged.exec"
-
 sonarqube {
     properties {
         property "sonar.projectKey", "redhat-developer_intellij-openshift-connector"
         property "sonar.organization", "redhat-developer"
         property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.jacoco.reportPaths", mergedCoverageFile
+        property "sonar.junit.reportsPath", "$buildDir/test-results/"
     }
-}
-
-task jacocoMerge(type: JacocoMerge) {
-    executionData = files("$buildDir/jacoco/test.exec", "$buildDir/jacoco/integrationTest.exec")
-    destinationFile = file(mergedCoverageFile)
-    dependsOn test, integrationTest
 }
 
 jacocoTestReport {
-    executionData.setFrom(files(mergedCoverageFile))
+    getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
         xml.enabled = true
+        html.enabled = true
     }
-    dependsOn tasks.jacocoMerge
 }
 
 runIde {

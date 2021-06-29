@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import java.io.IOException;
@@ -19,7 +18,15 @@ import java.util.List;
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 public interface Odo {
-    List<Project> getProjects();
+    List<String> getNamespaces() throws IOException;
+
+    /**
+     * Return the name of the current active namespace (project for OpenShift).
+     *
+     * @return the active namespace name
+     * @throws IOException if communication errored
+     */
+    String getNamespace() throws IOException;
 
     void describeApplication(String project, String application) throws IOException;
 

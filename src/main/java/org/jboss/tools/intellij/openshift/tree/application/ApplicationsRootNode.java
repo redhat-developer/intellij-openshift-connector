@@ -178,7 +178,8 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         return newContext == null
                 || currentContext == null
                 || !StringUtils.equals(currentContext.getContext().getCluster(), newContext.getContext().getCluster())
-                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser());
+                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser())
+                || !StringUtils.equals(currentContext.getContext().getNamespace(), newContext.getContext().getNamespace());
     }
 
     private boolean hasNewToken(NamedContext newContext, Config newConfig, NamedContext currentContext, Config currentConfig) {

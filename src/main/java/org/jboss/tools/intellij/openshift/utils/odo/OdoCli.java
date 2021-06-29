@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.base.Strings;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -24,13 +25,15 @@ import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuild
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import io.fabric8.servicecatalog.client.ServiceCatalogClient;
@@ -76,14 +79,16 @@ public class OdoCli implements Odo {
     private final com.intellij.openapi.project.Project project;
     private final String command;
 
-    private final OpenShiftClient client;
+    private final KubernetesClient client;
 
     private Map<String, String> envVars;
+
+    private String namespace;
 
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
         this.project = project;
-        this.client = new DefaultOpenShiftClient(new ConfigBuilder().build());
+        this.client = new DefaultKubernetesClient(new ConfigBuilder().build());
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
             this.envVars.put("ODO_DISABLE_TELEMETRY", "true");
@@ -114,8 +119,53 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public List<Project> getProjects() {
-        return client.projects().list().getItems();
+    public List<String> getNamespaces() throws IOException {
+        try {
+            if (client.isAdaptable(OpenShiftClient.class)) {
+                return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().
+                        map(p -> p.getMetadata().getName()).collect(Collectors.toList());
+            } else {
+                return client.namespaces().list().getItems().stream().
+                        map(p -> p.getMetadata().getName()).collect(Collectors.toList());
+            }
+        } catch (KubernetesClientException e) {
+            throw new IOException(e);
+        }
+    }
+
+    protected String validateNamespace(String ns) {
+        if (Strings.isNullOrEmpty(ns)) {
+            ns = "default";
+        }
+        try {
+            if (client.isAdaptable(OpenShiftClient.class)) {
+                client.adapt(OpenShiftClient.class).projects().withName(ns).get();
+            } else {
+                client.namespaces().withName(ns).get();
+            }
+        } catch (KubernetesClientException e) {
+            ns = "";
+            if (client.isAdaptable(OpenShiftClient.class)) {
+                List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
+                if (!projects.isEmpty()) {
+                    ns = projects.get(0).getMetadata().getNamespace();
+                }
+            } else {
+                List<Namespace> namespaces = client.namespaces().list().getItems();
+                if (!namespaces.isEmpty()) {
+                    ns = namespaces.get(0).getMetadata().getNamespace();
+                }
+            }
+        }
+        return ns;
+    }
+
+    @Override
+    public String getNamespace() throws IOException {
+        if (namespace == null) {
+            namespace = validateNamespace(client.getNamespace());
+        }
+        return "".equals(namespace)?null:namespace;
     }
 
     private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {

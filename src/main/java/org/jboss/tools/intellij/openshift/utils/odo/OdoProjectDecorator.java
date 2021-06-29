@@ -36,8 +36,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<io.fabric8.openshift.api.model.Project> getProjects() {
-        return delegate.getProjects();
+    public List<String> getNamespaces() throws IOException {
+        return delegate.getNamespaces();
     }
 
     @Override

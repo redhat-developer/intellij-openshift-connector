@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import io.fabric8.openshift.api.model.Project;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class OdoCliProjectTest extends OdoCliTest {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
-            List<Project> projects = odo.getProjects();
+            List<String> projects = odo.getNamespaces();
             assertTrue(projects.size() > 0);
         } finally {
             odo.deleteProject(project);

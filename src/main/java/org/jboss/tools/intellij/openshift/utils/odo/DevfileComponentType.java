@@ -10,17 +10,26 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-public final class DevfileComponentType extends AbstractComponentType {
+import com.redhat.devtools.alizer.api.DevfileType;
+
+import java.util.List;
+
+public final class DevfileComponentType extends AbstractComponentType implements DevfileType {
 
     private final String displayName;
     private final String description;
     private final DevfileRegistry devfileRegistry;
+    private final String language;
+    private final List<String> tags;
 
-    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry) {
+    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry,
+                                String language, List<String> tags) {
         super(name);
         this.displayName = displayName;
         this.description = description;
         this.devfileRegistry = devfileRegistry;
+        this.language = language;
+        this.tags = tags;
     }
 
     @Override
@@ -38,6 +47,19 @@ public final class DevfileComponentType extends AbstractComponentType {
 
     public DevfileRegistry getDevfileRegistry() {
         return devfileRegistry;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    @Override
+    public String getProjectType() {
+        return null;
     }
 
     @Override

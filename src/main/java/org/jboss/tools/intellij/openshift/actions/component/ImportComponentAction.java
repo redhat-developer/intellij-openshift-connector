@@ -26,11 +26,13 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -75,19 +77,25 @@ public class ImportComponentAction extends CreateComponentAction {
 
     @NotNull
     private CreateComponentModel getModel(Project project, Odo odo, String application, String name, ComponentInfo info, ComponentKind kind) throws IOException {
-        CreateComponentModel model = new CreateComponentModel("Import component", odo);
-        model.setProject(project);
+        List<ComponentType> types = odo.getComponentTypes();
+        CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
+        ComponentType type = select(types, info.getComponentTypeName(), info.getComponentKind());
         model.setApplication(application);
         model.setName(name);
-        model.setComponentTypesTree(odo.getComponentTypes());
         model.setSourceType(info.getSourceType());
-        model.setComponentTypeName(info.getComponentTypeName());
-        model.setComponentTypeVersion(info.getComponentTypeVersion());
+        model.setSelectedComponentType(type);
+        model.setSelectedComponentTypeVersion(info.getComponentTypeVersion());
         model.setGitURL(info.getRepositoryURL());
         model.setGitReference(info.getRepositoryReference());
         model.setBinaryFilePath(info.getBinaryURL());
-        model.setComponentKind(kind);
         model.setImportMode(true);
         return model;
+    }
+
+    private ComponentType select(List<ComponentType> types, String componentTypeName, ComponentKind componentKind) {
+        return types.stream().filter(type -> componentKind.equals(type.getKind())).
+                filter(type -> componentTypeName.equals(type)).
+                findFirst().orElse(null);
+
     }
 }

@@ -26,14 +26,4 @@ public enum ComponentState {
         return label;
     }
 
-    public static ComponentState fromState(String state) {
-        switch (state) {
-            case "Pushed":
-                return PUSHED;
-            case "Not Pushed":
-                return NOT_PUSHED;
-            default:
-                return NO_CONTEXT;
-        }
-    }
 }

@@ -48,6 +48,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -292,14 +295,17 @@ public class OdoCli implements Odo {
      * ensure that $HOME/.odo/config.yaml file exists so thar we can use service related commands.
      */
     private void ensureDefaultOdoConfigFileExists() {
-        File dir = new File(HOME_FOLDER, PLUGIN_FOLDER);
-        File config = new File(dir, "config.yaml");
+        Path dir = Paths.get(HOME_FOLDER, PLUGIN_FOLDER);
+        Path config = dir.resolve("config.yaml");
         try {
-            if (!config.exists()) {
-                dir.mkdirs();
-                config.createNewFile();
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir);
+            }
+            if (!Files.exists(config)) {
+                Files.createFile(config);
             }
         } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

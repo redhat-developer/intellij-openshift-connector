@@ -35,6 +35,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
+@SuppressWarnings({"java:S1171","java:S100"})
 public class LoginDialog extends DialogWrapper implements DocumentListener {
     private JPanel contentPane;
     private JTextField userNameField;
@@ -119,20 +120,20 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
 
     @Override
     public void insertUpdate(DocumentEvent e) {
-        changed(e);
+        changed();
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
-        changed(e);
+        changed();
     }
 
     @Override
     public void changedUpdate(DocumentEvent e) {
-        changed(e);
+        changed();
     }
 
-    public void changed(DocumentEvent e) {
+    public void changed() {
         if (getUserName().trim().length() > 0 || getPassword().length > 0) {
             tokenField.setEnabled(false);
         } else {

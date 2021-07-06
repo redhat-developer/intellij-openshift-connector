@@ -30,7 +30,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,7 +65,7 @@ public class CreateComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "create component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     final Optional<String> application;
     String projectName;
     if (selected instanceof ApplicationNode) {

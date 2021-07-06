@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.validation;
 
-import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.jetbrains.jsonSchema.extension.JsonSchemaFileProvider;
@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URL;
 
 public class DevfileJsonSchemaFileProvider implements JsonSchemaFileProvider {
-    private static URL SCHEMA_URL = DevfileJsonSchemaFileProvider.class.getResource("/schemas/devfile.json");
+    private static final URL SCHEMA_URL = DevfileJsonSchemaFileProvider.class.getResource("/schemas/devfile.json");
 
     @Override
     public boolean isAvailable(@NotNull VirtualFile file) {
@@ -37,7 +37,7 @@ public class DevfileJsonSchemaFileProvider implements JsonSchemaFileProvider {
 
     @Override
     public @Nullable VirtualFile getSchemaFile() {
-        return VirtualFileManager.getInstance().findFileByUrl(VfsUtil.convertFromUrl(SCHEMA_URL));
+        return VirtualFileManager.getInstance().findFileByUrl(VfsUtilCore.convertFromUrl(SCHEMA_URL));
     }
 
     @Override

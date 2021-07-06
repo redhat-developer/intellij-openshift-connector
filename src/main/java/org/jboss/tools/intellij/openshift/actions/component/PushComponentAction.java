@@ -24,7 +24,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -45,9 +44,9 @@ public class PushComponentAction extends ContextAwareComponentAction {
   protected String getTelemetryActionName() { return "push component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) ((ComponentNode) selected).getComponent();
+    Component component = ((ComponentNode) selected).getComponent();
     ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {

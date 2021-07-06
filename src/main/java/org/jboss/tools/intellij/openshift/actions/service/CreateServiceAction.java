@@ -25,7 +25,6 @@ import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +44,7 @@ public class CreateServiceAction extends OdoAction {
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            ApplicationsRootNode rootNode = (ApplicationsRootNode) ((ParentableNode<Object>) selected).getRoot();
+            ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
             if (rootNode != null) {
                 Odo odo = rootNode.getOdo();
                 return odo.isServiceCatalogAvailable();
@@ -55,7 +54,7 @@ public class CreateServiceAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         final String applicationName;
         String projectName;
         if (selected instanceof ApplicationNode) {
@@ -94,7 +93,7 @@ public class CreateServiceAction extends OdoAction {
     }
 
     protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {
-        CreateServiceDialog dialog = new CreateServiceDialog(null);
+        CreateServiceDialog dialog = new CreateServiceDialog();
         dialog.setServiceTemplates(templates.toArray(new ServiceTemplate[templates.size()]));
         if (StringUtils.isNotEmpty(application)) {
             dialog.setApplication(application);

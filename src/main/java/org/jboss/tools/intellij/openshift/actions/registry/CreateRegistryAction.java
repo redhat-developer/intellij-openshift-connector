@@ -21,8 +21,6 @@ import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode
 import org.jboss.tools.intellij.openshift.ui.registry.CreateRegistryDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
-
 import java.io.IOException;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
@@ -36,7 +34,7 @@ public class CreateRegistryAction extends OdoAction {
     protected String getTelemetryActionName() { return "create registry"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         DevfileRegistriesNode registriesNode = (DevfileRegistriesNode) selected;
         CreateRegistryDialog dialog = new CreateRegistryDialog();
         dialog.show();

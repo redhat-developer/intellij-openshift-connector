@@ -19,7 +19,6 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,10 +30,10 @@ public class FollowLogComponentAction extends PushedComponentAction {
   protected String getTelemetryActionName() { return "follow component log"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = (Component) componentNode.getComponent();
-    ApplicationNode applicationNode = (ApplicationNode) componentNode.getParent();
+    Component component = componentNode.getComponent();
+    ApplicationNode applicationNode = componentNode.getParent();
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {

@@ -76,6 +76,7 @@ sonarqube {
         property "sonar.projectKey", "redhat-developer_intellij-openshift-connector"
         property "sonar.organization", "redhat-developer"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.junit.reportsPath", "$buildDir/test-results/"
     }
 }
 

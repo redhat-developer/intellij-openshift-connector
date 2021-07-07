@@ -281,7 +281,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             for (TreeNode nodeObject : Collections.list(rootNode.children())) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodeObject;
                 ComponentType type = (ComponentType) node.getUserObject();
-                if (type.getName().equals(model.getSelectedComponentType().getName())) {
+                if (type.getName().equals(model.getSelectedComponentType().getName()) &&
+                        (type instanceof S2iComponentType ||
+                                (model.getSelectedComponentType()) instanceof DevfileComponentType &&
+                                        ((DevfileComponentType) type).getDevfileRegistry().getName().equals(((DevfileComponentType) model.getSelectedComponentType()).getDevfileRegistry().getName()))) {
                     return node.getPath();
                 }
             }

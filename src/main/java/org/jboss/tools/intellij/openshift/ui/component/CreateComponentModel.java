@@ -138,14 +138,16 @@ public class CreateComponentModel extends WizardModel {
             setName(devfile.getParentFile().getName());
         }
         setSelectedComponentStarter(null);
-        List<DevfileComponentType> types = computeComponentTypes();
-        try {
-            DevfileComponentType type = recognizer.selectDevFileFromTypes(context, types);
-            if (type != null) {
-                setSelectedComponentType(type);
+        if (!projectHasDevfile) {
+            List<DevfileComponentType> types = computeComponentTypes();
+            try {
+                DevfileComponentType type = recognizer.selectDevFileFromTypes(context, types);
+                if (type != null) {
+                    setSelectedComponentType(type);
+                }
+            } catch (IOException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 

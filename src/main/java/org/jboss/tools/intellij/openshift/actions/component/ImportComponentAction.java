@@ -94,7 +94,7 @@ public class ImportComponentAction extends CreateComponentAction {
 
     private ComponentType select(List<ComponentType> types, String componentTypeName, ComponentKind componentKind) {
         return types.stream().filter(type -> componentKind.equals(type.getKind())).
-                filter(type -> componentTypeName.equals(type)).
+                filter(type -> componentTypeName.equals(type.getName())).
                 findFirst().orElse(null);
 
     }

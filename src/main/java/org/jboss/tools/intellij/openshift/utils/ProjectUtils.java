@@ -10,6 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+
 import java.io.File;
 import java.nio.file.Files;
 
@@ -28,5 +35,23 @@ public class ProjectUtils {
             }
         }
         return true;
+    }
+
+    public static VirtualFile getDefaultDirectory(Project project) {
+        Module[] modules = ModuleManager.getInstance(project).getModules();
+        for(Module module : modules) {
+            return getModuleRoot(module);
+        }
+        return null;
+    }
+
+    public static VirtualFile getModuleRoot(Module module) {
+        ModuleRootManager manager = ModuleRootManager.getInstance(module);
+        VirtualFile[] roots = manager.getContentRoots();
+        if (roots.length > 0) {
+            return roots[0];
+        } else {
+            return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
+        }
     }
 }

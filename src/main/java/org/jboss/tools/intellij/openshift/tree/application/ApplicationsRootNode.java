@@ -15,7 +15,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
@@ -26,6 +25,7 @@ import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import org.apache.commons.codec.binary.StringUtils;
+import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
@@ -92,30 +92,20 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         return components;
     }
 
-    public static VirtualFile getModuleRoot(Module module) {
-        ModuleRootManager manager = ModuleRootManager.getInstance(module);
-        VirtualFile[] roots = manager.getContentRoots();
-        if (roots.length > 0) {
-            return roots[0];
-        } else {
-            return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
-        }
-    }
-
     protected void loadProjectModel(Project project) {
         for(Module module : project.getComponent(ModuleManager.class).getModules()) {
-            addContext(getModuleRoot(module));
+            addContext(ProjectUtils.getModuleRoot(module));
         }
     }
 
     @Override
     public void moduleAdded(@NotNull Project project, @NotNull Module module) {
-        addContext(getModuleRoot(module));
+        addContext(ProjectUtils.getModuleRoot(module));
     }
 
     @Override
     public void moduleRemoved(@NotNull Project project, @NotNull Module module) {
-        removeContext(getModuleRoot(module));
+        removeContext(ProjectUtils.getModuleRoot(module));
     }
 
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {

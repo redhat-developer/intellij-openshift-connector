@@ -11,32 +11,44 @@
 package org.jboss.tools.intellij.openshift.ui.component;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardModel;
+import com.redhat.devtools.alizer.api.LanguageRecognizer;
+import com.redhat.devtools.alizer.api.LanguageRecognizerBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Predicate;
 
 public class CreateComponentModel extends WizardModel {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateComponentModel.class);
+    private static LanguageRecognizer recognizer = new LanguageRecognizerBuilder().build();
+
     private Project project;
     private String name = "";
     private ComponentSourceType sourceType = ComponentSourceType.LOCAL;
     private String context = "";
-    private String componentTypeName;
-    private String componentTypeVersion;
-    private String application = "";
+    private String selectedComponentTypeVersion;
+    private String application = "app";
+    private boolean applicationReadOnly;
     private boolean pushAfterCreate = true;
 
     private String gitURL;
@@ -44,7 +56,7 @@ public class CreateComponentModel extends WizardModel {
 
     private String binaryFilePath;
 
-    private ComponentKind componentKind;
+    private ComponentType selectedComponentType;
 
     private boolean importMode;
 
@@ -60,20 +72,20 @@ public class CreateComponentModel extends WizardModel {
 
     private final Odo odo;
 
-    private String registryName;
-
-    public CreateComponentModel(String title, Odo odo) {
+    public CreateComponentModel(String title, Project project, Odo odo, List<ComponentType> types) {
         super(title);
         this.odo = odo;
+        this.project = project;
+        setComponentTypesTree(types);
+        VirtualFile file = ProjectUtils.getDefaultDirectory(project);
+        if (file != null) {
+            setContext(file.getPath());
+        }
         add(new CreateComponentDialogStep(this));
     }
 
     public Project getProject() {
         return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public boolean isProjectHasDevfile() {
@@ -104,6 +116,15 @@ public class CreateComponentModel extends WizardModel {
         return context;
     }
 
+    protected List<DevfileComponentType> computeComponentTypes() {
+        List<DevfileComponentType> types = new ArrayList<>();
+        Enumeration<DefaultMutableTreeNode> childs = (Enumeration<DefaultMutableTreeNode>) top.getFirstChild().children();
+        while (childs.hasMoreElements()) {
+            types.add((DevfileComponentType) childs.nextElement().getUserObject());
+        }
+        return types;
+    }
+
     public void setContext(String context) {
         this.context = context;
         File devfile = new File(context, Constants.DEVFILE_NAME);
@@ -113,23 +134,29 @@ public class CreateComponentModel extends WizardModel {
         }else {
             projectIsEmpty = false;
         }
+        if (StringUtils.isEmpty(name)) {
+            setName(devfile.getParentFile().getName());
+        }
         setSelectedComponentStarter(null);
+        if (!projectHasDevfile) {
+            List<DevfileComponentType> types = computeComponentTypes();
+            try {
+                DevfileComponentType type = recognizer.selectDevFileFromTypes(context, types);
+                if (type != null) {
+                    setSelectedComponentType(type);
+                }
+            } catch (IOException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            }
+        }
     }
 
-    public String getComponentTypeName() {
-        return componentTypeName;
+    public String getSelectedComponentTypeVersion() {
+        return selectedComponentTypeVersion;
     }
 
-    public void setComponentTypeName(String componentTypeName) {
-        this.componentTypeName = componentTypeName;
-    }
-
-    public String getComponentTypeVersion() {
-        return componentTypeVersion;
-    }
-
-    public void setComponentTypeVersion(String componentTypeVersion) {
-        this.componentTypeVersion = componentTypeVersion;
+    public void setSelectedComponentTypeVersion(String selectedComponentTypeVersion) {
+        this.selectedComponentTypeVersion = selectedComponentTypeVersion;
     }
 
     public String getApplication() {
@@ -138,6 +165,14 @@ public class CreateComponentModel extends WizardModel {
 
     public void setApplication(String application) {
         this.application = application;
+    }
+
+    public boolean isApplicationReadOnly() {
+        return applicationReadOnly;
+    }
+
+    public void setApplicationReadOnly(boolean applicationReadOnly) {
+        this.applicationReadOnly = applicationReadOnly;
     }
 
     public boolean isPushAfterCreate() {
@@ -172,12 +207,12 @@ public class CreateComponentModel extends WizardModel {
         this.binaryFilePath = binaryFilePath;
     }
 
-    public ComponentKind getComponentKind() {
-        return componentKind;
+    public ComponentType getSelectedComponentType() {
+        return selectedComponentType;
     }
 
-    public void setComponentKind(ComponentKind componentKind) {
-        this.componentKind = componentKind;
+    public void setSelectedComponentType(ComponentType selectedComponentType) {
+        this.selectedComponentType = selectedComponentType;
     }
 
     public boolean isImportMode() {
@@ -204,7 +239,7 @@ public class CreateComponentModel extends WizardModel {
     public boolean isValid() {
         return StringUtils.isNotBlank(getName()) && StringUtils.isNotBlank(getApplication()) &&
                 StringUtils.isNotBlank(getContext()) &&
-                (isProjectHasDevfile() || StringUtils.isNotBlank(getComponentTypeName())) &&
+                (isProjectHasDevfile() || getSelectedComponentType() != null) &&
                 (getSourceType() == ComponentSourceType.LOCAL ||
                         (getSourceType() == ComponentSourceType.GIT && StringUtils.isNotBlank(getGitURL()) && isValidURL(getGitURL())) ||
                         (getSourceType() == ComponentSourceType.BINARY && StringUtils.isNotBlank(getBinaryFilePath())));
@@ -218,7 +253,7 @@ public class CreateComponentModel extends WizardModel {
         return top;
     }
 
-    public void setComponentTypesTree(List<ComponentType> types) {
+    private void setComponentTypesTree(List<ComponentType> types) {
         // creates the default Roots
         DefaultMutableTreeNode devfileComponents = new DefaultMutableTreeNode("DevFile Components");
         DefaultMutableTreeNode s2iComponents = new DefaultMutableTreeNode("S2I Components (Deprecated)");
@@ -246,16 +281,5 @@ public class CreateComponentModel extends WizardModel {
 
     public void setSelectedComponentStarter(String selectedComponentStarter) {
         this.selectedComponentStarter = selectedComponentStarter;
-    }
-
-    public String getDevFileRegistryName() {
-        if (getComponentKind().equals(ComponentKind.DEVFILE)){
-            return registryName;
-        }
-        return null;
-    }
-
-    public void setDevFileRegistryName(String registryName) {
-        this.registryName = registryName;
     }
 }

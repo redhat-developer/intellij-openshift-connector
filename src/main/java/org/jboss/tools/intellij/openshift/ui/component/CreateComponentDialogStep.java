@@ -18,7 +18,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
@@ -99,10 +99,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             }
         });
         browseModulesButton.addActionListener(e -> {
-            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !model.hasComponent(VfsUtilCore.virtualToIoFile(ApplicationsRootNode.getModuleRoot(m)).getAbsolutePath()));
+            ModuleSelectionDialog dialog = new ModuleSelectionDialog(root.getParent(), model.getProject(), m -> !model.hasComponent(VfsUtilCore.virtualToIoFile(ProjectUtils.getModuleRoot(m)).getAbsolutePath()));
             dialog.show();
             if (dialog.isOK()) {
-                contextTextField.setText(ApplicationsRootNode.getModuleRoot(dialog.getSelectedModule()).getPath());
+                contextTextField.setText(ProjectUtils.getModuleRoot(dialog.getSelectedModule()).getPath());
             }
             updateState();
         });
@@ -140,8 +140,8 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
             if (node.isLeaf()) {
                 Object nodeInfo = node.getUserObject();
+                model.setSelectedComponentType((ComponentType) nodeInfo);
                 if (((ComponentType) nodeInfo).getKind() == ComponentKind.S2I) {
-                    model.setComponentKind(ComponentKind.S2I);
                     sourceTypeComboBox.setEnabled(true);
                     componentVersionComboBox.setEnabled(true);
                     componentVersionComboBox.setModel(new DefaultComboBoxModel(((S2iComponentType) nodeInfo).getVersions().toArray()));
@@ -149,13 +149,11 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     componentVersionComboBox.setSelectedIndex(0);
                     componentStartersCombo.setEnabled(false);
                 } else {
-                    model.setComponentKind(ComponentKind.DEVFILE);
                     componentVersionComboBox.setSelectedIndex(-1);
                     componentVersionComboBox.setEnabled(false);
                     model.setSourceType(ComponentSourceType.LOCAL);
                     sourceTypeComboBox.setSelectedItem(model.getSourceType());
                     sourceTypeComboBox.setEnabled(false);
-                    model.setDevFileRegistryName(((DevfileComponentType) nodeInfo).getDevfileRegistry().getName());
                     componentStartersCombo.setEnabled(model.isProjectIsEmpty());
                     List<Starter> starters = Collections.emptyList();
                     if (model.isProjectIsEmpty()) {
@@ -170,16 +168,15 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
                     componentStartersCombo.setRenderer(SimpleListCellRenderer.create("", st -> st.getName()));
                 }
                 componentStartersCombo.setSelectedIndex(-1);
-                model.setComponentTypeName(((ComponentType) nodeInfo).getName());
             } else {
-                model.setComponentTypeName(null);
+                model.setSelectedComponentType(null);
             }
             updateState();
         });
 
         componentVersionComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                model.setComponentTypeVersion((String) e.getItem());
+                model.setSelectedComponentTypeVersion((String) e.getItem());
             }
             updateState();
         });
@@ -208,6 +205,16 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         if (model.isProjectHasDevfile()) {
             informationLabel.setText("Context already has a devfile, component type selection is not required.");
         }
+        ComponentType type = model.getSelectedComponentType();
+        if (type != null) {
+            TreeNode[] nodes = searchNode();
+            if (nodes != null) {
+                componentTypeTree.getSelectionModel().setSelectionPath(new TreePath(nodes));
+                componentVersionComboBox.setSelectedItem(model.getSelectedComponentTypeVersion());
+            }
+        } else {
+            componentTypeTree.getSelectionModel().clearSelection();
+        }
         WizardNavigationState state = model.getCurrentNavigationState();
         state.FINISH.setEnabled(model.isValid());
         if (model.getSourceType() != ComponentSourceType.LOCAL && model.getName().length() > 0 && model.getContext().length() > 0 && model.getApplication().length() > 0) {
@@ -230,7 +237,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         componentTypeTree.setModel(new DefaultTreeModel(model.getComponentTypesTree()));
 
         componentVersionComboBox.setSelectedItem(null);
-        componentVersionComboBox.setSelectedItem(model.getComponentTypeVersion());
+        componentVersionComboBox.setSelectedItem(model.getSelectedComponentTypeVersion());
         pushAfterCreateCheckBox.setSelected(model.isPushAfterCreate());
         if (model.isImportMode()) {
             nameTextField.setEnabled(false);
@@ -238,7 +245,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             TreeNode[] path = searchNode();
             if (path != null) {
                 componentTypeTree.setSelectionPath(new TreePath(path));
-                componentVersionComboBox.setSelectedItem(model.getComponentTypeVersion());
+                componentVersionComboBox.setSelectedItem(model.getSelectedComponentTypeVersion());
             }
             componentTypeTree.setEnabled(false);
             componentVersionComboBox.setEnabled(false);
@@ -246,7 +253,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             pushAfterCreateCheckBox.setSelected(false);
             pushAfterCreateCheckBox.setEnabled(false);
         }
-        if (StringUtils.isNotEmpty(model.getApplication())) {
+        if (model.isApplicationReadOnly()) {
             applicationTextField.setEnabled(false);
         }
     }
@@ -259,7 +266,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private TreeNode[] searchNode() {
         TreeNode rootNode = null;
         //first select the correct root
-        switch (model.getComponentKind()) {
+        switch (model.getSelectedComponentType().getKind()) {
             case DEVFILE:
                 rootNode = model.getComponentTypesTree().getChildAt(0);
                 break;
@@ -274,7 +281,10 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             for (TreeNode nodeObject : Collections.list(rootNode.children())) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodeObject;
                 ComponentType type = (ComponentType) node.getUserObject();
-                if (type.getName().equals(model.getComponentTypeName())) {
+                if (type.getName().equals(model.getSelectedComponentType().getName()) &&
+                        (type instanceof S2iComponentType ||
+                                (model.getSelectedComponentType()) instanceof DevfileComponentType &&
+                                        ((DevfileComponentType) type).getDevfileRegistry().getName().equals(((DevfileComponentType) model.getSelectedComponentType()).getDevfileRegistry().getName()))) {
                     return node.getPath();
                 }
             }

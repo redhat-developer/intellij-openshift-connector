@@ -110,7 +110,12 @@ public class OdoCli implements Odo {
             telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
             telemetry.send();
         } catch (RuntimeException e) {
-            telemetry.error(e).send();
+            //workaround to not send null values
+            if (e.getMessage() != null) {
+                telemetry.error(e).send();
+            } else {
+                telemetry.error(e.toString()).send();
+            }
         }
     }
 

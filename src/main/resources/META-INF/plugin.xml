@@ -12,6 +12,9 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.8.0</b></p>
+  <p>Simplified create component workflow<p>
+  <p>Application Explorer focused on current namespace/project<p>
   <p><b>0.7.0</b></p>
   <p>Devfile registry management<p>
   <p>Integration with Kubernetes by Red Hat plugin<p>

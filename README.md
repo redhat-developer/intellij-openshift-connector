@@ -25,6 +25,20 @@ The extension also supports OpenShift running on Azure, AWS.
 
 ## New features
 
+### Application Explorer focused on current namespace/project
+
+The Application Explorer now display components and services from the current namespace/project. If you want to switch to a different namespace/project, switch to the Kubernetes view and choose the `Use Project` or `Use Namespace` menu:
+
+![](images/0.8.0/openshift1.gif)
+
+### Simplified create component wizard
+
+When a new component is to be created, a wizard was displayed and the user has to enter several fields before the component could be created. This looks complex for users, so we decided that most of those fields can be automatically computed with default values and user can immediately push the `Finish` button:
+
+![](images/0.8.0/openshift2.gif)
+
+## Features
+
 ### Devfile registries management
 
 The preferred way of developing components is now based on devfile, which is a YAML file that describe how to build the component and if required, launch other containers with other containers. When you create a component, you need to specify a devfile that describe your component. So either you component source contains its own devfile or you need to pick a devfile that is related to your component. In the second case, OpenShift Connector supports devfile registries that contains a set of different devfiles. There is a default registry (https://registry.devfile.io) but you may want to have your own registries. It is now possible to add and remove registries as you want.
@@ -44,8 +58,6 @@ Connection from the plugin to the cluster is managed through the well known kube
 So the Kubernetes by Red Hat plugin is now a required dependency of this plugin and you can access his features through the Kubernetes window:
 
 ![](images/0.7.0/openshift3.gif)
-
-## Features
 
 ### Improved OpenShift Container Platform 4 compatibility
 

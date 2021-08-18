@@ -25,10 +25,11 @@ public class OdoCliServiceTest extends OdoCliTest {
     public void checkCreateService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createProject(project);
-            odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
+            createComponent(project, application, component, false, ComponentKind.DEVFILE);
+            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, "default", service, false);
         } finally {
             odo.deleteProject(project);
         }
@@ -38,10 +39,11 @@ public class OdoCliServiceTest extends OdoCliTest {
     public void checkCreateServiceAndGetTemplate() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createProject(project);
-            odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
+            createComponent(project, application, component, false, ComponentKind.DEVFILE);
+            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, "default", service, false);
             String template = odo.getServiceTemplate(project, application, service);
             assertNotNull(template);
             assertEquals(SERVICE_TEMPLATE, template);
@@ -54,11 +56,12 @@ public class OdoCliServiceTest extends OdoCliTest {
     public void checkCreateDeleteService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
+        String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createProject(project);
-            odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
-            odo.deleteService(project, application, service);
+            createComponent(project, application, component, false, ComponentKind.DEVFILE);
+            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, "default", service, false);
+            odo.deleteService(project, application, COMPONENT_PATH, service);
         } finally {
             odo.deleteProject(project);
         }

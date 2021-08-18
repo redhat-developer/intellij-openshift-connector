@@ -14,6 +14,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import org.jboss.tools.intellij.openshift.utils.odo.OperatorCRD;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +29,7 @@ public class CreateServiceDialog extends DialogWrapper {
     private JPanel contentPane;
     private JTextField nameField;
     private JComboBox serviceTemplatesComboBox;
-    private JTextField applicationTextField;
-    private JComboBox servicePlanComboBox;
+    private JComboBox serviceCRDComboBox;
 
     public CreateServiceDialog() {
         super(null, false, IdeModalityType.IDE);
@@ -59,9 +59,16 @@ public class CreateServiceDialog extends DialogWrapper {
     }
 
     private void templateSelected(ServiceTemplate template) {
-        servicePlanComboBox.setModel(new DefaultComboBoxModel(template.getPlans().toArray()));
-        servicePlanComboBox.setSelectedIndex(0);
-        servicePlanComboBox.setEnabled(template.getPlans().size() >= 2);
+        serviceCRDComboBox.setModel(new DefaultComboBoxModel(((ServiceTemplate) template).getCRDs().toArray()));
+        serviceCRDComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                value = ((OperatorCRD) value).getKind();
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+        serviceCRDComboBox.setSelectedIndex(0);
+        serviceCRDComboBox.setEnabled(((ServiceTemplate) template).getCRDs().size() >= 2);
     }
 
     public String getName() {
@@ -72,8 +79,8 @@ public class CreateServiceDialog extends DialogWrapper {
         return (ServiceTemplate) serviceTemplatesComboBox.getSelectedItem();
     }
 
-    public String getServiceTemplatePlan() {
-        return (String) servicePlanComboBox.getSelectedItem();
+    public String getServiceTemplateCRD() {
+        return ((OperatorCRD)serviceCRDComboBox.getSelectedItem()).getKind();
     }
 
     @NotNull
@@ -83,20 +90,9 @@ public class CreateServiceDialog extends DialogWrapper {
         if (nameField.getText().length() == 0) {
             validations.add(new ValidationInfo("Name must be provided", nameField));
         }
-        if (applicationTextField.getText().length() == 0) {
-            validations.add(new ValidationInfo("Application must be provided", applicationTextField));
-        }
         return validations;
     }
 
-    public void setApplication(String application){
-        applicationTextField.setText(application);
-        applicationTextField.setEditable(false);
-    }
-
-    public String getApplication(){
-        return applicationTextField.getText();
-    }
 
 
     {

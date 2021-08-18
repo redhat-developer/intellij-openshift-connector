@@ -13,14 +13,10 @@ package org.jboss.tools.intellij.openshift.actions.service;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
-import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.actions.component.ContextAwareComponentAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
-import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
+import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
@@ -31,47 +27,24 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-public class CreateServiceAction extends OdoAction {
-
-    public CreateServiceAction() {
-        super(ApplicationNode.class, NamespaceNode.class);
-    }
+public class CreateServiceAction extends ContextAwareComponentAction {
 
     @Override
     protected String getTelemetryActionName() { return "create service"; }
 
     @Override
-    public boolean isVisible(Object selected) {
-        boolean visible = super.isVisible(selected);
-        if (visible) {
-            ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
-            if (rootNode != null) {
-                Odo odo = rootNode.getOdo();
-                return odo.isServiceCatalogAvailable();
-            }
-        }
-        return false;
-    }
-
-    @Override
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-        final String applicationName;
-        String projectName;
-        if (selected instanceof ApplicationNode) {
-            applicationName = ((ApplicationNode) selected).getName();
-            projectName = ((ApplicationNode) selected).getParent().getName();
-        } else { // selected is NamespaceNode
-            applicationName = "";
-            projectName = ((NamespaceNode)selected).getName();
-        }
+        ComponentNode component = (ComponentNode) selected;
+        final String applicationName = component.getParent().getName();
+        String projectName = component.getParent().getParent().getName();
         CompletableFuture.runAsync(() -> {
             try {
                 List<ServiceTemplate> templates = odo.getServiceTemplates();
                 if (!templates.isEmpty()) {
-                    CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates, applicationName));
+                    CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates));
                     if (dialog.isOK()) {
-                        createService(odo, projectName, dialog.getApplication(), dialog);
-                        ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
+                        createService(odo, projectName, applicationName, component.getComponent().getPath(), dialog);
+                        ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(component.getParent());
                         sendTelemetryResults(TelemetryResult.SUCCESS);
                     } else {
                         sendTelemetryResults(TelemetryResult.ABORTED);
@@ -88,16 +61,13 @@ public class CreateServiceAction extends OdoAction {
         });
     }
 
-    private void createService(Odo odo, String project, String application, CreateServiceDialog dialog) throws IOException {
-        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplatePlan(), dialog.getName(), false);
+    private void createService(Odo odo, String project, String application, String context, CreateServiceDialog dialog) throws IOException {
+        odo.createService(project, application, context, dialog.getServiceTemplate().getName(), dialog.getServiceTemplateCRD(), dialog.getName(), true);
     }
 
-    protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {
+    protected CreateServiceDialog showDialog(List<ServiceTemplate> templates) {
         CreateServiceDialog dialog = new CreateServiceDialog();
         dialog.setServiceTemplates(templates.toArray(new ServiceTemplate[templates.size()]));
-        if (StringUtils.isNotEmpty(application)) {
-            dialog.setApplication(application);
-        }
         dialog.show();
         return dialog;
     }

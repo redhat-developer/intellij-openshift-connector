@@ -19,4 +19,13 @@ public class CreateServiceActionTest extends ActionTest {
     return new CreateServiceAction();
   }
 
+  @Override
+  protected void verifyPushedComponent(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyNotPushedComponent(boolean visible) {
+    assertTrue(visible);
+  }
 }

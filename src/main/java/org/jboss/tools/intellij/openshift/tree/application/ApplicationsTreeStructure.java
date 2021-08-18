@@ -169,7 +169,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } catch (KubernetesClientException | IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
         }
-        odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
+        try {
+            odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
+        } catch (IOException e) {
+            results.add(new MessageNode(element.getRoot(), element, "Failed to load application services"));
+        }
 
         if (results.isEmpty()) {
             results.add(new CreateComponentLinkNode(element.getRoot(), element));

@@ -18,9 +18,4 @@ public class DeleteServiceActionTest extends ActionTest {
   public AnAction getAction() {
     return new DeleteServiceAction();
   }
-
-  @Override
-  protected void verifyService(boolean visible) {
-    assertTrue(visible);
-  }
 }

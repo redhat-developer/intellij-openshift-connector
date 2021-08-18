@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.fabric8.servicecatalog.api.model.ServiceInstance;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
@@ -116,18 +115,18 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException {
-        delegate.createService(project, application, serviceTemplate, servicePlan, service, wait);
+    public void createService(String project, String application, String context, String serviceTemplate, String serviceCRD, String service, boolean wait) throws IOException {
+        delegate.createService(project, application, context, serviceTemplate, serviceCRD, service, wait);
     }
 
     @Override
-    public String getServiceTemplate(String project, String application, String service) {
+    public String getServiceTemplate(String project, String application, String service) throws IOException {
         return delegate.getServiceTemplate(project, application, service);
     }
 
     @Override
-    public void deleteService(String project, String application, String service) throws IOException {
-        delegate.deleteService(project, application, service);
+    public void deleteService(String project, String application, String context, String service) throws IOException {
+        delegate.deleteService(project, application, context, service);
     }
 
     @Override
@@ -257,8 +256,19 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<ServiceInstance> getServices(String project, String application) {
-        return delegate.getServices(project, application);
+    public List<Service> getServices(String project, String application) throws IOException {
+        List<Service> services = delegate.getServices(project, application);
+        for(Service service : services) {
+            if (service.getComponent() != null) {
+                root.getComponents().forEach((path,comp) -> {
+                    if (comp.getProject().equals(project) && comp.getApplication().equals(application) &&
+                    comp.getName().equals(service.getComponent())) {
+                        service.setPath(comp.getPath());
+                    }
+                });
+            }
+        }
+        return services;
     }
 
     @Override
@@ -304,11 +314,6 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
         return delegate.debugStatus(project, application, context, component);
-    }
-
-    @Override
-    public boolean isServiceCatalogAvailable() {
-        return delegate.isServiceCatalogAvailable();
     }
 
     @Override

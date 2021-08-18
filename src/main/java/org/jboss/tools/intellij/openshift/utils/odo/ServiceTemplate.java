@@ -14,5 +14,5 @@ import java.util.List;
 
 public interface ServiceTemplate {
   String getName();
-  List<String> getPlans();
+  List<OperatorCRD> getCRDs();
 }

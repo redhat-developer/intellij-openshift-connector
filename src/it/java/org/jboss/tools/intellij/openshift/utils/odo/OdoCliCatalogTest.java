@@ -27,17 +27,13 @@ public class OdoCliCatalogTest extends OdoCliTest {
 
     @Test
     public void checkGetServiceTemplates() throws IOException {
-        if (odo.isServiceCatalogAvailable()) {
-            List<ServiceTemplate> services = odo.getServiceTemplates();
-            assertTrue(services.size() > 0);
-        }
+        List<ServiceTemplate> services = odo.getServiceTemplates();
+        assertTrue(services.size() > 0);
     }
 
     @Test
     public void checkMultiPlansServiceTemplates() throws IOException {
-        if (odo.isServiceCatalogAvailable()) {
-            List<ServiceTemplate> services = odo.getServiceTemplates();
-            assertTrue(services.stream().filter(template -> template.getPlans().size() > 1).count() > 0);
-        }
+        List<ServiceTemplate> services = odo.getServiceTemplates();
+        assertTrue(services.stream().filter(template -> ((ServiceTemplate) template).getCRDs().size() > 1).count() > 0);
     }
 }

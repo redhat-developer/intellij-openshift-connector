@@ -28,9 +28,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
-            }
+            odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
         } finally {
             odo.deleteProject(project);
         }
@@ -43,12 +41,10 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, SERVICE_TEMPLATE, "default", service,false);
-                String template = odo.getServiceTemplate(project, application, service);
-                assertNotNull(template);
-                assertEquals(SERVICE_TEMPLATE, template);
-            }
+            odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
+            String template = odo.getServiceTemplate(project, application, service);
+            assertNotNull(template);
+            assertEquals(SERVICE_TEMPLATE, template);
         } finally {
             odo.deleteProject(project);
         }
@@ -61,10 +57,8 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
-                odo.deleteService(project, application, service);
-            }
+            odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
+            odo.deleteService(project, application, service);
         } finally {
             odo.deleteProject(project);
         }

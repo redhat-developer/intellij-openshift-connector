@@ -47,7 +47,7 @@ public class CreateServiceDialog extends DialogWrapper {
         serviceTemplatesComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                value = ((ServiceTemplate) value).getName();
+                value = ((ServiceTemplate) value).getDisplayName();
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             }
         });

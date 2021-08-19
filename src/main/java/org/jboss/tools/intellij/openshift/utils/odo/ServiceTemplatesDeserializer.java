@@ -63,6 +63,7 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
             if (items != null) {
                 for (JsonNode item : items) {
                     String name = item.get(METADATA_FIELD).get(NAME_FIELD).asText();
+                    String displayName = item.get(SPEC_FIELD).has(DISPLAY_NAME_FIELD)?item.get(SPEC_FIELD).get(DISPLAY_NAME_FIELD).asText():name;
                     ArrayNode samples = null;
                     if (item.get(METADATA_FIELD).has(ANNOTATIONS_FIELD) && item.get(METADATA_FIELD).get(ANNOTATIONS_FIELD).has(ALM_EXAMPLES_FIELD)) {
                         samples = (ArrayNode) MAPPER.readTree(item.get(METADATA_FIELD).get(ANNOTATIONS_FIELD).get(ALM_EXAMPLES_FIELD).asText());
@@ -120,6 +121,11 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
                         @Override
                         public String getName() {
                             return name;
+                        }
+
+                        @Override
+                        public String getDisplayName() {
+                            return displayName;
                         }
 
                         @Override

@@ -14,5 +14,6 @@ import java.util.List;
 
 public interface ServiceTemplate {
   String getName();
+  String getDisplayName();
   List<OperatorCRD> getCRDs();
 }

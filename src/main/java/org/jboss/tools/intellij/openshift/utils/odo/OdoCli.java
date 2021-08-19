@@ -526,10 +526,18 @@ public class OdoCli implements Odo {
 
     @Override
     public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project, String application) throws IOException {
-        return configureObjectMapper(new ServiceDeserializer()).readValue(
-                execute(command, envVars, "service", "list", "--app", application, "--project", project, "-o", "json"),
-                new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
-                });
+        try {
+            return configureObjectMapper(new ServiceDeserializer()).readValue(
+                    execute(command, envVars, "service", "list", "--app", application, "--project", project, "-o", "json"),
+                    new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
+                    });
+        } catch (IOException e) {
+            //https://github.com/openshift/odo/issues/5010
+            if (e.getMessage().contains("\"no operator backed services found in namespace:")) {
+                return Collections.emptyList();
+            }
+            throw e;
+        }
     }
 
     protected LabelSelector getLabelSelector(String application, String component) {

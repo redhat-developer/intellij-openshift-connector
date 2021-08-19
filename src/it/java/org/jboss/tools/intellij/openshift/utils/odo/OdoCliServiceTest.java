@@ -20,9 +20,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class OdoCliServiceTest extends OdoCliTest {
 
-    public static final String SERVICE_TEMPLATE = "postgres-operator.v1.4.0";
-    private static final String SERVICE_CRD = "postgresql";
-
     @Test
     public void checkCreateService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();

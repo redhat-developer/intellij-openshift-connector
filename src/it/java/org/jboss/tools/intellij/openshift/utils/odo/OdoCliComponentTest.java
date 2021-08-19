@@ -180,7 +180,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
         try {
             createComponent(project, application, component, push, kind);
-            odo.createService(project, application, COMPONENT_PATH, "jenkins-pipeline-example", "default", service, true);
+            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, SERVICE_CRD, service, true);
             if (push && kind == ComponentKind.S2I) { // TODO remove kind test when link with devfile is supported.
                 odo.link(project, application, component, COMPONENT_PATH, service, null);
             }

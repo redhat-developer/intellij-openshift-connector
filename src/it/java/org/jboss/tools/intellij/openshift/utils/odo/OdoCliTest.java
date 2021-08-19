@@ -31,6 +31,9 @@ import java.util.concurrent.ExecutionException;
 public abstract class OdoCliTest extends BaseTest {
 
     public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
+    public static final String SERVICE_TEMPLATE = "postgres-operator.v1.4.0";
+    public static final String SERVICE_CRD = "postgresql";
+
     protected Odo odo;
 
     protected Random random = new Random();

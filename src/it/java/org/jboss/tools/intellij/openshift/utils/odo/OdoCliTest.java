@@ -12,6 +12,10 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.ui.TestDialog;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
+import io.fabric8.kubernetes.api.model.DaemonEndpointFluent;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.After;
@@ -19,6 +23,7 @@ import org.junit.Before;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -49,6 +54,10 @@ public abstract class OdoCliTest extends BaseTest {
     protected static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
 
     private TestDialog previousTestDialog;
+
+    protected static boolean isOpenShift() {
+        return new DefaultKubernetesClient(new ConfigBuilder().build()).isAdaptable(OpenShiftClient.class);
+    }
 
     @Before
     public void init() throws IOException, ExecutionException, InterruptedException {
@@ -92,8 +101,8 @@ public abstract class OdoCliTest extends BaseTest {
         }
     }
 
-    protected void createStorage(String project, String application, String component, boolean push, String storage) throws IOException, InterruptedException {
-        createS2iComponent(project, application, component, push);
+    protected void createStorage(String project, String application, String component, boolean push, ComponentKind kind, String storage) throws IOException, InterruptedException {
+        createComponent(project, application, component, push, kind);
         odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
     }
 

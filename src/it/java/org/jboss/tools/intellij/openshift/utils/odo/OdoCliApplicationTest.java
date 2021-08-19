@@ -32,12 +32,19 @@ public class OdoCliApplicationTest extends OdoCliTest {
 
     @Parameterized.Parameters(name = "pushed: {0}, kind: {1}")
     public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {false, ComponentKind.S2I},
-                {true, ComponentKind.S2I},
-                {false, ComponentKind.DEVFILE},
-                {true, ComponentKind.DEVFILE}
-        });
+        if (isOpenShift()) {
+            return Arrays.asList(new Object[][]{
+                    {false, ComponentKind.S2I},
+                    {true, ComponentKind.S2I},
+                    {false, ComponentKind.DEVFILE},
+                    {true, ComponentKind.DEVFILE}
+            });
+        } else {
+            return Arrays.asList(new Object[][]{
+                    {false, ComponentKind.DEVFILE},
+                    {true, ComponentKind.DEVFILE}
+            });
+        }
     }
 
     @Test

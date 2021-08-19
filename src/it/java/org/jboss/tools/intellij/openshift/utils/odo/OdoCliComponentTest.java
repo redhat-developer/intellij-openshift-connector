@@ -46,12 +46,19 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Parameterized.Parameters(name = "pushed: {0}, kind: {1}")
     public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {false, ComponentKind.S2I},
-                {true, ComponentKind.S2I},
-                {false, ComponentKind.DEVFILE},
-                {true, ComponentKind.DEVFILE}
-        });
+        if (isOpenShift()) {
+            return Arrays.asList(new Object[][]{
+                    {false, ComponentKind.S2I},
+                    {true, ComponentKind.S2I},
+                    {false, ComponentKind.DEVFILE},
+                    {true, ComponentKind.DEVFILE}
+            });
+        } else {
+            return Arrays.asList(new Object[][]{
+                    {false, ComponentKind.DEVFILE},
+                    {true, ComponentKind.DEVFILE}
+            });
+        }
     }
 
     @Before
@@ -173,7 +180,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
         try {
             createComponent(project, application, component, push, kind);
-            odo.createService(project, application, ".", "jenkins-pipeline-example", "default", service, true);
+            odo.createService(project, application, COMPONENT_PATH, "jenkins-pipeline-example", "default", service, true);
             if (push && kind == ComponentKind.S2I) { // TODO remove kind test when link with devfile is supported.
                 odo.link(project, application, component, COMPONENT_PATH, service, null);
             }
@@ -185,7 +192,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     @Test
     public void checkCreateComponentAndCreateStorage() throws IOException, InterruptedException {
         try {
-            createStorage(project, application, component, push, storage);
+            createStorage(project, application, component, push, kind, storage);
         } finally {
             odo.deleteProject(project);
         }
@@ -194,7 +201,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     @Test
     public void checkCreateComponentAndCreateDeleteStorage() throws IOException, InterruptedException {
         try {
-            createStorage(project, application, component, push, storage);
+            createStorage(project, application, component, push, kind, storage);
             odo.deleteStorage(project, application, COMPONENT_PATH, component, storage);
         } finally {
             odo.deleteProject(project);

@@ -37,7 +37,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
         telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-        this.actionPerformed(anActionEvent, getOdo(anActionEvent), getElement(selected));
+        this.actionPerformed(anActionEvent, (Object) getElement(selected), getOdo(anActionEvent));
     }
 
     private Odo getOdo(AnActionEvent anActionEvent) {

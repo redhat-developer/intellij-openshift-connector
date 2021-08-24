@@ -12,6 +12,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.8.1</b></p>
+  <p>Context menus non functional<p>
   <p><b>0.8.0</b></p>
   <p>Simplified create component workflow<p>
   <p>Application Explorer focused on current namespace/project<p>

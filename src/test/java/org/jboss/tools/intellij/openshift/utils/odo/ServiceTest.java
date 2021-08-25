@@ -55,6 +55,6 @@ public class ServiceTest {
     Assert.assertEquals(4, services.size());
     Service service = services.get(0);
     Assert.assertNotNull(service);
-    Assert.assertEquals("Kafka/my-cluster", service.getName());
+    Assert.assertEquals("my-cluster", service.getName());
   }
 }

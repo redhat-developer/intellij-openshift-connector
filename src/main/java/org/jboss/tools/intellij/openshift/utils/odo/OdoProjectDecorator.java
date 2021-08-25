@@ -115,8 +115,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createService(String project, String application, String context, String serviceTemplate, String serviceCRD, String service, boolean wait) throws IOException {
-        delegate.createService(project, application, context, serviceTemplate, serviceCRD, service, wait);
+    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException {
+        delegate.createService(project, application, serviceTemplate, serviceCRD, service, wait);
     }
 
     @Override
@@ -125,8 +125,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void deleteService(String project, String application, String context, String service) throws IOException {
-        delegate.deleteService(project, application, context, service);
+    public void deleteService(String project, String application, Service service) throws IOException {
+        delegate.deleteService(project, application, service);
     }
 
     @Override
@@ -257,18 +257,7 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public List<Service> getServices(String project, String application) throws IOException {
-        List<Service> services = delegate.getServices(project, application);
-        for(Service service : services) {
-            if (service.getComponent() != null) {
-                root.getComponents().forEach((path,comp) -> {
-                    if (comp.getProject().equals(project) && comp.getApplication().equals(application) &&
-                    comp.getName().equals(service.getComponent())) {
-                        service.setPath(comp.getPath());
-                    }
-                });
-            }
-        }
-        return services;
+        return delegate.getServices(project, application);
     }
 
     @Override

@@ -24,8 +24,8 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>>
   private static final String NAME_FIELD = "name";
 
   private static final String METADATA_FIELD = "metadata";
-  private static final String LABELS_FIELD = "labels";
   private static final String KIND_FIELD = "kind";
+  private static final String APIVERSION_FIELD = "apiVersion";
 
   public ServiceDeserializer() {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, Service.class));
@@ -41,7 +41,8 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>>
   }
 
   public static Service getService(JsonNode service) {
-    String componentName = service.get(METADATA_FIELD).has(LABELS_FIELD) && service.get(METADATA_FIELD).get(LABELS_FIELD).has(KubernetesLabels.COMPONENT_NAME_LABEL)?service.get(METADATA_FIELD).get(LABELS_FIELD).get(KubernetesLabels.COMPONENT_NAME_LABEL).asText():null;
-    return Service.of(service.get(KIND_FIELD).asText() + '/' + service.get(METADATA_FIELD).get(NAME_FIELD).asText(), componentName);
+    String apiVersion = service.get(APIVERSION_FIELD).asText();
+    String kind = service.get(KIND_FIELD).asText();
+    return Service.of(service.get(METADATA_FIELD).get(NAME_FIELD).asText(), apiVersion, kind);
   }
 }

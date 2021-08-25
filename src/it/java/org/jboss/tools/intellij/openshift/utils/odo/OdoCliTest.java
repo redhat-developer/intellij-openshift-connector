@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.ui.TestDialog;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
-import io.fabric8.kubernetes.api.model.DaemonEndpointFluent;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -23,9 +22,10 @@ import org.junit.Before;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertNotNull;
 
 
 public abstract class OdoCliTest extends BaseTest {
@@ -112,5 +112,17 @@ public abstract class OdoCliTest extends BaseTest {
     private void cleanLocalProjectDirectory() throws IOException {
         FileUtils.deleteDirectory(new File(COMPONENT_PATH, ".odo"));
         FileUtils.deleteQuietly(new File(COMPONENT_PATH+"/devfile.yaml"));
+    }
+
+    protected OperatorCRD getOperatorCRD(ServiceTemplate serviceTemplate) {
+        OperatorCRD crd = serviceTemplate.getCRDs().stream().filter(c -> c.getName().equals(SERVICE_CRD)).findFirst().orElse(null);
+        assertNotNull(crd);
+        return crd;
+    }
+
+    protected ServiceTemplate getServiceTemplate() throws IOException {
+        ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE)).findFirst().orElse(null);
+        assertNotNull(serviceTemplate);
+        return serviceTemplate;
     }
 }

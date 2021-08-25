@@ -14,6 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,11 +25,11 @@ public class OdoCliServiceTest extends OdoCliTest {
     public void checkCreateService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, false, ComponentKind.DEVFILE);
-            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, SERVICE_CRD, service, false);
+            ServiceTemplate serviceTemplate = getServiceTemplate();
+            OperatorCRD crd = getOperatorCRD(serviceTemplate);
+            odo.createService(project, application, serviceTemplate, crd, service, false);
         } finally {
             odo.deleteProject(project);
         }
@@ -39,11 +40,11 @@ public class OdoCliServiceTest extends OdoCliTest {
     public void checkCreateServiceAndGetTemplate() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, false, ComponentKind.DEVFILE);
-            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, SERVICE_CRD, service, false);
+            ServiceTemplate serviceTemplate = getServiceTemplate();
+            OperatorCRD crd = getOperatorCRD(serviceTemplate);
+            odo.createService(project, application, serviceTemplate, crd, service, false);
             String template = odo.getServiceTemplate(project, application, service);
             assertNotNull(template);
             assertEquals(SERVICE_TEMPLATE, template);
@@ -56,14 +57,18 @@ public class OdoCliServiceTest extends OdoCliTest {
     public void checkCreateDeleteService() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
-        String component = COMPONENT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, false, ComponentKind.DEVFILE);
-            odo.createService(project, application, COMPONENT_PATH, SERVICE_TEMPLATE, SERVICE_CRD, service, false);
-            odo.deleteService(project, application, COMPONENT_PATH, SERVICE_CRD + '/' + service);
+            ServiceTemplate serviceTemplate = getServiceTemplate();
+            OperatorCRD crd = getOperatorCRD(serviceTemplate);
+            odo.createService(project, application, serviceTemplate, crd, service, false);
+            List<Service> services = odo.getServices(project, application);
+            assertNotNull(services);
+            assertEquals(1, services.size());
+            odo.deleteService(project, application, services.get(0));
         } finally {
             odo.deleteProject(project);
         }
     }
+
 }

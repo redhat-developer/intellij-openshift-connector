@@ -32,12 +32,6 @@ public class DeleteServiceAction extends OdoAction {
   }
 
   @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    return visible && ((ServiceNode)selected).getService().getPath() != null;
-  }
-
-  @Override
   protected String getTelemetryActionName() { return "delete service"; }
 
   @Override
@@ -52,7 +46,7 @@ public class DeleteServiceAction extends OdoAction {
     }
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getService().getPath(), serviceNode.getName());
+        odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getService());
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(serviceNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

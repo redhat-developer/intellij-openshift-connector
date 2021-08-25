@@ -44,11 +44,11 @@ public interface Odo {
 
     void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
-    void createService(String project, String application, String context, String serviceTemplate, String serviceCRD, String service, boolean wait) throws IOException;
+    void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException;
 
     String getServiceTemplate(String project, String application, String service) throws IOException;
 
-    void deleteService(String project, String application, String context, String service) throws IOException;
+    void deleteService(String project, String application, Service service) throws IOException;
 
     List<ComponentType> getComponentTypes() throws IOException;
 

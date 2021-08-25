@@ -12,13 +12,11 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 public interface Service {
     String getName();
-    String getComponent();
-    String getPath();
-    void setPath(String path);
+    String getApiVersion();
+    String getKind();
 
-    static Service of(String name, String component) {
+    static Service of(String name, String apiVersion, String kind) {
         return new Service() {
-            private String path;
 
             @Override
             public String getName() {
@@ -26,18 +24,13 @@ public interface Service {
             }
 
             @Override
-            public String getComponent() {
-                return component;
+            public String getApiVersion() {
+                return apiVersion;
             }
 
             @Override
-            public String getPath() {
-                return path;
-            }
-
-            @Override
-            public void setPath(String path) {
-                this.path = path;
+            public String getKind() {
+                return kind;
             }
         };
     }

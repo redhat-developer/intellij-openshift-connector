@@ -20,12 +20,12 @@ public class CreateServiceActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyPushedComponent(boolean visible) {
+  protected void verifyProject(boolean visible) {
     assertTrue(visible);
   }
 
   @Override
-  protected void verifyNotPushedComponent(boolean visible) {
+  protected void verifyApplication(boolean visible) {
     assertTrue(visible);
   }
 }

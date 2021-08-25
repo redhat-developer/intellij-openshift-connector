@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
@@ -33,6 +34,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
+import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import okhttp3.OkHttpClient;
@@ -55,6 +57,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
@@ -79,6 +82,10 @@ public class OdoCli implements Odo {
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
     private static final String WINDOW_TITLE = "OpenShift";
+
+    private static final String METADATA_FIELD = "metadata";
+    private static final String NAME_FIELD = "name";
+    private static final String NAMESPACE_FIELD = "namespace";
 
     private final com.intellij.openapi.project.Project project;
     private final String command;
@@ -319,13 +326,42 @@ public class OdoCli implements Odo {
         }
     }
 
+    private CustomResourceDefinitionContext toCustomResourceDefinitionContext(OperatorCRD crd) {
+        String group = crd.getName().substring(crd.getName().indexOf('.') + 1);
+        String plural = crd.getName().substring(0, crd.getName().indexOf('.'));
+        return new CustomResourceDefinitionContext.Builder()
+                .withName(crd.getName())
+                .withGroup(group)
+                .withScope("Namespaced")
+                .withKind(crd.getKind())
+                .withPlural(plural)
+                .withVersion(crd.getVersion())
+                .build();
+    }
+
+    private CustomResourceDefinitionContext toCustomResourceDefinitionContext(org.jboss.tools.intellij.openshift.utils.odo.Service service) {
+        String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
+        String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
+        return new CustomResourceDefinitionContext.Builder()
+                .withName(service.getKind().toLowerCase(Locale.ROOT) + "s." + group)
+                .withGroup(group)
+                .withScope("Namespaced")
+                .withKind(service.getKind())
+                .withPlural(service.getKind().toLowerCase() + "s")
+                .withVersion(version)
+                .build();
+    }
+
     @Override
-    public void createService(String project, String application, String context, String serviceTemplate, String serviceCRD, String service, boolean wait) throws IOException {
-        ExecHelper.execute(command, true, new File(context), envVars, "service", "create",
-                serviceTemplate + '/' + serviceCRD, service);
-        if (wait) {
-            push(project, application, context,null);
-        }
+    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException {
+        CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(serviceCRD);
+        ensureMetadata(serviceCRD.getSample(), project, service);
+        client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(serviceCRD.getSample()));
+    }
+
+    private void ensureMetadata(JsonNode node, String project, String service) {
+        ((ObjectNode)node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
+        ((ObjectNode)node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
     }
 
     @Override
@@ -334,9 +370,9 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void deleteService(String project, String application, String context, String service) throws IOException {
-        ExecHelper.execute(command, true, new File(context), envVars, "service", "delete", service, "-f");
-        push(project, application, context, null);
+    public void deleteService(String project, String application, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
+        CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
+        client.customResource(context).delete(project, service.getName());
     }
 
     @Override

@@ -20,20 +20,38 @@ import static org.junit.Assert.assertTrue;
 public class OdoCliCatalogTest extends OdoCliTest {
 
     @Test
-    public void checkGetComponentTypes() throws IOException {
-        List<ComponentType> components = odo.getComponentTypes();
-        assertTrue(components.size() > 0);
+    public void checkGetComponentTypes() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        try {
+            createProject(project);
+            List<ComponentType> components = odo.getComponentTypes();
+            assertTrue(components.size() > 0);
+        } finally {
+            odo.deleteProject(project);
+        }
     }
 
     @Test
-    public void checkGetServiceTemplates() throws IOException {
-        List<ServiceTemplate> services = odo.getServiceTemplates();
-        assertTrue(services.size() > 0);
+    public void checkGetServiceTemplates() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        try {
+            createProject(project);
+            List<ServiceTemplate> services = odo.getServiceTemplates();
+            assertTrue(services.size() > 0);
+        } finally {
+            odo.deleteProject(project);
+        }
     }
 
     @Test
-    public void checkMultiPlansServiceTemplates() throws IOException {
-        List<ServiceTemplate> services = odo.getServiceTemplates();
-        assertTrue(services.stream().filter(template -> ((ServiceTemplate) template).getCRDs().size() > 1).count() > 0);
+    public void checkMultiPlansServiceTemplates() throws IOException, InterruptedException {
+        String project = PROJECT_PREFIX + random.nextInt();
+        try {
+            createProject(project);
+            List<ServiceTemplate> services = odo.getServiceTemplates();
+            assertTrue(services.stream().filter(template -> ((ServiceTemplate) template).getCRDs().size() > 1).count() > 0);
+        } finally {
+            odo.deleteProject(project);
+        }
     }
 }

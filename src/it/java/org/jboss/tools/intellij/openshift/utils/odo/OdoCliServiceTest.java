@@ -27,6 +27,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
+            createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
             odo.createService(project, application, serviceTemplate, crd, service, false);
@@ -42,6 +43,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
+            createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
             odo.createService(project, application, serviceTemplate, crd, service, false);
@@ -59,6 +61,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
+            createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
             odo.createService(project, application, serviceTemplate, crd, service, false);
@@ -70,5 +73,4 @@ public class OdoCliServiceTest extends OdoCliTest {
             odo.deleteProject(project);
         }
     }
-
 }

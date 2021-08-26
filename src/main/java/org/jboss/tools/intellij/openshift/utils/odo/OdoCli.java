@@ -343,7 +343,7 @@ public class OdoCli implements Odo {
         String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
         String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
         return new CustomResourceDefinitionContext.Builder()
-                .withName(service.getKind().toLowerCase(Locale.ROOT) + "s." + group)
+                .withName(service.getKind().toLowerCase() + "s." + group)
                 .withGroup(group)
                 .withScope("Namespaced")
                 .withKind(service.getKind())

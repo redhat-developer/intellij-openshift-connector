@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -44,7 +46,8 @@ public interface Odo {
 
     void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
-    void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException;
+    void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+                       String service, ObjectNode spec, boolean wait) throws IOException;
 
     String getServiceTemplate(String project, String application, String service) throws IOException;
 

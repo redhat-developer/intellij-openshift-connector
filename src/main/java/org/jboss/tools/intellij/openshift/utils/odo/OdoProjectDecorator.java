@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FileUtils;
@@ -115,8 +116,9 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException {
-        delegate.createService(project, application, serviceTemplate, serviceCRD, service, wait);
+    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+                              String service, ObjectNode spec, boolean wait) throws IOException {
+        delegate.createService(project, application, serviceTemplate, serviceCRD, service, spec, wait);
     }
 
     @Override

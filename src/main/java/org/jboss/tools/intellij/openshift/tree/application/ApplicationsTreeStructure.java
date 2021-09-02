@@ -254,7 +254,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
             return new LabelAndIconDescriptor(project, element,
-                    ((ServiceNode) element)::getName, SERVICE_ICON, parentDescriptor);
+                    ((ServiceNode) element)::getName, () -> ((ServiceNode) element).getService().getKind(), SERVICE_ICON, parentDescriptor);
         } else if (element instanceof PersistentVolumeClaimNode) {
             return new LabelAndIconDescriptor(project, element,
                     ((PersistentVolumeClaimNode) element)::getName, STORAGE_ICON, parentDescriptor);

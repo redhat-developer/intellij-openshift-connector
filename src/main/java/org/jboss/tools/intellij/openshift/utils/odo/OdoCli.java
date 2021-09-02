@@ -57,7 +57,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
@@ -86,6 +85,7 @@ public class OdoCli implements Odo {
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String NAMESPACE_FIELD = "namespace";
+    private static final String SPEC_FIELD = "spec";
 
     private final com.intellij.openapi.project.Project project;
     private final String command;
@@ -353,15 +353,24 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException {
-        CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(serviceCRD);
-        ensureMetadata(serviceCRD.getSample(), project, service);
-        client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(serviceCRD.getSample()));
+    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+                              String service, ObjectNode spec, boolean wait) throws IOException {
+        try {
+            CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(serviceCRD);
+            ObjectNode payload = serviceCRD.getSample().deepCopy();
+            updatePayload(payload, spec, project, service);
+            client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(payload));
+        } catch (KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
     }
 
-    private void ensureMetadata(JsonNode node, String project, String service) {
+    private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
         ((ObjectNode)node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
         ((ObjectNode)node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
+        if (spec != null) {
+            ((ObjectNode)node).set(SPEC_FIELD, spec);
+        }
     }
 
     @Override
@@ -396,7 +405,7 @@ public class OdoCli implements Odo {
         }
     }
 
-    private JsonNode findSchema(String crd) {
+    private ObjectNode findSchema(String crd) {
         try {
             if (swaggerLoaded.compareAndSet(false, true)) {
                 loadSwagger();

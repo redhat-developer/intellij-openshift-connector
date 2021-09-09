@@ -64,7 +64,7 @@ task integrationTest(type: Test) {
 }
 
 dependencies {
-    compile 'io.fabric8:openshift-client:5.0.2'
+    compile 'io.fabric8:openshift-client:5.7.2'
     compile 'io.fabric8:servicecatalog-client:5.0.2'
     compile 'org.apache.commons:commons-compress:1.19'
     compile 'org.apache.commons:commons-exec:1.3'

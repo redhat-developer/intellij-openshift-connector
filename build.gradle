@@ -20,7 +20,7 @@ targetCompatibility = '1.8'
 intellij {
     version = ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName = 'org.jboss.tools.intellij.openshift'
-    plugins = ['java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml', 'com.redhat.devtools.intellij.telemetry:0.0.1.9', 'com.redhat.devtools.intellij.kubernetes:0.1.6.32']
+    plugins = ['java', 'terminal', 'JavaScriptDebugger', 'JavaScriptLanguage', 'CSS', 'yaml', 'com.redhat.devtools.intellij.telemetry:0.0.1.9', 'com.redhat.devtools.intellij.kubernetes:0.2.4.65']
 	updateSinceUntilBuild = false
 }
 

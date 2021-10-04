@@ -12,6 +12,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.8.2</b></p>
+  <p>Compatibility with Kubernetes by Red Hat 0.2.4<p>
   <p><b>0.8.1</b></p>
   <p>Context menus non functional<p>
   <p><b>0.8.0</b></p>

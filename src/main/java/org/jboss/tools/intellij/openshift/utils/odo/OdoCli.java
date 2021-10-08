@@ -380,8 +380,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void deleteService(String project, String application, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
-        CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
-        client.customResource(context).delete(project, service.getName());
+        try {
+            CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
+            client.customResource(context).delete(project, service.getName());
+        } catch (KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
     }
 
     @Override

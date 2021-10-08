@@ -1,365 +1,470 @@
-[
-  {
-    "apiVersion": "kafka.strimzi.io/v1beta2",
-    "kind": "Kafka",
-    "metadata": {
-      "creationTimestamp": "2021-08-16T07:22:36Z",
-      "generation": 1,
-      "labels": {
-        "app": "app",
-        "app.kubernetes.io/instance": "sbcomp1",
-        "app.kubernetes.io/managed-by": "odo",
-        "app.kubernetes.io/managed-by-version": "v2.2.4",
-        "app.kubernetes.io/part-of": "app"
+{
+  "kind": "List",
+  "apiVersion": "odo.dev/v1alpha1",
+  "metadata": {},
+  "items": [
+    {
+      "kind": "Service",
+      "apiVersion": "odo.dev/v1alpha1",
+      "metadata": {
+        "name": "Kafka/my-cluster",
+        "creationTimestamp": null
       },
-      "managedFields": [
-        {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "fieldsType": "FieldsV1",
-          "fieldsV1": {
-            "f:metadata": {
-              "f:labels": {
-                ".": {},
-                "f:app": {},
-                "f:app.kubernetes.io/instance": {},
-                "f:app.kubernetes.io/managed-by": {},
-                "f:app.kubernetes.io/managed-by-version": {},
-                "f:app.kubernetes.io/part-of": {}
-              }
-            },
-            "f:spec": {
-              ".": {},
-              "f:entityOperator": {
-                ".": {},
-                "f:topicOperator": {},
-                "f:userOperator": {}
-              },
-              "f:kafka": {
-                ".": {},
-                "f:config": {
-                  ".": {},
-                  "f:inter.broker.protocol.version": {},
-                  "f:log.message.format.version": {},
-                  "f:offsets.topic.replication.factor": {},
-                  "f:transaction.state.log.min.isr": {},
-                  "f:transaction.state.log.replication.factor": {}
+      "clusterInfo": {
+        "labels": {
+          "app": "app",
+          "app.kubernetes.io/instance": "nodejs-ex",
+          "app.kubernetes.io/managed-by": "odo",
+          "app.kubernetes.io/managed-by-version": "v2.3.1",
+          "app.kubernetes.io/part-of": "app"
+        },
+        "creationTimestamp": "2021-10-08T17:23:27+02:00"
+      },
+      "inDevfile": true,
+      "deployed": true,
+      "manifest": {
+        "apiVersion": "kafka.strimzi.io/v1beta2",
+        "kind": "Kafka",
+        "metadata": {
+          "creationTimestamp": "2021-10-08T15:23:27Z",
+          "generation": 1,
+          "labels": {
+            "app": "app",
+            "app.kubernetes.io/instance": "nodejs-ex",
+            "app.kubernetes.io/managed-by": "odo",
+            "app.kubernetes.io/managed-by-version": "v2.3.1",
+            "app.kubernetes.io/part-of": "app"
+          },
+          "managedFields": [
+            {
+              "apiVersion": "kafka.strimzi.io/v1beta2",
+              "fieldsType": "FieldsV1",
+              "fieldsV1": {
+                "f:metadata": {
+                  "f:labels": {
+                    ".": {},
+                    "f:app": {},
+                    "f:app.kubernetes.io/instance": {},
+                    "f:app.kubernetes.io/managed-by": {},
+                    "f:app.kubernetes.io/managed-by-version": {},
+                    "f:app.kubernetes.io/part-of": {}
+                  },
+                  "f:ownerReferences": {
+                    ".": {},
+                    "k:{\"uid\":\"0a5e4e85-e877-4255-8edd-f5efba549aac\"}": {
+                      ".": {},
+                      "f:apiVersion": {},
+                      "f:kind": {},
+                      "f:name": {},
+                      "f:uid": {}
+                    }
+                  }
                 },
-                "f:listeners": {},
-                "f:replicas": {},
-                "f:storage": {
+                "f:spec": {
                   ".": {},
-                  "f:type": {}
-                },
-                "f:version": {}
-              },
-              "f:zookeeper": {
-                ".": {},
-                "f:replicas": {},
-                "f:storage": {
-                  ".": {},
-                  "f:type": {}
+                  "f:entityOperator": {
+                    ".": {},
+                    "f:topicOperator": {},
+                    "f:userOperator": {}
+                  },
+                  "f:kafka": {
+                    ".": {},
+                    "f:config": {
+                      ".": {},
+                      "f:inter.broker.protocol.version": {},
+                      "f:log.message.format.version": {},
+                      "f:offsets.topic.replication.factor": {},
+                      "f:transaction.state.log.min.isr": {},
+                      "f:transaction.state.log.replication.factor": {}
+                    },
+                    "f:listeners": {},
+                    "f:replicas": {},
+                    "f:storage": {
+                      ".": {},
+                      "f:type": {}
+                    },
+                    "f:version": {}
+                  },
+                  "f:zookeeper": {
+                    ".": {},
+                    "f:replicas": {},
+                    "f:storage": {
+                      ".": {},
+                      "f:type": {}
+                    }
+                  }
                 }
+              },
+              "manager": "odo",
+              "operation": "Update",
+              "time": "2021-10-08T15:23:45Z"
+            },
+            {
+              "apiVersion": "kafka.strimzi.io/v1beta2",
+              "fieldsType": "FieldsV1",
+              "fieldsV1": {
+                "f:status": {
+                  ".": {},
+                  "f:clusterId": {},
+                  "f:conditions": {},
+                  "f:listeners": {},
+                  "f:observedGeneration": {}
+                }
+              },
+              "manager": "okhttp",
+              "operation": "Update",
+              "time": "2021-10-08T15:26:36Z"
+            }
+          ],
+          "name": "my-cluster",
+          "namespace": "demo",
+          "ownerReferences": [
+            {
+              "apiVersion": "apps/v1",
+              "kind": "Deployment",
+              "name": "nodejs-ex-app",
+              "uid": "0a5e4e85-e877-4255-8edd-f5efba549aac"
+            }
+          ],
+          "resourceVersion": "179489",
+          "uid": "fedf4ca5-562d-4eea-9070-756ff80bb3dd"
+        },
+        "spec": {
+          "entityOperator": {
+            "topicOperator": {},
+            "userOperator": {}
+          },
+          "kafka": {
+            "config": {
+              "inter.broker.protocol.version": "2.8",
+              "log.message.format.version": "2.8",
+              "offsets.topic.replication.factor": 3,
+              "transaction.state.log.min.isr": 2,
+              "transaction.state.log.replication.factor": 3
+            },
+            "listeners": [
+              {
+                "name": "plain",
+                "port": 9092,
+                "tls": false,
+                "type": "internal"
+              },
+              {
+                "name": "tls",
+                "port": 9093,
+                "tls": true,
+                "type": "internal"
               }
+            ],
+            "replicas": 3,
+            "storage": {
+              "type": "ephemeral"
+            },
+            "version": "2.8.0"
+          },
+          "zookeeper": {
+            "replicas": 3,
+            "storage": {
+              "type": "ephemeral"
             }
-          },
-          "manager": "odo",
-          "operation": "Update",
-          "time": "2021-08-16T07:22:36Z"
-        },
-        {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "fieldsType": "FieldsV1",
-          "fieldsV1": {
-            "f:status": {
-              ".": {},
-              "f:conditions": {},
-              "f:observedGeneration": {}
-            }
-          },
-          "manager": "okhttp",
-          "operation": "Update",
-          "time": "2021-08-16T07:22:37Z"
-        }
-      ],
-      "name": "my-cluster",
-      "namespace": "demo",
-      "ownerReferences": [
-        {
-          "apiVersion": "apps/v1",
-          "kind": "Deployment",
-          "name": "sbcomp1-app",
-          "uid": "188074fb-0af4-48f9-a171-360494b85ebb"
-        }
-      ],
-      "resourceVersion": "222809",
-      "selfLink": "/apis/kafka.strimzi.io/v1beta2/namespaces/demo/kafkas/my-cluster",
-      "uid": "e48b372a-0844-465e-9ecf-0888963a47b5"
-    },
-    "spec": {
-      "entityOperator": {
-        "topicOperator": {},
-        "userOperator": {}
-      },
-      "kafka": {
-        "config": {
-          "inter.broker.protocol.version": "2.8",
-          "log.message.format.version": "2.8",
-          "offsets.topic.replication.factor": 3,
-          "transaction.state.log.min.isr": 2,
-          "transaction.state.log.replication.factor": 3
-        },
-        "listeners": [
-          {
-            "name": "plain",
-            "port": 9092,
-            "tls": false,
-            "type": "internal"
-          },
-          {
-            "name": "tls",
-            "port": 9093,
-            "tls": true,
-            "type": "internal"
           }
-        ],
-        "replicas": 3,
-        "storage": {
-          "type": "ephemeral"
         },
-        "version": "2.8.0"
-      },
-      "zookeeper": {
-        "replicas": 3,
-        "storage": {
-          "type": "ephemeral"
+        "status": {
+          "clusterId": "wg2QKRmZTTiasO3p6HHxHg",
+          "conditions": [
+            {
+              "lastTransitionTime": "2021-10-08T15:26:36.879Z",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "listeners": [
+            {
+              "addresses": [
+                {
+                  "host": "my-cluster-kafka-bootstrap.demo.svc",
+                  "port": 9092
+                }
+              ],
+              "bootstrapServers": "my-cluster-kafka-bootstrap.demo.svc:9092",
+              "type": "plain"
+            },
+            {
+              "addresses": [
+                {
+                  "host": "my-cluster-kafka-bootstrap.demo.svc",
+                  "port": 9093
+                }
+              ],
+              "bootstrapServers": "my-cluster-kafka-bootstrap.demo.svc:9093",
+              "certificates": [
+                "-----BEGIN CERTIFICATE-----\nMIIFLTCCAxWgAwIBAgIUBrkIJndx3tXeZFKvQCNMcxscJK4wDQYJKoZIhvcNAQEN\nBQAwLTETMBEGA1UECgwKaW8uc3RyaW16aTEWMBQGA1UEAwwNY2x1c3Rlci1jYSB2\nMDAeFw0yMTEwMDgxNTIzMjdaFw0yMjEwMDgxNTIzMjdaMC0xEzARBgNVBAoMCmlv\nLnN0cmltemkxFjAUBgNVBAMMDWNsdXN0ZXItY2EgdjAwggIiMA0GCSqGSIb3DQEB\nAQUAA4ICDwAwggIKAoICAQDqfNi47OhjU7C0Pld2HVi7BsAvZxyltGqdoDZy/aWH\nlQBr3Xme2QXBJaVrxB8hDSppKdSMH07z3hn4JQuERvpKEY2FNXVfIaiJm7dZfq0+\n0AalrcqBc01a3tByN41tJKe+P8CUxICvMxGz+2Yyc1sDJMiPDz+P/Qh5aSL13Nj1\niSF4pEDTYR39JZlTqARJnCvhv3/6cFzJUTjQx9RPyu+fTy34Avnbdj0/KPhVSqlR\npU8P2BpiT8YA8MauYj20ITJ7+bE4AuxSdthFnFBnP+ajNyA0RFjekqr1FxgBtDRT\nygvbif/kJLfG8SneXTGwqvXi8tbnLGBSxxQOzfztomiwsLdaOCv/c1J9wbTmWNSa\nsAPKseCkwqVqEmlW9+xD36IYgu1GcQps9MYSx6Ckyn4CJeC5h9w+GpIs+x5Y6Gr+\n5z3ytdr4ip1+0bie0UGqBMH1jA3DnQDfuF7+4KURtaLiGxZ6yPVbyGT+waBbGi33\n/buOKoUfAEoLAYpJe5zrp+n/VSo9o4TuRHIXeW6GcxjxoAY3TBE6TYaric4+Iwy1\nCDIdvJ7lFEH5rtdyokhWvh8qjMf6xGmiSlIsirg0fcBIIFto4A6sA44ISkFfjJK2\noBdSneOn/vGYxofENI3GQ72Y70xUkQUWCxipHAHAVoqijq08a3K11UqhkxczTDRS\nXwIDAQABo0UwQzAdBgNVHQ4EFgQUEMJp8tTZNXK+2QKQ4Ro68qt639gwEgYDVR0T\nAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAQYwDQYJKoZIhvcNAQENBQADggIB\nACnYg1o+69FAh2+G6wWJ72SnxGkX5Az3oBRkDqjZUSP6wQ4DPpL9ToF10OnQnBES\nHicb2V4TeG2NQrDiKgUFerUYtgJsqrn4VLx4IdTZcbyM8VO5d2+pVKB82T5Q41hL\nEl5wc/R/n2qNfol4bYwc3P0zafQLGnXrIpDPMdVJSjp1W59HAnuC43W1EmOkU4/q\nr6cTOoyDHZZus7do8xoWXrSSLa5GC60S9s16cMdjHTkNPlZZMvGWLNd333XBA0Ft\n1vpAoL9nnid8MgB/+FDgarm+5IFbc5hbcRCLPQmOwro6JWxyCZzZdCVUPRrnKVAl\ntdhHVRtsEwjjb+OaydLgudAAMpRe3V7AZgMepF9kj91ZmIc8ae6S2XQbx6Ub+aMB\nltlp9WCdYmau4PlqpoTzPGp/zhtTXmuud2Nke7IPFrUJApJIi8vDN+8Mub4dib2v\nI3M3fM3Fmqnns/fdSwL4NyARh5Fys2c5XJwV/2eLZpBPRIANauAYAJMts/5hLCjG\nyWzPGiAHs91f4MXja++31ppnbybUIa+n94UgOmsYL+wEPCywAbPMS7ET/PH0LI4Z\n0m3p4lyAADgTl7APiKXhpe+bliUAsGuTOqhIl/gA+DvOH3gQ1A+oFC76/Y6BEKAY\n7YvF6aSlFjyoCK6OKmIjVxQkod3JLhMZflgNrvLFXthy\n-----END CERTIFICATE-----\n"
+              ],
+              "type": "tls"
+            }
+          ],
+          "observedGeneration": 1
         }
       }
     },
-    "status": {
-      "conditions": [
-        {
-          "lastTransitionTime": "2021-08-16T07:22:36.564Z",
-          "message": "Kafka cluster is being deployed",
-          "reason": "Creating",
-          "status": "True",
-          "type": "NotReady"
-        }
-      ],
-      "observedGeneration": 0
-    }
-  },
-  {
-    "apiVersion": "kafka.strimzi.io/v1beta2",
-    "kind": "KafkaTopic",
-    "metadata": {
-      "creationTimestamp": "2021-08-12T16:28:53Z",
-      "generation": 1,
-      "labels": {
-        "strimzi.io/cluster": "my-cluster"
+    {
+      "kind": "Service",
+      "apiVersion": "odo.dev/v1alpha1",
+      "metadata": {
+        "name": "KafkaTopic/consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a",
+        "creationTimestamp": null
       },
-      "managedFields": [
-        {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "fieldsType": "FieldsV1",
-          "fieldsV1": {
-            "f:metadata": {
-              "f:labels": {
-                ".": {},
-                "f:strimzi.io/cluster": {}
-              }
-            },
-            "f:spec": {
-              ".": {},
-              "f:config": {
-                ".": {},
-                "f:cleanup.policy": {},
-                "f:compression.type": {},
-                "f:segment.bytes": {}
-              },
-              "f:partitions": {},
-              "f:replicas": {},
-              "f:topicName": {}
-            },
-            "f:status": {
-              ".": {},
-              "f:conditions": {},
-              "f:observedGeneration": {},
-              "f:topicName": {}
-            }
+      "clusterInfo": {
+        "labels": {
+          "strimzi.io/cluster": "my-cluster"
+        },
+        "creationTimestamp": "2021-10-08T17:26:24+02:00"
+      },
+      "inDevfile": false,
+      "deployed": true,
+      "manifest": {
+        "apiVersion": "kafka.strimzi.io/v1beta2",
+        "kind": "KafkaTopic",
+        "metadata": {
+          "creationTimestamp": "2021-10-08T15:26:24Z",
+          "generation": 1,
+          "labels": {
+            "strimzi.io/cluster": "my-cluster"
           },
-          "manager": "okhttp",
-          "operation": "Update",
-          "time": "2021-08-12T16:28:54Z"
-        }
-      ],
-      "name": "consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a",
-      "namespace": "demo",
-      "resourceVersion": "40685",
-      "selfLink": "/apis/kafka.strimzi.io/v1beta2/namespaces/demo/kafkatopics/consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a",
-      "uid": "67af7e70-9b0f-4f64-b52b-644be98ed60a"
-    },
-    "spec": {
-      "config": {
-        "cleanup.policy": "compact",
-        "compression.type": "producer",
-        "segment.bytes": "104857600"
-      },
-      "partitions": 50,
-      "replicas": 3,
-      "topicName": "__consumer_offsets"
-    },
-    "status": {
-      "conditions": [
-        {
-          "lastTransitionTime": "2021-08-12T16:28:54.638183Z",
-          "status": "True",
-          "type": "Ready"
-        }
-      ],
-      "observedGeneration": 1,
-      "topicName": "__consumer_offsets"
-    }
-  },
-  {
-    "apiVersion": "kafka.strimzi.io/v1beta2",
-    "kind": "KafkaTopic",
-    "metadata": {
-      "creationTimestamp": "2021-08-12T16:28:52Z",
-      "generation": 1,
-      "labels": {
-        "strimzi.io/cluster": "my-cluster"
-      },
-      "managedFields": [
-        {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "fieldsType": "FieldsV1",
-          "fieldsV1": {
-            "f:metadata": {
-              "f:labels": {
-                ".": {},
-                "f:strimzi.io/cluster": {}
-              }
-            },
-            "f:spec": {
-              ".": {},
-              "f:config": {
-                ".": {},
-                "f:min.insync.replicas": {}
+          "managedFields": [
+            {
+              "apiVersion": "kafka.strimzi.io/v1beta2",
+              "fieldsType": "FieldsV1",
+              "fieldsV1": {
+                "f:metadata": {
+                  "f:labels": {
+                    ".": {},
+                    "f:strimzi.io/cluster": {}
+                  }
+                },
+                "f:spec": {
+                  ".": {},
+                  "f:config": {
+                    ".": {},
+                    "f:cleanup.policy": {},
+                    "f:compression.type": {},
+                    "f:segment.bytes": {}
+                  },
+                  "f:partitions": {},
+                  "f:replicas": {},
+                  "f:topicName": {}
+                },
+                "f:status": {
+                  ".": {},
+                  "f:conditions": {},
+                  "f:observedGeneration": {},
+                  "f:topicName": {}
+                }
               },
-              "f:partitions": {},
-              "f:replicas": {},
-              "f:topicName": {}
-            },
-            "f:status": {
-              ".": {},
-              "f:conditions": {},
-              "f:observedGeneration": {},
-              "f:topicName": {}
+              "manager": "okhttp",
+              "operation": "Update",
+              "time": "2021-10-08T15:26:25Z"
             }
+          ],
+          "name": "consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a",
+          "namespace": "demo",
+          "resourceVersion": "179436",
+          "uid": "8a883376-e69d-4aaf-8ab9-052044880642"
+        },
+        "spec": {
+          "config": {
+            "cleanup.policy": "compact",
+            "compression.type": "producer",
+            "segment.bytes": "104857600"
           },
-          "manager": "okhttp",
-          "operation": "Update",
-          "time": "2021-08-12T16:28:54Z"
+          "partitions": 50,
+          "replicas": 3,
+          "topicName": "__consumer_offsets"
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2021-10-08T15:26:25.783952Z",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "observedGeneration": 1,
+          "topicName": "__consumer_offsets"
         }
-      ],
-      "name": "strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55",
-      "namespace": "demo",
-      "resourceVersion": "40683",
-      "selfLink": "/apis/kafka.strimzi.io/v1beta2/namespaces/demo/kafkatopics/strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55",
-      "uid": "eb9d44c0-70b6-45c9-b36a-2907d8d6f571"
+      }
     },
-    "spec": {
-      "config": {
-        "min.insync.replicas": "2"
+    {
+      "kind": "Service",
+      "apiVersion": "odo.dev/v1alpha1",
+      "metadata": {
+        "name": "KafkaTopic/strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55",
+        "creationTimestamp": null
       },
-      "partitions": 1,
-      "replicas": 3,
-      "topicName": "__strimzi_store_topic"
-    },
-    "status": {
-      "conditions": [
-        {
-          "lastTransitionTime": "2021-08-12T16:28:54.351656Z",
-          "status": "True",
-          "type": "Ready"
-        }
-      ],
-      "observedGeneration": 1,
-      "topicName": "__strimzi_store_topic"
-    }
-  },
-  {
-    "apiVersion": "kafka.strimzi.io/v1beta2",
-    "kind": "KafkaTopic",
-    "metadata": {
-      "creationTimestamp": "2021-08-12T16:28:53Z",
-      "generation": 1,
-      "labels": {
-        "strimzi.io/cluster": "my-cluster"
+      "clusterInfo": {
+        "labels": {
+          "strimzi.io/cluster": "my-cluster"
+        },
+        "creationTimestamp": "2021-10-08T17:26:24+02:00"
       },
-      "managedFields": [
-        {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "fieldsType": "FieldsV1",
-          "fieldsV1": {
-            "f:metadata": {
-              "f:labels": {
-                ".": {},
-                "f:strimzi.io/cluster": {}
-              }
-            },
-            "f:spec": {
-              ".": {},
-              "f:config": {
-                ".": {},
-                "f:cleanup.policy": {},
-                "f:message.timestamp.type": {},
-                "f:min.compaction.lag.ms": {},
-                "f:segment.bytes": {}
+      "inDevfile": false,
+      "deployed": true,
+      "manifest": {
+        "apiVersion": "kafka.strimzi.io/v1beta2",
+        "kind": "KafkaTopic",
+        "metadata": {
+          "creationTimestamp": "2021-10-08T15:26:24Z",
+          "generation": 1,
+          "labels": {
+            "strimzi.io/cluster": "my-cluster"
+          },
+          "managedFields": [
+            {
+              "apiVersion": "kafka.strimzi.io/v1beta2",
+              "fieldsType": "FieldsV1",
+              "fieldsV1": {
+                "f:metadata": {
+                  "f:labels": {
+                    ".": {},
+                    "f:strimzi.io/cluster": {}
+                  }
+                },
+                "f:spec": {
+                  ".": {},
+                  "f:config": {
+                    ".": {},
+                    "f:min.insync.replicas": {}
+                  },
+                  "f:partitions": {},
+                  "f:replicas": {},
+                  "f:topicName": {}
+                },
+                "f:status": {
+                  ".": {},
+                  "f:conditions": {},
+                  "f:observedGeneration": {},
+                  "f:topicName": {}
+                }
               },
-              "f:partitions": {},
-              "f:replicas": {},
-              "f:topicName": {}
-            },
-            "f:status": {
-              ".": {},
-              "f:conditions": {},
-              "f:observedGeneration": {},
-              "f:topicName": {}
+              "manager": "okhttp",
+              "operation": "Update",
+              "time": "2021-10-08T15:26:26Z"
             }
+          ],
+          "name": "strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55",
+          "namespace": "demo",
+          "resourceVersion": "179437",
+          "uid": "ed07ffed-6fbe-4b6c-a293-1d520a415255"
+        },
+        "spec": {
+          "config": {
+            "min.insync.replicas": "2"
           },
-          "manager": "okhttp",
-          "operation": "Update",
-          "time": "2021-08-12T16:28:54Z"
+          "partitions": 1,
+          "replicas": 3,
+          "topicName": "__strimzi_store_topic"
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2021-10-08T15:26:25.880824Z",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "observedGeneration": 1,
+          "topicName": "__strimzi_store_topic"
         }
-      ],
-      "name": "strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b",
-      "namespace": "demo",
-      "resourceVersion": "40684",
-      "selfLink": "/apis/kafka.strimzi.io/v1beta2/namespaces/demo/kafkatopics/strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b",
-      "uid": "b7557429-b689-459a-8901-ba6c7adf0035"
+      }
     },
-    "spec": {
-      "config": {
-        "cleanup.policy": "compact",
-        "message.timestamp.type": "CreateTime",
-        "min.compaction.lag.ms": "0",
-        "segment.bytes": "67108864"
+    {
+      "kind": "Service",
+      "apiVersion": "odo.dev/v1alpha1",
+      "metadata": {
+        "name": "KafkaTopic/strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b",
+        "creationTimestamp": null
       },
-      "partitions": 1,
-      "replicas": 1,
-      "topicName": "__strimzi-topic-operator-kstreams-topic-store-changelog"
-    },
-    "status": {
-      "conditions": [
-        {
-          "lastTransitionTime": "2021-08-12T16:28:54.616899Z",
-          "status": "True",
-          "type": "Ready"
+      "clusterInfo": {
+        "labels": {
+          "strimzi.io/cluster": "my-cluster"
+        },
+        "creationTimestamp": "2021-10-08T17:26:24+02:00"
+      },
+      "inDevfile": false,
+      "deployed": true,
+      "manifest": {
+        "apiVersion": "kafka.strimzi.io/v1beta2",
+        "kind": "KafkaTopic",
+        "metadata": {
+          "creationTimestamp": "2021-10-08T15:26:24Z",
+          "generation": 1,
+          "labels": {
+            "strimzi.io/cluster": "my-cluster"
+          },
+          "managedFields": [
+            {
+              "apiVersion": "kafka.strimzi.io/v1beta2",
+              "fieldsType": "FieldsV1",
+              "fieldsV1": {
+                "f:metadata": {
+                  "f:labels": {
+                    ".": {},
+                    "f:strimzi.io/cluster": {}
+                  }
+                },
+                "f:spec": {
+                  ".": {},
+                  "f:config": {
+                    ".": {},
+                    "f:cleanup.policy": {},
+                    "f:message.timestamp.type": {},
+                    "f:min.compaction.lag.ms": {},
+                    "f:segment.bytes": {}
+                  },
+                  "f:partitions": {},
+                  "f:replicas": {},
+                  "f:topicName": {}
+                },
+                "f:status": {
+                  ".": {},
+                  "f:conditions": {},
+                  "f:observedGeneration": {},
+                  "f:topicName": {}
+                }
+              },
+              "manager": "okhttp",
+              "operation": "Update",
+              "time": "2021-10-08T15:26:26Z"
+            }
+          ],
+          "name": "strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b",
+          "namespace": "demo",
+          "resourceVersion": "179438",
+          "uid": "b10f6412-df76-4f1d-b714-6c23cd2236e6"
+        },
+        "spec": {
+          "config": {
+            "cleanup.policy": "compact",
+            "message.timestamp.type": "CreateTime",
+            "min.compaction.lag.ms": "0",
+            "segment.bytes": "67108864"
+          },
+          "partitions": 1,
+          "replicas": 1,
+          "topicName": "__strimzi-topic-operator-kstreams-topic-store-changelog"
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2021-10-08T15:26:25.907107Z",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "observedGeneration": 1,
+          "topicName": "__strimzi-topic-operator-kstreams-topic-store-changelog"
         }
-      ],
-      "observedGeneration": 1,
-      "topicName": "__strimzi-topic-operator-kstreams-topic-store-changelog"
+      }
     }
-  }
-]
+  ]
+}

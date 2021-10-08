@@ -33,7 +33,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>>
   @Override
   public List<Service> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
     List<Service> result = new ArrayList<>();
-      for (JsonNode service : root) {
+      for (JsonNode service : root.get("items") {
         result.add(getService(service));
     }
     return result;

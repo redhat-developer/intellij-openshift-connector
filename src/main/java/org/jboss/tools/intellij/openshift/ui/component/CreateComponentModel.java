@@ -14,7 +14,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardModel;
 import com.redhat.devtools.alizer.api.LanguageRecognizer;
-import com.redhat.devtools.alizer.api.LanguageRecognizerBuilder;
+import com.redhat.devtools.alizer.api.RecognizerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
@@ -40,7 +40,7 @@ import java.util.function.Predicate;
 
 public class CreateComponentModel extends WizardModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateComponentModel.class);
-    private static LanguageRecognizer recognizer = new LanguageRecognizerBuilder().build();
+    private static LanguageRecognizer recognizer = new RecognizerFactory().createLanguageRecognizer();
 
     private Project project;
     private String name = "";

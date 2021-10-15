@@ -68,13 +68,13 @@ jobs:
         run: |
           curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.18.3/install.sh | bash -s v0.18.3
           kubectl create -f https://operatorhub.io/install/cloud-native-postgresql.yaml
-          nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep postgres-operator | grep Running | wc -l`
+          nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep postgresql-operator | grep Running | wc -l`
           echo -n "Waiting for operator to show up "
           while [ "$nb" = "0" ]
           do
             echo -n "."
             sleep 1
-            nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep postgres-operator | grep Running | wc -l`
+            nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep postgresql-operator | grep Running | wc -l`
           done
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

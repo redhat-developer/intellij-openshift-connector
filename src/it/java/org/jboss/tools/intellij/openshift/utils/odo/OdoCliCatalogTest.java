@@ -36,6 +36,9 @@ public class OdoCliCatalogTest extends OdoCliTest {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
+            //After a namespace is created the cluster wide operators takes time to appear
+            //in installed state into the namespace
+            Thread.sleep(60000L);
             List<ServiceTemplate> services = odo.getServiceTemplates();
             assertTrue(services.size() > 0);
         } finally {
@@ -48,6 +51,9 @@ public class OdoCliCatalogTest extends OdoCliTest {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
+            //After a namespace is created the cluster wide operators takes time to appear
+            //in installed state into the namespace
+            Thread.sleep(60000L);
             List<ServiceTemplate> services = odo.getServiceTemplates();
             assertTrue(services.stream().filter(template -> ((ServiceTemplate) template).getCRDs().size() > 1).count() > 0);
         } finally {

@@ -14,7 +14,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.with;
 import static org.junit.Assert.assertTrue;
 
 public class OdoCliCatalogTest extends OdoCliTest {
@@ -38,9 +41,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
             createProject(project);
             //After a namespace is created the cluster wide operators takes time to appear
             //in installed state into the namespace
-            Thread.sleep(60000L);
-            List<ServiceTemplate> services = odo.getServiceTemplates();
-            assertTrue(services.size() > 0);
+            with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
         } finally {
             odo.deleteProject(project);
         }
@@ -53,9 +54,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
             createProject(project);
             //After a namespace is created the cluster wide operators takes time to appear
             //in installed state into the namespace
-            Thread.sleep(60000L);
-            List<ServiceTemplate> services = odo.getServiceTemplates();
-            assertTrue(services.stream().filter(template -> ((ServiceTemplate) template).getCRDs().size() > 1).count() > 0);
+            with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> odo.getServiceTemplates().stream().filter(template -> template.getCRDs().size() > 1).count() > 1);
         } finally {
             odo.deleteProject(project);
         }

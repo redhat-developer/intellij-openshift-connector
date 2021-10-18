@@ -169,7 +169,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } catch (KubernetesClientException | IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
         }
-        odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
+        try {
+            odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
+        } catch (IOException e) {
+            results.add(new MessageNode(element.getRoot(), element, "Failed to load application services"));
+        }
 
         if (results.isEmpty()) {
             results.add(new CreateComponentLinkNode(element.getRoot(), element));
@@ -250,7 +254,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
             return new LabelAndIconDescriptor(project, element,
-                    ((ServiceNode) element)::getName, SERVICE_ICON, parentDescriptor);
+                    ((ServiceNode) element)::getName, () -> ((ServiceNode) element).getService().getKind(), SERVICE_ICON, parentDescriptor);
         } else if (element instanceof PersistentVolumeClaimNode) {
             return new LabelAndIconDescriptor(project, element,
                     ((PersistentVolumeClaimNode) element)::getName, STORAGE_ICON, parentDescriptor);

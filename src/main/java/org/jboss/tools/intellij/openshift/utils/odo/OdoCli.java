@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
@@ -33,10 +34,12 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
+import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
-import io.fabric8.servicecatalog.api.model.ServiceInstance;
-import io.fabric8.servicecatalog.client.ServiceCatalogClient;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
@@ -55,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
@@ -67,7 +71,6 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
-import static org.jboss.tools.intellij.openshift.KubernetesLabels.NAME_LABEL;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.IS_OPENSHIFT;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.KUBERNETES_VERSION;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPENSHIFT_VERSION;
@@ -79,6 +82,11 @@ public class OdoCli implements Odo {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
     private static final String WINDOW_TITLE = "OpenShift";
 
+    private static final String METADATA_FIELD = "metadata";
+    private static final String NAME_FIELD = "name";
+    private static final String NAMESPACE_FIELD = "namespace";
+    private static final String SPEC_FIELD = "spec";
+
     private final com.intellij.openapi.project.Project project;
     private final String command;
 
@@ -87,6 +95,10 @@ public class OdoCli implements Odo {
     private Map<String, String> envVars;
 
     private String namespace;
+
+    private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
+
+    private JSonParser swagger;
 
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
@@ -314,27 +326,66 @@ public class OdoCli implements Odo {
         }
     }
 
+    private CustomResourceDefinitionContext toCustomResourceDefinitionContext(OperatorCRD crd) {
+        String group = crd.getName().substring(crd.getName().indexOf('.') + 1);
+        String plural = crd.getName().substring(0, crd.getName().indexOf('.'));
+        return new CustomResourceDefinitionContext.Builder()
+                .withName(crd.getName())
+                .withGroup(group)
+                .withScope("Namespaced")
+                .withKind(crd.getKind())
+                .withPlural(plural)
+                .withVersion(crd.getVersion())
+                .build();
+    }
+
+    private CustomResourceDefinitionContext toCustomResourceDefinitionContext(org.jboss.tools.intellij.openshift.utils.odo.Service service) {
+        String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
+        String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
+        return new CustomResourceDefinitionContext.Builder()
+                .withName(service.getKind().toLowerCase() + "s." + group)
+                .withGroup(group)
+                .withScope("Namespaced")
+                .withKind(service.getKind())
+                .withPlural(service.getKind().toLowerCase() + "s")
+                .withVersion(version)
+                .build();
+    }
+
     @Override
-    public void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException {
-        ensureDefaultOdoConfigFileExists();
-        if (wait) {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(HOME_FOLDER), true, envVars, command, "service", "create", serviceTemplate,
-                    "--plan", servicePlan, service, "--app", application, "--project", project, "-w");
-        } else {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(HOME_FOLDER), true, envVars, command, "service", "create", serviceTemplate,
-                    "--plan", servicePlan, service, "--app", application, "--project", project);
+    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+                              String service, ObjectNode spec, boolean wait) throws IOException {
+        try {
+            CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(serviceCRD);
+            ObjectNode payload = serviceCRD.getSample().deepCopy();
+            updatePayload(payload, spec, project, service);
+            client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(payload));
+        } catch (KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
+        ((ObjectNode)node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
+        ((ObjectNode)node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
+        if (spec != null) {
+            ((ObjectNode)node).set(SPEC_FIELD, spec);
         }
     }
 
     @Override
-    public String getServiceTemplate(String project, String application, String service) {
-        ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-        return sc.serviceInstances().inNamespace(project).withName(service).get().getMetadata().getLabels().get(NAME_LABEL);
+    public String getServiceTemplate(String project, String application, String service) throws IOException {
+        throw new IOException("Not implemented by odo yet");
     }
 
     @Override
-    public void deleteService(String project, String application, String service) throws IOException {
-        execute(command, envVars, "service", "delete", "--project", project, "--app", application, service, "-f");
+    public void deleteService(String project, String application, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
+        try {
+            CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
+            client.customResource(context).delete(project, service.getName());
+        } catch (KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
     }
 
     @Override
@@ -345,9 +396,34 @@ public class OdoCli implements Odo {
                 });
     }
 
+
+    private void loadSwagger() {
+        try {
+            Request req = new Request.Builder().get().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
+            Response response = client.adapt(OkHttpClient.class).newCall(req).execute();
+            if (response.isSuccessful()) {
+                swagger = new JSonParser(new ObjectMapper().readTree(response.body().charStream()));
+            }
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+    }
+
+    private ObjectNode findSchema(String crd) {
+        try {
+            if (swaggerLoaded.compareAndSet(false, true)) {
+                loadSwagger();
+            }
+            if (swagger != null) {
+                return swagger.findSchema("/apis/" + crd);
+            }
+        } catch (IOException e) {}
+        return null;
+    }
+
     @Override
     public List<ServiceTemplate> getServiceTemplates() throws IOException {
-        return configureObjectMapper(new ServiceTemplatesDeserializer()).readValue(
+        return configureObjectMapper(new ServiceTemplatesDeserializer(this::findSchema)).readValue(
                 execute(command, envVars, "catalog", "list", "services", "-o", "json"),
                 new TypeReference<List<ServiceTemplate>>() {
                 });
@@ -498,12 +574,18 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public List<ServiceInstance> getServices(String project, String application) {
+    public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project, String application) throws IOException {
         try {
-            ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-            return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
-        } catch (KubernetesClientException e) {
-            return Collections.emptyList();
+            return configureObjectMapper(new ServiceDeserializer()).readValue(
+                    execute(command, envVars, "service", "list", "--app", application, "--project", project, "-o", "json"),
+                    new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
+                    });
+        } catch (IOException e) {
+            //https://github.com/openshift/odo/issues/5010
+            if (e.getMessage().contains("\"no operator backed services found in namespace:")) {
+                return Collections.emptyList();
+            }
+            throw e;
         }
     }
 
@@ -579,12 +661,6 @@ public class OdoCli implements Odo {
             }
             throw e;
         }
-    }
-
-
-    @Override
-    public boolean isServiceCatalogAvailable() {
-        return client.isAdaptable(ServiceCatalogClient.class);
     }
 
     @Override

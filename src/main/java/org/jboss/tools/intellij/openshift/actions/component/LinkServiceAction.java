@@ -16,8 +16,6 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import io.fabric8.servicecatalog.api.model.ServiceInstance;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -26,6 +24,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.Service;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,13 +59,13 @@ public class LinkServiceAction extends OdoAction {
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        List<ServiceInstance> services = odo.getServices(namespaceNode.getName(), applicationNode.getName());
+        List<Service> services = odo.getServices(namespaceNode.getName(), applicationNode.getName());
         if (!services.isEmpty()) {
           String service;
           if (services.size() == 1) {
-            service = KubernetesLabels.getComponentName(services.get(0));
+            service = services.get(0).getName();
           } else {
-            String[] servicesArray = services.stream().map(KubernetesLabels::getComponentName).toArray(String[]::new);
+            String[] servicesArray = services.stream().map(Service::getName).toArray(String[]::new);
             service = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
           }
           if (service != null) {

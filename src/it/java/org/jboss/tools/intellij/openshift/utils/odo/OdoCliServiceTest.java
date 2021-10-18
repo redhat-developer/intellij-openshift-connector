@@ -10,16 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class OdoCliServiceTest extends OdoCliTest {
-
-    public static final String SERVICE_TEMPLATE = "jenkins-pipeline-example";
 
     @Test
     public void checkCreateService() throws IOException, InterruptedException {
@@ -28,27 +28,28 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
-            }
+            ServiceTemplate serviceTemplate = getServiceTemplate();
+            OperatorCRD crd = getOperatorCRD(serviceTemplate);
+            odo.createService(project, application, serviceTemplate, crd, service, null, false);
         } finally {
             odo.deleteProject(project);
         }
     }
 
     @Test
+    @Ignore("getServiceTemplate not implemented")
     public void checkCreateServiceAndGetTemplate() throws IOException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, SERVICE_TEMPLATE, "default", service,false);
-                String template = odo.getServiceTemplate(project, application, service);
-                assertNotNull(template);
-                assertEquals(SERVICE_TEMPLATE, template);
-            }
+            ServiceTemplate serviceTemplate = getServiceTemplate();
+            OperatorCRD crd = getOperatorCRD(serviceTemplate);
+            odo.createService(project, application, serviceTemplate, crd, service, null, false);
+            String template = odo.getServiceTemplate(project, application, service);
+            assertNotNull(template);
+            assertEquals(SERVICE_TEMPLATE, template);
         } finally {
             odo.deleteProject(project);
         }
@@ -61,10 +62,13 @@ public class OdoCliServiceTest extends OdoCliTest {
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
-            if (odo.isServiceCatalogAvailable()) {
-                odo.createService(project, application, SERVICE_TEMPLATE, "default", service, false);
-                odo.deleteService(project, application, service);
-            }
+            ServiceTemplate serviceTemplate = getServiceTemplate();
+            OperatorCRD crd = getOperatorCRD(serviceTemplate);
+            odo.createService(project, application, serviceTemplate, crd, service, null, false);
+            List<Service> services = odo.getServices(project, application);
+            assertNotNull(services);
+            assertEquals(1, services.size());
+            odo.deleteService(project, application, services.get(0));
         } finally {
             odo.deleteProject(project);
         }

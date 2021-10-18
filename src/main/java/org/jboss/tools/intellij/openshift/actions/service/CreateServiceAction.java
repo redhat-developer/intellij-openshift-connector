@@ -17,10 +17,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
@@ -39,19 +37,6 @@ public class CreateServiceAction extends OdoAction {
 
     @Override
     protected String getTelemetryActionName() { return "create service"; }
-
-    @Override
-    public boolean isVisible(Object selected) {
-        boolean visible = super.isVisible(selected);
-        if (visible) {
-            ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
-            if (rootNode != null) {
-                Odo odo = rootNode.getOdo();
-                return odo.isServiceCatalogAvailable();
-            }
-        }
-        return false;
-    }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
@@ -89,7 +74,8 @@ public class CreateServiceAction extends OdoAction {
     }
 
     private void createService(Odo odo, String project, String application, CreateServiceDialog dialog) throws IOException {
-        odo.createService(project, application, dialog.getServiceTemplate().getName(), dialog.getServiceTemplatePlan(), dialog.getName(), false);
+        odo.createService(project, application, dialog.getServiceTemplate(), dialog.getServiceTemplateCRD(),
+                dialog.getName(), dialog.getSpec(), false);
     }
 
     protected CreateServiceDialog showDialog(List<ServiceTemplate> templates, String application) {

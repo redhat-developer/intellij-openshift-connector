@@ -19,4 +19,13 @@ public class CreateServiceActionTest extends ActionTest {
     return new CreateServiceAction();
   }
 
+  @Override
+  protected void verifyProject(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyApplication(boolean visible) {
+    assertTrue(visible);
+  }
 }

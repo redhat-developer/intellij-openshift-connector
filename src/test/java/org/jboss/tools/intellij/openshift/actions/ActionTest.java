@@ -29,6 +29,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
+import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.tree.TreePath;
@@ -156,7 +157,9 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   public void testActionOnService() {
+    Service service = mock(Service.class);
     ServiceNode serviceNode = mock(ServiceNode.class);
+    when(serviceNode.getService()).thenReturn(service);
     AnActionEvent event = createEvent(serviceNode);
     AnAction action = getAction();
     action.update(event);

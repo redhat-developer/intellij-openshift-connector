@@ -46,7 +46,7 @@ public class DeleteServiceAction extends OdoAction {
     }
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getName());
+        odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getService());
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(serviceNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

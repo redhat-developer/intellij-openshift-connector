@@ -10,10 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
+import org.jboss.tools.intellij.openshift.utils.odo.Service;
 
 public class ServiceNode extends ParentableNode<ApplicationNode> {
-public ServiceNode(ApplicationNode parent, HasMetadata serviceResource) {
-    super(parent.getRoot(), parent, serviceResource.getMetadata().getName());
-  }
+
+    private final Service service;
+
+    public ServiceNode(ApplicationNode parent, Service service) {
+        super(parent.getRoot(), parent, service.getName());
+        this.service = service;
+    }
+
+    public Service getService() {
+        return service;
+    }
 }

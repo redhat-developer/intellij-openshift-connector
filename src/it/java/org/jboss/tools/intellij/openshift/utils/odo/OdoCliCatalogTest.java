@@ -54,7 +54,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
             createProject(project);
             //After a namespace is created the cluster wide operators takes time to appear
             //in installed state into the namespace
-            with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> odo.getServiceTemplates().stream().filter(template -> template.getCRDs().size() > 1).count() > 1);
+            with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> odo.getServiceTemplates().stream().filter(template -> template.getCRDs().size() > 1).count() > 0);
         } finally {
             odo.deleteProject(project);
         }

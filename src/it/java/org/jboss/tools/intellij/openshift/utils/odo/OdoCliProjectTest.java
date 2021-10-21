@@ -21,7 +21,7 @@ public class OdoCliProjectTest extends OdoCliTest {
 
 
     @Test
-    public void checkCreateProject() throws IOException, InterruptedException {
+    public void checkCreateProject() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -31,7 +31,7 @@ public class OdoCliProjectTest extends OdoCliTest {
     }
 
     @Test
-    public void checkListProjects() throws IOException, InterruptedException {
+    public void checkListProjects() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);

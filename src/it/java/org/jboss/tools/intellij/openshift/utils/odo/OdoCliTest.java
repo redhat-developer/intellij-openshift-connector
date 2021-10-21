@@ -24,15 +24,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.with;
 import static org.junit.Assert.assertNotNull;
 
 
 public abstract class OdoCliTest extends BaseTest {
 
     public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
-    public static final String SERVICE_TEMPLATE = "postgres-operator.v1.4.0";
-    public static final String SERVICE_CRD = "postgresql";
+    public static final String SERVICE_TEMPLATE = "cloud-native-postgresql.v1.9.2";
+    public static final String SERVICE_CRD = "clusters.postgresql.k8s.enterprisedb.io";
+    public static final String REGISTRY_URL = "https://registry.devfile.io";
+    public static final String REGISTRY_NAME = "RegistryForITTests";
 
     protected Odo odo;
 
@@ -66,6 +70,8 @@ public abstract class OdoCliTest extends BaseTest {
     public void init() throws IOException, ExecutionException, InterruptedException {
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo(project).get();
+        if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
+            odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
 
         if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
             odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
@@ -74,28 +80,28 @@ public abstract class OdoCliTest extends BaseTest {
     }
 
     @After
-    public void shutdown() {
+    public void shutdown() throws IOException {
         MessagesHelper.setTestDialog(previousTestDialog);
+        odo.deleteDevfileRegistry(REGISTRY_NAME);
     }
 
-    protected void createProject(String project) throws IOException, InterruptedException {
+    protected void createProject(String project) throws IOException {
         odo.createProject(project);
     }
 
-    protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
+    protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException {
         createProject(project);
         cleanLocalProjectDirectory();
         odo.createComponentLocal(project, application, "java", "8", null, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
-    protected void createDevfileComponent(String project, String application, String component, boolean push) throws IOException, InterruptedException {
+    protected void createDevfileComponent(String project, String application, String component, boolean push) throws IOException {
         createProject(project);
         cleanLocalProjectDirectory();
-        String registryName = odo.listDevfileRegistries().get(0).getName();
-        odo.createComponentLocal(project, application, "java-springboot", null, registryName, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
+        odo.createComponentLocal(project, application, "java-springboot", null, REGISTRY_NAME, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
-    protected void createComponent(String project, String application, String component, boolean push, ComponentKind kind) throws IOException, InterruptedException {
+    protected void createComponent(String project, String application, String component, boolean push, ComponentKind kind) throws IOException {
         switch (kind){
             case S2I:
                 createS2iComponent(project,application, component, push); break;
@@ -104,7 +110,7 @@ public abstract class OdoCliTest extends BaseTest {
         }
     }
 
-    protected void createStorage(String project, String application, String component, boolean push, ComponentKind kind, String storage) throws IOException, InterruptedException {
+    protected void createStorage(String project, String application, String component, boolean push, ComponentKind kind, String storage) throws IOException {
         createComponent(project, application, component, push, kind);
         odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
     }
@@ -121,6 +127,7 @@ public abstract class OdoCliTest extends BaseTest {
     }
 
     protected ServiceTemplate getServiceTemplate() throws IOException {
+        with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
         ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE)).findFirst().orElse(null);
         assertNotNull(serviceTemplate);
         return serviceTemplate;

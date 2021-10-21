@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
-    public void checkCreateService() throws IOException, InterruptedException {
+    public void checkCreateService() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
@@ -38,7 +38,7 @@ public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
     @Ignore("getServiceTemplate not implemented")
-    public void checkCreateServiceAndGetTemplate() throws IOException, InterruptedException {
+    public void checkCreateServiceAndGetTemplate() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
@@ -56,7 +56,7 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateDeleteService() throws IOException, InterruptedException {
+    public void checkCreateDeleteService() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();

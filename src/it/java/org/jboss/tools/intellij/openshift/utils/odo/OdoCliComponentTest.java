@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.fest.util.Files;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,7 @@ import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -71,7 +73,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponent() throws IOException, InterruptedException {
+    public void checkCreateComponent() throws IOException {
         try {
             createComponent(project, application, component, push, kind);
             List<Component> components = odo.getComponents(project, application);
@@ -84,7 +86,7 @@ public class OdoCliComponentTest extends OdoCliTest {
 
 
     @Test
-    public void checkCreateAndDiscoverComponent() throws IOException, InterruptedException {
+    public void checkCreateAndDiscoverComponent() throws IOException {
         try {
             createComponent(project, application, component, push, kind);
             List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
@@ -100,7 +102,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateAndDeleteComponent() throws IOException, InterruptedException {
+    public void checkCreateAndDeleteComponent() throws IOException {
         try {
             createComponent(project, application, component, push, kind);
             odo.deleteComponent(project, application, COMPONENT_PATH, component, kind);
@@ -109,7 +111,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         }
     }
 
-    private void checkCreateComponentAndCreateURL(boolean secure) throws IOException, InterruptedException {
+    private void checkCreateComponentAndCreateURL(boolean secure) throws IOException {
         try {
             createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure);
@@ -125,16 +127,18 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndCreateURL() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateURL() throws IOException {
+        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateURL(false);
     }
 
     @Test
-    public void checkCreateComponentAndCreateSecureURL() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateSecureURL() throws IOException {
+        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateURL(true);
     }
 
-    private void checkCreateComponentAndCreateAndDeleteURL(boolean secure) throws IOException, InterruptedException {
+    private void checkCreateComponentAndCreateAndDeleteURL(boolean secure) throws IOException {
         try {
             createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure);
@@ -167,32 +171,33 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndCreateAndDeleteURL() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateAndDeleteURL() throws IOException {
+        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateAndDeleteURL(false);
     }
 
     @Test
-    public void checkCreateComponentAndCreateAndDeleteSecureURL() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateAndDeleteSecureURL() throws IOException {
+        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateAndDeleteURL(true);
     }
 
     @Test
-    public void checkCreateComponentAndLinkService() throws IOException, InterruptedException {
+    public void checkCreateComponentAndLinkService() throws IOException {
+        Assume.assumeTrue(push && kind == ComponentKind.S2I);// TODO remove kind test when link with devfile is supported.
         try {
             createComponent(project, application, component, push, kind);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
             odo.createService(project, application, serviceTemplate, crd, service, null, true);
-            if (push && kind == ComponentKind.S2I) { // TODO remove kind test when link with devfile is supported.
-                odo.link(project, application, component, COMPONENT_PATH, service, null);
-            }
+            odo.link(project, application, component, COMPONENT_PATH, service, null);
         } finally {
             odo.deleteProject(project);
         }
     }
 
     @Test
-    public void checkCreateComponentAndCreateStorage() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateStorage() throws IOException {
         try {
             createStorage(project, application, component, push, kind, storage);
         } finally {
@@ -201,7 +206,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndCreateDeleteStorage() throws IOException, InterruptedException {
+    public void checkCreateComponentAndCreateDeleteStorage() throws IOException {
         try {
             createStorage(project, application, component, push, kind, storage);
             odo.deleteStorage(project, application, COMPONENT_PATH, component, storage);
@@ -211,7 +216,8 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndListURLs() throws IOException, InterruptedException {
+    public void checkCreateComponentAndListURLs() throws IOException {
+        Assume.assumeTrue(isOpenShift());
         try {
             createComponent(project, application, component, push, kind);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
@@ -226,10 +232,8 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndDebug() throws IOException, InterruptedException {
-        if (!push) {
-            return;
-        }
+    public void checkCreateComponentAndDebug() throws IOException {
+        Assume.assumeTrue(isOpenShift() && push);
         try {
             createComponent(project, application, component, push, kind);
             odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false);
@@ -260,15 +264,11 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentStarter() throws IOException, InterruptedException {
-        if (kind != ComponentKind.DEVFILE) {
-            return;
-        }
-
-        String registryName = odo.listDevfileRegistries().get(0).getName();
+    public void checkCreateComponentStarter() throws IOException {
+        Assume.assumeThat(ComponentKind.DEVFILE, equalTo(kind));
         try {
             createProject(project);
-            odo.createComponentLocal(project, application, "java-springboot", null, registryName,component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
+            odo.createComponentLocal(project, application, "java-springboot", null, REGISTRY_NAME,component, Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject", push);
             List<Component> components = odo.getComponents(project, application);
             assertNotNull(components);
             assertEquals(push ? 1 : 0, components.size());

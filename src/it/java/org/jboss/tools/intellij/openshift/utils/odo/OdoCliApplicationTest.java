@@ -48,7 +48,7 @@ public class OdoCliApplicationTest extends OdoCliTest {
     }
 
     @Test
-    public void checkListApplications() throws IOException, InterruptedException {
+    public void checkListApplications() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();

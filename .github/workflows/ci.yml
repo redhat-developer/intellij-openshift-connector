@@ -66,7 +66,7 @@ jobs:
           version: v0.11.1
       - name: Setup cluster
         run: |
-          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.18.3/install.sh | bash -s v0.18.3
+          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.19.1/install.sh | bash -s v0.19.1
           kubectl create -f https://operatorhub.io/install/cloud-native-postgresql.yaml
           nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep postgresql-operator | grep Running | wc -l`
           echo -n "Waiting for operator to show up "

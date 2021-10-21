@@ -26,9 +26,7 @@ public class OdoCliRegistryTest extends OdoCliTest {
         try {
             odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
         } finally {
-            try {
-                odo.deleteDevfileRegistry(registryName);
-            } catch (IOException e) {}
+            odo.deleteDevfileRegistry(registryName);
         }
     }
 

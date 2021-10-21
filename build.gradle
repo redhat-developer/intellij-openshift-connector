@@ -9,9 +9,9 @@ plugins {
 }
 
 repositories {
+    maven { url 'https://repository.jboss.org' }
     mavenLocal()
     mavenCentral()
-    maven { url 'https://repository.jboss.org' }
 }
 
 sourceCompatibility = '1.8'

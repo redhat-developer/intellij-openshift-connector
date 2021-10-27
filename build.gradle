@@ -10,7 +10,6 @@ plugins {
 
 repositories {
     maven { url 'https://repository.jboss.org' }
-    mavenLocal()
     mavenCentral()
 }
 

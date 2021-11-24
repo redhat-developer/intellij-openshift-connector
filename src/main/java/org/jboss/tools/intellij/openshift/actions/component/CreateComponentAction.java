@@ -26,14 +26,11 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentSourceType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -108,31 +105,13 @@ public class CreateComponentAction extends OdoAction {
 
   private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
     computeTelemetry(model);
-    if (model.getSourceType() == ComponentSourceType.LOCAL) {
-      odo.createComponentLocal(project, application, model.getSelectedComponentType().getName(),
-              model.getSelectedComponentTypeVersion(),
+    odo.createComponent(project, application, model.getSelectedComponentType().getName(),
               model.getSelectedComponentType() instanceof DevfileComponentType?((DevfileComponentType)model.getSelectedComponentType()).getDevfileRegistry().getName():null,
               model.getName(),
               model.getContext(),
               model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null,
               model.getSelectedComponentStarter(),
               model.isPushAfterCreate());
-    } else if (model.getSourceType() == ComponentSourceType.GIT) {
-      odo.createComponentGit(project, application, model.getContext(),
-              model.getSelectedComponentType().getName(),
-              model.getSelectedComponentTypeVersion(),
-              model.getName(),
-              model.getGitURL(),
-              model.getGitReference(),
-              model.isPushAfterCreate());
-    } else if (model.getSourceType() == ComponentSourceType.BINARY) {
-      Path binary = Paths.get(model.getBinaryFilePath());
-      if (binary.isAbsolute()) {
-       binary = Paths.get(model.getContext()).relativize(binary);
-      }
-      odo.createComponentBinary(project, application, model.getContext(), model.getSelectedComponentType().getName(),
-              model.getSelectedComponentTypeVersion(), model.getName(), binary.toString(), model.isPushAfterCreate());
-    }
   }
 
   protected boolean showDialog(CreateComponentModel model) {
@@ -154,17 +133,11 @@ public class CreateComponentAction extends OdoAction {
 
     private void computeTelemetry(CreateComponentModel model) {
         telemetrySender
-                .addProperty(TelemetryService.PROP_COMPONENT_SOURCE_TYPE, model.getSourceType().toString());
-        telemetrySender
                 .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
         telemetrySender
                 .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isPushAfterCreate()));
         if (StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
-            String prefix = model.getSelectedComponentTypeVersion() == null ? "devfile:" : "s2i:";
-            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, prefix + model.getSelectedComponentType().getName());
-        }
-        if (StringUtils.isNotBlank(model.getSelectedComponentTypeVersion())) {
-            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_VERSION, model.getSelectedComponentTypeVersion());
+            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
         }
         if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {
             telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());

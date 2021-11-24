@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.configurations.ConfigurationType;
@@ -20,6 +19,7 @@ import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.impl.ExecutionManagerImpl;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
+import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
@@ -72,7 +72,7 @@ public abstract class DebugComponentAction extends OdoAction {
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = componentNode.getComponent();
-            return (isPushed(component) && isDebuggable(component.getInfo().getComponentKind(), component.getInfo().getComponentTypeName()));
+            return (isPushed(component) && isDebuggable(component.getInfo().getComponentTypeName()));
         }
         return false;
     }
@@ -160,9 +160,9 @@ public abstract class DebugComponentAction extends OdoAction {
             ApplicationManager.getApplication().invokeLater(
                     () -> {
                         try {
-                            Objects.requireNonNull(ProgramRunnerUtil.getRunner(
+                            Objects.requireNonNull(ProgramRunner.getRunner(
                                     DefaultDebugExecutor.getDebugExecutorInstance().getId(),
-                                    runSettings)).execute(getEnvironment());
+                                    runSettings.getConfiguration())).execute(getEnvironment());
                             sendTelemetryResults(TelemetryResult.SUCCESS);
                         } catch (ExecutionException e) {
                             sendTelemetryError(e);
@@ -246,7 +246,7 @@ public abstract class DebugComponentAction extends OdoAction {
         return environment;
     }
 
-    protected abstract boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName);
+    protected abstract boolean isDebuggable(@NotNull String componentTypeName);
 
     protected abstract String getDebugLanguage();
 

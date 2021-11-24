@@ -21,18 +21,13 @@ import java.util.List;
 
 public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
 
-    private static final String S2I_ITEMS_FIELD = "s2iItems";
-    private static final String DEVFILE_ITEMS_FIELD = "devfileItems";
+    private static final String ITEMS_FIELD = "items";
     private static final String DEVFILE_REGISTRY = "Registry";
     private static final String DEVFILE_DISPLAY_NAME_FIELD = "DisplayName";
     private static final String DEVFILE_DESCRIPTION_FIELD = "Description";
     private static final String DEVFILE_LANGUAGE_FIELD = "Language";
     private static final String DEVFILE_TAGS_FIELD = "Tags";
-    private static final String METADATA_FIELD = "metadata";
-    private static final String S2I_NAME_FIELD = "name";
     private static final String DEVFILE_NAME_FIELD = "Name";
-    private static final String SPEC_FIELD = "spec";
-    private static final String NON_HIDDEN_TAGS_FIELD = "nonHiddenTags";
 
     public ComponentTypesDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
@@ -41,24 +36,9 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     @Override
     public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt){
         List<ComponentType> result = new ArrayList<>();
-        result.addAll(parseS2iItems(root.get(S2I_ITEMS_FIELD)));
-        result.addAll(parseDevfileItems(root.get(DEVFILE_ITEMS_FIELD)));
+        result.addAll(parseDevfileItems(root.get(ITEMS_FIELD)));
         return result;
     }
-
-    private List<ComponentType> parseS2iItems(JsonNode items) {
-        List<ComponentType> result = new ArrayList<>();
-        if (items != null) {
-            for (JsonNode item : items) {
-                String name = item.get(METADATA_FIELD).get(S2I_NAME_FIELD).asText();
-                List<String> versions = new ArrayList<>();
-                item.get(SPEC_FIELD).get(NON_HIDDEN_TAGS_FIELD).forEach(node -> versions.add(node.textValue()));
-                result.add(new S2iComponentType(name, versions));
-            }
-        }
-        return result;
-    }
-
     private static String get(JsonNode node, String fieldName) {
         return node.has(fieldName)?node.get(fieldName).asText():"";
     }

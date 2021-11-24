@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.ui.url;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.ui.CollectionComboBoxModel;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +29,7 @@ import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"java:S1171","java:S100"})
 public class CreateURLDialog extends DialogWrapper {
     private JPanel contentPane;
     private JTextField nameTextField;
@@ -88,12 +88,6 @@ public class CreateURLDialog extends DialogWrapper {
 
     public boolean isSecure() {
         return secureCheckBox.isSelected();
-    }
-
-    public void setPorts(List<Integer> ports) {
-        portsComboBox.setModel(new CollectionComboBoxModel(ports));
-        portsComboBox.setSelectedIndex(-1);
-        portsComboBox.setSelectedIndex(0);
     }
 
     public Integer getSelectedPort() {

@@ -27,6 +27,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,7 +48,7 @@ public class ImportComponentAction extends CreateComponentAction {
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            visible = ((Component) ((ComponentNode) selected).getComponent()).getState() == ComponentState.NO_CONTEXT;
+            visible = ((ComponentNode) selected).getComponent().getState() == ComponentState.NO_CONTEXT;
         }
         return visible;
     }
@@ -64,7 +65,7 @@ public class ImportComponentAction extends CreateComponentAction {
                 ApplicationsRootNode root = componentNode.getRoot();
                 Project project = root.getProject();
                 ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), null, component.getInfo().getComponentKind());
-                CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info, component.getInfo().getComponentKind());
+                CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info);
                 process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, structure);
 
             } catch (IOException e) {
@@ -75,26 +76,20 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @NotNull
-    private CreateComponentModel getModel(Project project, Odo odo, String application, String name, ComponentInfo info, ComponentKind kind) throws IOException {
-        List<ComponentType> types = odo.getComponentTypes();
+    private CreateComponentModel getModel(Project project, Odo odo, String application, String name, ComponentInfo info) throws IOException {
+        List<DevfileComponentType> types = odo.getComponentTypes();
         CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
         ComponentType type = select(types, info.getComponentTypeName(), info.getComponentKind());
         model.setApplication(application);
         model.setName(name);
-        model.setSourceType(info.getSourceType());
         model.setSelectedComponentType(type);
-        model.setSelectedComponentTypeVersion(info.getComponentTypeVersion());
-        model.setGitURL(info.getRepositoryURL());
-        model.setGitReference(info.getRepositoryReference());
-        model.setBinaryFilePath(info.getBinaryURL());
         model.setImportMode(true);
         return model;
     }
 
-    private ComponentType select(List<ComponentType> types, String componentTypeName, ComponentKind componentKind) {
+    private ComponentType select(List<DevfileComponentType> types, String componentTypeName, ComponentKind componentKind) {
         return types.stream().filter(type -> componentKind.equals(type.getKind())).
                 filter(type -> componentTypeName.equals(type.getName())).
                 findFirst().orElse(null);
-
     }
 }

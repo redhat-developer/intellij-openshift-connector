@@ -126,7 +126,7 @@ public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase
 
   private ComponentInfo mockInfo(){
     ComponentInfo.Builder builder = new ComponentInfo.Builder();
-    return builder.withComponentKind(ComponentKind.S2I).build();
+    return builder.withComponentKind(ComponentKind.DEVFILE).build();
   }
 
   public void testActionOnPushedComponent() {

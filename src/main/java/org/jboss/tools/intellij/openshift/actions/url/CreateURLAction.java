@@ -21,11 +21,9 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.ui.url.CreateURLDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
@@ -36,7 +34,9 @@ public class CreateURLAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "create URL"; }
+    protected String getTelemetryActionName() {
+        return "create URL";
+    }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
@@ -47,7 +47,7 @@ public class CreateURLAction extends OdoAction {
         CompletableFuture.runAsync(() -> {
             try {
                 if (createURL(odo, namespaceNode.getName(), applicationNode.getName(), component)) {
-                    ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                    ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
                     sendTelemetryResults(TelemetryResult.SUCCESS);
                 } else {
                     sendTelemetryResults(TelemetryResult.ABORTED);
@@ -60,27 +60,11 @@ public class CreateURLAction extends OdoAction {
     }
 
     public static boolean createURL(Odo odo, String project, String application, Component component) throws IOException {
-        CreateURLDialog dialog;
-        if (ComponentKind.S2I.equals(component.getInfo().getComponentKind())) {
-            List<Integer> ports = odo.getServicePorts(project, application, component.getName());
-            if (!ports.isEmpty()) {
-                dialog = UIHelper.executeInUI(() -> {
-                    CreateURLDialog dialog1 = new CreateURLDialog(false);
-                    dialog1.setPorts(ports);
-                    dialog1.show();
-                    return dialog1;
-                });
-
-            } else {
-                throw new IOException("Can't create url for component without ports");
-            }
-        } else {
-            dialog = UIHelper.executeInUI(() -> {
-                CreateURLDialog dialog1 = new CreateURLDialog(true);
-                dialog1.show();
-                return dialog1;
-            });
-        }
+        CreateURLDialog dialog = UIHelper.executeInUI(() -> {
+            CreateURLDialog dialog1 = new CreateURLDialog(true);
+            dialog1.show();
+            return dialog1;
+        });
         if (dialog.isOK()) {
             Integer port = dialog.getSelectedPort();
             String urlName = dialog.getName();

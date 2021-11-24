@@ -21,18 +21,13 @@ public interface ComponentTypeInfo {
   String getName();
   List<Starter> getStarters();
   
-  public class Builder {
+  class Builder {
     private String name;
     
     private List<Starter> starters = new ArrayList<>();
     
     public Builder withName(String name) {
       this.name = name;
-      return this;
-    }
-    
-    public Builder withStarters(List<Starter> starters) {
-      this.starters = starters;
       return this;
     }
     

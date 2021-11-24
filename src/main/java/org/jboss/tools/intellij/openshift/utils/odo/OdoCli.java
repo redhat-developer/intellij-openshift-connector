@@ -141,7 +141,7 @@ public class OdoCli implements Odo {
     @Override
     public List<String> getNamespaces() throws IOException {
         try {
-            if (client.isAdaptable(OpenShiftClient.class)) {
+            if (isOpenShift()) {
                 return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().
                         map(p -> p.getMetadata().getName()).collect(Collectors.toList());
             } else {
@@ -158,14 +158,14 @@ public class OdoCli implements Odo {
             ns = "default";
         }
         try {
-            if (client.isAdaptable(OpenShiftClient.class)) {
+            if (isOpenShift()) {
                 client.adapt(OpenShiftClient.class).projects().withName(ns).get();
             } else {
                 client.namespaces().withName(ns).get();
             }
         } catch (KubernetesClientException e) {
             ns = "";
-            if (client.isAdaptable(OpenShiftClient.class)) {
+            if (isOpenShift()) {
                 List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
                 if (!projects.isEmpty()) {
                     ns = projects.get(0).getMetadata().getNamespace();
@@ -181,7 +181,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public String getNamespace() throws IOException {
+    public String getNamespace() {
         if (namespace == null) {
             namespace = validateNamespace(client.getNamespace());
         }
@@ -245,15 +245,13 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
         List<String> args = new ArrayList<>();
         args.add(command);
         args.add("create");
         if (StringUtils.isNotBlank(devfile)) {
             args.add("--devfile");
             args.add(devfile);
-        } else if (StringUtils.isNotBlank(componentVersion)) {
-            args.add(componentType + ":" + componentVersion);
         } else {
             if (StringUtils.isNotBlank(starter)) {
                 args.add("--starter=" + starter);
@@ -267,45 +265,10 @@ public class OdoCli implements Odo {
         args.add(project);
         args.add("--app");
         args.add(application);
-        if (StringUtils.isNotBlank(componentVersion)) {
-            args.add("--s2i");
-        }
         if (push) {
             args.add("--now");
         }
         ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(source), true, envVars, args.toArray(new String[0]));
-    }
-
-    @Override
-    public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
-        if (StringUtils.isNotBlank(reference)) {
-            if (push) {
-                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
-                        "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
-            } else {
-                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
-                        "--git", source, "--ref", reference, "--project", project, "--app", application);
-            }
-        } else {
-            if (push) {
-                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
-                        "--git", source, "--project", project, "--app", application, "--now");
-            } else {
-                ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
-                        "--git", source, "--project", project, "--app", application);
-            }
-        }
-    }
-
-    @Override
-    public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
-        if (push) {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
-                    "--binary", source, "--project", project, "--app", application, "--now");
-        } else {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "create", componentType + ':' + componentVersion, component,
-                    "--binary", source, "--project", project, "--app", application);
-        }
     }
 
     /**
@@ -389,10 +352,10 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public List<ComponentType> getComponentTypes() throws IOException {
+    public List<DevfileComponentType> getComponentTypes() throws IOException {
         return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
                 execute(command, envVars, "catalog", "list", "components", "-o", "json"),
-                new TypeReference<List<ComponentType>>() {
+                new TypeReference<List<DevfileComponentType>>() {
                 });
     }
 
@@ -492,7 +455,7 @@ public class OdoCli implements Odo {
         execute(new File(context), command, envVars, "url", "delete", "-f", name);
     }
 
-    private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig, ComponentKind kind) throws IOException {
+    private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig) throws IOException {
         List<String> args = new ArrayList<>();
         args.add("delete");
         args.add("-f");
@@ -513,12 +476,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-        undeployComponent(project, application, context, component, false, kind);
+        undeployComponent(project, application, context, component, false);
     }
 
     @Override
     public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-        undeployComponent(project, application, context, component, true, kind);
+        undeployComponent(project, application, context, component, true);
     }
 
     @Override
@@ -672,12 +635,12 @@ public class OdoCli implements Odo {
     public String consoleURL() throws IOException {
         try {
             VersionInfo version = client.getVersion();
-            if (version == null || "4".equals(version.getMajor())) { // assuming null version is version 4
+            if (isOpenShift() && "4".equals(version.getMajor())) { // assuming kubernetes version 1 is version 4
                 ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
                 if (configMap != null) {
                     return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
                 }
-            } else if ("3".equals(version.getMajor())) {
+            } else if (isOpenShift() && "3".equals(version.getMajor())) {
                 ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
                 String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
                 return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
@@ -686,6 +649,10 @@ public class OdoCli implements Odo {
         } catch (KubernetesClientException e) {
             return client.getMasterUrl().toExternalForm();
         }
+    }
+
+    private boolean isOpenShift() {
+        return client.isAdaptable(OpenShiftClient.class);
     }
 
     @Override
@@ -700,9 +667,6 @@ public class OdoCli implements Odo {
     public ComponentKind getComponentKind(String context) throws IOException {
         String json = execute(new File(context), command, envVars, "list", "--path", ".", "-o", "json");
         JsonNode root = JSON_MAPPER.readTree(json);
-        if (root.get("s2iComponents").size() != 0) {
-            return ComponentKind.S2I;
-        }
         if (root.get("devfileComponents").size() != 0) {
             return ComponentKind.DEVFILE;
         }
@@ -740,8 +704,6 @@ public class OdoCli implements Odo {
     @Override
     public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
         return getComponentTypes().stream().
-                filter(DevfileComponentType.class::isInstance).
-                map(DevfileComponentType.class::cast).
                 filter(type -> name.equals(type.getDevfileRegistry().getName())).
                 collect(Collectors.toList());
     }

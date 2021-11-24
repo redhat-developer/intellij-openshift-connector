@@ -90,29 +90,19 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
             FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
             File tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
-            delegate.createComponentLocal(project, application, componentType, componentVersion, registryName, component, tmpdir.getAbsolutePath(), devfile, starter, push);
+            delegate.createComponent(project, application, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter, push);
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);
             FileUtils.deleteQuietly(tmpdir);
             VirtualFile[] files = new VirtualFile[] {VfsUtil.findFileByIoFile(sourceDir,true)};
             VfsUtil.markDirtyAndRefresh(false, true, true, files);
         } else {
-            delegate.createComponentLocal(project, application, componentType, componentVersion, registryName, component, source, devfile, starter, push);
+            delegate.createComponent(project, application, componentType, registryName, component, source, devfile, starter, push);
         }
-    }
-
-    @Override
-    public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
-        delegate.createComponentGit(project, application, context, componentType, componentVersion, component, source, reference, push);
-    }
-
-    @Override
-    public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
-        delegate.createComponentBinary(project, application, context, componentType, componentVersion, component, source, push);
     }
 
     @Override
@@ -132,7 +122,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<ComponentType> getComponentTypes() throws IOException {
+    public List<DevfileComponentType> getComponentTypes() throws IOException {
         return delegate.getComponentTypes();
     }
 

@@ -24,7 +24,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
@@ -64,7 +63,7 @@ public class ImportComponentAction extends CreateComponentAction {
             try {
                 ApplicationsRootNode root = componentNode.getRoot();
                 Project project = root.getProject();
-                ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), null, component.getInfo().getComponentKind());
+                ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(), component.getName(), null);
                 CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info);
                 process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, structure);
 
@@ -79,7 +78,7 @@ public class ImportComponentAction extends CreateComponentAction {
     private CreateComponentModel getModel(Project project, Odo odo, String application, String name, ComponentInfo info) throws IOException {
         List<DevfileComponentType> types = odo.getComponentTypes();
         CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
-        ComponentType type = select(types, info.getComponentTypeName(), info.getComponentKind());
+        ComponentType type = select(types, info.getComponentTypeName());
         model.setApplication(application);
         model.setName(name);
         model.setSelectedComponentType(type);
@@ -87,9 +86,8 @@ public class ImportComponentAction extends CreateComponentAction {
         return model;
     }
 
-    private ComponentType select(List<DevfileComponentType> types, String componentTypeName, ComponentKind componentKind) {
-        return types.stream().filter(type -> componentKind.equals(type.getKind())).
-                filter(type -> componentTypeName.equals(type.getName())).
+    private ComponentType select(List<DevfileComponentType> types, String componentTypeName) {
+        return types.stream().filter(type -> componentTypeName.equals(type.getName())).
                 findFirst().orElse(null);
     }
 }

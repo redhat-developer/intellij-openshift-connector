@@ -179,7 +179,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         contextTextField.setText(model.getContext());
         applicationTextField.setText(model.getApplication());
 
-        DefaultListModel listModel = new DefaultListModel();
+        DefaultListModel<DevfileComponentType> listModel = new DefaultListModel<>();
         listModel.addAll(model.getComponentTypesList());
         componentTypeList.setModel(listModel);
 

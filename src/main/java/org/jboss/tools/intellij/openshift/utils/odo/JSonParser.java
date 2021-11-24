@@ -84,13 +84,13 @@ public class JSonParser {
         return result;
     }
 
-    public ComponentInfo parseComponentInfo(ComponentKind kind) {
+    public ComponentInfo parseComponentInfo() {
         ComponentInfo.Builder builder = new ComponentInfo.Builder();
         if (root.has(SPEC_FIELD)) {
             String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
         }
-        return builder.withComponentKind(kind).build();
+        return builder.build();
     }
 
     public DebugStatus parseDebugStatus() {

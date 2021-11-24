@@ -59,7 +59,7 @@ public interface Odo {
 
     List<URL> listURLs(String project, String application, String context, String component) throws IOException;
 
-    ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException;
+    ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException;
 
     void createURL(String project, String application, String context, String component, String name, Integer port,
                    boolean secure) throws IOException;
@@ -111,8 +111,6 @@ public interface Odo {
     java.net.URL getMasterUrl();
 
     List<ComponentDescriptor> discover(String path) throws IOException;
-
-    ComponentKind getComponentKind(String context) throws IOException;
 
     ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException;
 

@@ -419,17 +419,17 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException {
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException {
         if (path != null) {
-            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"), kind);
+            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"));
         } else {
-            return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"), kind);
+            return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
         }
     }
 
-    private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
+    private ComponentInfo parseComponentInfo(String json) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentInfo(kind);
+        return parser.parseComponentInfo();
     }
 
     @Override
@@ -486,12 +486,20 @@ public class OdoCli implements Odo {
 
     @Override
     public void follow(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log", "-f");
+        if (context != null) {
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log", "-f");
+        } else {
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "log", "-f");
+        }
     }
 
     @Override
     public void log(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log");
+        if (context != null) {
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log");
+        } else {
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "log");
+        }
     }
 
     @Override
@@ -661,16 +669,6 @@ public class OdoCli implements Odo {
                 execute(new File(path), command, envVars, "list", "--path", ".", "-o", "json"),
                 new TypeReference<List<ComponentDescriptor>>() {
                 });
-    }
-
-    @Override
-    public ComponentKind getComponentKind(String context) throws IOException {
-        String json = execute(new File(context), command, envVars, "list", "--path", ".", "-o", "json");
-        JsonNode root = JSON_MAPPER.readTree(json);
-        if (root.get("devfileComponents").size() != 0) {
-            return ComponentKind.DEVFILE;
-        }
-        return null;
     }
 
     @Override

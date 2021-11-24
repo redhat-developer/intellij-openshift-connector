@@ -89,29 +89,14 @@ public abstract class OdoCliTest extends BaseTest {
         odo.createProject(project);
     }
 
-    protected void createS2iComponent(String project, String application, String component, boolean push) throws IOException {
+    protected void createComponent(String project, String application, String component, boolean push) throws IOException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponentLocal(project, application, "java", "8", null, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
+        odo.createComponent(project, application, "java-springboot", REGISTRY_NAME, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
     }
 
-    protected void createDevfileComponent(String project, String application, String component, boolean push) throws IOException {
-        createProject(project);
-        cleanLocalProjectDirectory();
-        odo.createComponentLocal(project, application, "java-springboot", null, REGISTRY_NAME, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
-    }
-
-    protected void createComponent(String project, String application, String component, boolean push, ComponentKind kind) throws IOException {
-        switch (kind){
-            case S2I:
-                createS2iComponent(project,application, component, push); break;
-            case DEVFILE:
-                createDevfileComponent(project,application, component, push); break;
-        }
-    }
-
-    protected void createStorage(String project, String application, String component, boolean push, ComponentKind kind, String storage) throws IOException {
-        createComponent(project, application, component, push, kind);
+    protected void createStorage(String project, String application, String component, boolean push, String storage) throws IOException {
+        createComponent(project, application, component, push);
         odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
     }
 

@@ -475,12 +475,12 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+    public void undeployComponent(String project, String application, String context, String component) throws IOException {
         undeployComponent(project, application, context, component, false);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+    public void deleteComponent(String project, String application, String context, String component) throws IOException {
         undeployComponent(project, application, context, component, true);
     }
 

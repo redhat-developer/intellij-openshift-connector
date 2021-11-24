@@ -66,9 +66,9 @@ public interface Odo {
 
     void deleteURL(String project, String application, String context, String component, String name) throws IOException;
 
-    void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException;
+    void undeployComponent(String project, String application, String context, String component) throws IOException;
 
-    void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException;
+    void deleteComponent(String project, String application, String context, String component) throws IOException;
 
     void follow(String project, String application, String context, String component) throws IOException;
 

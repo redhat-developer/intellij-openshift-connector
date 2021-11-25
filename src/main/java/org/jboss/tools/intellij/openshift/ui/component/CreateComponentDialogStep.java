@@ -76,6 +76,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             protected void textChanged(DocumentEvent e) {
                 model.setContext(contextTextField.getText());
                 informationLabel.setVisible(model.isProjectHasDevfile() || model.isProjectIsEmpty());
+                componentTypeList.setEnabled(!model.isProjectHasDevfile());
                 componentStartersCombo.setEnabled(model.isProjectIsEmpty());
                 componentStartersCombo.removeAllItems();
                 updateState();

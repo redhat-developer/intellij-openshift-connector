@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
 
     @Test
+    @Ignore("getServiceTemplate not implemented")
     public void checkCreateServiceAndGetTemplate() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         String application = APPLICATION_PREFIX + random.nextInt();

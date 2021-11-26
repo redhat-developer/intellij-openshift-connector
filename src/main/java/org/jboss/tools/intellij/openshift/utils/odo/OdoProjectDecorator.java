@@ -137,21 +137,6 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<Integer> getServicePorts(String project, String application, String component) {
-        List<Integer> ports = delegate.getServicePorts(project, application, component);
-        root.getComponents().forEach((path, comp) -> {
-            if (comp.getProject().equals(project) && comp.getApplication().equals(application) && comp.getName().equals(component)) {
-                comp.getPorts().forEach(port -> {
-                    if (!ports.contains(port)) {
-                        ports.add(port);
-                    }
-                });
-            }
-        });
-        return ports;
-    }
-
-    @Override
     public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
         return delegate.listURLs(project, application, context, component);
     }
@@ -282,8 +267,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
-        delegate.link(project, application, component, context, source, port);
+    public void link(String project, String application, String context, String component, String target) throws IOException {
+        delegate.link(project, application, context, component, target);
     }
 
     @Override

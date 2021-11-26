@@ -14,7 +14,6 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.fest.util.Files;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -159,8 +158,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore
-    // TODO remove when link with devfile is supported.
     public void checkCreateComponentAndLinkService() throws IOException {
         Assume.assumeTrue(push);
         try {
@@ -168,7 +165,13 @@ public class OdoCliComponentTest extends OdoCliTest {
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
             odo.createService(project, application, serviceTemplate, crd, service, null, true);
-            odo.link(project, application, component, COMPONENT_PATH, service, null);
+            List<Service> deployedServices = odo.getServices(project, application);
+            assertNotNull(deployedServices);
+            assertEquals(1, deployedServices.size());
+            Service deployedService = deployedServices.get(0);
+            assertNotNull(deployedService);
+            odo.link(project, application, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
+            odo.push(project,application, COMPONENT_PATH, component);
         } finally {
             odo.deleteProject(project);
         }

@@ -115,7 +115,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     private void addContext(VirtualFile modulePathFile) {
-        if (modulePathFile != null && modulePathFile.isValid()) {
+        if (modulePathFile != null && modulePathFile.isValid() && getOdo() != null) {
             try {
                 List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.getPath());
                 descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));

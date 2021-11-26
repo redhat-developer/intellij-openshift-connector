@@ -27,8 +27,6 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -398,12 +396,6 @@ public class OdoCli implements Odo {
         ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "catalog", "describe", "service", template);
     }
 
-    @Override
-    public List<Integer> getServicePorts(String project, String application, String component) {
-        Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
-        return service != null ? service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList()) : new ArrayList<>();
-    }
-
     private List<URL> parseURLs(String json) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
         return parser.parseURLS();
@@ -606,12 +598,8 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
-        if (port != null) {
-            execute(new File(context), command, envVars, "link", source, "--port", port.toString(), "--wait");
-        } else {
-            execute(new File(context), command, envVars, "link", source, "--wait");
-        }
+    public void link(String project, String application, String context, String component, String target) throws IOException {
+        execute(new File(context), command, envVars, "link", target);
     }
 
     @Override
@@ -653,6 +641,7 @@ public class OdoCli implements Odo {
                 String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
                 return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
             }
+            //https://<master-ip>:<apiserver-port>/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
             return client.getMasterUrl() + "console";
         } catch (KubernetesClientException e) {
             return client.getMasterUrl().toExternalForm();

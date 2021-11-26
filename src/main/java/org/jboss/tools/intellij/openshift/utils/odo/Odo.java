@@ -55,8 +55,6 @@ public interface Odo {
 
     void describeServiceTemplate(String template) throws IOException;
 
-    List<Integer> getServicePorts(String project, String application, String component);
-
     List<URL> listURLs(String project, String application, String context, String component) throws IOException;
 
     ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException;
@@ -100,7 +98,7 @@ public interface Odo {
 
     void deleteStorage(String project, String application, String context, String component, String storage) throws IOException;
 
-    void link(String project, String application, String component, String context, String source, Integer port) throws IOException;
+    void link(String project, String application, String context, String component, String target) throws IOException;
 
     String consoleURL() throws IOException;
 

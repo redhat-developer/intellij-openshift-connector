@@ -11,11 +11,11 @@
 package org.jboss.tools.intellij.openshift.validation;
 
 import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import com.intellij.testFramework.fixtures.TestFixtureBuilder;
+import com.redhat.devtools.intellij.common.utils.VfsRootAccessHelper;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
 import org.junit.After;
 import org.junit.Assume;
@@ -38,9 +38,8 @@ public class DevfileSchemasTest {
         myFixture.setTestDataPath("src/test/resources");
         myFixture.setUp();
         myFixture.enableInspections(YamlJsonSchemaHighlightingInspection.class);
-        VfsRootAccess.allowRootAccess(() -> {
-
-        }, new File("src").getAbsoluteFile().getParentFile().getAbsolutePath());
+        String path = new File("src").getAbsoluteFile().getParentFile().getAbsolutePath();
+        VfsRootAccessHelper.allowRootAccess(path);
     }
 
     @After

@@ -23,28 +23,14 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class OdoCliApplicationTest extends OdoCliTest {
     private boolean push;
-    private ComponentKind kind;
 
-    public OdoCliApplicationTest(boolean push, ComponentKind kind) {
+    public OdoCliApplicationTest(boolean push) {
         this.push = push;
-        this.kind = kind;
     }
 
-    @Parameterized.Parameters(name = "pushed: {0}, kind: {1}")
-    public static Iterable<Object[]> data() {
-        if (isOpenShift()) {
-            return Arrays.asList(new Object[][]{
-                    {false, ComponentKind.S2I},
-                    {true, ComponentKind.S2I},
-                    {false, ComponentKind.DEVFILE},
-                    {true, ComponentKind.DEVFILE}
-            });
-        } else {
-            return Arrays.asList(new Object[][]{
-                    {false, ComponentKind.DEVFILE},
-                    {true, ComponentKind.DEVFILE}
-            });
-        }
+    @Parameterized.Parameters(name = "pushed: {0}")
+    public static Iterable<? extends Object> data() {
+        return Arrays.asList(false, true);
     }
 
     @Test
@@ -53,7 +39,7 @@ public class OdoCliApplicationTest extends OdoCliTest {
         String application = APPLICATION_PREFIX + random.nextInt();
         String component = COMPONENT_PREFIX + random.nextInt();
         try {
-            createComponent(project, application, component, push, kind);
+            createComponent(project, application, component, push);
             List<Application> applications = odo.getApplications(project);
             assertTrue(push ? applications.size() > 0 : applications.size() == 0);
         } finally {

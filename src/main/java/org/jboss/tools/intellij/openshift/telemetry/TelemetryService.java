@@ -23,9 +23,7 @@ public class TelemetryService {
     public static final String PREFIX_ACTION = "ui-";
     public static final String NAME_PREFIX_MISC = "misc-";
 
-    public static final String PROP_COMPONENT_SOURCE_TYPE = "component_sourcetype";
     public static final String PROP_COMPONENT_KIND = "component_kind";
-    public static final String PROP_COMPONENT_VERSION = "component_version";
     public static final String PROP_COMPONENT_PUSH_AFTER_CREATE = "component_is_push_after_create";
     public static final String PROP_COMPONENT_HAS_LOCAL_DEVFILE = "component_has_local_devfile";
     public static final String PROP_COMPONENT_SELECTED_STARTER = "component_selected_starter";

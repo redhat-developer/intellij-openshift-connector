@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.configurations.ConfigurationType;
@@ -20,6 +19,7 @@ import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.impl.ExecutionManagerImpl;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
+import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
@@ -36,7 +36,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +71,7 @@ public abstract class DebugComponentAction extends OdoAction {
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = componentNode.getComponent();
-            return (isPushed(component) && isDebuggable(component.getInfo().getComponentKind(), component.getInfo().getComponentTypeName()));
+            return (isPushed(component) && isDebuggable(component.getInfo().getComponentTypeName()));
         }
         return false;
     }
@@ -112,12 +111,10 @@ public abstract class DebugComponentAction extends OdoAction {
                                             + component.getName() + ".");
                                     indicator.setIndeterminate(true);
                                     try {
-                                        if (ComponentKind.DEVFILE.equals(component.getInfo().getComponentKind())) {
                                             indicator.setText2("Please wait while component is switching to debug mode...");
                                             odo.pushWithDebug(projectName, applicationName, component.getPath(), component.getName());
                                             indicator.checkCanceled();
                                             indicator.setText2("Component pushed!");
-                                        }
                                         odo.debug(
                                                 projectName,
                                                 applicationName,
@@ -160,9 +157,9 @@ public abstract class DebugComponentAction extends OdoAction {
             ApplicationManager.getApplication().invokeLater(
                     () -> {
                         try {
-                            Objects.requireNonNull(ProgramRunnerUtil.getRunner(
+                            Objects.requireNonNull(ProgramRunner.getRunner(
                                     DefaultDebugExecutor.getDebugExecutorInstance().getId(),
-                                    runSettings)).execute(getEnvironment());
+                                    runSettings.getConfiguration())).execute(getEnvironment());
                             sendTelemetryResults(TelemetryResult.SUCCESS);
                         } catch (ExecutionException e) {
                             sendTelemetryError(e);
@@ -246,7 +243,7 @@ public abstract class DebugComponentAction extends OdoAction {
         return environment;
     }
 
-    protected abstract boolean isDebuggable(ComponentKind kind, @NotNull String componentTypeName);
+    protected abstract boolean isDebuggable(@NotNull String componentTypeName);
 
     protected abstract String getDebugLanguage();
 

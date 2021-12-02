@@ -40,11 +40,7 @@ public interface Odo {
 
     void watch(String project, String application, String context, String component) throws IOException;
 
-    void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException;
-
-    void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException;
-
-    void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
+    void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException;
 
     void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
                        String service, ObjectNode spec, boolean wait) throws IOException;
@@ -53,26 +49,24 @@ public interface Odo {
 
     void deleteService(String project, String application, Service service) throws IOException;
 
-    List<ComponentType> getComponentTypes() throws IOException;
+    List<DevfileComponentType> getComponentTypes() throws IOException;
 
     List<ServiceTemplate> getServiceTemplates() throws IOException;
 
     void describeServiceTemplate(String template) throws IOException;
 
-    List<Integer> getServicePorts(String project, String application, String component);
-
     List<URL> listURLs(String project, String application, String context, String component) throws IOException;
 
-    ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException;
+    ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException;
 
     void createURL(String project, String application, String context, String component, String name, Integer port,
                    boolean secure) throws IOException;
 
     void deleteURL(String project, String application, String context, String component, String name) throws IOException;
 
-    void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException;
+    void undeployComponent(String project, String application, String context, String component) throws IOException;
 
-    void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException;
+    void deleteComponent(String project, String application, String context, String component) throws IOException;
 
     void follow(String project, String application, String context, String component) throws IOException;
 
@@ -104,7 +98,7 @@ public interface Odo {
 
     void deleteStorage(String project, String application, String context, String component, String storage) throws IOException;
 
-    void link(String project, String application, String component, String context, String source, Integer port) throws IOException;
+    void link(String project, String application, String context, String component, String target) throws IOException;
 
     String consoleURL() throws IOException;
 
@@ -115,8 +109,6 @@ public interface Odo {
     java.net.URL getMasterUrl();
 
     List<ComponentDescriptor> discover(String path) throws IOException;
-
-    ComponentKind getComponentKind(String context) throws IOException;
 
     ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException;
 

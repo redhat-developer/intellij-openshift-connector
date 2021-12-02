@@ -21,7 +21,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
@@ -46,7 +45,7 @@ public class LinkServiceAction extends OdoAction {
     boolean visible = super.isVisible(selected);
     if (visible) {
       Component comp = ((ComponentNode)selected).getComponent();
-      visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
+      visible = (comp.getState() == ComponentState.PUSHED);
     }
     return visible;
   }
@@ -61,19 +60,21 @@ public class LinkServiceAction extends OdoAction {
       try {
         List<Service> services = odo.getServices(namespaceNode.getName(), applicationNode.getName());
         if (!services.isEmpty()) {
-          String service;
+          Service service;
           if (services.size() == 1) {
-            service = services.get(0).getName();
+            service = services.get(0);
           } else {
             String[] servicesArray = services.stream().map(Service::getName).toArray(String[]::new);
-            service = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
+            String serviceName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
+            service = services.stream().filter(s -> serviceName.equals(s.getName())).findAny().get();
           }
           if (service != null) {
-            Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service, NotificationType.INFORMATION);
+            Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service.getName(), NotificationType.INFORMATION);
             Notifications.Bus.notify(notification);
-            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getPath(), service, null);
+            String target = service.getKind() + "/" + service.getName();
+            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), target);
             notification.expire();
-            Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service,
+            Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service.getName(),
             NotificationType.INFORMATION));
             sendTelemetryResults(TelemetryResult.SUCCESS);
           }

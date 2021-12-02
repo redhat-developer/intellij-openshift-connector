@@ -59,7 +59,7 @@ public class OdoProjectDecorator implements Odo {
         final IOException[] exception = {null};
         getComponents(project, application).forEach(component -> {
             try {
-                deleteComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentKind());
+                deleteComponent(project, application, component.getPath(), component.getName());
             } catch (IOException e) {
                 exception[0] = e;
             }
@@ -90,29 +90,19 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createComponentLocal(String project, String application, String componentType, String componentVersion, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
             FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
             File tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
-            delegate.createComponentLocal(project, application, componentType, componentVersion, registryName, component, tmpdir.getAbsolutePath(), devfile, starter, push);
+            delegate.createComponent(project, application, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter, push);
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);
             FileUtils.deleteQuietly(tmpdir);
             VirtualFile[] files = new VirtualFile[] {VfsUtil.findFileByIoFile(sourceDir,true)};
             VfsUtil.markDirtyAndRefresh(false, true, true, files);
         } else {
-            delegate.createComponentLocal(project, application, componentType, componentVersion, registryName, component, source, devfile, starter, push);
+            delegate.createComponent(project, application, componentType, registryName, component, source, devfile, starter, push);
         }
-    }
-
-    @Override
-    public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
-        delegate.createComponentGit(project, application, context, componentType, componentVersion, component, source, reference, push);
-    }
-
-    @Override
-    public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
-        delegate.createComponentBinary(project, application, context, componentType, componentVersion, component, source, push);
     }
 
     @Override
@@ -132,7 +122,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<ComponentType> getComponentTypes() throws IOException {
+    public List<DevfileComponentType> getComponentTypes() throws IOException {
         return delegate.getComponentTypes();
     }
 
@@ -147,28 +137,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<Integer> getServicePorts(String project, String application, String component) {
-        List<Integer> ports = delegate.getServicePorts(project, application, component);
-        root.getComponents().forEach((path, comp) -> {
-            if (comp.getProject().equals(project) && comp.getApplication().equals(application) && comp.getName().equals(component)) {
-                comp.getPorts().forEach(port -> {
-                    if (!ports.contains(port)) {
-                        ports.add(port);
-                    }
-                });
-            }
-        });
-        return ports;
-    }
-
-    @Override
     public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
         return delegate.listURLs(project, application, context, component);
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException {
-        return delegate.getComponentInfo(project, application, component, path, kind);
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException {
+        return delegate.getComponentInfo(project, application, component, path);
     }
 
     @Override
@@ -183,16 +158,16 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-        delegate.undeployComponent(project, application, context, component, kind);
+    public void undeployComponent(String project, String application, String context, String component) throws IOException {
+        delegate.undeployComponent(project, application, context, component);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+    public void deleteComponent(String project, String application, String context, String component) throws IOException {
         if (context != null) {
             root.removeContext(new File(context));
         }
-        delegate.deleteComponent(project, application, context, component, kind);
+        delegate.deleteComponent(project, application, context, component);
     }
 
     @Override
@@ -248,9 +223,8 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setState(ComponentState.PUSHED);
                     found.get().setPath(path);
                 } else {
-                    ComponentKind kind = getComponentKind(path);
                     components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path,
-                            getComponentInfo(project, application, comp.getName(), path, kind)));
+                            getComponentInfo(project, application, comp.getName(), path)));
                 }
             }
         }
@@ -293,8 +267,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
-        delegate.link(project, application, component, context, source, port);
+    public void link(String project, String application, String context, String component, String target) throws IOException {
+        delegate.link(project, application, context, component, target);
     }
 
     @Override
@@ -315,11 +289,6 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<ComponentDescriptor> discover(String path) throws IOException {
         return delegate.discover(path);
-    }
-
-    @Override
-    public ComponentKind getComponentKind(String context) throws IOException {
-        return delegate.getComponentKind(context);
     }
 
     @Override

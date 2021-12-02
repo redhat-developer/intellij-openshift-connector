@@ -26,7 +26,6 @@ public class JSonParser {
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String SPEC_FIELD = "spec";
-    private static final String SOURCE_TYPE_FIELD = "sourceType";
     private static final String TYPE_FIELD = "type";
     private static final String URLS_FIELD = "urls";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
@@ -85,18 +84,13 @@ public class JSonParser {
         return result;
     }
 
-    public ComponentInfo parseComponentInfo(ComponentKind kind) {
+    public ComponentInfo parseComponentInfo() {
         ComponentInfo.Builder builder = new ComponentInfo.Builder();
         if (root.has(SPEC_FIELD)) {
             String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
-            if (root.get(SPEC_FIELD).has(SOURCE_TYPE_FIELD)) {
-                String sourceType = root.get(SPEC_FIELD).get(SOURCE_TYPE_FIELD).asText();
-                builder.withSourceType(ComponentSourceType.fromAnnotation(sourceType)).withComponentTypeName(componentTypeName);
-            } else {
-                builder.withSourceType(ComponentSourceType.LOCAL).withComponentTypeName(componentTypeName);
-            }
+            builder.withComponentTypeName(componentTypeName);
         }
-        return builder.withComponentKind(kind).build();
+        return builder.build();
     }
 
     public DebugStatus parseDebugStatus() {

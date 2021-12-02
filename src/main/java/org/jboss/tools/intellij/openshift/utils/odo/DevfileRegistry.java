@@ -11,9 +11,9 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 public interface DevfileRegistry {
-    public String getName();
-    public String getURL();
-    public boolean isSecure();
+    String getName();
+    String getURL();
+    boolean isSecure();
 
     static DevfileRegistry of(String name, String url, boolean secure) {
         return new DevfileRegistry() {

@@ -10,23 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import org.apache.commons.lang3.StringUtils;
-
 public abstract class ParentableNode<T> {
     private final T parent;
     private final ApplicationsRootNode root;
     private final String name;
-    private final String displayName;
 
     protected ParentableNode(ApplicationsRootNode root, T parent, String name) {
-        this(root, parent, name, null);
-    }
-
-    protected ParentableNode(ApplicationsRootNode root, T parent, String name, String displayName) {
         this.root = root;
         this.parent = parent;
         this.name = name;
-        this.displayName = displayName;
     }
 
     public ApplicationsRootNode getRoot() {
@@ -54,9 +46,4 @@ public abstract class ParentableNode<T> {
         return ((NamespaceNode)element).getName();
     }
 
-    public String getDisplayName() {
-        if (StringUtils.isEmpty(displayName))
-            return name;
-        return displayName;
-    }
 }

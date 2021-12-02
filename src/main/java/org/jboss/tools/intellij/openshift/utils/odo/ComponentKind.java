@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 public enum ComponentKind {
-    S2I("s2i"),
     DEVFILE("devfile");
 
     private final String label;

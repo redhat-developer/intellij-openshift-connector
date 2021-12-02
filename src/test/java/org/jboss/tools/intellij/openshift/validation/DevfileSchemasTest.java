@@ -38,7 +38,9 @@ public class DevfileSchemasTest {
         myFixture.setTestDataPath("src/test/resources");
         myFixture.setUp();
         myFixture.enableInspections(YamlJsonSchemaHighlightingInspection.class);
-        VfsRootAccess.allowRootAccess(new File("src").getAbsoluteFile().getParentFile().getAbsolutePath());
+        VfsRootAccess.allowRootAccess(() -> {
+
+        }, new File("src").getAbsoluteFile().getParentFile().getAbsolutePath());
     }
 
     @After

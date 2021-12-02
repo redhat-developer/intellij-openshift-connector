@@ -22,7 +22,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
@@ -47,7 +46,7 @@ public class LinkComponentAction extends OdoAction {
     boolean visible = super.isVisible(selected);
     if (visible) {
       Component comp = ((ComponentNode)selected).getComponent();
-      visible = (comp.getState() == ComponentState.PUSHED && ComponentKind.S2I.equals(comp.getInfo().getComponentKind()));
+      visible = (comp.getState() == ComponentState.PUSHED);
     }
     return visible;
   }
@@ -68,24 +67,6 @@ public class LinkComponentAction extends OdoAction {
     return targetComponent;
   }
 
-  protected Integer getSelectedPort(Odo odo, String project, String application, String component) {
-    Integer port = null;
-
-    List<Integer> ports = odo.getServicePorts(project, application, component);
-    if (!ports.isEmpty()) {
-      if (ports.size() == 1) {
-        port = ports.get(0);
-      } else {
-        String[] portsArray = ports.stream().map(Object::toString).toArray(String[]::new);
-        String portStr = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Select port", "Link component", Messages.getQuestionIcon(), portsArray, portsArray[0], null));
-        if (portStr != null) {
-          port = Integer.parseInt(portStr);
-        }
-      }
-    }
-    return port;
-  }
-
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
@@ -96,21 +77,14 @@ public class LinkComponentAction extends OdoAction {
       try {
         String targetComponent = getSelectedTargetComponent(odo, namespaceNode.getName(), applicationNode.getName(), sourceComponent.getName());
           if (targetComponent != null) {
-            Integer port = getSelectedPort(odo, namespaceNode.getName(), applicationNode.getName(), targetComponent);
-            if (port != null) {
               Notification notification = new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Linking component to " + targetComponent,
                       NotificationType.INFORMATION);
               Notifications.Bus.notify(notification);
-              odo.link(namespaceNode.getName(), applicationNode.getName(), sourceComponent.getName(), sourceComponent.getPath(), targetComponent, port);
+              odo.link(namespaceNode.getName(), applicationNode.getName(), sourceComponent.getPath(), sourceComponent.getName(), targetComponent);
               notification.expire();
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));
               sendTelemetryResults(TelemetryResult.SUCCESS);
-            } else {
-              String message = "No ports to link to";
-              sendTelemetryError(message);
-              UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
-            }
           } else {
             String message = "No components to link to";
             sendTelemetryError(message);

@@ -32,11 +32,6 @@ public final class DevfileComponentType extends AbstractComponentType implements
         this.tags = tags;
     }
 
-    @Override
-    public ComponentKind getKind() {
-        return ComponentKind.DEVFILE;
-    }
-
     public String getDisplayName() {
         return displayName;
     }

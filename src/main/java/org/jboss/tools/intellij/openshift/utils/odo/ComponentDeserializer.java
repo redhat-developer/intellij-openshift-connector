@@ -21,7 +21,6 @@ import java.util.List;
 
 public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Component>> {
 
-    public static final String S2I_FIELD = "s2iComponents";
     public static final String DEVFILE_FIELD = "devfileComponents";
     public static final String METADATA_FIELD = "metadata";
     public static final String NAME_FIELD = "name";
@@ -33,25 +32,23 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     @Override
     public List<Component> convert(JsonNode root, DeserializationContext context) {
         List<Component> result = new ArrayList<>();
-        // two roots, s2i and devfiles
-        result.addAll(parseComponents(root.get(S2I_FIELD), ComponentKind.S2I));
-        result.addAll(parseComponents(root.get(DEVFILE_FIELD), ComponentKind.DEVFILE));
+        result.addAll(parseComponents(root.get(DEVFILE_FIELD)));
         return result;
     }
 
-    private Collection<Component> parseComponents(JsonNode tree, ComponentKind kind) {
+    private Collection<Component> parseComponents(JsonNode tree) {
         List<Component> result = new ArrayList<>();
         if (tree != null) {
             for (JsonNode item : tree) {
-                result.add(Component.of(getName(item), getComponentInfo(item, kind)));
+                result.add(Component.of(getName(item), getComponentInfo(item)));
             }
         }
         return result;
     }
 
-    private ComponentInfo getComponentInfo(JsonNode item, ComponentKind kind) {
+    private ComponentInfo getComponentInfo(JsonNode item) {
         JSonParser parser = new JSonParser(item);
-        return parser.parseComponentInfo(kind);
+        return parser.parseComponentInfo();
     }
 
     private String getName(JsonNode item) {

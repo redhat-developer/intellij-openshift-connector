@@ -72,11 +72,11 @@ public class PushComponentAction extends ContextAwareComponentAction {
 
   private boolean checkMigrated(Odo odo, String project, String application, Component component) throws IOException {
     if (component.getState() == ComponentState.PUSHED) {
-      ComponentInfo info = odo.getComponentInfo(project, application, component.getName(), component.getPath(), component.getInfo().getComponentKind());
+      ComponentInfo info = odo.getComponentInfo(project, application, component.getName(), component.getPath());
       if (info.isMigrated()) {
         int choice = UIHelper.executeInUI(() -> Messages.showDialog(COMPONENT_MIGRATION_MESSAGE, COMPONENT_MIGRATION_TITLE, new String[]{UNDEPLOY_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon()));
         if (choice == 0) {
-          odo.undeployComponent(project, application, component.getPath(), component.getName(), component.getInfo().getComponentKind());
+          odo.undeployComponent(project, application, component.getPath(), component.getName());
         } else if (choice == 1) {
           BrowserUtil.browse(Constants.MIGRATION_HELP_PAGE_URL);
           return false;

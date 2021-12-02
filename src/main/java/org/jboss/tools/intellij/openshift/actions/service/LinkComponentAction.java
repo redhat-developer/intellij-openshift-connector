@@ -59,7 +59,7 @@ public class LinkComponentAction extends OdoAction {
             component = components.get(Arrays.asList(componentNames).indexOf(componentName));
           }
           if (component != null) {
-            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getName(), component.getPath(), serviceNode.getName(), null);
+            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), serviceNode.getName());
             Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link component", "Service linked to " + component.getName(),
             NotificationType.INFORMATION));
             sendTelemetryResults(TelemetryResult.SUCCESS);

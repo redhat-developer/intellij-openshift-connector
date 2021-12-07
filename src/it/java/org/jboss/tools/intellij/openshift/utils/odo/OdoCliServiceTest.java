@@ -30,7 +30,7 @@ public class OdoCliServiceTest extends OdoCliTest {
             createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            odo.createService(project, application, serviceTemplate, crd, service, null, false);
+            createService(project, application, serviceTemplate, crd, service);
         } finally {
             odo.deleteProject(project);
         }
@@ -46,7 +46,7 @@ public class OdoCliServiceTest extends OdoCliTest {
             createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            odo.createService(project, application, serviceTemplate, crd, service, null, false);
+            createService(project, application, serviceTemplate, crd, service);
             String template = odo.getServiceTemplate(project, application, service);
             assertNotNull(template);
             assertEquals(SERVICE_TEMPLATE, template);
@@ -64,7 +64,7 @@ public class OdoCliServiceTest extends OdoCliTest {
             createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            odo.createService(project, application, serviceTemplate, crd, service, null, false);
+            createService(project, application, serviceTemplate, crd, service);
             List<Service> services = odo.getServices(project, application);
             assertNotNull(services);
             assertEquals(1, services.size());

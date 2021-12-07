@@ -120,5 +120,5 @@ public interface Odo {
 
     List<DevfileComponentType> getComponentTypes(String name) throws IOException;
 
-    boolean isOpenshift();
+    boolean isOpenShift();
 }

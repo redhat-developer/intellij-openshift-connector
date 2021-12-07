@@ -61,7 +61,7 @@ public class CreateURLAction extends OdoAction {
 
     public static boolean createURL(Odo odo, String project, String application, Component component) throws IOException {
         CreateURLDialog dialog = UIHelper.executeInUI(() -> {
-            CreateURLDialog dialog1 = new CreateURLDialog(!odo.isOpenshift(), odo.getMasterUrl().getHost());
+            CreateURLDialog dialog1 = new CreateURLDialog(!odo.isOpenShift(), odo.getMasterUrl().getHost());
             dialog1.show();
             return dialog1;
         });

@@ -133,11 +133,6 @@ public class OdoCli implements Odo {
         }
     }
 
-    @Override
-    public boolean isOpenshift(){
-        return ClusterHelper.getClusterInfo(client).isOpenshift();
-    }
-
 
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
         final SimpleModule module = new SimpleModule();
@@ -148,7 +143,7 @@ public class OdoCli implements Odo {
     @Override
     public List<String> getNamespaces() throws IOException {
         try {
-            if (isOpenshift()) {
+            if (isOpenShift()) {
                 return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().
                         map(p -> p.getMetadata().getName()).collect(Collectors.toList());
             } else {
@@ -165,14 +160,14 @@ public class OdoCli implements Odo {
             ns = "default";
         }
         try {
-            if (isOpenshift()) {
+            if (isOpenShift()) {
                 client.adapt(OpenShiftClient.class).projects().withName(ns).get();
             } else {
                 client.namespaces().withName(ns).get();
             }
         } catch (KubernetesClientException e) {
             ns = "";
-            if (isOpenshift()) {
+            if (isOpenShift()) {
                 List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
                 if (!projects.isEmpty()) {
                     ns = projects.get(0).getMetadata().getNamespace();
@@ -448,7 +443,7 @@ public class OdoCli implements Odo {
         if (secure) {
             args.add("--secure");
         }
-        if (!isOpenshift()){
+        if (!isOpenShift()){
             args.add("--host");
             args.add(host);
         }
@@ -644,12 +639,12 @@ public class OdoCli implements Odo {
     public String consoleURL() throws IOException {
         try {
             VersionInfo version = client.getVersion();
-            if (isOpenshift() && "4".equals(version.getMajor())) { // assuming kubernetes version 1 is version 4
+            if (isOpenShift() && "4".equals(version.getMajor())) { // assuming kubernetes version 1 is version 4
                 ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
                 if (configMap != null) {
                     return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
                 }
-            } else if (isOpenshift() && "3".equals(version.getMajor())) {
+            } else if (isOpenShift() && "3".equals(version.getMajor())) {
                 ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
                 String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
                 return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
@@ -659,6 +654,11 @@ public class OdoCli implements Odo {
         } catch (KubernetesClientException e) {
             return client.getMasterUrl().toExternalForm();
         }
+    }
+
+    @Override
+    public boolean isOpenShift(){
+        return ClusterHelper.getClusterInfo(client).isOpenshift();
     }
 
     @Override

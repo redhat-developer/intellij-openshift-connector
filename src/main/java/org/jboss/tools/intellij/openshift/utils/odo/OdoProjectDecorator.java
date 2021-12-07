@@ -322,7 +322,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public boolean isOpenshift() {
-        return delegate.isOpenshift();
+    public boolean isOpenShift() {
+        return delegate.isOpenShift();
     }
 }

@@ -12,9 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.ui.TestDialog;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.After;
@@ -62,10 +59,6 @@ public abstract class OdoCliTest extends BaseTest {
 
     private TestDialog previousTestDialog;
 
-    protected static boolean isOpenShift() {
-        return new DefaultKubernetesClient(new ConfigBuilder().build()).isAdaptable(OpenShiftClient.class);
-    }
-
     @Before
     public void init() throws IOException, ExecutionException, InterruptedException {
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
@@ -102,6 +95,7 @@ public abstract class OdoCliTest extends BaseTest {
 
     private void cleanLocalProjectDirectory() throws IOException {
         FileUtils.deleteDirectory(new File(COMPONENT_PATH, ".odo"));
+        FileUtils.deleteDirectory(new File(COMPONENT_PATH, "kubernetes"));
         FileUtils.deleteQuietly(new File(COMPONENT_PATH+"/devfile.yaml"));
     }
 
@@ -116,5 +110,10 @@ public abstract class OdoCliTest extends BaseTest {
         ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE)).findFirst().orElse(null);
         assertNotNull(serviceTemplate);
         return serviceTemplate;
+    }
+
+    protected void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {
+        cleanLocalProjectDirectory();
+        odo.createService(project, application, serviceTemplate, crd, service, null, false);
     }
 }

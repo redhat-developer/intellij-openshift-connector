@@ -38,6 +38,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     private String component;
     private String service;
     private String storage;
+    private String host;
 
     public OdoCliComponentTest(boolean push) {
         this.push = push;
@@ -55,6 +56,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         component = COMPONENT_PREFIX + random.nextInt();
         service = SERVICE_PREFIX + random.nextInt();
         storage = STORAGE_PREFIX + random.nextInt();
+        host = odo.getMasterUrl().getHost();
     }
 
     @Test
@@ -99,9 +101,9 @@ public class OdoCliComponentTest extends OdoCliTest {
     private void checkCreateComponentAndCreateURL(boolean secure) throws IOException {
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure, host);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(2, urls.size());
+            assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
         } finally {
             odo.deleteProject(project);
         }
@@ -109,35 +111,53 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndCreateURL() throws IOException {
-        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateURL(false);
     }
 
     @Test
     public void checkCreateComponentAndCreateSecureURL() throws IOException {
-        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateURL(true);
     }
 
     private void checkCreateComponentAndCreateAndDeleteURL(boolean secure) throws IOException {
         try {
+            List<URL> urls;
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure);
-            List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(2, urls.size());
-            assertEquals(push ? URL.State.PUSHED : URL.State.NOT_PUSHED, urls.get(0).getState());
-            assertEquals(URL.State.NOT_PUSHED, urls.get(1).getState());
+            if (odo.isOpenShift()) {
+                // remove url created automatically for openshift cluster to better visibility of the test
+                urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                assertEquals(1, urls.size());
+                odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
+                if (push) {
+                    odo.push(project, application, COMPONENT_PATH, component);
+                }
+                urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                assertEquals(0, urls.size());
+            }
+
+            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure, host);
+            urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+
+            assertEquals(1, urls.size());
+            assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
+            if (push) {
+                odo.push(project, application, COMPONENT_PATH, component);
+                urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                assertEquals(1, urls.size());
+                assertEquals(URL.State.PUSHED, urls.get(0).getState());
+            }
 
             odo.deleteURL(project, application, COMPONENT_PATH, component, urls.get(0).getName());
             urls = odo.listURLs(project, application, COMPONENT_PATH, component);
 
             if (push) {
-                assertEquals(2, urls.size());
-                assertEquals(URL.State.LOCALLY_DELETED, urls.get(0).getState());
-                assertEquals(URL.State.NOT_PUSHED, urls.get(1).getState());
-            } else {
                 assertEquals(1, urls.size());
-                assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
+                assertEquals(URL.State.LOCALLY_DELETED, urls.get(0).getState());
+                odo.push(project, application, COMPONENT_PATH, component);
+                urls = odo.listURLs(project, application, COMPONENT_PATH, component);
+                assertEquals(0, urls.size());
+            } else {
+                assertEquals(0, urls.size());
             }
 
         } finally {
@@ -147,13 +167,11 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndCreateAndDeleteURL() throws IOException {
-        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateAndDeleteURL(false);
     }
 
     @Test
     public void checkCreateComponentAndCreateAndDeleteSecureURL() throws IOException {
-        Assume.assumeTrue(isOpenShift());
         checkCreateComponentAndCreateAndDeleteURL(true);
     }
 
@@ -198,11 +216,13 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndListURLs() throws IOException {
-        Assume.assumeTrue(isOpenShift());
         try {
             createComponent(project, application, component, push);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(1, urls.size());
+            assertEquals(odo.isOpenShift() ? 1 : 0, urls.size());
+            if (odo.isOpenShift()) {
+                assertEquals(push ? URL.State.PUSHED : URL.State.NOT_PUSHED, urls.get(0).getState());
+            }
         } finally {
             odo.deleteProject(project);
         }
@@ -210,13 +230,13 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndDebug() throws IOException {
-        Assume.assumeTrue(isOpenShift() && push);
+        Assume.assumeTrue(push);
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false, host);
             odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
-            assertEquals(2, urls.size());
+            assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
             int debugPort;
             try (ServerSocket serverSocket = new ServerSocket(0)) {
                 debugPort = serverSocket.getLocalPort();

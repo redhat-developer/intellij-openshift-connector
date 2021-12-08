@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,25 +32,25 @@ import java.util.List;
 public class CreateURLDialog extends DialogWrapper {
     private JPanel contentPane;
     private JTextField nameTextField;
-    private JComboBox portsComboBox;
     private JCheckBox secureCheckBox;
     private JTextField portField;
+    private JTextField hostField;
+    private JLabel hostLabel;
 
     /**
      * Constructor for CreateURL dialog.
-     * @param showPortField set to @true to show editable portField. Otherwise the port combo box will be used.
+     *
+     * @param showHostField set to @true to show editable hostField.
      */
-    public CreateURLDialog(boolean showPortField) {
+    public CreateURLDialog(boolean showHostField, String hostValue) {
         super(null, false, IdeModalityType.IDE);
         init();
         setTitle("Create URL");
-        if (showPortField){
-            portField.setVisible(true);
-            portField.setText("1024");
-            portsComboBox.setVisible(false);
-        }else {
-            portField.setVisible(false);
-            portsComboBox.setVisible(true);
+        portField.setText("1024");
+        hostField.setVisible(showHostField);
+        hostLabel.setVisible(showHostField);
+        if (showHostField) {
+            hostField.setText(hostValue);
         }
     }
 
@@ -90,11 +89,12 @@ public class CreateURLDialog extends DialogWrapper {
         return secureCheckBox.isSelected();
     }
 
-    public Integer getSelectedPort() {
-        if (getPortFieldValue().isEmpty()) {
-            return (Integer) portsComboBox.getSelectedItem();
-        } else
-            return Integer.valueOf(getPortFieldValue());
+    public Integer getPort() {
+        return Integer.valueOf(getPortFieldValue());
+    }
+
+    public String getHost() {
+        return hostField.getText().trim();
     }
 
     {
@@ -122,8 +122,6 @@ public class CreateURLDialog extends DialogWrapper {
         final JLabel label2 = new JLabel();
         label2.setText("Port");
         contentPane.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        portsComboBox = new JComboBox();
-        contentPane.add(portsComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

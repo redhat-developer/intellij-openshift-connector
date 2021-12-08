@@ -92,6 +92,19 @@
     <toolWindow id="OpenShift" anchor="left" factoryClass="org.jboss.tools.intellij.openshift.WindowToolFactory" icon="/META-INF/OpenShiftPluginIcon13x13.svg"/>
   </extensions>
 
+  <extensionPoints>
+    <extensionPoint name="authorizationServer" beanClass="org.jboss.tools.intellij.openshift.oauth.model.ServerExtensionPoint"/>
+  </extensionPoints>
+
+  <extensions defaultExtensionNs="org.jboss.tools.intellij.openshift">
+    <authorizationServer id="org.jboss.tools.intellij.openshift.authorizationServer.redhat"
+                         client-id="vscode-redhat-account"
+                         display-name="Red Hat SSO"
+                         realm="redhat-external"
+                         url="https://sso.redhat.com/auth"/>
+  </extensions>
+
+
   <actions>
     <group id="org.jboss.tools.intellij.tree" popup="true">
       <!-- Application Explorer -->

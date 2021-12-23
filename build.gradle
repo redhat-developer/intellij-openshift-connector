@@ -9,8 +9,12 @@ plugins {
 }
 
 repositories {
-    maven { url 'https://repository.jboss.org' }
+    mavenLocal()
     mavenCentral()
+    maven { url 'https://repository.jboss.org' }
+    maven {
+        url 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies'
+    }
 }
 
 sourceCompatibility = '1.8'
@@ -53,7 +57,7 @@ sourceSets {
 }
 
 task integrationTest(type: Test) {
-    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+    useJUnitPlatform()
     description = 'Runs the integration tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -69,6 +73,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.9'
     compile 'com.redhat.devtools.intellij:intellij-common:1.5.0-SNAPSHOT'
     compile 'com.redhat.devtools.alizer:alizer-api:0.1.0-SNAPSHOT'
+    compile 'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.0.2'
     testCompile 'org.mockito:mockito-core:2.28.2'
     testCompile 'org.easytesting:fest-assert:1.4'
     testCompile 'com.redhat.devtools.intellij:intellij-common:1.5.0-SNAPSHOT:test'
@@ -96,6 +101,7 @@ runIde {
 }
 
 runIdeForUiTests {
+    systemProperty "robot-server.port", System.getProperty("robot-server.port")
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
 }
 

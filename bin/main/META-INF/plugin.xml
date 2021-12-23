@@ -1,0 +1,154 @@
+<idea-plugin>
+  <id>org.jboss.tools.intellij.openshift</id>
+  <name>OpenShift Connector by Red Hat</name>
+  <version>1.0</version>
+  <vendor email="developers@redhat.com" url="http://www.redhat.com">Red-Hat</vendor>
+
+  <description><![CDATA[
+      <img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/openshift_extension.png" width="32" height="32"/>
+      <h2>Overview</h2>
+      <p>A plugin for interacting with Red Hat OpenShift using a local or remote instance of OpenShift clusters providing a streamlined developer experience. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.</p>
+      <p>To run the instance of OpenShift cluster locally, developers can use <a href="https://github.com/minishift/minishift/releases">minishift</a> / <a href="https://developers.redhat.com/products/cdk/download/">CDK</a>. Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.</p>
+    ]]></description>
+
+  <change-notes><![CDATA[
+  <p><b>0.8.2</b></p>
+  <p>Compatibility with Kubernetes by Red Hat 0.2.4<p>
+  <p><b>0.8.1</b></p>
+  <p>Context menus non functional<p>
+  <p><b>0.8.0</b></p>
+  <p>Simplified create component workflow<p>
+  <p>Application Explorer focused on current namespace/project<p>
+  <p><b>0.7.0</b></p>
+  <p>Devfile registry management<p>
+  <p>Integration with Kubernetes by Red Hat plugin<p>
+  <p><b>0.6.0</b></p>
+  <p>Improved OpenShift Container Platform 4 compatibility<p>
+  <p>Improved navigation in the OpenShift view<p>
+  <p>Opt-in Telemetry data collection</p>
+  <p><b>0.5.0</b></p>
+  <p>Add support for starters for devfile based components<p>
+  <p>devfiles can be editied with syntax checking and content assist</p>
+  <p>Switch to odo 2.0.7</p>
+  <p><b>0.4.0</b></p>
+  <p>Add support for devfile based components</p>
+  <p>Switch to Odo 2.0.3</p>
+  <p><b>0.3.0</b></p>
+  <p>Add support plan selection while creating services</p>
+  <p>Switch to Odo 1.2.3</p>
+  <p><b>0.2.5</b></p>
+  <p>Add support for secure URLs</p>
+  <p>Switch to Odo 1.2.2</p>
+  <p><b>0.2.4</b></p>
+  <p>Fixed a blocker linked to Odo 1.1.3 causing the tree not to be usable when urls are created from the Web UI</p>
+  <p><b>0.2.2</b></p>
+  <p>Switch to Odo 1.1.3</p>
+  <p>Improved synchronization while debugging</p>
+  <p>Bug fixes: fix Open Console Dashboard action</p>
+  <p><b>0.2.1</b></p>
+  <p>Proxy support</p>
+  <p>Bug fixes: NPE when loading a new project/module</p>
+  <p><b>0.2.0</b></p>
+  <p>Debug Support for Local Node.js and Java Components</p>
+  <p>Switch to Odo 1.1.0</p>
+  <p><b>0.1.1</b></p>
+  <p>Bug fixes: Application Explorer was not refreshed after login</p>
+  <p><b>0.1.0</b></p>
+  <p>Switch to Odo 1.0.0</p>
+  <p>Use the Odo 1.0.0 based workflow</p>
+  <p>For more information, see <a href="https://github.com/redhat-developer/intellij-openshift-connector/blob/master/README.md">this page</a></p>
+  <p><b>0.0.6</b></p>
+  <p>Add icon for the OpenShift window</p>
+  <p>Update download URLs to reflect the new Odo organization</p>
+  <p><b>0.0.5</b></p>
+  <p>Add support for URL management<p>
+  <p><b>0.0.4</b></p>
+  <p>Fix error reported when logging to a cluster<p>
+  <p>Fix error reported when getting applications list for a project<p>
+  <p><b>0.0.3</b></p>
+  <p>Fix line feed issue for Macos<p>
+  <p><b>0.0.2</b></p>
+  <p>Fix terminal auto close for 2018.3+ based products</p>
+  <p><b>0.0.1</b></p>
+  <p>Initial release</p>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="193"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <depends>com.intellij.modules.lang</depends>
+  <depends>org.jetbrains.plugins.terminal</depends>
+  <depends>com.redhat.devtools.intellij.telemetry</depends>
+  <depends>com.redhat.devtools.intellij.kubernetes</depends>
+
+  <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
+  <depends optional="true" config-file="withJavaScriptDebugger.xml">JavaScriptDebugger</depends>
+  <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <toolWindow id="OpenShift" anchor="left" factoryClass="org.jboss.tools.intellij.openshift.WindowToolFactory" icon="/META-INF/OpenShiftPluginIcon13x13.svg"/>
+  </extensions>
+
+  <actions>
+    <group id="org.jboss.tools.intellij.tree" popup="true">
+      <!-- Application Explorer -->
+      <!-- Top level: cluster -->
+      <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" text="List Catalog Components"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" text="List Catalog Services"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>
+      <separator/>
+      <!-- application level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New Component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.DescribeApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DescribeApplicationAction" text="Describe"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" text="Delete"/>
+      <!-- component level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.url.CreateURLAction" id="org.jboss.tools.intellij.openshift.actions.url.CreateURLAction" text="Create URL"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" text="Create Storage"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" text="Describe"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" text="Follow Log"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" text="Link Component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" text="Undeploy"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
+      <!-- service level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link Component"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" text="Describe"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
+      <!-- storage level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" text="Delete"/>
+      <!-- URL level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" text="Open in Browser"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
+      <!-- project level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
+      <!-- registry management -->
+      <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New registry"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" text="Delete"/>
+    </group>
+  </actions>
+
+</idea-plugin>

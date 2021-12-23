@@ -11,29 +11,34 @@
 package org.jboss.tools.intellij.openshift;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
-import org.junit.After;
-import org.junit.Before;
+import com.intellij.remoterobot.RemoteRobot;
+
+
+
+import com.redhat.devtools.intellij.commonUiTestLibrary.UITestRunner;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.TimeUnit;
 
 public class BaseTest {
-    private CodeInsightTestFixture myFixture;
+    private static RemoteRobot robot;
+
     protected Project project;
 
-    @Before
-    public void setUp() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
-        project = myFixture.getProject();
+    @BeforeAll
+    public static void connect() {
+        robot = UITestRunner.runIde(UITestRunner.IdeaVersion.V_2020_2, 8580);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        myFixture.tearDown();
+    @Test
+    public void iokhrimeTest() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(60);
+    }
+
+    @AfterAll
+    public static void closeIde() {
+        UITestRunner.closeIde();
     }
 }

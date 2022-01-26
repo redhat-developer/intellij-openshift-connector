@@ -148,8 +148,8 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public void createURL(String project, String application, String context, String component, String name,
-                          Integer port, boolean secure) throws IOException {
-        delegate.createURL(project, application, context, component, name, port, secure);
+                          Integer port, boolean secure, String host) throws IOException {
+        delegate.createURL(project, application, context, component, name, port, secure, host);
     }
 
     @Override
@@ -319,5 +319,10 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
         return delegate.getComponentTypes(name);
+    }
+
+    @Override
+    public boolean isOpenShift() {
+        return delegate.isOpenShift();
     }
 }

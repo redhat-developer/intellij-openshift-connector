@@ -28,9 +28,12 @@ public class ProjectUtils {
 
     public static boolean isEmpty(File project) {
         if (Files.exists(project.toPath())) {
-            for (File f : project.listFiles()) {
-                if (!f.getName().startsWith(".")) {
-                    return false;
+            File[] files = project.listFiles();
+            if (files != null && files.length > 0) {
+                for (File f : project.listFiles()) {
+                    if (!f.getName().startsWith(".")) {
+                        return false;
+                    }
                 }
             }
         }

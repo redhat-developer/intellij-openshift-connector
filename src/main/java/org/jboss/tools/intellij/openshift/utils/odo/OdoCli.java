@@ -39,6 +39,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.slf4j.Logger;
@@ -120,11 +121,14 @@ public class OdoCli implements Odo {
             telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
             telemetry.send();
         } catch (RuntimeException e) {
-            //workaround to not send null values
-            if (e.getMessage() != null) {
-                telemetry.error(e).send();
-            } else {
-                telemetry.error(e.toString()).send();
+            // do not send telemetry when there is no context ( ie default kube URL as master URL )
+            if (!e.getMessage().startsWith(Constants.DEFAULT_KUBE_URL)){
+                //workaround to not send null values
+                if (e.getMessage() != null) {
+                    telemetry.error(e).send();
+                } else {
+                    telemetry.error(e.toString()).send();
+                }
             }
         }
     }
@@ -426,7 +430,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void createURL(String project, String application, String context, String component, String name, Integer port,
-                          boolean secure) throws IOException {
+                          boolean secure, String host) throws IOException {
         List<String> args = new ArrayList<>();
         args.add(command);
         args.add("url");
@@ -438,6 +442,10 @@ public class OdoCli implements Odo {
         args.add(port.toString());
         if (secure) {
             args.add("--secure");
+        }
+        if (!isOpenShift()){
+            args.add("--host");
+            args.add(host);
         }
         ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, args.toArray(new String[0]));
     }
@@ -545,7 +553,7 @@ public class OdoCli implements Odo {
                     });
         } catch (IOException e) {
             //https://github.com/openshift/odo/issues/5010
-            if (e.getMessage().contains("\"no operator backed services found in namespace:")) {
+            if (e.getMessage().contains("\"no operator backed services found in namespace:") || (e.getMessage().contains("failed to list Operator backed services"))) {
                 return Collections.emptyList();
             }
             throw e;
@@ -648,8 +656,9 @@ public class OdoCli implements Odo {
         }
     }
 
-    private boolean isOpenShift() {
-        return client.isAdaptable(OpenShiftClient.class);
+    @Override
+    public boolean isOpenShift(){
+        return ClusterHelper.getClusterInfo(client).isOpenshift();
     }
 
     @Override

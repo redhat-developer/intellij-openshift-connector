@@ -60,7 +60,7 @@ public interface Odo {
     ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException;
 
     void createURL(String project, String application, String context, String component, String name, Integer port,
-                   boolean secure) throws IOException;
+                   boolean secure, String host) throws IOException;
 
     void deleteURL(String project, String application, String context, String component, String name) throws IOException;
 
@@ -119,4 +119,6 @@ public interface Odo {
     void deleteDevfileRegistry(String name) throws IOException;
 
     List<DevfileComponentType> getComponentTypes(String name) throws IOException;
+
+    boolean isOpenShift();
 }

@@ -68,7 +68,7 @@ public class BaseTest {
 
     private void deploySampleToCluster() throws InterruptedException {
         final OpenshiftConnector openshiftConnector = robot.find(OpenshiftConnector.class, Duration.ofSeconds(60));
-        openshiftConnector.expandOpenshiftConnectorTree();
+        openshiftConnector.expandOpenshiftConnectorTree("https://api.crc.testing:6443/");
         openshiftConnector.clickToCreateDeploymentLink();
 
         final CreateComponentFixture createComponentFixture = robot.find(CreateComponentFixture.class, Duration.ofSeconds(60));

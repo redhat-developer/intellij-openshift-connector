@@ -23,12 +23,8 @@ public class OpenshiftConnector extends ContainerFixture {
     find(ComponentFixture.class, byXpath("//div[@visible_text='OpenShift' and @class='StripeButton']"), Duration.ofSeconds(60)).click();
   }
 
-  public void expandOpenshiftConnectorTree() throws InterruptedException {
-    try {
-      getOpenshiftConnectorTree().expandAll();
-    }catch(Exception ex){
-      // suppress unexpected timeout exception
-    }
+  public void expandOpenshiftConnectorTree(String path) throws InterruptedException {
+      getOpenshiftConnectorTree().expand(path);
   }
 
   public void clickToCreateDeploymentLink() throws InterruptedException {

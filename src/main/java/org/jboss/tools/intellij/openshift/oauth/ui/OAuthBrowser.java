@@ -55,6 +55,9 @@ public class OAuthBrowser extends JPanel {
             redirectFuture.complete(info);
         } catch (IOException | VerificationException | OAuthErrorException | URISyntaxException | ServerRequest.HttpFailure | InterruptedException e) {
             redirectFuture.completeExceptionally(e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 

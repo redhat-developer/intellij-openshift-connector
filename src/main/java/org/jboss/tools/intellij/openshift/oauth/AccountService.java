@@ -83,26 +83,30 @@ public class AccountService {
 		String token = null;
 
 		IAuthorizationServer server = findAuthorizationServer(serverId);
-		List<IAccount> identities = server.getAccounts();
-		if (identities.isEmpty()) {
-			token = performLogin(server, null, tokenType, context);
-		} else {
-			IAccount account = identities.get(0);
-			AccountStatus status = getStatus(account);
-			switch (status) {
-			case VALID:
-				token = account.getToken(tokenType);
-				break;
-			case NEEDS_REFRESH:
-				token = performRefresh(account, tokenType);
-				break;
-			case NEEDS_LOGIN:
-				token = performLogin(server, account, tokenType, context);
-				break;
-			}
+		if (server != null) {
+			List<IAccount> identities = server.getAccounts();
+			if (identities.isEmpty()) {
+				token = performLogin(server, null, tokenType, context);
+			} else {
+				IAccount account = identities.get(0);
+				AccountStatus status = getStatus(account);
+				switch (status) {
+					case VALID:
+						token = account.getToken(tokenType);
+						break;
+					case NEEDS_REFRESH:
+						token = performRefresh(account, tokenType);
+						break;
+					case NEEDS_LOGIN:
+						token = performLogin(server, account, tokenType, context);
+						break;
+				}
 
+			}
+			return token;
+		} else {
+			throw new OAuthConfigurationException("No server found for id: " + serverId);
 		}
-		return token;
 	}
 
 	private String performLogin(IAuthorizationServer server, IAccount account, int tokenType, Object context) {

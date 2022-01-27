@@ -4,5 +4,6 @@ target
 build
 .gradle
 out
+bin
 
 lsp/

@@ -1,5 +1,0 @@
-<idea-plugin>
-    <extensions defaultExtensionNs="JavaScript.JsonSchema">
-        <ProviderFactory implementation="org.jboss.tools.intellij.openshift.validation.DevfileJsonSchemaProviderFactory"/>
-    </extensions>
-</idea-plugin>

@@ -10,22 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.cluster;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.util.ui.JBHtmlEditorKit;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxDialog;
+import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxModel;
 import org.jboss.tools.intellij.openshift.utils.OCCommandUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.HyperlinkEvent;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
@@ -37,15 +44,18 @@ import java.io.IOException;
 
 @SuppressWarnings({"java:S1171","java:S100"})
 public class LoginDialog extends DialogWrapper implements DocumentListener {
+    private final Project project;
     private JPanel contentPane;
     private JTextField userNameField;
     private JPasswordField passwordField;
     private JTextField clusterURLField;
     private JPasswordField tokenField;
     private JButton pasteLoginCommandButton;
+    private JEditorPane labelEditorPane;
 
-    public LoginDialog(Component parent, String clusterURL) {
-        super(null, parent, false, IdeModalityType.IDE);
+    public LoginDialog(Project project, Component parent, String clusterURL) {
+        super(project, parent, false, IdeModalityType.IDE);
+        this.project = project;
         init();
         setTitle("Cluster login");
         clusterURLField.setText(clusterURL);
@@ -53,6 +63,22 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         passwordField.getDocument().addDocumentListener(this);
         tokenField.getDocument().addDocumentListener(this);
         pasteLoginCommandButton.addActionListener(e -> parseLoginCommandFromClipboard());
+        labelEditorPane.setEditorKit(new JBHtmlEditorKit());
+        labelEditorPane.setText("Enter the cluster URL and the required credentials. You can also bootstrap a <a href=''>Red Hat Developer Sandbox</a> cluster using your Red Hat account");
+        labelEditorPane.addHyperlinkListener(this::loginToSandbox);
+    }
+
+    @NotNull
+    private void loginToSandbox(HyperlinkEvent e) {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                SandboxModel sandboxModel = new SandboxModel("Red Hat Developer Sandbox", project);
+                SandboxDialog dialog1 = new SandboxDialog(project, true, sandboxModel);
+                dialog1.show();
+                if (sandboxModel.isComplete()) {
+                    clusterURLField.setText(sandboxModel.getClusterURL());
+                    tokenField.setText(sandboxModel.getClusterToken());
+                }
+            }
     }
 
     private void parseLoginCommandFromClipboard() {
@@ -90,7 +116,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
     }
 
     public static void main(String[] args) {
-        LoginDialog dialog = new LoginDialog(null, "");
+        LoginDialog dialog = new LoginDialog(null, null, "");
         dialog.pack();
         dialog.show();
         System.exit(0);

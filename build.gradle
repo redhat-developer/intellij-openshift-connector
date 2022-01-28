@@ -73,6 +73,13 @@ dependencies {
     testCompile 'org.easytesting:fest-assert:1.4'
     testCompile 'com.redhat.devtools.intellij:intellij-common:1.5.0-SNAPSHOT:test'
     testCompile 'org.awaitility:awaitility:4.1.0'
+    testCompile 'org.mock-server:mockserver-client-java:5.11.2'
+    testCompile 'org.mock-server:mockserver-netty:5.11.2'
+
+    compile 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    compile 'org.keycloak:keycloak-installed-adapter:15.0.2'
+    compile 'com.squareup.retrofit2:converter-jackson:2.9.0'
 }
 
 sonarqube {
@@ -93,10 +100,18 @@ jacocoTestReport {
 
 runIde {
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+    //systemProperties['jboss.sandbox.api.endpoint'] = 'http://localhost:3000'
 }
 
 runIdeForUiTests {
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+}
+
+task runSandbox(type: JavaExec) {
+    group = "Execution"
+    description = "Run the Sandbox registration server in port 3000"
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock'
 }
 
 group 'org.jboss.tools.intellij'

@@ -33,7 +33,7 @@ public class LoginAction extends LoggedOutClusterAction {
     CompletableFuture.runAsync(() -> {
         try {
           LoginDialog loginDialog = UIHelper.executeInUI(() -> {
-            LoginDialog dialog = new LoginDialog(null, clusterNode.getOdo().getMasterUrl().toString());
+            LoginDialog dialog = new LoginDialog(anActionEvent.getProject(), null, clusterNode.getOdo().getMasterUrl().toString());
             dialog.show();
             return dialog;
             });

@@ -43,6 +43,8 @@ public class Constants {
      * Home sub folder for the plugin
      */
     public static final String PLUGIN_FOLDER = ".odo";
+    public static final String PLUGIN_ID = "org.jboss.tools.intellij.openshift";
+    public static final String REDHAT_SSO_SERVER_ID = "org.jboss.tools.intellij.openshift.authorizationServer.redhat";
 
     public enum DebugStatus {
         RUNNING, NOT_RUNNING, UNKNOWN

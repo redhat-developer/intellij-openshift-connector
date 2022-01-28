@@ -19,7 +19,24 @@ There are only a few guidelines that we need contributors to follow.
     $ ./gradlew runIde
     ```
 
-
 2. Once the plugin is installed and reloaded, there will be an OpenShift Icon in the Tool Windows list (bottom left).
+
+## Red Hat Developer Sandbox integration
+
+In order to test the Red Hat Developer Sandbox workflow, we have developed a fake registration server that has less
+limitations than the production one and allow to test the whole workflow easily.
+
+1. Start the fake registration server:
+    ```bash
+    $ ./gradlew runSandbox
+    ```
+
+2. In the build.gradle file, uncomment the line:
+   `//systemProperties['jboss.sandbox.api.endpoint'] = 'http://localhost:3000'`
+
+    then run
+    ```bash
+    $ ./gradlew runIde
+    ```
 
 > If you have any questions or run into any problems, please post an issue - we'll be very happy to help.

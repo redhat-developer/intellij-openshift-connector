@@ -36,7 +36,6 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
     private static final String ALM_EXAMPLES_FIELD = "alm-examples";
     private static final String CRD_FIELD = "customresourcedefinitions";
     private static final String OWNED_FIELD = "owned";
-    private static final String REQUIRED_FIELD = "required";
     private static final String VERSION_FIELD = "version";
     private static final String KIND_FIELD = "kind";
     private static final String DISPLAY_NAME_FIELD = "displayName";
@@ -177,27 +176,24 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
                             crds.add(getOperatorCRD(crd, samples, descriptors));
                         }
                     }
-                    if (item.get(SPEC_FIELD).get(CRD_FIELD).has(REQUIRED_FIELD)) {
-                        for(JsonNode crd : item.get(SPEC_FIELD).get(CRD_FIELD).get(REQUIRED_FIELD)) {
-                            crds.add(getOperatorCRD(crd, samples, Collections.emptyList()));
-                        }
+                    if (!crds.isEmpty()) {
+                        result.add(new ServiceTemplate() {
+                            @Override
+                            public String getName() {
+                                return name;
+                            }
+
+                            @Override
+                            public String getDisplayName() {
+                                return displayName;
+                            }
+
+                            @Override
+                            public List<OperatorCRD> getCRDs() {
+                                return crds;
+                            }
+                        });
                     }
-                    result.add(new ServiceTemplate() {
-                        @Override
-                        public String getName() {
-                            return name;
-                        }
-
-                        @Override
-                        public String getDisplayName() {
-                            return displayName;
-                        }
-
-                        @Override
-                        public List<OperatorCRD> getCRDs() {
-                            return crds;
-                        }
-                    });
                 }
             }
         }

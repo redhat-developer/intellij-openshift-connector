@@ -14,7 +14,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
@@ -27,7 +27,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
@@ -38,7 +37,7 @@ import javax.swing.tree.TreeSelectionModel;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public abstract class ActionTest extends LightPlatformCodeInsightFixtureTestCase {
+public abstract class ActionTest extends BasePlatformTestCase {
   public AnActionEvent createEvent(Object selected) {
     AnActionEvent event = mock(AnActionEvent.class);
     Presentation presentation = new Presentation();

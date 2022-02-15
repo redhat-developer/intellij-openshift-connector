@@ -26,6 +26,7 @@ import com.intellij.ui.wizard.WizardStep;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.oauth.TokenProvider;
 import org.jboss.tools.intellij.openshift.oauth.exception.OAuthException;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JButton;
@@ -49,12 +50,7 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
     private JButton confirmVerificationButton;
     private JPanel root;
 
-    private static final int OK = 0;
-    private static final int CANCEL = 1;
-    private static final int ERROR = 2;
-
     private SandboxProcessor processor;
-    private int status = CANCEL;
 
     public SandboxWorkflowPage(SandboxModel model, Project project) {
         super("", "Please login to Red Hat SSO if required, then provide required information to bootstrap your Red Hat Developer Sandbox.");
@@ -101,14 +97,21 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
 
 
     private void ssoLogin(ProgressIndicator monitor) {
-        try {
-            reportMessage("Login to Red Hat SSO", false);
-            model.setIDToken(TokenProvider.get().getToken(Constants.REDHAT_SSO_SERVER_ID, TokenProvider.ID_TOKEN,
-                    WindowManager.getInstance().getFrame(project)));
-        } catch (OAuthException e) {
-            reportMessage("Failed to login to Red Hat SSO", true);
-            setStatus("Failed to login to Red Hat SSO", ERROR);
+        String errorMessage = "Failed to login to Red Hat SSO";
+        if (!monitor.isCanceled()) {
+            try {
+                reportMessage("Login to Red Hat SSO", false);
+                model.setIDToken(TokenProvider.get().getToken(Constants.REDHAT_SSO_SERVER_ID, TokenProvider.ID_TOKEN,
+                        WindowManager.getInstance().getFrame(project)));
+                model.recordTelemetryEvent(TelemetryService.REDHAT_SSO_GET_TOKEN, model.getIDToken() != null ?
+                        TelemetryService.VALUE_SUCCESS : TelemetryService.VALUE_FAILURE);
+                return;
+            } catch (OAuthException e) {
+                model.recordTelemetryError(errorMessage);
+            }
         }
+        reportMessage(errorMessage, true);
+        setStatus(errorMessage);
     }
 
     private void retrieveState(ProgressIndicator monitor) {
@@ -121,24 +124,25 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
     }
 
     private void reportState(SandboxProcessor.State state) {
+        model.recordTelemetryEvent(TelemetryService.DEVSANDBOX_API_STATE_PREFIX+state.name(), "");
         switch (state) {
             case NONE:
-                setStatus("Checking Red Hat Developer Sandbox signup state", CANCEL);
+                setStatus("Checking Red Hat Developer Sandbox signup state");
                 break;
             case NEEDS_SIGNUP:
-                setStatus("Checking Red Hat Developer Sandbox needs signup", CANCEL);
+                setStatus("Checking Red Hat Developer Sandbox needs signup");
                 break;
             case NEEDS_APPROVAL:
-                setStatus("Your Red Hat Developer Sandbox needs to be approved, you should wait or retry later", CANCEL);
+                setStatus("Your Red Hat Developer Sandbox needs to be approved, you should wait or retry later");
                 break;
             case NEEDS_VERIFICATION:
-                setStatus("Your Red Hat Developer Sandbox needs to be verified, enter your country code and phone number and click 'Verify'", CANCEL);
+                setStatus("Your Red Hat Developer Sandbox needs to be verified, enter your country code and phone number and click 'Verify'");
                 break;
             case CONFIRM_VERIFICATION:
-                setStatus("You need to send the verification code received on your phone, enter the verification code and phone number and click 'Verify'", CANCEL);
+                setStatus("You need to send the verification code received on your phone, enter the verification code and phone number and click 'Verify'");
                 break;
             case READY:
-                setStatus("Your Red Hat Developer Sandbox is ready, let's login now !!!", OK);
+                setStatus("Your Red Hat Developer Sandbox is ready, let's login now !!!");
                 model.setClusterURL(processor.getClusterURL());
                 model.getCurrentNavigationState().NEXT.setEnabled(true);
                 break;
@@ -153,15 +157,11 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
         boolean stop = false;
         try {
             while (!monitor.isCanceled() && !stop) {
-                processor.advance(model.getCountryCode(), model.getPhoneNumber(), model.getVerificationCode());
+                processor.advance(model);
                 reportState(processor.getState());
                 stop = processor.getState().isNeedsInteraction();
                 if (!stop) {
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+                    sleep();
                 }
             }
         } catch (IOException e) {
@@ -170,9 +170,16 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
         }
     }
 
-    private void setStatus(String message, int status) {
+    private void sleep() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void setStatus(String message) {
         ApplicationManager.getApplication().invokeLater(() -> messageLabel.setText(message), ModalityState.any());
-        this.status = status;
     }
 
     private void launchJob() {

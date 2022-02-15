@@ -17,6 +17,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBHtmlEditorKit;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxDialog;
 import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxModel;
 import org.jboss.tools.intellij.openshift.utils.OCCommandUtils;
@@ -70,15 +72,19 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
 
     @NotNull
     private void loginToSandbox(HyperlinkEvent e) {
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                SandboxModel sandboxModel = new SandboxModel("Red Hat Developer Sandbox", project);
-                SandboxDialog dialog1 = new SandboxDialog(project, true, sandboxModel);
-                dialog1.show();
-                if (sandboxModel.isComplete()) {
-                    clusterURLField.setText(sandboxModel.getClusterURL());
-                    tokenField.setText(sandboxModel.getClusterToken());
-                }
+        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            TelemetrySender telemetrySender = new TelemetrySender(TelemetryService.DEVSANDBOX_LOGIN_DIALOG);
+            SandboxModel sandboxModel = new SandboxModel("Red Hat Developer Sandbox", project, telemetrySender);
+            SandboxDialog dialog1 = new SandboxDialog(project, true, sandboxModel);
+            dialog1.show();
+            if (sandboxModel.isComplete()) {
+                telemetrySender.sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
+                clusterURLField.setText(sandboxModel.getClusterURL());
+                tokenField.setText(sandboxModel.getClusterToken());
+            } else {
+                telemetrySender.sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
             }
+        }
     }
 
     private void parseLoginCommandFromClipboard() {

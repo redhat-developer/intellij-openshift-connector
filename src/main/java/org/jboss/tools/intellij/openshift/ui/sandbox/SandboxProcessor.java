@@ -10,20 +10,19 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.sandbox;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.TimeUnit;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Red Hat Developers
@@ -140,7 +139,7 @@ public class SandboxProcessor {
     getSignupState();
   }
   
-  public State advance(String countryCode, String phoneNumber, String confirmCode) throws IOException {
+  public State advance(SandboxModel model) throws IOException {
     switch (state) {
     case NONE:
     case NEEDS_APPROVAL:
@@ -150,10 +149,12 @@ public class SandboxProcessor {
       processSignup();
       break;
     case NEEDS_VERIFICATION:
-      startVerification(countryCode, phoneNumber);
+      startVerification(model.getCountryCode(), model.getPhoneNumber());
       break;
     case CONFIRM_VERIFICATION:
-      processVerification(confirmCode);
+      processVerification(model.getVerificationCode());
+      break;
+    default:
       break;
     }
     return state;

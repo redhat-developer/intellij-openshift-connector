@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.ui.sandbox;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.ui.wizard.WizardModel;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 
 /**
  * @author Red Hat Developers
@@ -30,7 +31,9 @@ public class SandboxModel extends WizardModel {
   public static final String PROPERTY_CLUSTER_URL = "clusterURL";
   
   public static final String PROPERTY_CLUSTER_TOKEN = "clusterToken";
-  
+
+  private final TelemetrySender sender;
+
   private String IDToken;
   
   private String phoneNumber;
@@ -45,10 +48,11 @@ public class SandboxModel extends WizardModel {
 
   private boolean complete;
 
-  public SandboxModel(@NlsContexts.DialogTitle String title, Project project) {
+  public SandboxModel(@NlsContexts.DialogTitle String title, Project project, TelemetrySender sender) {
     super(title);
     add(new SandboxWorkflowPage(this, project));
     add(new SandboxLoginPage(this, project));
+    this.sender = sender;
   }
 
   /**
@@ -141,5 +145,13 @@ public class SandboxModel extends WizardModel {
 
   public void setComplete(boolean complete) {
     this.complete = complete;
+  }
+
+  public void recordTelemetryEvent(String property, String value) {
+    this.sender.addProperty(property, value);
+  }
+
+  public void recordTelemetryError(String message){
+    this.sender.error(message);
   }
 }

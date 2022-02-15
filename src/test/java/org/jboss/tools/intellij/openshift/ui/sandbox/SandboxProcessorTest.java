@@ -10,14 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.sandbox;
 
-import static org.jboss.tools.intellij.openshift.ui.sandbox.SandboxProcessor.State;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +18,15 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeUnit;
+
+import static org.jboss.tools.intellij.openshift.ui.sandbox.SandboxProcessor.State;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Jeff MAURY
  *
@@ -33,10 +34,12 @@ import org.mockserver.model.HttpResponse;
 public class SandboxProcessorTest {
 	
 	private MockServerClient mockServer;
+	private SandboxModel mockModel;
 	
 	@Before
 	public void init() {
 		mockServer = ClientAndServer.startClientAndServer(0);
+		mockModel = mock(SandboxModel.class);
 	}
 	
 	@After
@@ -58,7 +61,7 @@ public class SandboxProcessorTest {
 		.respond(HttpResponse.notFoundResponse());
 		SandboxProcessor processor = new SandboxProcessor("token", "http://localhost:" + mockServer.getPort());
 		assertEquals(State.NONE, processor.getState());
-		State state = processor.advance("", "", "");
+		State state = processor.advance(mockModel);
 		assertEquals(State.NEEDS_SIGNUP, state);
 	}
 	
@@ -70,7 +73,7 @@ public class SandboxProcessorTest {
 		.respond(HttpResponse.response("{ \"status\": { \"ready\": false, \"verificationRequired\": true}}"));
 		SandboxProcessor processor = new SandboxProcessor("token", "http://localhost:" + mockServer.getPort());
 		assertEquals(State.NONE, processor.getState());
-		State state = processor.advance("", "", "");
+		State state = processor.advance(mockModel);
 		assertEquals(State.NEEDS_VERIFICATION, state);
 	}
 	
@@ -82,7 +85,7 @@ public class SandboxProcessorTest {
 		.respond(HttpResponse.response("{ \"status\": { \"ready\": false, \"verificationRequired\": false}}"));
 		SandboxProcessor processor = new SandboxProcessor("token", "http://localhost:" + mockServer.getPort());
 		assertEquals(State.NONE, processor.getState());
-		State state = processor.advance("", "", "");
+		State state = processor.advance(mockModel);
 		assertEquals(State.NEEDS_APPROVAL, state);
 	}
 
@@ -94,7 +97,7 @@ public class SandboxProcessorTest {
 		.respond(HttpResponse.response("{ \"status\": { \"ready\": true}}"));
 		SandboxProcessor processor = new SandboxProcessor("token", "http://localhost:" + mockServer.getPort());
 		assertEquals(State.NONE, processor.getState());
-		State state = processor.advance("", "", "");
+		State state = processor.advance(mockModel);
 		assertEquals(State.READY, state);
 	}
 
@@ -110,9 +113,9 @@ public class SandboxProcessorTest {
 		.respond(HttpResponse.response().withStatusCode(204));
 		SandboxProcessor processor = new SandboxProcessor("token", "http://localhost:" + mockServer.getPort());
 		assertEquals(State.NONE, processor.getState());
-		State state = processor.advance("", "", "");
+		State state = processor.advance(mockModel);
 		assertEquals(State.NEEDS_VERIFICATION, state);
-		state = processor.advance("", "", "");
+		state = processor.advance(mockModel);
 		assertEquals(State.CONFIRM_VERIFICATION, state);
 	}
 	
@@ -128,10 +131,10 @@ public class SandboxProcessorTest {
 		.respond(HttpResponse.response().withStatusCode(204).withDelay(TimeUnit.SECONDS, 45));
 		SandboxProcessor processor = new SandboxProcessor("token", "http://localhost:" + mockServer.getPort());
 		assertEquals(State.NONE, processor.getState());
-		State state = processor.advance("", "", "");
+		State state = processor.advance(mockModel);
 		assertEquals(State.NEEDS_VERIFICATION, state);
 		try {
-			state = processor.advance("", "", "");
+			state = processor.advance(mockModel);
 			fail("should timeout");
 		} catch (SocketTimeoutException e) {
 		}

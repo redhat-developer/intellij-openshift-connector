@@ -1,7 +1,7 @@
 {
   "tools": {
     "odo": {
-      "version": "2.4.2",
+      "version": "2.5.0",
       "versionCmd": "version --client",
       "versionExtractRegExp": "odo v(\\d+[\\.\\d+]*(-.*)?)\\s.*",
       "versionMatchRegExpr": "2.5.0",

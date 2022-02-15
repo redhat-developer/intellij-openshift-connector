@@ -21,11 +21,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 public class ServiceTemplateRequiredTest {
   private static final URL url = ServiceTemplateRequiredTest.class.getResource("/service-template-required-test.json");
 
@@ -49,55 +44,6 @@ public class ServiceTemplateRequiredTest {
   public void verifyThatServiceTemplatesReturnsItems() throws IOException {
     List<ServiceTemplate> serviceTemplates = MAPPER.readValue(url, new TypeReference<List<ServiceTemplate>>() {});
     Assert.assertNotNull(serviceTemplates);
-    Assert.assertEquals(7, serviceTemplates.size());
-    Assert.assertNotNull(serviceTemplates.get(6));
-  }
-
-  @Test
-  public void verifyThatServiceTemplatesReturnsName() throws IOException {
-    List<ServiceTemplate> serviceTemplates = MAPPER.readValue(url, new TypeReference<List<ServiceTemplate>>() {});
-    Assert.assertNotNull(serviceTemplates);
-    Assert.assertEquals(7, serviceTemplates.size());
-    ServiceTemplate serviceTemplate = serviceTemplates.get(6);
-    Assert.assertNotNull(serviceTemplate);
-    Assert.assertEquals("web-terminal.v1.4.0", serviceTemplate.getName());
-  }
-
-  @Test
-  public void verifyThatServiceTemplatesReturnsCRDs() throws IOException {
-    List<ServiceTemplate> serviceTemplates = MAPPER.readValue(url, new TypeReference<List<ServiceTemplate>>() {});
-    Assert.assertNotNull(serviceTemplates);
-    Assert.assertEquals(7, serviceTemplates.size());
-    ServiceTemplate serviceTemplate = serviceTemplates.get(6);
-    Assert.assertNotNull(serviceTemplate);
-    Assert.assertEquals("web-terminal.v1.4.0", serviceTemplate.getName());
-    assertTrue(serviceTemplate instanceof ServiceTemplate);
-    ServiceTemplate operatorServiceTemplate = (ServiceTemplate) serviceTemplate;
-    assertNotNull(operatorServiceTemplate.getCRDs());
-    assertEquals(2, operatorServiceTemplate.getCRDs().size());
-  }
-
-  @Test
-  public void verifyThatServiceTemplatesReturnsCRDInfo() throws IOException {
-    List<ServiceTemplate> serviceTemplates = MAPPER.readValue(url, new TypeReference<List<ServiceTemplate>>() {});
-    Assert.assertNotNull(serviceTemplates);
-    Assert.assertEquals(7, serviceTemplates.size());
-    ServiceTemplate serviceTemplate = serviceTemplates.get(6);
-    Assert.assertNotNull(serviceTemplate);
-    Assert.assertEquals("web-terminal.v1.4.0", serviceTemplate.getName());
-    assertTrue(serviceTemplate instanceof ServiceTemplate);
-    ServiceTemplate operatorServiceTemplate = (ServiceTemplate) serviceTemplate;
-    assertNotNull(operatorServiceTemplate.getCRDs());
-    assertEquals(2, operatorServiceTemplate.getCRDs().size());
-    OperatorCRD crd = operatorServiceTemplate.getCRDs().get(0);
-    assertEquals("devworkspaceroutings.controller.devfile.io", crd.getName());
-    assertEquals("v1alpha1", crd.getVersion());
-    assertEquals("DevWorkspaceRouting", crd.getKind());
-    assertEquals("devworkspaceroutings.controller.devfile.io", crd.getDisplayName());
-    assertEquals("devworkspaceroutings.controller.devfile.io", crd.getDescription());
-    assertNull(crd.getSample());
-    assertNull(crd.getSchema());
-    assertNotNull(crd.getSpecDescriptors());
-    assertEquals(0, crd.getSpecDescriptors().size());
+    Assert.assertEquals(6, serviceTemplates.size());
   }
 }

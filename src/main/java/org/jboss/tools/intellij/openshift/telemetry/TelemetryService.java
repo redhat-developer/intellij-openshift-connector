@@ -42,9 +42,6 @@ public class TelemetryService {
     public static final String DEVSANDBOX_TOKEN_RETRIEVED = "devsandbox_token_retrieved";
     public static final String DEVSANDBOX_API_STATE_PREFIX = "devsandbox-api-state-";
 
-    //each of the sandbox API calls
-    //dialog closed
-
     private static TelemetryService instance;
 
     private final Lazy<TelemetryMessageBuilder> builder = new Lazy<>(() -> new TelemetryMessageBuilder(TelemetryService.class.getClassLoader()));

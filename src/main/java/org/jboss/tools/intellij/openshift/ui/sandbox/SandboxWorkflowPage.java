@@ -124,7 +124,7 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
     }
 
     private void reportState(SandboxProcessor.State state) {
-        model.recordTelemetryEvent(TelemetryService.DEVSANDBOX_API_STATE_PREFIX+state.name(), "");
+        model.recordTelemetryEvent(TelemetryService.DEVSANDBOX_API_STATE_PREFIX+state.name(), "called");
         switch (state) {
             case NONE:
                 setStatus("Checking Red Hat Developer Sandbox signup state");

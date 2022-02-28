@@ -20,6 +20,9 @@ public class TelemetryService {
     }
 
     public static final String VALUE_ABORTED = "aborted";
+    public static final String VALUE_SUCCESS = "success";
+    public static final String VALUE_FAILURE = "failure";
+
     public static final String PREFIX_ACTION = "ui-";
     public static final String NAME_PREFIX_MISC = "misc-";
 
@@ -33,6 +36,11 @@ public class TelemetryService {
     public static final String KUBERNETES_VERSION = "kubernetes_version";
     public static final String IS_OPENSHIFT = "is_openshift";
     public static final String OPENSHIFT_VERSION = "openshift_version";
+
+    public static final String DEVSANDBOX_LOGIN_DIALOG="devsandbox-login-dialog";
+    public static final String REDHAT_SSO_GET_TOKEN = "redhat_sso_get_token";
+    public static final String DEVSANDBOX_TOKEN_RETRIEVED = "devsandbox_token_retrieved";
+    public static final String DEVSANDBOX_API_STATE_PREFIX = "devsandbox-api-state-";
 
     private static TelemetryService instance;
 

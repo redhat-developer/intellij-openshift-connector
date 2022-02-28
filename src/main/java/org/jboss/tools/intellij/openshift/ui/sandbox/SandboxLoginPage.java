@@ -14,6 +14,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.ui.cluster.OAuthBrowser;
 import org.jboss.tools.intellij.openshift.utils.KubernetesClusterHelper;
 import org.jetbrains.annotations.Nullable;
@@ -42,12 +43,12 @@ public class SandboxLoginPage extends WizardStep<SandboxModel> {
     public void createUIComponents() {
         browser = new OAuthBrowser();
         browser.addTokenListener(e -> {
+            model.recordTelemetryEvent(TelemetryService.DEVSANDBOX_TOKEN_RETRIEVED, "true");
             model.setClusterToken(e.getToken());
             model.getCurrentNavigationState().FINISH.setEnabled(true);
         });
         Frame f = WindowManager.getInstance().getFrame(project);
         browser.setSize(f.getWidth() * 3 / 4, f.getHeight() * 3 / 4);
-
     }
 
     @Override

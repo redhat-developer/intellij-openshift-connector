@@ -1,0 +1,96 @@
+{
+	"kind": "List",
+	"apiVersion": "odo.dev/v1alpha1",
+	"metadata": {},
+	"devfileComponents": [
+		{
+			"kind": "Component",
+			"apiVersion": "odo.dev/v1alpha1",
+			"metadata": {
+				"name": "nodejs1",
+				"namespace": "jmaury-dev",
+				"creationTimestamp": null,
+				"labels": {
+					"app": "sample-app",
+					"app.kubernetes.io/instance": "nodejs1",
+					"app.kubernetes.io/managed-by": "odo",
+					"app.kubernetes.io/managed-by-version": "v2.5.0",
+					"app.kubernetes.io/name": "",
+					"app.kubernetes.io/part-of": "sample-app",
+					"component": "nodejs1"
+				},
+				"annotations": {
+					"app.openshift.io/vcs-uri": "git@github.com:odo-devfiles/nodejs-ex.git",
+					"deployment.kubernetes.io/revision": "1",
+					"odo.dev/project-type": "nodejs"
+				}
+			},
+			"spec": {
+				"app": "sample-app",
+				"type": "nodejs",
+				"env": [
+					{
+						"name": "PROJECTS_ROOT",
+						"value": "/project"
+					},
+					{
+						"name": "PROJECT_SOURCE",
+						"value": "/project"
+					},
+					{
+						"name": "DEBUG_PORT",
+						"value": "5858"
+					}
+				]
+			},
+			"status": {
+				"state": "Pushed"
+			}
+		}
+	],
+	"otherComponents": [
+		{
+			"kind": "Component",
+			"apiVersion": "odo.dev/v1alpha1",
+			"metadata": {
+				"name": "quarkus1",
+				"namespace": "jmaury-dev",
+				"creationTimestamp": null,
+				"labels": {
+					"app": "quarkus1",
+					"app.kubernetes.io/component": "quarkus1",
+					"app.kubernetes.io/instance": "quarkus1",
+					"app.kubernetes.io/name": "quarkus1",
+					"app.kubernetes.io/part-of": "sample-app",
+					"app.openshift.io/runtime": "quarkus1"
+				},
+				"annotations": {
+					"alpha.image.policy.openshift.io/resolve-names": "*",
+					"app.openshift.io/vcs-ref": "",
+					"app.openshift.io/vcs-uri": "https://github.com/elsony/devfile-sample-code-with-quarkus.git",
+					"deployment.kubernetes.io/revision": "2",
+					"image.openshift.io/triggers": "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"quarkus1:latest\",\"namespace\":\"jmaury-dev\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"quarkus1\\\")].image\",\"pause\":\"false\"}]",
+					"isFromDevfile": "true",
+					"openshift.io/generated-by": "OpenShiftWebConsole"
+				}
+			},
+			"spec": {
+				"app": "sample-app",
+				"type": "Not available",
+				"env": [
+					{
+						"name": "PROJECTS_ROOT",
+						"value": "/projects"
+					},
+					{
+						"name": "PROJECT_SOURCE",
+						"value": "/projects"
+					}
+				]
+			},
+			"status": {
+				"state": "Pushed"
+			}
+		}
+	]
+}

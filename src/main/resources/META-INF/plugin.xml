@@ -12,6 +12,11 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.9.0</b></p>
+  <p>Add login to Red Hat Developer Sandbox<p>
+  <p>Add support for Operator based services<p>
+  <p>Add support for non Odo components<p>
+  <p>Switch to odo 2.5.0</p>
   <p><b>0.8.2</b></p>
   <p>Compatibility with Kubernetes by Red Hat 0.2.4<p>
   <p><b>0.8.1</b></p>

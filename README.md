@@ -26,6 +26,79 @@ The extension also supports OpenShift running on Azure, AWS.
 
 ## New features
 
+### Red Hat Developer Sandbox login
+
+Red Hat provides an online OpenShift environment called [Developer Sandbox](https://red.ht/dev-sandbox) that makes it easy for developers to build, test and deploy cloud native applications and microservices.
+
+In order to use Developer Sandbox, you must own a Red Hat SSO account (which can be linked to social accounts like GitHub,…​). Once logged in into Red Hat SSO, you will get an environment provisioned in Developer Sandbox but the first time you will try to login in to Developer Sandbox, your account needs to be verified (in order to prevent crypto miners and robots) thus you need to go through a verification phase where you will be asked to provide:
+
+- first your phone number and country code
+- then a verification code that you will receive on your smartphone.
+
+So it is now possible to provision and log in to Developer Sandbox from the OpenShift Connector and connect it to the Developer Sandbox environment.
+
+Open the `OpenShift` window (`Window → OpenShift`):
+
+![](images/0.9.0/openshift1.png)
+
+Right click on the first node and select the `Login in to cluster` context menu:
+
+![](images/0.9.0/openshift2.png)
+
+In order to provision the Developer Sandbox environment, click on the `Red Hat Developer Sandbox` link: a browser window will open and you will be required to login to your Red Hat SSO account:
+
+![](images/0.9.0/openshift3.png)
+
+Login to your account (please note that if you don’t have a Red Hat account, you can create a new one). Once you’re logged in, you should see the following window:
+
+![](images/0.9.0/openshift4.png)
+
+Enter your contry code (+XX) and phone number and click the `Verify` button:
+
+You will be required to provide the verification code that you should have received on your phone:
+
+![](images/0.9.0/openshift5.png)
+
+Once your Developer Sandbox environment is provisioned; you will see the following window:
+
+![](images/0.9.0/openshift6.png)
+
+Click on the `Ǹext` button to log in to your Developer Sandbox environment:
+
+![](images/0.9.0/openshift7.png)
+
+Click on the `DevSandbox` button and log in with the same credentials: you will see the following window:
+
+![](images/0.9.0/openshift8.png)
+
+Click on the `Display Token` link and the click on the `Finish` button, you should be back to the `Login` wizard:
+
+![](images/0.9.0/openshift9.png)
+
+Please note that the `URL` and `Token` fields have been updated. Click the `Finish` button, the `OpenShift` view will be updated with the Developer Sandbox URL and if you expand it, you will see the current namespace available for you to start playing with:
+
+![](images/0.9.0/openshift10.png)
+
+You’re now ready to work against this environment for free !!!.
+
+### Operator based services
+
+When developing cloud native applications on OpenShift, developer may need to launch services (databases, messaging system,…) that the application under development may need to connect to. The OpenShift Connector allowed to launch such services but it was based on the service catalog which is not available anymore on OpenShift 4.
+
+The new feature is based on operators which is the devops way of installing and managing software on Kubernetes clusters. So when you want to launch a service for your application, you will have to choose from the list of installed operators on your cluster and then select type of deployment you want.
+
+In the following example, a single operator is installed on our cluster: the [Strimzi](https://strimzi.io) operator for setting up Kafka clusters on Kubernetes.
+
+For each operator, we can select the type of deployment we want to setup. For each type of deployment, specific parameters may be specified. In this example, we decided to set the replicas number to 4 for a Kafka cluster.
+
+![](images/0.9.0/openshift11.gif)
+
+After you’ve entered the name of your service, it will appear in the OpenShift view:
+
+![](images/0.9.0/openshift12.png)
+
+## Features
+
 ### Application Explorer focused on current namespace/project
 
 The Application Explorer now display components and services from the current namespace/project. If you want to switch to a different namespace/project, switch to the Kubernetes view and choose the `Use Project` or `Use Namespace` menu:
@@ -37,8 +110,6 @@ The Application Explorer now display components and services from the current na
 When a new component is to be created, a wizard was displayed and the user has to enter several fields before the component could be created. This looks complex for users, so we decided that most of those fields can be automatically computed with default values and user can immediately push the `Finish` button:
 
 ![](images/0.8.0/openshift2.gif)
-
-## Features
 
 ### Devfile registries management
 

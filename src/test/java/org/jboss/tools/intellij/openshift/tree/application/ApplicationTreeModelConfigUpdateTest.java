@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TestDialog;
+import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
@@ -37,15 +38,13 @@ import static org.mockito.Mockito.verify;
 
 public class ApplicationTreeModelConfigUpdateTest {
 
-    private Project project;
     private CodeInsightTestFixture myFixture;
     private TestDialog previousTestDialog;
 
     @Before
     public void before() throws Exception {
-        this.project = mock(Project.class);
         IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
+        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder((LightProjectDescriptor) null);
         IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
         myFixture.setUp();
@@ -70,7 +69,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo(token);
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationsRootNode model = createApplicationsRootNode(project, cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo(token);
@@ -87,7 +86,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         Context context = createContext();
         doReturn("papa-smurf","smurfette").when(context).getUser();
         Config config = createConfig(context);
-        ApplicationsRootNode model = createApplicationsRootNode(project, config);
+        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), config);
         // when
         model.onUpdate(null, config);
         // then
@@ -100,7 +99,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         Context context = createContext();
         doReturn("localhost","www.openshift.com").when(context).getCluster();
         Config config = createConfig(context);
-        ApplicationsRootNode model = createApplicationsRootNode(project, config);
+        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), config);
         // when
         model.onUpdate(null, config);
         // then
@@ -117,7 +116,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo("token1");
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationsRootNode model = createApplicationsRootNode(project, cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo("token2");
@@ -138,7 +137,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo("token1");
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationsRootNode model = createApplicationsRootNode(project, cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo(null);

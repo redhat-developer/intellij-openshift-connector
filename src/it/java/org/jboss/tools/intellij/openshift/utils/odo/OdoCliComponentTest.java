@@ -101,7 +101,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     private void checkCreateComponentAndCreateURL(boolean secure) throws IOException {
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, secure, host);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8000, secure, host);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
         } finally {
@@ -135,7 +135,7 @@ public class OdoCliComponentTest extends OdoCliTest {
                 assertEquals(0, urls.size());
             }
 
-            odo.createURL(project, application, COMPONENT_PATH, component, null, 8080, secure, host);
+            odo.createURL(project, application, COMPONENT_PATH, component, null, 8000, secure, host);
             urls = odo.listURLs(project, application, COMPONENT_PATH, component);
 
             assertEquals(1, urls.size());
@@ -233,7 +233,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         Assume.assumeTrue(push);
         try {
             createComponent(project, application, component, push);
-            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8080, false, host);
+            odo.createURL(project, application, COMPONENT_PATH, component, "url1", 8000, false, host);
             odo.push(project, application, COMPONENT_PATH, component);
             List<URL> urls = odo.listURLs(project, application, COMPONENT_PATH, component);
             assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());

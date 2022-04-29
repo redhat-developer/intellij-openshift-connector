@@ -12,6 +12,9 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.10.0</b></p>
+  <p>Switch to odo 2.5.1</p>
+  <p>Fix security issues<p>
   <p><b>0.9.0</b></p>
   <p>Add login to Red Hat Developer Sandbox<p>
   <p>Add support for Operator based services<p>

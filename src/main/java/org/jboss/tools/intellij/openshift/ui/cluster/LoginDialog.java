@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.ui.cluster;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBHtmlEditorKit;
@@ -43,8 +44,10 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-@SuppressWarnings({"java:S1171","java:S100"})
+@SuppressWarnings({"java:S1171", "java:S100"})
 public class LoginDialog extends DialogWrapper implements DocumentListener {
     private final Project project;
     private JPanel contentPane;
@@ -121,13 +124,6 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         }
     }
 
-    public static void main(String[] args) {
-        LoginDialog dialog = new LoginDialog(null, null, "");
-        dialog.pack();
-        dialog.show();
-        System.exit(0);
-    }
-
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
@@ -178,6 +174,27 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
             userNameField.setEnabled(true);
             passwordField.setEnabled(true);
         }
+    }
+
+    @Override
+    protected List<ValidationInfo> doValidateAll() {
+        List<ValidationInfo> validations = new ArrayList<>();
+        if (tokenField.isEnabled() && getToken().length == 0) {
+            validations.add(new ValidationInfo("Specify the token.", tokenField));
+        }
+        if (userNameField.isEnabled() && getUserName().trim().isEmpty()) {
+            validations.add(new ValidationInfo("Specify the username.", userNameField));
+        }
+        if (passwordField.isEnabled() && getPassword().length == 0) {
+            validations.add(new ValidationInfo("Specify the password.", passwordField));
+        }
+        if (getClusterURL().isEmpty()) {
+            validations.add(new ValidationInfo("Specify the cluster URL.", clusterURLField));
+        }
+        if (!getClusterURL().matches("^https?[a-zA-Z0-9:/.-]+")) {
+            validations.add(new ValidationInfo("\"" + getClusterURL() + "\" is not an allowed URL value.", clusterURLField));
+        }
+        return validations;
     }
 
     {

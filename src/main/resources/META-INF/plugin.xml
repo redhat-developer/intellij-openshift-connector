@@ -12,6 +12,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.10.1</b></p>
+  <p>Fix odo download on Windows and MacOS</p>
   <p><b>0.10.0</b></p>
   <p>Switch to odo 2.5.1</p>
   <p>Fix security issues<p>

@@ -80,6 +80,12 @@ dependencies {
     compile 'io.jsonwebtoken:jjwt-jackson:0.11.2'
     compile 'org.keycloak:keycloak-installed-adapter:18.0.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.9.0'
+    constraints {
+        //may be removed when Keycloak dependency is updated
+        compile('org.bouncycastle:bcprov-jdk15on:1.70') {
+            because 'https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-2841508'
+        }
+    }
 }
 
 sonarqube {

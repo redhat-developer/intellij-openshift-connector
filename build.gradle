@@ -85,6 +85,10 @@ dependencies {
         compile('org.bouncycastle:bcprov-jdk15on:1.70') {
             because 'https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-2841508'
         }
+        //may be removed when Keycloak dependency is updated
+        compile('io.undertow:undertow-core:2.2.11.Final') {
+            because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-2847922'
+        }
     }
 }
 

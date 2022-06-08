@@ -59,7 +59,8 @@ public class OdoProjectDecorator implements Odo {
         final IOException[] exception = {null};
         getComponents(project, application).forEach(component -> {
             try {
-                deleteComponent(project, application, component.getPath(), component.getName());
+                deleteComponent(project, application, component.getPath(), component.getName(),
+                        component.getInfo().getComponentKind());
             } catch (IOException e) {
                 exception[0] = e;
             }
@@ -142,8 +143,9 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException {
-        return delegate.getComponentInfo(project, application, component, path);
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path,
+                                          ComponentKind kind) throws IOException {
+        return delegate.getComponentInfo(project, application, component, path, kind);
     }
 
     @Override
@@ -158,16 +160,18 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component) throws IOException {
-        delegate.undeployComponent(project, application, context, component);
+    public void undeployComponent(String project, String application, String context, String component,
+                                  ComponentKind kind) throws IOException {
+        delegate.undeployComponent(project, application, context, component, kind);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component) throws IOException {
+    public void deleteComponent(String project, String application, String context, String component,
+                                ComponentKind kind) throws IOException {
         if (context != null) {
             root.removeContext(new File(context));
         }
-        delegate.deleteComponent(project, application, context, component);
+        delegate.deleteComponent(project, application, context, component, kind);
     }
 
     @Override
@@ -224,7 +228,7 @@ public class OdoProjectDecorator implements Odo {
                     found.get().setPath(path);
                 } else {
                     components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path,
-                            getComponentInfo(project, application, comp.getName(), path)));
+                            getComponentInfo(project, application, comp.getName(), path, ComponentKind.DEVFILE)));
                 }
             }
         }

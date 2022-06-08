@@ -49,7 +49,8 @@ public class DeleteComponentAction extends OdoAction {
 
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName());
+        odo.deleteComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(),
+                component.getInfo().getComponentKind());
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(componentNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

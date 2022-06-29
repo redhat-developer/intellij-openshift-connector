@@ -92,7 +92,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     public void checkCreateAndDeleteComponent() throws IOException {
         try {
             createComponent(project, application, component, push);
-            odo.deleteComponent(project, application, COMPONENT_PATH, component);
+            odo.deleteComponent(project, application, COMPONENT_PATH, component, ComponentKind.DEVFILE);
         } finally {
             odo.deleteProject(project);
         }

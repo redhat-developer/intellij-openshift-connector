@@ -53,7 +53,8 @@ public class UndeployComponentAction extends OdoAction {
     NamespaceNode namespaceNode = applicationNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        odo.undeployComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName());
+        odo.undeployComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(),
+                component.getName(), component.getInfo().getComponentKind());
         component.setState(ComponentState.NOT_PUSHED);
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);

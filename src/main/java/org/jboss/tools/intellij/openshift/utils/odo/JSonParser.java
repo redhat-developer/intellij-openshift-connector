@@ -84,8 +84,8 @@ public class JSonParser {
         return result;
     }
 
-    public ComponentInfo parseComponentInfo() {
-        ComponentInfo.Builder builder = new ComponentInfo.Builder();
+    public ComponentInfo parseComponentInfo(ComponentKind kind) {
+        ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
         if (root.has(SPEC_FIELD)) {
             String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);

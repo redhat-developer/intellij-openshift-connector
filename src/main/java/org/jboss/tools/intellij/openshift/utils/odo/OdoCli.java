@@ -24,6 +24,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -419,17 +420,18 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, String path) throws IOException {
+    public ComponentInfo getComponentInfo(String project, String application, String component, String path,
+                                          ComponentKind kind) throws IOException {
         if (path != null) {
-            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"));
+            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"), kind);
         } else {
-            return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
+            return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"), kind);
         }
     }
 
-    private ComponentInfo parseComponentInfo(String json) throws IOException {
+    private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentInfo();
+        return parser.parseComponentInfo(kind);
     }
 
     @Override
@@ -459,33 +461,71 @@ public class OdoCli implements Odo {
         execute(new File(context), command, envVars, "url", "delete", "-f", name);
     }
 
-    private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig) throws IOException {
-        List<String> args = new ArrayList<>();
-        args.add("delete");
-        args.add("-f");
-        if (context != null) {
-            if (deleteConfig) {
-                args.add("-a");
+    /*
+     * We should emulate oc delete all -l app.kubernetes.io/component=comp_name but as the Kubernetes client does not allow
+     * to retrieve all APIGroups we reduce the scope to:
+     * - Deployment
+     * - Service
+     * - Route
+     * - BuildConfig
+     * - ImageStreams
+     */
+    private void deleteDeployment(String project, String application, String deployment) throws IOException {
+        try {
+            client.apps().deployments().inNamespace(project).withName(deployment)
+                    .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
+            client.services().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment).list()
+                    .getItems().forEach(service -> client.services().withName(service.getMetadata().getName())
+                            .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+            if (client.isAdaptable(OpenShiftClient.class)) {
+                OpenShiftClient oclient = client.adapt(OpenShiftClient.class);
+                oclient.routes().inNamespace(project).withLabelIn(KubernetesLabels.COMPONENT_LABEL, deployment).list()
+                        .getItems().forEach(route -> oclient.routes().withName(route.getMetadata().getName())
+                                .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+                oclient.buildConfigs().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
+                        .list().getItems().forEach(bc -> oclient.buildConfigs().withName(bc.getMetadata().getName())
+                                .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+                oclient.imageStreams().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
+                        .list().getItems().forEach(is -> oclient.imageStreams().withName(is.getMetadata().getName())
+                                .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
             }
-            execute(new File(context), command, envVars, args.toArray(new String[0]));
+        } catch (KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    private void undeployComponent(String project, String application, String context, String component,
+                                   boolean deleteConfig, ComponentKind kind) throws IOException {
+        if (kind != ComponentKind.OTHER) {
+            List<String> args = new ArrayList<>();
+            args.add("delete");
+            args.add("-f");
+            if (context != null) {
+                if (deleteConfig) {
+                    args.add("-a");
+                }
+                execute(new File(context), command, envVars, args.toArray(new String[0]));
+            } else {
+                args.add("--project");
+                args.add(project);
+                args.add("--app");
+                args.add(application);
+                args.add(component);
+                execute(command, envVars, args.toArray(new String[0]));
+            }
         } else {
-            args.add("--project");
-            args.add(project);
-            args.add("--app");
-            args.add(application);
-            args.add(component);
-            execute(command, envVars, args.toArray(new String[0]));
+            deleteDeployment(project, application, component);
         }
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component) throws IOException {
-        undeployComponent(project, application, context, component, false);
+    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        undeployComponent(project, application, context, component, false, kind);
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component) throws IOException {
-        undeployComponent(project, application, context, component, true);
+    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
+        undeployComponent(project, application, context, component, true, kind);
     }
 
     @Override

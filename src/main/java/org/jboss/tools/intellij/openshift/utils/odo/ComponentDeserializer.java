@@ -33,24 +33,24 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     @Override
     public List<Component> convert(JsonNode root, DeserializationContext context) {
         List<Component> result = new ArrayList<>();
-        result.addAll(parseComponents(root.get(DEVFILE_FIELD)));
-        result.addAll(parseComponents(root.get(OTHER_FIELD)));
+        result.addAll(parseComponents(root.get(DEVFILE_FIELD), ComponentKind.DEVFILE));
+        result.addAll(parseComponents(root.get(OTHER_FIELD), ComponentKind.OTHER));
         return result;
     }
 
-    private Collection<Component> parseComponents(JsonNode tree) {
+    private Collection<Component> parseComponents(JsonNode tree, ComponentKind kind) {
         List<Component> result = new ArrayList<>();
         if (tree != null) {
             for (JsonNode item : tree) {
-                result.add(Component.of(getName(item), getComponentInfo(item)));
+                result.add(Component.of(getName(item), getComponentInfo(item, kind)));
             }
         }
         return result;
     }
 
-    private ComponentInfo getComponentInfo(JsonNode item) {
+    private ComponentInfo getComponentInfo(JsonNode item, ComponentKind kind) {
         JSonParser parser = new JSonParser(item);
-        return parser.parseComponentInfo();
+        return parser.parseComponentInfo(kind);
     }
 
     private String getName(JsonNode item) {

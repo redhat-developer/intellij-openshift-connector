@@ -124,13 +124,11 @@ public class OdoCli implements Odo {
         } catch (RuntimeException e) {
             // do not send telemetry when there is no context ( ie default kube URL as master URL )
             try {
-                if (!e.getMessage().startsWith(Constants.DEFAULT_KUBE_URL)){
-                    //workaround to not send null values
-                    if (e.getMessage() != null) {
-                        telemetry.error(e).send();
-                    } else {
-                        telemetry.error(e.toString()).send();
-                    }
+                //workaround to not send null values
+                if (e.getMessage() != null) {
+                    telemetry.error(e).send();
+                } else {
+                    telemetry.error(e.toString()).send();
                 }
             } catch (RuntimeException ex) {
                 LOGGER.warn(ex.getLocalizedMessage(), ex);

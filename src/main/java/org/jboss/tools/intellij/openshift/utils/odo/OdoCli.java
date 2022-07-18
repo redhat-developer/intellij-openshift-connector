@@ -34,11 +34,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.http.HttpRequest;
+import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
@@ -372,10 +371,11 @@ public class OdoCli implements Odo {
 
     private void loadSwagger() {
         try {
-            Request req = new Request.Builder().get().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
-            Response response = client.adapt(OkHttpClient.class).newCall(req).execute();
+
+            HttpRequest req = client.getHttpClient().newHttpRequestBuilder().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
+            HttpResponse<String> response = client.getHttpClient().send(req, String.class);
             if (response.isSuccessful()) {
-                swagger = new JSonParser(new ObjectMapper().readTree(response.body().charStream()));
+                swagger = new JSonParser(new ObjectMapper().readTree(response.body()));
             }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);

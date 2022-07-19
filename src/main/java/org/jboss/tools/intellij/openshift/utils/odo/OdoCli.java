@@ -34,15 +34,15 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.http.HttpRequest;
+import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -227,7 +227,13 @@ public class OdoCli implements Odo {
 
     @Override
     public void push(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "push");
+        ExecHelper.executeWithTerminal(
+                this.project, WINDOW_TITLE,
+                new File(context),
+                true,
+                envVars,
+                command,
+                "push");
     }
 
     @Override
@@ -237,11 +243,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void describeComponent(String project, String application, String context, String component) throws IOException {
-        if (context != null) {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "describe");
-        } else {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, false, envVars, command, "describe", "--project", project, "--app", application, component);
-        }
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe");
     }
 
     @Override
@@ -367,10 +369,11 @@ public class OdoCli implements Odo {
 
     private void loadSwagger() {
         try {
-            Request req = new Request.Builder().get().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
-            Response response = client.adapt(OkHttpClient.class).newCall(req).execute();
+
+            HttpRequest req = client.getHttpClient().newHttpRequestBuilder().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
+            HttpResponse<String> response = client.getHttpClient().send(req, String.class);
             if (response.isSuccessful()) {
-                swagger = new JSonParser(new ObjectMapper().readTree(response.body().charStream()));
+                swagger = new JSonParser(new ObjectMapper().readTree(response.body()));
             }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -528,20 +531,34 @@ public class OdoCli implements Odo {
 
     @Override
     public void follow(String project, String application, String context, String component) throws IOException {
-        if (context != null) {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log", "-f");
-        } else {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "log", "-f");
-        }
+        ExecHelper.executeWithTerminal(
+                this.project, WINDOW_TITLE,
+                createWorkingDirectory(context),
+                true,
+                envVars,
+                command,
+                "log", "-f");
     }
 
     @Override
     public void log(String project, String application, String context, String component) throws IOException {
+        ExecHelper.executeWithTerminal(
+                this.project,
+                WINDOW_TITLE,
+                createWorkingDirectory(context),
+                true,
+                envVars,
+                command,
+                "log");
+    }
+
+    @Nullable
+    private File createWorkingDirectory(String context) {
+        File workingDirectory = null;
         if (context != null) {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, command, "log");
-        } else {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "log");
+            workingDirectory = new File(context);
         }
+        return workingDirectory;
     }
 
     @Override
@@ -654,8 +671,14 @@ public class OdoCli implements Odo {
 
     @Override
     public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "debug", "port-forward",
-                "--local-port", port.toString());
+        ExecHelper.executeWithTerminal(
+                this.project,
+                WINDOW_TITLE,
+                createWorkingDirectory(context),
+                false,
+                envVars,
+                command,
+                "debug", "port-forward", "--local-port", port.toString());
     }
 
     @Override

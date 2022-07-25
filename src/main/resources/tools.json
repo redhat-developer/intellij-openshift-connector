@@ -6,6 +6,7 @@
       "versionExtractRegExp": "odo v(\\d+[\\.\\d+]*(-.*)?)\\s.*",
       "versionMatchRegExpr": "2.5.1",
       "baseDir": "$HOME/.odo",
+      "silentMode": true,
       "platforms": {
         "win": {
           "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v2.5.1/odo-windows-amd64.exe.zip",

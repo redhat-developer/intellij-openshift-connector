@@ -12,75 +12,154 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>0.11.0</b></p>
+  <ul>
+  <li>Add delete command for non Odo commands</li>
+  <li>Update Kubernetes and OpenShift client to 5.12.2</li>
+  <li>Security fixes</li>
+  <li>Bug fixes</li>
+  </ul>
+  </br>
   <p><b>0.10.1</b></p>
-  <p>Fix odo download on Windows and MacOS</p>
+  <ul>
+  <li>Fix odo download on Windows and MacOS</li>
+  </ul>
+  </br>
   <p><b>0.10.0</b></p>
-  <p>Switch to odo 2.5.1</p>
-  <p>Fix security issues<p>
+  <ul>
+  <li>Switch to odo 2.5.1</li>
+  <li>Fix security issues</li>
+  </ul>
+  </br>
   <p><b>0.9.0</b></p>
-  <p>Add login to Red Hat Developer Sandbox<p>
-  <p>Add support for Operator based services<p>
-  <p>Add support for non Odo components<p>
-  <p>Switch to odo 2.5.0</p>
+  <ul>
+  <li>Add login to Red Hat Developer Sandbox</li>
+  <li>Add support for Operator based services</li>
+  <li>Add support for non Odo components</li>
+  <li>Switch to odo 2.5.0</li>
+  </ul>
+  </br>
   <p><b>0.8.2</b></p>
-  <p>Compatibility with Kubernetes by Red Hat 0.2.4<p>
+  <ul>
+  <li>Compatibility with Kubernetes by Red Hat 0.2.4</li>
+  </ul>
+  </br>
   <p><b>0.8.1</b></p>
-  <p>Context menus non functional<p>
+  <ul>
+  <li>Context menus non functional</li>
+  </ul>
+  </br>
   <p><b>0.8.0</b></p>
-  <p>Simplified create component workflow<p>
-  <p>Application Explorer focused on current namespace/project<p>
+  <ul>
+  <li>Simplified create component workflow</li>
+  <li>Application Explorer focused on current namespace/project</li>
+  </ul>
+  </br>
   <p><b>0.7.0</b></p>
-  <p>Devfile registry management<p>
-  <p>Integration with Kubernetes by Red Hat plugin<p>
+  <ul>
+  <li>Devfile registry management</li>
+  <li>Integration with Kubernetes by Red Hat plugin</li>
+  </ul>
+  </br>
   <p><b>0.6.0</b></p>
-  <p>Improved OpenShift Container Platform 4 compatibility<p>
-  <p>Improved navigation in the OpenShift view<p>
-  <p>Opt-in Telemetry data collection</p>
+  <ul>
+  <li>Improved OpenShift Container Platform 4 compatibility</li>
+  <li>Improved navigation in the OpenShift view</li>
+  <li>Opt-in Telemetry data collection</li>
+  </ul>
+  </br>
   <p><b>0.5.0</b></p>
-  <p>Add support for starters for devfile based components<p>
-  <p>devfiles can be editied with syntax checking and content assist</p>
-  <p>Switch to odo 2.0.7</p>
+  <ul>
+  <li>Add support for starters for devfile based components</li>
+  <li>devfiles can be editied with syntax checking and content assist</li>
+  <li>Switch to odo 2.0.7</li>
+  </ul>
+  </br>
   <p><b>0.4.0</b></p>
-  <p>Add support for devfile based components</p>
-  <p>Switch to Odo 2.0.3</p>
+  <ul>
+  <li>Add support for devfile based components</li>
+  <li>Switch to Odo 2.0.3</li>
+  </ul>
+  </br>
   <p><b>0.3.0</b></p>
-  <p>Add support plan selection while creating services</p>
-  <p>Switch to Odo 1.2.3</p>
+  <ul>
+  <li>Add support plan selection while creating services</li>
+  <li>Switch to Odo 1.2.3</li>
+  </ul>
+  </br>
   <p><b>0.2.5</b></p>
-  <p>Add support for secure URLs</p>
-  <p>Switch to Odo 1.2.2</p>
+  <ul>
+  <li>Add support for secure URLs</li>
+  <li>Switch to Odo 1.2.2</li>
+  </ul>
+  </br>
   <p><b>0.2.4</b></p>
-  <p>Fixed a blocker linked to Odo 1.1.3 causing the tree not to be usable when urls are created from the Web UI</p>
+  <ul>
+  <li>Fixed a blocker linked to Odo 1.1.3 causing the tree not to be usable when urls are created from the Web UI</li>
+  </ul>
+  </br>
   <p><b>0.2.2</b></p>
-  <p>Switch to Odo 1.1.3</p>
-  <p>Improved synchronization while debugging</p>
-  <p>Bug fixes: fix Open Console Dashboard action</p>
+  <ul>
+  <li>Switch to Odo 1.1.3</li>
+  <li>Improved synchronization while debugging</li>
+  <li>Bug fixes: fix Open Console Dashboard action</li>
+  </ul>
+  </br>
   <p><b>0.2.1</b></p>
-  <p>Proxy support</p>
-  <p>Bug fixes: NPE when loading a new project/module</p>
+  <ul>
+  <li>Proxy support</li>
+  <li>Bug fixes: NPE when loading a new project/module</li>
+  </ul>
+  </br>
   <p><b>0.2.0</b></p>
-  <p>Debug Support for Local Node.js and Java Components</p>
-  <p>Switch to Odo 1.1.0</p>
+  <ul>
+  <li>Debug Support for Local Node.js and Java Components</li>
+  <li>Switch to Odo 1.1.0</li>
+  </ul>
+  </br>
   <p><b>0.1.1</b></p>
-  <p>Bug fixes: Application Explorer was not refreshed after login</p>
+  <ul>
+  <li>Bug fixes: Application Explorer was not refreshed after login</li>
+  </ul>
+  </br>
   <p><b>0.1.0</b></p>
-  <p>Switch to Odo 1.0.0</p>
-  <p>Use the Odo 1.0.0 based workflow</p>
-  <p>For more information, see <a href="https://github.com/redhat-developer/intellij-openshift-connector/blob/master/README.md">this page</a></p>
+  <ul>
+  <li>Switch to Odo 1.0.0</li>
+  <li>Use the Odo 1.0.0 based workflow</li>
+  <li>For more information, see <a href="https://github.com/redhat-developer/intellij-openshift-connector/blob/master/README.md">this page</a></li>
+  </ul>
+  </br>
   <p><b>0.0.6</b></p>
-  <p>Add icon for the OpenShift window</p>
-  <p>Update download URLs to reflect the new Odo organization</p>
+  <ul>
+  <li>Add icon for the OpenShift window</li>
+  <li>Update download URLs to reflect the new Odo organization</li>
+  </ul>
+  </br>
   <p><b>0.0.5</b></p>
-  <p>Add support for URL management<p>
+  <ul>
+  <li>Add support for URL management</li>
+  </ul>
+  </br>
   <p><b>0.0.4</b></p>
-  <p>Fix error reported when logging to a cluster<p>
-  <p>Fix error reported when getting applications list for a project<p>
+  <ul>
+  <li>Fix error reported when logging to a cluster</li>
+  <li>Fix error reported when getting applications list for a project</li>
+  </ul>
+  </br>
   <p><b>0.0.3</b></p>
-  <p>Fix line feed issue for Macos<p>
+  <ul>
+  <li>Fix line feed issue for Macos</li>
+  </ul>
+  </br>
   <p><b>0.0.2</b></p>
-  <p>Fix terminal auto close for 2018.3+ based products</p>
+  <ul>
+  <li>Fix terminal auto close for 2018.3+ based products</li>
+  </ul>
+  </br>
   <p><b>0.0.1</b></p>
-  <p>Initial release</p>
+  <ul>
+  <li>Initial release</li>
+  </ul>
     ]]>
   </change-notes>
 

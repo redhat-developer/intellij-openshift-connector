@@ -37,7 +37,7 @@ public class WatchComponentAction extends PushComponentAction {
   }
 
   @Override
-  protected void process(Odo odo, String project, String application, Component component) throws IOException {
-    odo.watch(project, application, component.getPath(), component.getName());
+  protected void process(Odo odo, String project, Component component) throws IOException {
+    odo.watch(project, component.getPath(), component.getName());
   }
 }

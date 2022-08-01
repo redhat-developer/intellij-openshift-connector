@@ -12,10 +12,10 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 
-public class ComponentNode extends ParentableNode<ApplicationNode> {
+public class ComponentNode extends ParentableNode<NamespaceNode> {
   private final Component component;
 
-  public ComponentNode(ApplicationNode parent, Component component) {
+  public ComponentNode(NamespaceNode parent, Component component) {
     super(parent.getRoot(), parent, component.getName());
     this.component = component;
   }

@@ -13,26 +13,11 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import java.util.List;
 
 public class ComponentDescriptor {
-    private final String path;
-    private final String project;
-    private final String application;
+    private String path;
     private final String name;
-    private final List<Integer> ports;
 
-    public ComponentDescriptor(String project, String application, String path, String name, List<Integer> ports) {
-        this.project = project;
-        this.application = application;
-        this.path = path;
+    public ComponentDescriptor(String name) {
         this.name = name;
-        this.ports = ports;
-    }
-
-    public String getProject() {
-        return project;
-    }
-
-    public String getApplication() {
-        return application;
     }
 
     public String getName() {
@@ -43,7 +28,7 @@ public class ComponentDescriptor {
         return path;
     }
 
-    public List<Integer> getPorts() {
-        return ports;
+    public void setPath(String path) {
+        this.path = path;
     }
 }

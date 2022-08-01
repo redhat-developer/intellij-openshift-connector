@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import kotlinx.serialization.json.JsonArray;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.Constants.DebugStatus;
@@ -26,10 +27,12 @@ public class JSonParser {
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String SPEC_FIELD = "spec";
-    private static final String TYPE_FIELD = "type";
+    private static final String PROJECT_TYPE_FIELD = "projectType";
     private static final String URLS_FIELD = "urls";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
-    private static final String DEVFILE_FIELD = "Devfile";
+    private static final String DEVFILE_FIELD = "devfile";
+
+    private static final String DEVFILE_DATA_FIELD = "devfileData";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
     private static final String DESCRIPTION_FIELD = "description";
     private static final String REGISTRY_NAME_FIELD = "RegistryName";
@@ -40,6 +43,11 @@ public class JSonParser {
     private static final String BODY_VALUE = "body";
     private static final String SCHEMA_FIELD = "schema";
     private static final String DOLLAR_REF_FIELD = "$ref";
+    private static final String ODO_SETTINGS_FIELD = "OdoSettings";
+    private static final String REGISTRY_LIST_FIELD = "RegistryList";
+    private static final String NAME1_FIELD = "Name";
+    private static final String URL_FIELD = "URL";
+    private static final String SECURE_FIELD = "secure";
 
 
     private final JsonNode root;
@@ -70,28 +78,32 @@ public class JSonParser {
                 String host = item.get(SPEC_FIELD).has("host") ?
                         item.get(SPEC_FIELD).get("host").asText() : "";
                 String port = item.get(SPEC_FIELD).has("port") ? item.get(SPEC_FIELD).get("port").asText() : "0";
-                result.add(URL.of(name, protocol, host, port, item.get("status").get("state").asText(), item.get(SPEC_FIELD).get("secure").asBoolean()));
+                result.add(URL.of(name, protocol, host, port, item.get("status").get("state").asText(), item.get(SPEC_FIELD).get(SECURE_FIELD).asBoolean()));
             }
         });
         return result;
     }
 
-    public List<Application> parseApplications() {
-        List<Application> result = new ArrayList<>();
-        if (root.has(ITEMS_FIELD)) {
-            root.get(ITEMS_FIELD).forEach(item -> result.add(Application.of(item.get(METADATA_FIELD).get(NAME_FIELD).asText())));
-        }
-        return result;
-    }
-
     public ComponentInfo parseComponentInfo(ComponentKind kind) {
         ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
-        if (root.has(SPEC_FIELD)) {
-            String componentTypeName = root.get(SPEC_FIELD).get(TYPE_FIELD).asText();
+        if (root.has(PROJECT_TYPE_FIELD)) {
+            String componentTypeName = root.get(PROJECT_TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
         }
         return builder.build();
     }
+
+    public ComponentInfo parseDescribeComponentInfo(ComponentKind kind) {
+        ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
+        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
+                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
+                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(PROJECT_TYPE_FIELD)) {
+            String componentTypeName = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(PROJECT_TYPE_FIELD).asText();
+            builder.withComponentTypeName(componentTypeName);
+        }
+        return builder.build();
+    }
+
 
     public DebugStatus parseDebugStatus() {
         if (root.has(SPEC_FIELD)&& root.get(SPEC_FIELD).has(DEBUG_PROCESS_ID_FIELD)){
@@ -103,31 +115,24 @@ public class JSonParser {
         return Constants.DebugStatus.UNKNOWN;
     }
 
-    public ComponentTypeInfo parseComponentTypeInfo(String registryName) {
+    public ComponentTypeInfo parseComponentTypeInfo() {
         ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
         for (JsonNode element : root) {
-            if (element.has(REGISTRY_NAME_FIELD) && registryName.equals(element.get(REGISTRY_NAME_FIELD).asText())) {
-                if (element.has(DEVFILE_FIELD)) {
-                    JsonNode data = element.get(DEVFILE_FIELD);
-                    if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
-                        builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
+                    if (element.has(NAME_FIELD)) {
+                        builder.withName(element.get(NAME_FIELD).asText());
                     }
-                    if (data.has(STARTER_PROJECTS_FIELD)) {
-                        for (JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
+                    if (element.has(STARTER_PROJECTS_FIELD)) {
+                        for (JsonNode starter : element.get(STARTER_PROJECTS_FIELD)) {
                             builder.withStarter(parseStarter(starter));
                         }
                     }
-                }
-                break;
-            }
         }
         return builder.build();
     }
 
     public Starter parseStarter(JsonNode node) {
-        String name = node.get(NAME_FIELD).asText();
-        String description = node.has(DESCRIPTION_FIELD)?node.get(DESCRIPTION_FIELD).asText():"";
-        Starter.Builder builder = new Starter.Builder().withName(name).withDescription(description);
+        String name = node.asText();
+        Starter.Builder builder = new Starter.Builder().withName(name);
         return builder.build();
     }
 
@@ -177,5 +182,19 @@ public class JSonParser {
             }
         }
         throw new IOException("Invalid data, no 'paths' field");
+    }
+
+    public List<DevfileRegistry> parseRegistries() {
+        List<DevfileRegistry> result = new ArrayList<>();
+        if (root.has(ODO_SETTINGS_FIELD) && root.get(ODO_SETTINGS_FIELD).has(REGISTRY_LIST_FIELD) &&
+                root.get(ODO_SETTINGS_FIELD).get(REGISTRY_LIST_FIELD).isArray()) {
+            for(JsonNode item : root.get(ODO_SETTINGS_FIELD).get(REGISTRY_LIST_FIELD)) {
+                String name = item.get(NAME1_FIELD).asText();
+                String url = item.get(URL_FIELD).asText();
+                boolean secure = item.get(SECURE_FIELD).asBoolean();
+                result.add(DevfileRegistry.of(name, url, secure));
+            }
+        }
+        return result;
     }
 }

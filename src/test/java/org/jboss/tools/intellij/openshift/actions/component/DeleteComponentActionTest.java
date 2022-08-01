@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction;
 
 public class DeleteComponentActionTest extends ActionTest {
     @Override

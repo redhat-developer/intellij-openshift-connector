@@ -15,7 +15,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -56,17 +55,16 @@ public class ImportComponentAction extends CreateComponentAction {
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
-        ApplicationNode applicationNode = componentNode.getParent();
-        NamespaceNode namespaceNode = applicationNode.getParent();
+        NamespaceNode namespaceNode = componentNode.getParent();
         ApplicationsTreeStructure structure = (ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY);
         CompletableFuture.runAsync(() -> {
             try {
                 ApplicationsRootNode root = componentNode.getRoot();
                 Project project = root.getProject();
-                ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(), applicationNode.getName(),
+                ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(),
                         component.getName(), null, component.getInfo().getComponentKind());
-                CreateComponentModel model = getModel(project, odo, applicationNode.getName(), component.getName(), info);
-                process((ParentableNode) selected, odo, namespaceNode.getName(), Optional.of(applicationNode.getName()), root, model, structure);
+                CreateComponentModel model = getModel(project, odo, component.getName(), info);
+                process((ParentableNode) selected, odo, namespaceNode.getName(), root, model, structure);
 
             } catch (IOException e) {
                 sendTelemetryError(e);
@@ -76,11 +74,10 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @NotNull
-    private CreateComponentModel getModel(Project project, Odo odo, String application, String name, ComponentInfo info) throws IOException {
+    private CreateComponentModel getModel(Project project, Odo odo, String name, ComponentInfo info) throws IOException {
         List<DevfileComponentType> types = odo.getComponentTypes();
         CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
         ComponentType type = select(types, info.getComponentTypeName());
-        model.setApplication(application);
         model.setName(name);
         model.setSelectedComponentType(type);
         model.setImportMode(true);

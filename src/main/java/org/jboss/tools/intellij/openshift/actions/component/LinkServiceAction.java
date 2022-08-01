@@ -17,7 +17,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -54,11 +53,10 @@ public class LinkServiceAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        List<Service> services = odo.getServices(namespaceNode.getName(), applicationNode.getName());
+        List<Service> services = odo.getServices(namespaceNode.getName());
         if (!services.isEmpty()) {
           Service service;
           if (services.size() == 1) {
@@ -72,7 +70,7 @@ public class LinkServiceAction extends OdoAction {
             Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service.getName(), NotificationType.INFORMATION);
             Notifications.Bus.notify(notification);
             String target = service.getKind() + "/" + service.getName();
-            odo.link(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(), target);
+            odo.link(namespaceNode.getName(), component.getPath(), component.getName(), target);
             notification.expire();
             Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service.getName(),
             NotificationType.INFORMATION));

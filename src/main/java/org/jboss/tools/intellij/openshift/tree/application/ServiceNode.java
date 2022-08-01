@@ -12,11 +12,11 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 
-public class ServiceNode extends ParentableNode<ApplicationNode> {
+public class ServiceNode extends ParentableNode<NamespaceNode> {
 
     private final Service service;
 
-    public ServiceNode(ApplicationNode parent, Service service) {
+    public ServiceNode(NamespaceNode parent, Service service) {
         super(parent.getRoot(), parent, service.getName());
         this.service = service;
     }

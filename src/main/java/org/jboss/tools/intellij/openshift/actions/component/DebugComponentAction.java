@@ -32,7 +32,6 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -84,8 +83,7 @@ public abstract class DebugComponentAction extends OdoAction {
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
-        ApplicationNode applicationNode = componentNode.getParent();
-        NamespaceNode namespaceNode = applicationNode.getParent();
+        NamespaceNode namespaceNode = componentNode.getParent();
 
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
@@ -95,15 +93,15 @@ public abstract class DebugComponentAction extends OdoAction {
 
         RunManager runManager = RunManager.getInstance(project);
         final Optional<Integer> port = createOrFindPortFromConfiguration(runManager, component);
-        port.ifPresent(portNumber -> executeDebug(project, component, odo, applicationNode.getName(), namespaceNode.getName(), portNumber));
+        port.ifPresent(portNumber -> executeDebug(project, component, odo, namespaceNode.getName(), portNumber));
     }
 
-    private void executeDebug(Project project, Component component, Odo odo, String applicationName, String projectName, Integer port) {
+    private void executeDebug(Project project, Component component, Odo odo, String projectName, Integer port) {
         telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
         ExecHelper.submit(() -> {
             try {
                 // run odo debug if not already running
-                if (checkOdoDebugNotRunning(odo, projectName, applicationName, component)) {
+                if (checkOdoDebugNotRunning(odo, projectName, component)) {
                     ProgressManager.getInstance().run(
                             new Task.Modal(project, "Starting odo", true) {
                                 public void run(@NotNull ProgressIndicator indicator) {
@@ -112,17 +110,16 @@ public abstract class DebugComponentAction extends OdoAction {
                                     indicator.setIndeterminate(true);
                                     try {
                                             indicator.setText2("Please wait while component is switching to debug mode...");
-                                            odo.pushWithDebug(projectName, applicationName, component.getPath(), component.getName());
+                                            odo.pushWithDebug(projectName, component.getPath(), component.getName());
                                             indicator.checkCanceled();
                                             indicator.setText2("Component pushed!");
                                         odo.debug(
                                                 projectName,
-                                                applicationName,
                                                 component.getPath(),
                                                 component.getName(),
                                                 port);
                                         indicator.checkCanceled();
-                                        while (!checkOdoDebugRunning(odo, projectName, applicationName, component)) {
+                                        while (!checkOdoDebugRunning(odo, projectName, component)) {
                                             Thread.sleep(10L);
                                             indicator.checkCanceled();
                                         }
@@ -170,19 +167,17 @@ public abstract class DebugComponentAction extends OdoAction {
 
     }
 
-    private boolean checkOdoDebugNotRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
+    private boolean checkOdoDebugNotRunning(Odo odo, String projectName, Component component) throws IOException {
         return odo.debugStatus(
                 projectName,
-                applicationName,
                 component.getPath(),
                 component.getName()) == Constants.DebugStatus.NOT_RUNNING;
 
     }
 
-    private boolean checkOdoDebugRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
+    private boolean checkOdoDebugRunning(Odo odo, String projectName, Component component) throws IOException {
         return odo.debugStatus(
                 projectName,
-                applicationName,
                 component.getPath(),
                 component.getName()) == Constants.DebugStatus.RUNNING;
 

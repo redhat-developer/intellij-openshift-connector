@@ -118,7 +118,10 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         if (modulePathFile != null && modulePathFile.isValid() && getOdo() != null) {
             try {
                 List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.getPath());
-                descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
+                descriptors.forEach(descriptor -> {
+                    descriptor.setPath(modulePathFile.getPath());
+                    addContextToSettings(descriptor.getPath(), descriptor);
+                });
             } catch (IOException e) {
             }
         }

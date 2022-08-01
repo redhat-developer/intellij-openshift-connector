@@ -15,7 +15,6 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
@@ -37,8 +36,7 @@ public class DeleteServiceAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
-    ApplicationNode applicationNode = serviceNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    NamespaceNode namespaceNode = serviceNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
       Messages.getQuestionIcon())) {
       sendTelemetryResults(TelemetryResult.ABORTED);
@@ -46,7 +44,7 @@ public class DeleteServiceAction extends OdoAction {
     }
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteService(namespaceNode.getName(), applicationNode.getName(), serviceNode.getService());
+        odo.deleteService(namespaceNode.getName(), serviceNode.getService());
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(serviceNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

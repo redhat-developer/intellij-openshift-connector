@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.actions.url;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction;
 
 public class DeleteURLActionTest extends ActionTest {
   @Override

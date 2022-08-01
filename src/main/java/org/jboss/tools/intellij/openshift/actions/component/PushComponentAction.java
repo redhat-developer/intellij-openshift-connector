@@ -15,7 +15,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
@@ -46,13 +45,12 @@ public class PushComponentAction extends ContextAwareComponentAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
-    Component component = ((ComponentNode) selected).getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    Component component = componentNode.getComponent();
+    NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        if (checkMigrated(odo, namespaceNode.getName(), applicationNode.getName(), component)) {
-          process(odo, namespaceNode.getName(), applicationNode.getName(), component);
+        if (checkMigrated(odo, namespaceNode.getName(), component)) {
+          process(odo, namespaceNode.getName(), component);
           component.setState(ComponentState.PUSHED);
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
           sendTelemetryResults(TelemetryResult.SUCCESS);
@@ -66,18 +64,18 @@ public class PushComponentAction extends ContextAwareComponentAction {
     });
   }
 
-  protected void process(Odo odo, String project, String application, Component component) throws IOException {
-    odo.push(project, application, component.getPath(), component.getName());
+  protected void process(Odo odo, String project, Component component) throws IOException {
+    odo.push(project, component.getPath(), component.getName());
   }
 
-  private boolean checkMigrated(Odo odo, String project, String application, Component component) throws IOException {
+  private boolean checkMigrated(Odo odo, String project, Component component) throws IOException {
     if (component.getState() == ComponentState.PUSHED) {
-      ComponentInfo info = odo.getComponentInfo(project, application, component.getName(), component.getPath(),
+      ComponentInfo info = odo.getComponentInfo(project, component.getName(), component.getPath(),
               component.getInfo().getComponentKind());
       if (info.isMigrated()) {
         int choice = UIHelper.executeInUI(() -> Messages.showDialog(COMPONENT_MIGRATION_MESSAGE, COMPONENT_MIGRATION_TITLE, new String[]{UNDEPLOY_LABEL, HELP_LABEL, CANCEL_BUTTON}, 0, getWarningIcon()));
         if (choice == 0) {
-          odo.undeployComponent(project, application, component.getPath(), component.getName(), info.getComponentKind());
+          odo.undeployComponent(project, component.getPath(), component.getName(), info.getComponentKind());
         } else if (choice == 1) {
           BrowserUtil.browse(Constants.MIGRATION_HELP_PAGE_URL);
           return false;

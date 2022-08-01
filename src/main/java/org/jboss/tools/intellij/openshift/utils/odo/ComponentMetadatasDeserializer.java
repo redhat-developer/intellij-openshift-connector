@@ -18,20 +18,26 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
+public class ComponentMetadatasDeserializer extends StdNodeBasedDeserializer<List<ComponentMetadata>> {
 
-    public static final String COMPONENT_IN_DEVFILE_FIELD = "componentInDevfile";
+    private static final String DEVFILE_FIELD = "devfile";
+    private static final String DEVFILE_REGISTRY_FIELD = "devfileRegistry";
 
-    public ComponentDescriptorsDeserializer() {
-        super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
+    public ComponentMetadatasDeserializer() {
+        super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentMetadata.class));
     }
 
     @Override
-    public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) {
-        List<ComponentDescriptor> result = new ArrayList<>();
-        if (root.has(COMPONENT_IN_DEVFILE_FIELD)) {
-            result.add(new ComponentDescriptor(root.get(COMPONENT_IN_DEVFILE_FIELD).asText()));
+    public List<ComponentMetadata> convert(JsonNode root, DeserializationContext ctxt){
+        List<ComponentMetadata> result = new ArrayList<>();
+        for(JsonNode item : root) {
+            String componentType = get(item, DEVFILE_FIELD);
+            String registry = get(item, DEVFILE_REGISTRY_FIELD);
+            result.add(ComponentMetadata.of(registry, componentType));
         }
         return result;
+    }
+    private static String get(JsonNode node, String fieldName) {
+        return node.has(fieldName)?node.get(fieldName).asText():"";
     }
 }

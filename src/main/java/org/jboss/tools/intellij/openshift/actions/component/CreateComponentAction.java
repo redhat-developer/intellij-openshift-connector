@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
@@ -31,7 +30,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -39,7 +37,7 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public class CreateComponentAction extends OdoAction {
   public CreateComponentAction() {
-    super(ApplicationNode.class, NamespaceNode.class);
+    super(NamespaceNode.class);
   }
 
   protected CreateComponentAction(Class... clazz) {
@@ -48,15 +46,9 @@ public class CreateComponentAction extends OdoAction {
 
   public static void execute(ParentableNode<? extends Object> parentNode) {
     CreateComponentAction action = (CreateComponentAction) ActionManager.getInstance().getAction(CreateComponentAction.class.getName());
-    if (parentNode instanceof NamespaceNode) {
-      NamespaceNode namespaceNode = (NamespaceNode) parentNode;
-      action.doActionPerformed(namespaceNode, namespaceNode.getRoot().getOdo(), Optional.empty(), namespaceNode.getName(),
+    NamespaceNode namespaceNode = (NamespaceNode) parentNode;
+    action.doActionPerformed(namespaceNode, namespaceNode.getRoot().getOdo(), namespaceNode.getName(),
               namespaceNode.getRoot(), namespaceNode.getRoot().getProject());
-    } else if (parentNode instanceof ApplicationNode) {
-      ApplicationNode applicationNode = (ApplicationNode) parentNode;
-      action.doActionPerformed(applicationNode, applicationNode.getRoot().getOdo(), Optional.of(applicationNode.getName()),
-              applicationNode.getNamespace(), applicationNode.getRoot(), applicationNode.getRoot().getProject());
-    }
   }
 
   @Override
@@ -64,25 +56,18 @@ public class CreateComponentAction extends OdoAction {
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-    final Optional<String> application;
     String projectName;
-    if (selected instanceof ApplicationNode) {
-      application = Optional.of(((ApplicationNode) selected).getName());
-      projectName =  ((ApplicationNode)selected).getParent().getName();
-    } else {
-      application = Optional.empty();
-      projectName = ((NamespaceNode)selected).getName();
-    }
+    projectName = ((NamespaceNode)selected).getName();
     ApplicationsRootNode rootNode = ((ParentableNode<Object>)selected).getRoot();
     Project project = rootNode.getProject();
-    doActionPerformed((ParentableNode<Object>) selected, odo, application, projectName, rootNode, project);
+    doActionPerformed((ParentableNode<Object>) selected, odo, projectName, rootNode, project);
   }
 
-  private void doActionPerformed(ParentableNode<? extends Object> selected, Odo odo, Optional<String> application, String projectName, ApplicationsRootNode rootNode, Project project) {
+  private void doActionPerformed(ParentableNode<? extends Object> selected, Odo odo, String projectName, ApplicationsRootNode rootNode, Project project) {
     CompletableFuture.runAsync(() -> {
       try {
-        CreateComponentModel model = getModel(project, application, odo, p -> rootNode.getComponents().containsKey(p));
-        process(selected, odo, projectName, application, rootNode, model, rootNode.getStructure());
+        CreateComponentModel model = getModel(project, odo, p -> rootNode.getComponents().containsKey(p));
+        process(selected, odo, projectName, rootNode, model, rootNode.getStructure());
       } catch (IOException e) {
         sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create component"));
@@ -90,11 +75,11 @@ public class CreateComponentAction extends OdoAction {
     });
   }
 
-  protected void process(ParentableNode<? extends Object> selected, Odo odo, String projectName, Optional<String> application,
+  protected void process(ParentableNode<? extends Object> selected, Odo odo, String projectName,
                          ApplicationsRootNode rootNode, CreateComponentModel model, ApplicationsTreeStructure structure) throws IOException {
     boolean doit = UIHelper.executeInUI(() -> showDialog(model));
     if (doit) {
-      createComponent(odo, projectName, application.orElse(model.getApplication()), model);
+      createComponent(odo, projectName, model);
       rootNode.addContext(model.getContext());
       structure.fireModified(selected);
       sendTelemetryResults(TelemetryResult.SUCCESS);
@@ -103,15 +88,14 @@ public class CreateComponentAction extends OdoAction {
     }
   }
 
-  private void createComponent(Odo odo, String project, String application, CreateComponentModel model) throws IOException{
+  private void createComponent(Odo odo, String project, CreateComponentModel model) throws IOException{
     computeTelemetry(model);
-    odo.createComponent(project, application, model.getSelectedComponentType().getName(),
+    odo.createComponent(project, model.getSelectedComponentType().getName(),
               model.getSelectedComponentType() instanceof DevfileComponentType?((DevfileComponentType)model.getSelectedComponentType()).getDevfileRegistry().getName():null,
               model.getName(),
               model.getContext(),
               model.isProjectHasDevfile()? Constants.DEVFILE_NAME:null,
-              model.getSelectedComponentStarter(),
-              model.isPushAfterCreate());
+              model.getSelectedComponentStarter());
   }
 
   protected boolean showDialog(CreateComponentModel model) {
@@ -121,12 +105,8 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @NotNull
-  protected CreateComponentModel getModel(Project project, Optional<String> application, Odo odo, Predicate<String> componentChecker) throws IOException{
+  protected CreateComponentModel getModel(Project project, Odo odo, Predicate<String> componentChecker) throws IOException{
     CreateComponentModel model =  new CreateComponentModel("Create component", project, odo, odo.getComponentTypes());
-    application.ifPresent(v -> {
-      model.setApplication(v);
-      model.setApplicationReadOnly(true);
-    });
     model.setComponentPredicate(componentChecker);
     return model;
   }
@@ -135,7 +115,7 @@ public class CreateComponentAction extends OdoAction {
         telemetrySender
                 .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
         telemetrySender
-                .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isPushAfterCreate()));
+                .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
         if (StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
             telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
         }

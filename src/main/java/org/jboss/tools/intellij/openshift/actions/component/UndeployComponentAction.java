@@ -15,7 +15,6 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
@@ -49,11 +48,10 @@ public class UndeployComponentAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        odo.undeployComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(),
+        odo.undeployComponent(namespaceNode.getName(), component.getPath(),
                 component.getName(), component.getInfo().getComponentKind());
         component.setState(ComponentState.NOT_PUSHED);
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);

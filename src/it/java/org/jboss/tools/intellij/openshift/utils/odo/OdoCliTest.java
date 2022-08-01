@@ -82,15 +82,11 @@ public abstract class OdoCliTest extends BaseTest {
         odo.createProject(project);
     }
 
-    protected void createComponent(String project, String application, String component, boolean push) throws IOException {
+    protected void createComponent(String project, String component, boolean push) throws IOException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponent(project, application, "java-springboot", REGISTRY_NAME, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
-    }
-
-    protected void createStorage(String project, String application, String component, boolean push, String storage) throws IOException {
-        createComponent(project, application, component, push);
-        odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
+        odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,
+                new File(COMPONENT_PATH).getAbsolutePath(), null, null);
     }
 
     private void cleanLocalProjectDirectory() throws IOException {
@@ -112,8 +108,8 @@ public abstract class OdoCliTest extends BaseTest {
         return serviceTemplate;
     }
 
-    protected void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {
+    protected void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {
         cleanLocalProjectDirectory();
-        odo.createService(project, application, serviceTemplate, crd, service, null, false);
+        odo.createService(project, serviceTemplate, crd, service, null, false);
     }
 }

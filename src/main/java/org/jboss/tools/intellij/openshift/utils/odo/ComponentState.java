@@ -20,6 +20,12 @@ public class ComponentState {
 
     private Set<String> states = new HashSet<>();
 
+    public ComponentState(String state) {
+        addState(state);
+    }
+
+    public ComponentState() {}
+
     public void addState(String state) {
         states.add(state);
     }

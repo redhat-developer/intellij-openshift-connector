@@ -36,9 +36,6 @@ public class DescribeComponentAction extends OdoAction {
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
-    if (visible) {
-      visible = ((ComponentNode)selected).getComponent().getState() != ComponentState.NOT_PUSHED;
-    }
     return visible;
   }
 

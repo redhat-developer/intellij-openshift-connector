@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
@@ -212,8 +213,14 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
+            Component comp = ((ComponentNode) element).getComponent();
+            String suffix = comp.getState().toString();
+            if (!comp.hasContext()) {
+                suffix = "no context" + (suffix.isEmpty()?"":",") + suffix;
+            }
+            String finalSuffix = suffix;
             return new LabelAndIconDescriptor(project, element,
-                    () -> ((ComponentNode) element).getName() + ' ' + ((ComponentNode) element).getComponent().getState(),
+                    () -> ((ComponentNode) element).getName() + ' ' + finalSuffix,
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
             return new LabelAndIconDescriptor(project, element,

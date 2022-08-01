@@ -17,9 +17,6 @@ public abstract class PushedComponentAction extends ContextAwareComponentAction 
     @Override
     public boolean isVisible(Object selected) {
         boolean isVisible = super.isVisible(selected);
-        if (isVisible) {
-            isVisible = ((ComponentNode)selected).getComponent().getState() == ComponentState.PUSHED;
-        }
         return isVisible;
     }
 }

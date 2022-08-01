@@ -197,4 +197,14 @@ public class JSonParser {
         }
         return result;
     }
+
+    public ComponentState parseComponentState() {
+        ComponentState state = new ComponentState();
+        if (root.has("runningIn")) {
+            for(JsonNode st : root.get("runningIn")) {
+                state.addState(st.asText());
+            }
+        }
+        return state;
+    }
 }

@@ -35,7 +35,6 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -70,13 +69,13 @@ public abstract class DebugComponentAction extends OdoAction {
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = componentNode.getComponent();
-            return (isPushed(component) && isDebuggable(component.getInfo().getComponentTypeName()));
+            return (hasContext(component) && isDebuggable(component.getInfo().getComponentTypeName()));
         }
         return false;
     }
 
-    private boolean isPushed(Component component) {
-        return component.getState() == ComponentState.PUSHED;
+    private boolean hasContext(Component component) {
+        return component.hasContext();
     }
 
     @Override

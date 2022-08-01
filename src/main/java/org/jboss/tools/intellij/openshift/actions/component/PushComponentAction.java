@@ -51,7 +51,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
       try {
         if (checkMigrated(odo, namespaceNode.getName(), component)) {
           process(odo, namespaceNode.getName(), component);
-          component.setState(ComponentState.PUSHED);
+          component.getState().addState(ComponentState.DEV_STATE);
           ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } else {
@@ -69,7 +69,7 @@ public class PushComponentAction extends ContextAwareComponentAction {
   }
 
   private boolean checkMigrated(Odo odo, String project, Component component) throws IOException {
-    if (component.getState() == ComponentState.PUSHED) {
+    if (component.getState().isDeployRunning()) {
       ComponentInfo info = odo.getComponentInfo(project, component.getName(), component.getPath(),
               component.getInfo().getComponentKind());
       if (info.isMigrated()) {

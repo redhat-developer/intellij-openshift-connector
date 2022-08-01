@@ -39,7 +39,7 @@ public class UndeployComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((ComponentNode)selected).getComponent().getState() == ComponentState.PUSHED;
+      visible = ((ComponentNode)selected).getComponent().getState().isDeployRunning();
     }
     return visible;
   }
@@ -53,7 +53,7 @@ public class UndeployComponentAction extends OdoAction {
       try {
         odo.undeployComponent(namespaceNode.getName(), component.getPath(),
                 component.getName(), component.getInfo().getComponentKind());
-        component.setState(ComponentState.NOT_PUSHED);
+        component.getState().removeState(ComponentState.DEPLOY_STATE);
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

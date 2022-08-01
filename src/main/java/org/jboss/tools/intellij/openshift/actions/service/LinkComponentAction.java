@@ -77,6 +77,6 @@ public class LinkComponentAction extends OdoAction {
   }
 
   private List<Component> getTargetComponents(Odo odo, String project) throws IOException {
-    return odo.getComponents(project).stream().filter(component -> component.getState() == ComponentState.PUSHED).collect(Collectors.toList());
+    return odo.getComponents(project).stream().filter(component -> component.getState().isOnCluster()).collect(Collectors.toList());
   }
 }

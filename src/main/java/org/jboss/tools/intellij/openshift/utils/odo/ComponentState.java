@@ -10,20 +10,69 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-public enum ComponentState {
-    PUSHED("\u25C9 pushed"),
-    NOT_PUSHED("\u25CE not pushed"),
-    NO_CONTEXT("\u2718 no context");
+import java.util.HashSet;
+import java.util.Set;
 
-    private final String label;
+public class ComponentState {
+    public static final String DEV_STATE = "Dev";
+    public static final String DEPLOY_STATE = "Deploy";
+    private static final String DEBUG_STATE = "Debug";
 
-    ComponentState(String label) {
-        this.label = label;
+    private Set<String> states = new HashSet<>();
+
+    public void addState(String state) {
+        states.add(state);
+    }
+
+    public void removeState(String state) {
+        states.remove(state);
+    }
+
+    public void setStates(Set<String> states) {
+        this.states = states;
+    }
+
+    private boolean is(String state) {
+        return states.contains(state);
+    }
+
+    public boolean isDevRunning() {
+        return is(DEV_STATE);
+    }
+
+    public boolean isDeployRunning() {
+        return is(DEPLOY_STATE);
+    }
+
+    public boolean isDebugRunning() {
+        return is(DEBUG_STATE);
     }
 
     @Override
     public String toString() {
-        return label;
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        if (isDevRunning()) {
+            first = append(builder, first, DEV_STATE);
+        }
+        if (isDebugRunning()) {
+            first = append(builder, first, DEBUG_STATE);
+        }
+        if (isDeployRunning()) {
+            first = append(builder, first, DEPLOY_STATE);
+        }
+        return builder.toString();
     }
 
+    private boolean append(StringBuilder builder, boolean first, String label) {
+        if (!first) {
+            builder.append(',');
+        }
+        builder.append(label);
+        return false;
+    }
+
+    public boolean isOnCluster() {
+        return isDevRunning() || isDebugRunning() || isDeployRunning();
+    }
 }

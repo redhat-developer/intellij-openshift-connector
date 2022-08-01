@@ -43,10 +43,6 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
-    if (visible) {
-      Component comp = ((ComponentNode)selected).getComponent();
-      visible = (comp.getState() == ComponentState.PUSHED);
-    }
     return visible;
   }
 

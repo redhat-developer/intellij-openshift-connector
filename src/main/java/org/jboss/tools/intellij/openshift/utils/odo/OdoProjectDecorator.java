@@ -196,10 +196,9 @@ public class OdoProjectDecorator implements Odo {
             ComponentDescriptor comp = entry.getValue();
                 Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(comp.getName())).findFirst();
             if (found.isPresent()) {
-                found.get().setState(ComponentState.PUSHED);
                 found.get().setPath(path);
             } else {
-                components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path,
+                components.add(Component.of(comp.getName(), new ComponentState(), path,
                         getComponentInfo(project, comp.getName(), path, ComponentKind.DEVFILE)));
             }
         }

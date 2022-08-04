@@ -56,8 +56,6 @@ public class ComponentDescriptorTest {
     //DevfileDescriptor
     ComponentDescriptor devfileDescriptor = descriptors.get(0);
     Assert.assertNotNull(devfileDescriptor);
-    Assert.assertEquals("dev-app", devfileDescriptor.getApplication());
-    Assert.assertEquals("devproj", devfileDescriptor.getProject());
     Assert.assertEquals("devcomp", devfileDescriptor.getName());
   }
 }

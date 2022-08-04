@@ -53,15 +53,7 @@ public class CreateProjectActionTest extends ActionTest {
     assertFalse(event.getPresentation().isVisible());
   }
 
-  public void testActionOnApplication() {
-    ApplicationNode applicationNode = mock(ApplicationNode.class);
-    AnActionEvent event = createEvent(applicationNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnPushedComponent() {
+  public void testActionOnLocalDevComponent() {
     ComponentNode componentNode = mock(ComponentNode.class);
     AnActionEvent event = createEvent(componentNode);
     AnAction action = getAction();
@@ -76,14 +68,4 @@ public class CreateProjectActionTest extends ActionTest {
     action.update(event);
     assertFalse(event.getPresentation().isVisible());
   }
-
-
-  public void testActionOnStorage() {
-    PersistentVolumeClaimNode storageNode = mock(PersistentVolumeClaimNode.class);
-    AnActionEvent event = createEvent(storageNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
-  }
-
 }

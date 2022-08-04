@@ -13,59 +13,56 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ComponentState {
-    public static final String DEV_STATE = "Dev";
-    public static final String DEPLOY_STATE = "Deploy";
-    private static final String DEBUG_STATE = "Debug";
+public class ComponentFeatures {
 
-    private Set<String> states = new HashSet<>();
+    private Set<ComponentFeature> features = new HashSet<>();
 
-    public ComponentState(String state) {
-        addState(state);
+    public ComponentFeatures(ComponentFeature feature) {
+        addFeature(feature);
     }
 
-    public ComponentState() {}
+    public ComponentFeatures() {}
 
-    public void addState(String state) {
-        states.add(state);
+    public void addFeature(ComponentFeature feature) {
+        features.add(feature);
     }
 
-    public void removeState(String state) {
-        states.remove(state);
+    public void removeFeature(ComponentFeature feature) {
+        features.remove(feature);
     }
 
-    public void setStates(Set<String> states) {
-        this.states = states;
+    public void setFeatures(Set<ComponentFeature> features) {
+        this.features = features;
     }
 
-    private boolean is(String state) {
-        return states.contains(state);
+    public boolean is(ComponentFeature feature) {
+        return features.contains(feature);
     }
 
-    public boolean isDevRunning() {
-        return is(DEV_STATE);
+    public boolean isDev() {
+        return is(ComponentFeature.DEV);
     }
 
     public boolean isDeployRunning() {
-        return is(DEPLOY_STATE);
+        return is(ComponentFeature.DEPLOY);
     }
 
-    public boolean isDebugRunning() {
-        return is(DEBUG_STATE);
+    public boolean isDebug() {
+        return is(ComponentFeature.DEBUG);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
-        if (isDevRunning()) {
-            first = append(builder, first, DEV_STATE);
+        if (isDev()) {
+            first = append(builder, first, ComponentFeature.DEV.getLabel());
         }
-        if (isDebugRunning()) {
-            first = append(builder, first, DEBUG_STATE);
+        if (isDebug()) {
+            first = append(builder, first, ComponentFeature.DEBUG.getLabel());
         }
         if (isDeployRunning()) {
-            first = append(builder, first, DEPLOY_STATE);
+            first = append(builder, first, ComponentFeature.DEPLOY.getLabel());
         }
         return builder.toString();
     }
@@ -79,6 +76,6 @@ public class ComponentState {
     }
 
     public boolean isOnCluster() {
-        return isDevRunning() || isDebugRunning() || isDeployRunning();
+        return isDev() || isDebug() || isDeployRunning();
     }
 }

@@ -50,23 +50,23 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void push(String project, String context, String component) throws IOException {
-        delegate.push(project, context, component);
+    public void start(String project, String context, String component, ComponentFeature feature) throws IOException {
+        delegate.start(project, context, component, feature);
     }
 
     @Override
-    public void pushWithDebug(String project, String context, String component) throws IOException {
-        delegate.pushWithDebug(project, context, component);
+    public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
+        delegate.stop(project, context, component, feature);
+    }
+
+    @Override
+    public boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException {
+        return delegate.isStarted(project, context, component, feature);
     }
 
     @Override
     public void describeComponent(String project, String context, String component) throws IOException {
         delegate.describeComponent(project, context, component);
-    }
-
-    @Override
-    public void watch(String project, String context, String component) throws IOException {
-        delegate.watch(project, context, component);
     }
 
     @Override
@@ -193,13 +193,14 @@ public class OdoProjectDecorator implements Odo {
         List<Component> components = delegate.getComponents(project);
         for (Map.Entry<String, ComponentDescriptor> entry : root.getComponents().entrySet()) {
             String path = entry.getKey();
-            ComponentDescriptor comp = entry.getValue();
-                Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(comp.getName())).findFirst();
+            ComponentDescriptor componentDescriptor = entry.getValue();
+                Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(componentDescriptor.getName())).findFirst();
             if (found.isPresent()) {
                 found.get().setPath(path);
+                found.get().setInfo(getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE));
             } else {
-                components.add(Component.of(comp.getName(), new ComponentState(), path,
-                        getComponentInfo(project, comp.getName(), path, ComponentKind.DEVFILE)));
+                components.add(Component.of(componentDescriptor.getName(), new ComponentFeatures(), path,
+                        getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE)));
             }
         }
         return components;

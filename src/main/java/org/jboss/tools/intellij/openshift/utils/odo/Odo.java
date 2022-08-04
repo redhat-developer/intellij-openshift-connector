@@ -28,13 +28,13 @@ public interface Odo {
      */
     String getNamespace() throws IOException;
 
-    void push(String project, String context, String component) throws IOException;
+    void start(String project, String context, String component, ComponentFeature feature) throws IOException;
 
-    void pushWithDebug(String project, String context, String component) throws IOException;
+    void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
+
+    boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException;
 
     void describeComponent(String project, String context, String component) throws IOException;
-
-    void watch(String project, String context, String component) throws IOException;
 
     List<ComponentMetadata> analyze(String path) throws IOException;
 

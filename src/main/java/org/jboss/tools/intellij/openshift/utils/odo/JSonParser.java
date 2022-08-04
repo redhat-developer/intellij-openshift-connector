@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import kotlinx.serialization.json.JsonArray;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.Constants.DebugStatus;
@@ -48,6 +47,7 @@ public class JSonParser {
     private static final String NAME1_FIELD = "Name";
     private static final String URL_FIELD = "URL";
     private static final String SECURE_FIELD = "secure";
+    private static final String SUPPORTED_ODO_FEATURES_FIELD = "supportedOdoFeatures";
 
 
     private final JsonNode root;
@@ -101,6 +101,20 @@ public class JSonParser {
             String componentTypeName = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(PROJECT_TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
         }
+        ComponentFeatures features = new ComponentFeatures();
+        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(SUPPORTED_ODO_FEATURES_FIELD)) {
+            JsonNode featuresNode = root.get(DEVFILE_DATA_FIELD).get(SUPPORTED_ODO_FEATURES_FIELD);
+            if (featuresNode.has(ComponentFeature.DEV.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getLabel().toLowerCase()).asBoolean()) {
+                features.addFeature(ComponentFeature.DEV);
+            }
+            if (featuresNode.has(ComponentFeature.DEBUG.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getLabel().toLowerCase()).asBoolean()) {
+                features.addFeature(ComponentFeature.DEBUG);
+            }
+            if (featuresNode.has(ComponentFeature.DEPLOY.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEPLOY.getLabel().toLowerCase()).asBoolean()) {
+                features.addFeature(ComponentFeature.DEPLOY);
+            }
+        }
+        builder.withFeatures(features);
         return builder.build();
     }
 
@@ -198,11 +212,14 @@ public class JSonParser {
         return result;
     }
 
-    public ComponentState parseComponentState() {
-        ComponentState state = new ComponentState();
+    public ComponentFeatures parseComponentState() {
+        ComponentFeatures state = new ComponentFeatures();
         if (root.has("runningIn")) {
             for(JsonNode st : root.get("runningIn")) {
-                state.addState(st.asText());
+                ComponentFeature feature = ComponentFeature.fromLabel(st.asText());
+                if (feature != null) {
+                    state.addFeature(feature);
+                }
             }
         }
         return state;

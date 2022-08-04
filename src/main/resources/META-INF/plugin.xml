@@ -216,15 +216,15 @@
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
       <!-- component level -->
       <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"/>
+      <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" text="Describe"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" text="Follow Log"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" text="Link Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>
-      <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" text="Undeploy"/>

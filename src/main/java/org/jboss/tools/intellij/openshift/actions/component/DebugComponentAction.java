@@ -35,6 +35,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -109,7 +110,7 @@ public abstract class DebugComponentAction extends OdoAction {
                                     indicator.setIndeterminate(true);
                                     try {
                                             indicator.setText2("Please wait while component is switching to debug mode...");
-                                            odo.pushWithDebug(projectName, component.getPath(), component.getName());
+                                            odo.start(projectName, component.getPath(), component.getName(), ComponentFeature.DEBUG);
                                             indicator.checkCanceled();
                                             indicator.setText2("Component pushed!");
                                         odo.debug(

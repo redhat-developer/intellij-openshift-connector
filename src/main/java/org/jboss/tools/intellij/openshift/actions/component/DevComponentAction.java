@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,17 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
-public class LinkComponentActionTest extends ActionTest {
-  @Override
-  public AnAction getAction() {
-    return new LinkComponentAction();
-  }
-
-  @Override
-  protected void verifyLocalDevComponent(boolean visible) {
-    assertTrue(visible);
+public class DevComponentAction extends FeatureComponentAction {
+  public DevComponentAction() {
+    super(ComponentFeature.DEV);
   }
 }

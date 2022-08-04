@@ -31,7 +31,6 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
 
   protected OdoAction(Class... filters) {
     super(filters);
-    telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
   }
 
     @Override

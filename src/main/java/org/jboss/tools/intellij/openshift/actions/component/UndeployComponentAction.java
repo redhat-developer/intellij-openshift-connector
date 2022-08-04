@@ -19,7 +19,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStruc
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class UndeployComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((ComponentNode)selected).getComponent().getState().isDeployRunning();
+      visible = ((ComponentNode)selected).getComponent().getLiveFeatures().isDeployRunning();
     }
     return visible;
   }
@@ -53,7 +53,7 @@ public class UndeployComponentAction extends OdoAction {
       try {
         odo.undeployComponent(namespaceNode.getName(), component.getPath(),
                 component.getName(), component.getInfo().getComponentKind());
-        component.getState().removeState(ComponentState.DEPLOY_STATE);
+        component.getLiveFeatures().removeFeature(ComponentFeature.DEPLOY);
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

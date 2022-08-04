@@ -18,11 +18,15 @@ public interface ComponentInfo {
 
     ComponentKind getComponentKind();
 
+    ComponentFeatures getFeatures();
+
     class Builder {
         private String componentTypeName;
         private boolean migrated;
 
         private ComponentKind kind;
+
+        private ComponentFeatures features;
 
         public Builder withComponentTypeName(String componentTypeName) {
             this.componentTypeName = componentTypeName;
@@ -36,6 +40,11 @@ public interface ComponentInfo {
 
         public Builder withComponentKind(ComponentKind kind) {
             this.kind = kind;
+            return this;
+        }
+
+        public Builder withFeatures(ComponentFeatures features) {
+            this.features = features;
             return this;
         }
 
@@ -55,6 +64,11 @@ public interface ComponentInfo {
                 @Override
                 public ComponentKind getComponentKind() {
                     return kind;
+                }
+
+                @Override
+                public ComponentFeatures getFeatures() {
+                    return features;
                 }
             };
         }

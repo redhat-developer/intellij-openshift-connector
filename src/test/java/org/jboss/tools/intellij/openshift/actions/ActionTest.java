@@ -24,8 +24,9 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeatures;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
@@ -91,18 +92,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
     assertFalse(visible);
   }
 
-  public void testActionOnApplication() {
-    ApplicationNode applicationNode = mock(ApplicationNode.class);
-    AnActionEvent event = createEvent(applicationNode);
-    AnAction action = getAction();
-    action.update(event);
-    verifyApplication(event.getPresentation().isVisible());
-  }
-
-  protected void verifyApplication(boolean visible) {
-    assertFalse(visible);
-  }
-
   private AnActionEvent setupActionOnComponent(Component component) {
     ComponentNode componentNode = mock(ComponentNode.class);
     when(componentNode.getComponent()).thenReturn(component);
@@ -126,30 +115,31 @@ public abstract class ActionTest extends BasePlatformTestCase {
     return builder.build();
   }
 
-  public void testActionOnPushedComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.PUSHED, ".", mockInfo()));
-    verifyPushedComponent(event.getPresentation().isVisible());
+  public void testActionOnLocalDevComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV),
+            ".", mockInfo()));
+    verifyLocalDevComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyPushedComponent(boolean visible) {
+  protected void verifyLocalDevComponent(boolean visible) {
     assertFalse(visible);
   }
 
-  public void testActionOnNotPushedComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NOT_PUSHED, ".", mockInfo()));
-    verifyNotPushedComponent(event.getPresentation().isVisible());
+  public void testActionOnLocalOnlyComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(), ".", mockInfo()));
+    verifyLocalOnlyComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyNotPushedComponent(boolean visible) {
+  protected void verifyLocalOnlyComponent(boolean visible) {
     assertFalse(visible);
   }
 
-  public void testActionOnNoContextComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NO_CONTEXT, mockInfo()));
-    verifyNoContextComponent(event.getPresentation().isVisible());
+  public void testActionOnRemoteOnlyDevComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
+    verifyRemoteOnlyDevComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyNoContextComponent(boolean visible) {
+  protected void verifyRemoteOnlyDevComponent(boolean visible) {
     assertFalse(visible);
   }
 
@@ -167,14 +157,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
     assertFalse(visible);
   }
 
-
-  public void testActionOnStorage() {
-    PersistentVolumeClaimNode storageNode = mock(PersistentVolumeClaimNode.class);
-    AnActionEvent event = createEvent(storageNode);
-    AnAction action = getAction();
-    action.update(event);
-    verifyStorage(event.getPresentation().isVisible());
-  }
 
   protected void verifyNotPushedURL(boolean visible) {
     assertFalse(visible);
@@ -207,10 +189,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
     AnAction action = getAction();
     action.update(event);
     verifyLocallyDeletedURL(event.getPresentation().isVisible());
-  }
-
-  protected void verifyStorage(boolean visible) {
-    assertFalse(visible);
   }
 
   public void testActionOnRegistries() {

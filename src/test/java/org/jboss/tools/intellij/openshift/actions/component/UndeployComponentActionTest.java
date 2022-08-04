@@ -22,7 +22,7 @@ public class UndeployComponentActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyPushedComponent(boolean visible) {
+  protected void verifyLocalDevComponent(boolean visible) {
     assertTrue(visible);
   }
 }

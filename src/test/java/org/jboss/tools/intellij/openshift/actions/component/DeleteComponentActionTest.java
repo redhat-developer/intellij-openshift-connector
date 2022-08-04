@@ -20,17 +20,17 @@ public class DeleteComponentActionTest extends ActionTest {
     }
 
     @Override
-    protected void verifyPushedComponent(boolean visible) {
+    protected void verifyLocalDevComponent(boolean visible) {
         assertTrue(visible);
     }
 
     @Override
-    protected void verifyNotPushedComponent(boolean visible) {
+    protected void verifyLocalOnlyComponent(boolean visible) {
         assertTrue(visible);
     }
 
     @Override
-    protected void verifyNoContextComponent(boolean visible) {
+    protected void verifyRemoteOnlyDevComponent(boolean visible) {
         assertTrue(visible);
     }
 

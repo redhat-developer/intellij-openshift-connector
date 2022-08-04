@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
-import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
-
 public abstract class PushedComponentAction extends ContextAwareComponentAction {
     @Override
     public boolean isVisible(Object selected) {

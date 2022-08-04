@@ -19,6 +19,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.ui.ConsoleView;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -40,9 +44,9 @@ import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,6 +107,8 @@ public class OdoCli implements Odo {
     private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
 
     private JSonParser swagger;
+
+    private Map<String, Map<ComponentFeature, ProcessHandler>> componentProcesses = new HashMap<>();
 
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
@@ -219,29 +226,57 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void push(String project, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(
-                this.project, WINDOW_TITLE,
-                new File(context),
-                true,
-                envVars,
-                command,
-                "push");
+    public void start(String project, String context, String component, ComponentFeature feature) throws IOException {
+        Map<ComponentFeature, ProcessHandler> componentMap = componentProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        ProcessHandler handler = componentMap.get(feature);
+        if (handler == null) {
+            List<String> args = new ArrayList<>();
+            args.add(command);
+            args.addAll(feature.getArgs());
+            ExecHelper.executeWithTerminal(
+                    this.project, WINDOW_TITLE,
+                    new File(context),
+                    false,
+                    envVars,
+                    (ConsoleView) null,
+                    null,
+                    new ProcessAdapter() {
+                        @Override
+                        public void startNotified(@NotNull ProcessEvent event) {
+                            componentMap.put(feature, event.getProcessHandler());
+                        }
+
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            componentMap.remove(feature);
+                        }
+                    },
+                    args.toArray(new String[args.size()]));
+        }
+    }
+
+    private void stopHandler(ProcessHandler handler) {
+        handler.destroyProcess();
     }
 
     @Override
-    public void pushWithDebug(String project, String context, String component) throws IOException {
-        ExecHelper.execute(command, true, new File(context), envVars, "push", "--debug");
+    public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
+        Map<ComponentFeature, ProcessHandler> componentMap = componentProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        ProcessHandler handler = componentMap.remove(feature);
+        if (handler != null) {
+            stopHandler(handler);
+        }
+    }
+
+    @Override
+    public boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException {
+        Map<ComponentFeature, ProcessHandler> componentMap = componentProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        return componentMap.containsKey(feature);
     }
 
     @Override
     public void describeComponent(String project, String context, String component) throws IOException {
         ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe");
-    }
-
-    @Override
-    public void watch(String project, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "watch");
     }
 
     @Override

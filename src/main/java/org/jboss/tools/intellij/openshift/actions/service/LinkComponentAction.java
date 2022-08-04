@@ -20,7 +20,6 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
@@ -77,6 +76,6 @@ public class LinkComponentAction extends OdoAction {
   }
 
   private List<Component> getTargetComponents(Odo odo, String project) throws IOException {
-    return odo.getComponents(project).stream().filter(component -> component.getState().isOnCluster()).collect(Collectors.toList());
+    return odo.getComponents(project).stream().filter(component -> component.getLiveFeatures().isOnCluster()).collect(Collectors.toList());
   }
 }

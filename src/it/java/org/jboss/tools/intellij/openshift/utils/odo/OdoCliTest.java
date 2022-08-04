@@ -82,11 +82,14 @@ public abstract class OdoCliTest extends BaseTest {
         odo.createProject(project);
     }
 
-    protected void createComponent(String project, String component, boolean push) throws IOException {
+    protected void createComponent(String project, String component, ComponentFeature feature) throws IOException {
         createProject(project);
         cleanLocalProjectDirectory();
         odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,
                 new File(COMPONENT_PATH).getAbsolutePath(), null, null);
+        if (feature != null) {
+            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature);
+        }
     }
 
     private void cleanLocalProjectDirectory() throws IOException {

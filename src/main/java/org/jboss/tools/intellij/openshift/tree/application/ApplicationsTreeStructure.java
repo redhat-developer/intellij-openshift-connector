@@ -213,14 +213,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
-            Component comp = ((ComponentNode) element).getComponent();
-            String suffix = comp.getState().toString();
-            if (!comp.hasContext()) {
-                suffix = "no context" + (suffix.isEmpty()?"":",") + suffix;
-            }
-            String finalSuffix = suffix;
             return new LabelAndIconDescriptor(project, element,
-                    () -> ((ComponentNode) element).getName() + ' ' + finalSuffix,
+                    () -> ((ComponentNode) element).getName() + ' ' + getComponentSuffix((ComponentNode) element),
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
             return new LabelAndIconDescriptor(project, element,
@@ -242,6 +236,15 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeStarterNode)element).getName(), ((DevfileRegistryComponentTypeStarterNode)element).getStarter().getDescription(), STARTER_ICON, parentDescriptor);
         }
         return new LabelAndIconDescriptor(project, element, element.toString(), null, parentDescriptor);
+    }
+
+    private static String getComponentSuffix(ComponentNode element) {
+        Component comp = element.getComponent();
+        String suffix = comp.getLiveFeatures().toString();
+        if (!comp.hasContext()) {
+            suffix = "no context" + (suffix.isEmpty()?"":",") + suffix;
+        }
+        return suffix;
     }
 
     @Override

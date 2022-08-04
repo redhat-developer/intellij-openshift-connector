@@ -47,7 +47,7 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
         return result;
     }
 
-    private ComponentState getComponentState(JsonNode item) {
+    private ComponentFeatures getComponentState(JsonNode item) {
         JSonParser parser = new JSonParser(item);
         return parser.parseComponentState();
 

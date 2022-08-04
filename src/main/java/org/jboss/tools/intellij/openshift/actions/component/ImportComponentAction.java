@@ -23,7 +23,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -31,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ImportComponentAction extends CreateComponentAction {

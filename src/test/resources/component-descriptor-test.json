@@ -1,26 +1,11 @@
 {
-  "kind": "List",
-  "apiVersion": "odo.dev/v1alpha1",
-  "metadata": {},
-  "devfileComponents": [
+  "componentInDevfile": "devcomp",
+  "components": [
     {
-      "kind": "DevfileComponent",
-      "apiVersion": "odo.dev/v1alpha1",
-      "metadata": {
-        "name": "devcomp",
-        "namespace": "devproj",
-        "creationTimestamp": null
-      },
-      "spec": {
-        "componentName": "devcomp",
-        "app": "dev-app",
-        "sourceType": "local"
-      },
-      "status": {
-        "context": "/home/projects/nodejs-ex",
-        "state": "Pushed"
-      }
+      "name": "devcomp",
+      "managedBy": "",
+      "runningIn": [],
+      "projectType": "nodejs"
     }
   ]
-
-}                                                                                                                
+}

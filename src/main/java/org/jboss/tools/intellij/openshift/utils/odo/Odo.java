@@ -66,9 +66,11 @@ public interface Odo {
 
     void deleteComponent(String project, String context, String component, ComponentKind kind) throws IOException;
 
-    void follow(String project, String context, String component) throws IOException;
+    void follow(String project, String context, String component, boolean deploy) throws IOException;
 
-    void log(String project, String context, String component) throws IOException;
+    void log(String project, String context, String component, boolean deploy) throws IOException;
+
+    boolean isLogRunning(String context, String component, boolean deploy) throws IOException;
 
     void createProject(String project) throws IOException;
 

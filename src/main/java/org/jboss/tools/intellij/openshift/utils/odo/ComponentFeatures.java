@@ -43,7 +43,7 @@ public class ComponentFeatures {
         return is(ComponentFeature.DEV);
     }
 
-    public boolean isDeployRunning() {
+    public boolean isDeploy() {
         return is(ComponentFeature.DEPLOY);
     }
 
@@ -61,7 +61,7 @@ public class ComponentFeatures {
         if (isDebug()) {
             first = append(builder, first, ComponentFeature.DEBUG.getLabel());
         }
-        if (isDeployRunning()) {
+        if (isDeploy()) {
             first = append(builder, first, ComponentFeature.DEPLOY.getLabel());
         }
         return builder.toString();
@@ -76,6 +76,6 @@ public class ComponentFeatures {
     }
 
     public boolean isOnCluster() {
-        return isDev() || isDebug() || isDeployRunning();
+        return isDev() || isDebug() || isDeploy();
     }
 }

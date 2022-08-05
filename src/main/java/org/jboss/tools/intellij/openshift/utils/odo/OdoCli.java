@@ -60,6 +60,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -108,7 +109,17 @@ public class OdoCli implements Odo {
 
     private JSonParser swagger;
 
-    private Map<String, Map<ComponentFeature, ProcessHandler>> componentProcesses = new HashMap<>();
+    /*
+     Map of process launched for feature (dev, debug,...) related. Key is component name value is map index by the
+      feature and value is the process handler
+     */
+    private Map<String, Map<ComponentFeature, ProcessHandler>> componentFeatureProcesses = new HashMap<>();
+
+    /*
+     Map of process launched for log activity. Key is component name value is list with 2 process handler index 0 is dev
+     index 1 is deploy
+     */
+    private Map<String, List<ProcessHandler>> componentLogProcesses = new HashMap<>();
 
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
@@ -227,7 +238,10 @@ public class OdoCli implements Odo {
 
     @Override
     public void start(String project, String context, String component, ComponentFeature feature) throws IOException {
-        Map<ComponentFeature, ProcessHandler> componentMap = componentProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        if (feature.getPeer() != null) {
+            stop(project, context, component, feature.getPeer());
+        }
+        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
         ProcessHandler handler = componentMap.get(feature);
         if (handler == null) {
             List<String> args = new ArrayList<>();
@@ -261,7 +275,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
-        Map<ComponentFeature, ProcessHandler> componentMap = componentProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
         ProcessHandler handler = componentMap.remove(feature);
         if (handler != null) {
             stopHandler(handler);
@@ -270,7 +284,7 @@ public class OdoCli implements Odo {
 
     @Override
     public boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException {
-        Map<ComponentFeature, ProcessHandler> componentMap = componentProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
         return componentMap.containsKey(feature);
     }
 
@@ -558,27 +572,57 @@ public class OdoCli implements Odo {
         undeployComponent(project, context, component, true, kind);
     }
 
-    @Override
-    public void follow(String project, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(
-                this.project, WINDOW_TITLE,
-                createWorkingDirectory(context),
-                true,
-                envVars,
-                command,
-                "log", "-f");
+    private void doLog(String context, String component, boolean follow, boolean deploy) throws IOException {
+        List<ProcessHandler> handlers = componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
+        int index = deploy ? 1: 0;
+        ProcessHandler handler = handlers.get(index);
+        if (handler == null) {
+            List<String> args = new ArrayList<>();
+            args.add(command);
+            args.add("logs");
+            if (deploy) {
+                args.add("--deploy");
+            } else {
+                args.add("--dev");
+            }
+            if (follow) {
+                args.add("--follow");
+            }
+            ExecHelper.executeWithTerminal(
+                    this.project, WINDOW_TITLE,
+                    new File(context),
+                    false,
+                    envVars,
+                    (ConsoleView) null,
+                    null,
+                    new ProcessAdapter() {
+                        @Override
+                        public void startNotified(@NotNull ProcessEvent event) {
+                            handlers.set(index, event.getProcessHandler());
+                        }
+
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            handlers.set(index, null);
+                        }
+                    },
+                    args.toArray(new String[args.size()]));
+        }
     }
 
     @Override
-    public void log(String project, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(
-                this.project,
-                WINDOW_TITLE,
-                createWorkingDirectory(context),
-                true,
-                envVars,
-                command,
-                "log");
+    public boolean isLogRunning(String context, String component, boolean deploy) {
+        return componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2])).get(deploy ? 1 : 0) != null;
+    }
+
+    @Override
+    public void follow(String project, String context, String component, boolean deploy) throws IOException {
+        doLog(context, component, true, deploy);
+    }
+
+    @Override
+    public void log(String project, String context, String component, boolean deploy) throws IOException {
+        doLog(context, component, false, deploy);
     }
 
     @Nullable

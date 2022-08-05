@@ -39,7 +39,7 @@ public class UndeployComponentAction extends OdoAction {
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
     if (visible) {
-      visible = ((ComponentNode)selected).getComponent().getLiveFeatures().isDeployRunning();
+      visible = ((ComponentNode)selected).getComponent().getLiveFeatures().isDeploy();
     }
     return visible;
   }

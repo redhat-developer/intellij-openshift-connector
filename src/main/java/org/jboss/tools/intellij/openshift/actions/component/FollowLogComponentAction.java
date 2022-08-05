@@ -23,24 +23,13 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-public class FollowLogComponentAction extends PushedComponentAction {
+public class FollowLogComponentAction extends ShowLogComponentAction {
 
   @Override
   protected String getTelemetryActionName() { return "follow component log"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    Component component = componentNode.getComponent();
-    NamespaceNode namespaceNode = componentNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-        odo.follow(namespaceNode.getName(), component.getPath(), component.getName());
-        sendTelemetryResults(TelemetryResult.SUCCESS);
-      } catch (IOException e) {
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Follow Log"));
-      }
-    });
+    doLog((ComponentNode) selected, odo, true);
   }
 }

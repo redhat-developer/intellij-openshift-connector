@@ -14,8 +14,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", "dev"),
-    DEBUG("debug","dev", "--debug"),
+    DEV("dev", "dev") {
+        public ComponentFeature getPeer() {
+            return DEBUG;
+        }
+    },
+    DEBUG("debug", "dev", "--debug") {
+        public ComponentFeature getPeer() {
+            return DEV;
+        }
+    },
     DEPLOY("deploy", "deploy");
 
     private final String label;
@@ -24,6 +32,10 @@ public enum ComponentFeature {
     private ComponentFeature(String label, String... args) {
         this.label = label;
         this.args = Arrays.asList(args);
+    }
+
+    public ComponentFeature getPeer() {
+        return null;
     }
 
     public static ComponentFeature fromLabel(String label) {

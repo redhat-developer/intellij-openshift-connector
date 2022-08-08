@@ -73,7 +73,7 @@ public interface Component {
 
         @Override
         public void setInfo(ComponentInfo componentInfo) {
-            this.info = info;
+            this.info = componentInfo;
         }
     }
 

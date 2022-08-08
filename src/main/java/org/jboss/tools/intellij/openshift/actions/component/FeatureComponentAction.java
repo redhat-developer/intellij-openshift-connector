@@ -40,8 +40,11 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
-    Component component = ((ComponentNode) selected).getComponent();
-    return visible && component.getInfo().getFeatures().is(feature);
+    if (visible && selected instanceof ComponentNode) {
+      Component component = ((ComponentNode) selected).getComponent();
+      visible = component.getInfo().getFeatures().is(feature);
+    }
+    return visible;
   }
 
   @Override

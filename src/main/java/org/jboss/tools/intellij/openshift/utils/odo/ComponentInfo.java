@@ -26,7 +26,7 @@ public interface ComponentInfo {
 
         private ComponentKind kind;
 
-        private ComponentFeatures features;
+        private ComponentFeatures features = new ComponentFeatures();
 
         public Builder withComponentTypeName(String componentTypeName) {
             this.componentTypeName = componentTypeName;

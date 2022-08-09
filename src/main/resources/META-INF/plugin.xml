@@ -227,7 +227,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" text="Undeploy"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
       <!-- service level -->
       <action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link Component"/>

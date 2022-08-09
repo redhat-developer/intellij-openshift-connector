@@ -25,6 +25,11 @@ public class DescribeComponentActionTest extends ActionTest {
   }
 
   @Override
+  protected void verifyLocalOnlyComponent(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
   protected void verifyRemoteOnlyDevComponent(boolean visible) {
     assertTrue(visible);
   }

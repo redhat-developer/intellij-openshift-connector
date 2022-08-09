@@ -23,4 +23,14 @@ public class LinkComponentActionTest extends ActionTest {
   protected void verifyLocalDevComponent(boolean visible) {
     assertTrue(visible);
   }
+
+  @Override
+  protected void verifyLocalOnlyComponent(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyRemoteOnlyDevComponent(boolean visible) {
+    assertTrue(visible);
+  }
 }

@@ -43,7 +43,9 @@ import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jetbrains.annotations.NotNull;
@@ -246,7 +248,7 @@ public class OdoCli implements Odo {
         if (handler == null) {
             List<String> args = new ArrayList<>();
             args.add(command);
-            args.addAll(feature.getArgs());
+            args.addAll(feature.getStartArgs());
             ExecHelper.executeWithTerminal(
                     this.project, WINDOW_TITLE,
                     new File(context),
@@ -279,6 +281,12 @@ public class OdoCli implements Odo {
         ProcessHandler handler = componentMap.remove(feature);
         if (handler != null) {
             stopHandler(handler);
+            if (!feature.getStopArgs().isEmpty()) {
+                List<String> args = new ArrayList<>();
+                args.add(command);
+                args.addAll(feature.getStopArgs());
+                execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[feature.getStopArgs().size()]));
+            }
         }
     }
 
@@ -545,26 +553,27 @@ public class OdoCli implements Odo {
         if (kind != ComponentKind.OTHER) {
             List<String> args = new ArrayList<>();
             args.add("delete");
+            args.add("component");
             args.add("-f");
             if (context != null) {
-                if (deleteConfig) {
-                    args.add("-a");
+                File dir = createWorkingDirectory(context);
+                try {
+                    execute(dir, command, envVars, args.toArray(new String[0]));
+                } catch (IOException e) {
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
-                execute(new File(context), command, envVars, args.toArray(new String[0]));
+                new File(dir, "devfile.yaml").delete();
+                FileUtils.deleteQuietly(new File(dir, PLUGIN_FOLDER));
             } else {
-                args.add("--project");
+                args.add("--namespace");
                 args.add(project);
+                args.add("--name");
                 args.add(component);
                 execute(command, envVars, args.toArray(new String[0]));
             }
         } else {
             deleteDeployment(project, component);
         }
-    }
-
-    @Override
-    public void undeployComponent(String project, String context, String component, ComponentKind kind) throws IOException {
-        undeployComponent(project,context, component, false, kind);
     }
 
     @Override

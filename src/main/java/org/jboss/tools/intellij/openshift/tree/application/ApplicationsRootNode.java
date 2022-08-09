@@ -119,8 +119,8 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
             try {
                 List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.getPath());
                 descriptors.forEach(descriptor -> {
-                    descriptor.setPath(modulePathFile.getPath());
-                    addContextToSettings(descriptor.getPath(), descriptor);
+                    descriptor.setPath(modulePathFile.toNioPath().toString());
+                    addContextToSettings(modulePathFile.toNioPath().toString(), descriptor);
                 });
             } catch (IOException e) {
             }

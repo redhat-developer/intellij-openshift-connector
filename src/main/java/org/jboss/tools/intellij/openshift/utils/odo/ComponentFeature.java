@@ -11,27 +11,35 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", "dev") {
+    DEV("dev", Collections.singletonList("dev")) {
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
-    DEBUG("debug", "dev", "--debug") {
+    DEBUG("debug", Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;
         }
     },
-    DEPLOY("deploy", "deploy");
+    DEPLOY("deploy", Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
 
     private final String label;
-    private final List<String> args;
+    private final List<String> startArgs;
 
-    private ComponentFeature(String label, String... args) {
+    private final List<String> stopArgs;
+
+    private ComponentFeature(String label, List<String> startArgs, List<String> stopArgs) {
         this.label = label;
-        this.args = Arrays.asList(args);
+        this.startArgs = startArgs;
+        this.stopArgs = stopArgs;
+    }
+
+    private ComponentFeature(String label, List<String> startArgs) {
+        this(label, startArgs, Collections.emptyList());
     }
 
     public ComponentFeature getPeer() {
@@ -51,7 +59,11 @@ public enum ComponentFeature {
         return label;
     }
 
-    public List<String> getArgs() {
-        return args;
+    public List<String> getStartArgs() {
+        return startArgs;
+    }
+
+    public List<String> getStopArgs() {
+        return stopArgs;
     }
 }

@@ -158,37 +158,15 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
 
-  protected void verifyNotPushedURL(boolean visible) {
+  protected void verifyURL(boolean visible) {
     assertFalse(visible);
   }
 
-  protected void verifyPushedURL(boolean visible) {
-    assertFalse(visible);
-  }
-
-  protected void verifyLocallyDeletedURL(boolean visible) {
-    assertFalse(visible);
-  }
-
-  public void testActionOnNotPushedURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Not Pushed", false));
+  public void testActionOnURL() {
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "localhost", "8080"));
     AnAction action = getAction();
     action.update(event);
-    verifyNotPushedURL(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnPushedURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Pushed", false));
-    AnAction action = getAction();
-    action.update(event);
-    verifyPushedURL(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnLocallyDeleteURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Locally Deleted", false));
-    AnAction action = getAction();
-    action.update(event);
-    verifyLocallyDeletedURL(event.getPresentation().isVisible());
+    verifyURL(event.getPresentation().isVisible());
   }
 
   public void testActionOnRegistries() {

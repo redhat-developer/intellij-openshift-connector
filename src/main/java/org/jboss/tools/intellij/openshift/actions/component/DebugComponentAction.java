@@ -110,7 +110,7 @@ public abstract class DebugComponentAction extends OdoAction {
                                     indicator.setIndeterminate(true);
                                     try {
                                             indicator.setText2("Please wait while component is switching to debug mode...");
-                                            odo.start(projectName, component.getPath(), component.getName(), ComponentFeature.DEBUG);
+                                            odo.start(projectName, component.getPath(), component.getName(), ComponentFeature.DEBUG, null);
                                             indicator.checkCanceled();
                                             indicator.setText2("Component pushed!");
                                         odo.debug(

@@ -23,6 +23,7 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.util.Key;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -69,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
@@ -239,7 +241,8 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void start(String project, String context, String component, ComponentFeature feature) throws IOException {
+    public void start(String project, String context, String component, ComponentFeature feature,
+                      Consumer<Boolean> callback) throws IOException {
         if (feature.getPeer() != null) {
             stop(project, context, component, feature.getPeer());
         }
@@ -260,6 +263,13 @@ public class OdoCli implements Odo {
                         @Override
                         public void startNotified(@NotNull ProcessEvent event) {
                             componentMap.put(feature, event.getProcessHandler());
+                        }
+
+                        @Override
+                        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+                            if (callback != null && event.getText().contains(feature.getOutput())) {
+                                callback.accept(true);
+                            }
                         }
 
                         @Override
@@ -467,9 +477,9 @@ public class OdoCli implements Odo {
     @Override
     public List<URL> listURLs(String project, String context, String component) throws IOException {
         if (context != null) {
-            return parseURLs(execute(new File(context), command, envVars, "url", "list", "-o", "json"));
+            return parseURLs(execute(new File(context), command, envVars, "describe", "component", "-o", "json"));
         } else {
-            return parseURLs(execute(command, envVars, "describe", "--project", project, component, "-o", "json"));
+            return Collections.emptyList();
         }
     }
 

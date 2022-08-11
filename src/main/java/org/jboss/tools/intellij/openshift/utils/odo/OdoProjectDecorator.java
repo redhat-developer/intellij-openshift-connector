@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -50,8 +51,9 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void start(String project, String context, String component, ComponentFeature feature) throws IOException {
-        delegate.start(project, context, component, feature);
+    public void start(String project, String context, String component, ComponentFeature feature,
+                      Consumer<Boolean> callback) throws IOException {
+        delegate.start(project, context, component, feature, callback);
     }
 
     @Override

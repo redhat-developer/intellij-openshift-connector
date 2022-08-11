@@ -98,7 +98,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                 return getNamespaces((ApplicationsRootNode) element);
             } else if (element instanceof NamespaceNode) {
                 return getComponentsAndServices(((NamespaceNode) element));
-            } else if (element instanceof DevfileRegistriesNode) {
+            } else if (element instanceof ComponentNode) {
+                return getURLs((ComponentNode) element);
+            }else if (element instanceof DevfileRegistriesNode) {
                 return getRegistries(root, odo);
             } else if (element instanceof DevfileRegistryNode) {
                 return getRegistryComponentTypes((DevfileRegistryNode) element);
@@ -162,6 +164,19 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results.toArray();
     }
 
+    private Object[] getURLs(ComponentNode element) {
+        List<Object> results = new ArrayList<>();
+        Odo odo = element.getRoot().getOdo();
+        try {
+            odo.listURLs(element.getParent().getName(),
+                    element.getComponent().getPath(), element.getName()).forEach(url -> results.add(new URLNode(element, url)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("URLS=" + results);
+        return results.toArray();
+    }
+
     private Object[] getRegistries(ApplicationsRootNode root, Odo odo) {
         List<DevfileRegistryNode> result = new ArrayList<>();
 
@@ -222,8 +237,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
             return new LabelAndIconDescriptor(project, element,
-                    () -> url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
-                    () -> url.isSecure()?URL_SECURE_ICON:URL_ICON, parentDescriptor);
+                    () -> url.getName() + " (" + url.getPort() + ")",
+                    () -> URL_ICON, parentDescriptor);
         } else if (element instanceof MessageNode) {
             return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
         } else if (element instanceof DevfileRegistriesNode) {

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -28,7 +29,7 @@ public interface Odo {
      */
     String getNamespace() throws IOException;
 
-    void start(String project, String context, String component, ComponentFeature feature) throws IOException;
+    void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException;
 
     void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
 

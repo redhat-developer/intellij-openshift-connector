@@ -23,6 +23,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,13 +82,14 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        process(odo, namespaceNode.getName(), component);
-        if (component.getLiveFeatures().is(feature)) {
-          component.getLiveFeatures().removeFeature(feature);
-        } else {
-          component.getLiveFeatures().addFeature(feature);
-        }
-        ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+        process(odo, namespaceNode.getName(), component, res -> {
+          if (component.getLiveFeatures().is(feature)) {
+            component.getLiveFeatures().removeFeature(feature);
+          } else {
+            component.getLiveFeatures().addFeature(feature);
+          }
+          ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+        });
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
         sendTelemetryError(e);
@@ -96,11 +98,12 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     });
   }
 
-  protected void process(Odo odo, String project, Component component) throws IOException {
+  protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback) throws IOException {
     if (odo.isStarted(project, component.getPath(), component.getName(), feature)) {
       odo.stop(project, component.getPath(), component.getName(), feature);
+      callback.accept(true);
     } else {
-      odo.start(project, component.getPath(), component.getName(), feature);
+      odo.start(project, component.getPath(), component.getName(), feature, callback);
     }
   }
 }

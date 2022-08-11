@@ -15,31 +15,35 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", Collections.singletonList("dev")) {
+    DEV("dev", "Your application is now running on the cluster", Collections.singletonList("dev")) {
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
-    DEBUG("debug", Arrays.asList("dev", "--debug")) {
+    DEBUG("debug", "Your application is now running on the cluster", Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;
         }
     },
-    DEPLOY("deploy", Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
+    DEPLOY("deploy", "Your Devfile has been successfully deployed", Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
 
     private final String label;
+
+    private final String output;
+
     private final List<String> startArgs;
 
     private final List<String> stopArgs;
 
-    private ComponentFeature(String label, List<String> startArgs, List<String> stopArgs) {
+    private ComponentFeature(String label, String output, List<String> startArgs, List<String> stopArgs) {
         this.label = label;
+        this.output = output;
         this.startArgs = startArgs;
         this.stopArgs = stopArgs;
     }
 
-    private ComponentFeature(String label, List<String> startArgs) {
-        this(label, startArgs, Collections.emptyList());
+    private ComponentFeature(String label, String output, List<String> startArgs) {
+        this(label, output, startArgs, Collections.emptyList());
     }
 
     public ComponentFeature getPeer() {
@@ -65,5 +69,9 @@ public enum ComponentFeature {
 
     public List<String> getStopArgs() {
         return stopArgs;
+    }
+
+    public CharSequence getOutput() {
+        return output;
     }
 }

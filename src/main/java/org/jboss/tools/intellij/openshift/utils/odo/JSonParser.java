@@ -48,6 +48,11 @@ public class JSonParser {
     private static final String URL_FIELD = "URL";
     private static final String SECURE_FIELD = "secure";
     private static final String SUPPORTED_ODO_FEATURES_FIELD = "supportedOdoFeatures";
+    private static final String LOCAL_ADDRESS_FIELD = "localAddress";
+    private static final String LOCAL_PORT_FIELD = "localPort";
+    private static final String DEV_FORWARDED_PORTS_FIELD = "devForwardedPorts";
+    private static final String RUNNING_IN_FIELD = "runningIn";
+    private static final String CONTAINER_NAME_FIELD = "containerName";
 
 
     private final JsonNode root;
@@ -58,11 +63,8 @@ public class JSonParser {
 
     public List<URL> parseURLS() {
         List<URL> result = new ArrayList<>();
-        if (root.has(ITEMS_FIELD)) {
-            result.addAll(parseURLItems(root.get(ITEMS_FIELD)));
-        }
-        if (root.has(SPEC_FIELD)) {
-            result.addAll(parseURLItems(root.get(SPEC_FIELD).get(URLS_FIELD).get(ITEMS_FIELD)));
+        if (root.has(DEV_FORWARDED_PORTS_FIELD)) {
+            result.addAll(parseURLItems(root.get(DEV_FORWARDED_PORTS_FIELD)));
         }
         return result;
     }
@@ -71,14 +73,12 @@ public class JSonParser {
         List<URL> result = new ArrayList<>();
         urlItems.forEach(item -> {
             //odo incorrectly reports urls created with the web ui without names
-            if (item.get(METADATA_FIELD).has(NAME_FIELD)) {
-                String name = item.get(METADATA_FIELD).get(NAME_FIELD).asText();
-                String protocol = item.get(SPEC_FIELD).has("protocol") ?
-                        item.get(SPEC_FIELD).get("protocol").asText() : "";
-                String host = item.get(SPEC_FIELD).has("host") ?
-                        item.get(SPEC_FIELD).get("host").asText() : "";
-                String port = item.get(SPEC_FIELD).has("port") ? item.get(SPEC_FIELD).get("port").asText() : "0";
-                result.add(URL.of(name, protocol, host, port, item.get("status").get("state").asText(), item.get(SPEC_FIELD).get(SECURE_FIELD).asBoolean()));
+            if (item.has(CONTAINER_NAME_FIELD)) {
+                String name = item.get(CONTAINER_NAME_FIELD).asText();
+                String host = item.has(LOCAL_ADDRESS_FIELD) ?
+                        item.get(LOCAL_ADDRESS_FIELD).asText() : "localhost";
+                String port = item.has(LOCAL_PORT_FIELD) ? item.get(LOCAL_PORT_FIELD).asText() : "8080";
+                result.add(URL.of(name, host, port));
             }
         });
         return result;
@@ -214,8 +214,8 @@ public class JSonParser {
 
     public ComponentFeatures parseComponentState() {
         ComponentFeatures state = new ComponentFeatures();
-        if (root.has("runningIn")) {
-            for(JsonNode st : root.get("runningIn")) {
+        if (root.has(RUNNING_IN_FIELD)) {
+            for(JsonNode st : root.get(RUNNING_IN_FIELD)) {
                 ComponentFeature feature = ComponentFeature.fromLabel(st.asText());
                 if (feature != null) {
                     state.addFeature(feature);

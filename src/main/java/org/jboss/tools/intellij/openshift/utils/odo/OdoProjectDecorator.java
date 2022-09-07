@@ -135,12 +135,6 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createURL(String project, String context, String component, String name,
-                          Integer port, boolean secure, String host) throws IOException {
-        delegate.createURL(project, context, component, name, port, secure, host);
-    }
-
-    @Override
     public void deleteURL(String project, String context, String component, String name) throws IOException {
         delegate.deleteURL(project, context, component, name);
     }

@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
 import static org.junit.Assert.assertNotNull;
 
@@ -88,7 +90,9 @@ public abstract class OdoCliTest extends BaseTest {
         odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,
                 new File(COMPONENT_PATH).getAbsolutePath(), null, null);
         if (feature != null) {
-            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature);
+            AtomicBoolean started = new AtomicBoolean();
+            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature, state -> started.getAndSet(state));
+            await().atMost(15, TimeUnit.MINUTES).untilTrue(started);
         }
     }
 

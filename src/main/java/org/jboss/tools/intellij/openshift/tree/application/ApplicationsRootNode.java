@@ -117,10 +117,9 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContext(VirtualFile modulePathFile) {
         if (modulePathFile != null && modulePathFile.isValid() && getOdo() != null) {
             try {
-                List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.getPath());
+                List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.toNioPath().toString());
                 descriptors.forEach(descriptor -> {
-                    descriptor.setPath(modulePathFile.toNioPath().toString());
-                    addContextToSettings(modulePathFile.toNioPath().toString(), descriptor);
+                    addContextToSettings(descriptor.getPath(), descriptor);
                 });
             } catch (IOException e) {
             }

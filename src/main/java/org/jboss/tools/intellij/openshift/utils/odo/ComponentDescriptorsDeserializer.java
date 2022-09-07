@@ -21,16 +21,18 @@ import java.util.List;
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
 
     public static final String COMPONENT_IN_DEVFILE_FIELD = "componentInDevfile";
+    private final String path;
 
-    public ComponentDescriptorsDeserializer() {
+    public ComponentDescriptorsDeserializer(String path) {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
+        this.path = path;
     }
 
     @Override
     public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) {
         List<ComponentDescriptor> result = new ArrayList<>();
         if (root.has(COMPONENT_IN_DEVFILE_FIELD)) {
-            result.add(new ComponentDescriptor(root.get(COMPONENT_IN_DEVFILE_FIELD).asText()));
+            result.add(new ComponentDescriptor(root.get(COMPONENT_IN_DEVFILE_FIELD).asText(), path));
         }
         return result;
     }

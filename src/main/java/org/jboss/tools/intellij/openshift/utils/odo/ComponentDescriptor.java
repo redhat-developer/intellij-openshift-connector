@@ -16,8 +16,9 @@ public class ComponentDescriptor {
     private String path;
     private final String name;
 
-    public ComponentDescriptor(String name) {
+    public ComponentDescriptor(String name, String path) {
         this.name = name;
+        this.path = path;
     }
 
     public String getName() {

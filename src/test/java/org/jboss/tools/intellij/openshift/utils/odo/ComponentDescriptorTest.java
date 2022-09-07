@@ -30,7 +30,7 @@ public class ComponentDescriptorTest {
   public static void setup() {
     MAPPER = new ObjectMapper();
     SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer());
+    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer("."));
     MAPPER.registerModule(module);
   }
 

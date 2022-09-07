@@ -14,6 +14,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.fest.util.Files;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,7 +44,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         this.feature = feature;
     }
 
-    @Parameterized.Parameters(name = "pushed: {0}")
+    @Parameterized.Parameters(name = "feature: {0}")
     public static Iterable<? extends Object> data() {
         return Arrays.asList(null, ComponentFeature.DEV);
     }
@@ -94,84 +95,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         }
     }
 
-    private void checkCreateComponentAndCreateURL(boolean secure) throws IOException {
-        try {
-            createComponent(project, component, feature);
-            odo.createURL(project, COMPONENT_PATH, component, "url1", 8000, secure, host);
-            List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
-            assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
-        } finally {
-            odo.deleteProject(project);
-        }
-    }
-
     @Test
-    public void checkCreateComponentAndCreateURL() throws IOException {
-        checkCreateComponentAndCreateURL(false);
-    }
-
-    @Test
-    public void checkCreateComponentAndCreateSecureURL() throws IOException {
-        checkCreateComponentAndCreateURL(true);
-    }
-
-    private void checkCreateComponentAndCreateAndDeleteURL(boolean secure) throws IOException {
-        try {
-            List<URL> urls;
-            createComponent(project, component, feature);
-            if (odo.isOpenShift()) {
-                // remove url created automatically for openshift cluster to better visibility of the test
-                urls = odo.listURLs(project, COMPONENT_PATH, component);
-                assertEquals(1, urls.size());
-                odo.deleteURL(project, COMPONENT_PATH, component, urls.get(0).getName());
-                if (feature != null) {
-                    odo.start(project, COMPONENT_PATH, component, feature);
-                }
-                urls = odo.listURLs(project, COMPONENT_PATH, component);
-                assertEquals(0, urls.size());
-            }
-
-            odo.createURL(project, COMPONENT_PATH, component, null, 8000, secure, host);
-            urls = odo.listURLs(project, COMPONENT_PATH, component);
-
-            assertEquals(1, urls.size());
-            assertEquals(URL.State.NOT_PUSHED, urls.get(0).getState());
-            if (feature != null) {
-                odo.start(project, COMPONENT_PATH, component, feature);
-                urls = odo.listURLs(project, COMPONENT_PATH, component);
-                assertEquals(1, urls.size());
-                assertEquals(URL.State.PUSHED, urls.get(0).getState());
-            }
-
-            odo.deleteURL(project, COMPONENT_PATH, component, urls.get(0).getName());
-            urls = odo.listURLs(project, COMPONENT_PATH, component);
-
-            if (feature != null) {
-                assertEquals(1, urls.size());
-                assertEquals(URL.State.LOCALLY_DELETED, urls.get(0).getState());
-                odo.start(project, COMPONENT_PATH, component, feature);
-                urls = odo.listURLs(project, COMPONENT_PATH, component);
-                assertEquals(0, urls.size());
-            } else {
-                assertEquals(0, urls.size());
-            }
-
-        } finally {
-            odo.deleteProject(project);
-        }
-    }
-
-    @Test
-    public void checkCreateComponentAndCreateAndDeleteURL() throws IOException {
-        checkCreateComponentAndCreateAndDeleteURL(false);
-    }
-
-    @Test
-    public void checkCreateComponentAndCreateAndDeleteSecureURL() throws IOException {
-        checkCreateComponentAndCreateAndDeleteURL(true);
-    }
-
-    @Test
+    @Ignore
     public void checkCreateComponentAndLinkService() throws IOException {
         Assume.assumeTrue(feature != null);
         try {
@@ -185,7 +110,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             Service deployedService = deployedServices.get(0);
             assertNotNull(deployedService);
             odo.link(project, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV);
+            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null);
         } finally {
             odo.deleteProject(project);
         }
@@ -193,25 +118,23 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     public void checkCreateComponentAndListURLs() throws IOException {
+        Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
             List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
-            assertEquals(odo.isOpenShift() ? 1 : 0, urls.size());
-            if (odo.isOpenShift()) {
-                assertEquals(feature != null ? URL.State.PUSHED : URL.State.NOT_PUSHED, urls.get(0).getState());
-            }
+            assertEquals(1, urls.size());
         } finally {
             odo.deleteProject(project);
         }
     }
 
     @Test
+    @Ignore
     public void checkCreateComponentAndDebug() throws IOException {
         Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
-            odo.createURL(project, COMPONENT_PATH, component, "url1", 8000, false, host);
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV);
+            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null);
             List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
             assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
             int debugPort;
@@ -241,7 +164,7 @@ public class OdoCliComponentTest extends OdoCliTest {
                     Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject");
             List<Component> components = odo.getComponents(project);
             assertNotNull(components);
-            assertEquals(feature != null ? 1 : 0, components.size());
+            assertEquals(0, components.size());
         } finally {
             odo.deleteProject(project);
         }

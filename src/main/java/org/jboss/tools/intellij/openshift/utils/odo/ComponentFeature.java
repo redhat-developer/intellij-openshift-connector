@@ -15,12 +15,12 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", "Your application is now running on the cluster", Collections.singletonList("dev")) {
+    DEV("dev", "Press Ctrl+c to exit `odo dev` and delete resources from the cluster", Collections.singletonList("dev")) {
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
-    DEBUG("debug", "Your application is now running on the cluster", Arrays.asList("dev", "--debug")) {
+    DEBUG("debug", "Press Ctrl+c to exit `odo dev` and delete resources from the cluster", Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;
         }

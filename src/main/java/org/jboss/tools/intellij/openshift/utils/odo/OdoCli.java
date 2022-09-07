@@ -499,28 +499,6 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createURL(String project, String context, String component, String name, Integer port,
-                          boolean secure, String host) throws IOException {
-        List<String> args = new ArrayList<>();
-        args.add(command);
-        args.add("url");
-        args.add("create");
-        if (StringUtils.isNotEmpty(name)) {
-            args.add(name);
-        }
-        args.add("--port");
-        args.add(port.toString());
-        if (secure) {
-            args.add("--secure");
-        }
-        if (!isOpenShift()){
-            args.add("--host");
-            args.add(host);
-        }
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, args.toArray(new String[0]));
-    }
-
-    @Override
     public void deleteURL(String project, String context, String component, String name) throws IOException {
         execute(new File(context), command, envVars, "url", "delete", "-f", name);
     }
@@ -787,7 +765,7 @@ public class OdoCli implements Odo {
 
     @Override
     public List<ComponentDescriptor> discover(String path) throws IOException {
-        return configureObjectMapper(new ComponentDescriptorsDeserializer()).readValue(
+        return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
                 execute(new File(path), command, envVars, "list", "-o", "json"),
                 new TypeReference<List<ComponentDescriptor>>() {
                 });
@@ -816,15 +794,15 @@ public class OdoCli implements Odo {
     @Override
     public void createDevfileRegistry(String name, String url, String token) throws IOException {
         if (StringUtils.isNotBlank(token)) {
-            execute(command, envVars, "registry", "add", name, url, "--token", token);
+            execute(command, envVars, "preference", "add", "registry", name, url, "--token", token);
         } else {
-            execute(command, envVars, "registry", "add", name, url);
+            execute(command, envVars, "preference", "add", "registry", name, url);
         }
     }
 
     @Override
     public void deleteDevfileRegistry(String name) throws IOException {
-        execute(command, envVars, "registry", "delete", "-f", name);
+        execute(command, envVars, "preference", "remove", "registry", "-f", name);
     }
 
     @Override

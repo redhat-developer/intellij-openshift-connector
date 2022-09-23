@@ -22,19 +22,15 @@ import java.util.Iterator;
 import java.util.List;
 
 public class JSonParser {
-    private static final String ITEMS_FIELD = "items";
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String SPEC_FIELD = "spec";
     private static final String PROJECT_TYPE_FIELD = "projectType";
-    private static final String URLS_FIELD = "urls";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
     private static final String DEVFILE_FIELD = "devfile";
 
     private static final String DEVFILE_DATA_FIELD = "devfileData";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
-    private static final String DESCRIPTION_FIELD = "description";
-    private static final String REGISTRY_NAME_FIELD = "RegistryName";
 
     private static final String PATHS_FIELD = "paths";
     private static final String POST_FIELD = "post";
@@ -42,11 +38,6 @@ public class JSonParser {
     private static final String BODY_VALUE = "body";
     private static final String SCHEMA_FIELD = "schema";
     private static final String DOLLAR_REF_FIELD = "$ref";
-    private static final String ODO_SETTINGS_FIELD = "OdoSettings";
-    private static final String REGISTRY_LIST_FIELD = "RegistryList";
-    private static final String NAME1_FIELD = "Name";
-    private static final String URL_FIELD = "URL";
-    private static final String SECURE_FIELD = "secure";
     private static final String SUPPORTED_ODO_FEATURES_FIELD = "supportedOdoFeatures";
     private static final String LOCAL_ADDRESS_FIELD = "localAddress";
     private static final String LOCAL_PORT_FIELD = "localPort";
@@ -104,18 +95,22 @@ public class JSonParser {
         ComponentFeatures features = new ComponentFeatures();
         if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(SUPPORTED_ODO_FEATURES_FIELD)) {
             JsonNode featuresNode = root.get(DEVFILE_DATA_FIELD).get(SUPPORTED_ODO_FEATURES_FIELD);
-            if (featuresNode.has(ComponentFeature.DEV.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getLabel().toLowerCase()).asBoolean()) {
-                features.addFeature(ComponentFeature.DEV);
-            }
-            if (featuresNode.has(ComponentFeature.DEBUG.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getLabel().toLowerCase()).asBoolean()) {
-                features.addFeature(ComponentFeature.DEBUG);
-            }
-            if (featuresNode.has(ComponentFeature.DEPLOY.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEPLOY.getLabel().toLowerCase()).asBoolean()) {
-                features.addFeature(ComponentFeature.DEPLOY);
-            }
+            getComponentsFeatures(features, featuresNode);
         }
         builder.withFeatures(features);
         return builder.build();
+    }
+
+    private static void getComponentsFeatures(ComponentFeatures features, JsonNode featuresNode) {
+        if (featuresNode.has(ComponentFeature.DEV.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getLabel().toLowerCase()).asBoolean()) {
+            features.addFeature(ComponentFeature.DEV);
+        }
+        if (featuresNode.has(ComponentFeature.DEBUG.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getLabel().toLowerCase()).asBoolean()) {
+            features.addFeature(ComponentFeature.DEBUG);
+        }
+        if (featuresNode.has(ComponentFeature.DEPLOY.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEPLOY.getLabel().toLowerCase()).asBoolean()) {
+            features.addFeature(ComponentFeature.DEPLOY);
+        }
     }
 
 
@@ -198,29 +193,10 @@ public class JSonParser {
         throw new IOException("Invalid data, no 'paths' field");
     }
 
-    public List<DevfileRegistry> parseRegistries() {
-        List<DevfileRegistry> result = new ArrayList<>();
-        if (root.has(ODO_SETTINGS_FIELD) && root.get(ODO_SETTINGS_FIELD).has(REGISTRY_LIST_FIELD) &&
-                root.get(ODO_SETTINGS_FIELD).get(REGISTRY_LIST_FIELD).isArray()) {
-            for(JsonNode item : root.get(ODO_SETTINGS_FIELD).get(REGISTRY_LIST_FIELD)) {
-                String name = item.get(NAME1_FIELD).asText();
-                String url = item.get(URL_FIELD).asText();
-                boolean secure = item.get(SECURE_FIELD).asBoolean();
-                result.add(DevfileRegistry.of(name, url, secure));
-            }
-        }
-        return result;
-    }
-
     public ComponentFeatures parseComponentState() {
         ComponentFeatures state = new ComponentFeatures();
         if (root.has(RUNNING_IN_FIELD)) {
-            for(JsonNode st : root.get(RUNNING_IN_FIELD)) {
-                ComponentFeature feature = ComponentFeature.fromLabel(st.asText());
-                if (feature != null) {
-                    state.addFeature(feature);
-                }
-            }
+            getComponentsFeatures(state, root.get(RUNNING_IN_FIELD));
         }
         return state;
     }

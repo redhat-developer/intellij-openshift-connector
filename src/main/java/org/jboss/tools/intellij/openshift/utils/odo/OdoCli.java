@@ -780,16 +780,9 @@ public class OdoCli implements Odo {
 
     @Override
     public List<DevfileRegistry> listDevfileRegistries() throws IOException {
-        //see https://github.com/redhat-developer/odo/issues/5993
-        Path dir = Paths.get(HOME_FOLDER, PLUGIN_FOLDER);
-        Path config = dir.resolve("preference.yaml");
-        if (Files.exists(config)) {
-            JsonNode root = YAML_MAPPER.readTree(config.toFile());
-            JSonParser parser = new JSonParser(root);
-            return parser.parseRegistries();
-        }
-        return Collections.emptyList();
-    }
+        return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
+                execute(command, envVars, "preference", "view", "-o", "json"),
+                new TypeReference<List<DevfileRegistry>>() {});    }
 
     @Override
     public void createDevfileRegistry(String name, String url, String token) throws IOException {

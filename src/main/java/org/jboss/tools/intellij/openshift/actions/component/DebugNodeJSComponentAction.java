@@ -14,6 +14,7 @@ import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfiguration;
 import com.jetbrains.debugger.wip.JSRemoteDebugConfigurationType;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jetbrains.annotations.NotNull;
 
 public class DebugNodeJSComponentAction extends DebugComponentAction {
@@ -21,8 +22,8 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
     private static final String NODE_JS = "nodejs";
 
     @Override
-    protected boolean isDebuggable(@NotNull String componentTypeName) {
-        return componentTypeName.contains(NODE_JS);
+    protected boolean isDebuggable(@NotNull ComponentInfo componentInfo) {
+        return NODE_JS.equals(componentInfo.getLanguage()) || componentInfo.getComponentTypeName().contains(NODE_JS);
     }
 
     @Override
@@ -41,13 +42,5 @@ public class DebugNodeJSComponentAction extends DebugComponentAction {
             ((JSRemoteDebugConfiguration) configuration).setHost("localhost");
             ((JSRemoteDebugConfiguration) configuration).setPort(port);
         }
-    }
-
-    @Override
-    protected int getPortFromConfiguration(RunConfiguration configuration) {
-        if (configuration instanceof JSRemoteDebugConfiguration) {
-            return ((JSRemoteDebugConfiguration) configuration).getPort();
-        }
-        return -1;
     }
 }

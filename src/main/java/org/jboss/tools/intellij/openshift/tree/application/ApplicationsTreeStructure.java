@@ -173,7 +173,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("URLS=" + results);
         return results.toArray();
     }
 
@@ -237,7 +236,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
             return new LabelAndIconDescriptor(project, element,
-                    () -> url.getName() + " (" + url.getPort() + ")",
+                    () -> url.getName() + " (" + url.getLocalPort() + ")",
                     () -> URL_ICON, parentDescriptor);
         } else if (element instanceof MessageNode) {
             return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);

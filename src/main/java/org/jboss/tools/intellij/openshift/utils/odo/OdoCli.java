@@ -260,6 +260,8 @@ public class OdoCli implements Odo {
                     (ConsoleView) null,
                     null,
                     new ProcessAdapter() {
+                        private boolean callBackCalled = false;
+
                         @Override
                         public void startNotified(@NotNull ProcessEvent event) {
                             componentMap.put(feature, event.getProcessHandler());
@@ -267,8 +269,9 @@ public class OdoCli implements Odo {
 
                         @Override
                         public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                            if (callback != null && event.getText().contains(feature.getOutput())) {
+                            if (callback != null && !callBackCalled && event.getText().contains(feature.getOutput())) {
                                 callback.accept(true);
+                                callBackCalled = true;
                             }
                         }
 

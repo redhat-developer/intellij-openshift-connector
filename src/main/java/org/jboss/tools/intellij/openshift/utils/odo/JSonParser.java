@@ -41,9 +41,11 @@ public class JSonParser {
     private static final String SUPPORTED_ODO_FEATURES_FIELD = "supportedOdoFeatures";
     private static final String LOCAL_ADDRESS_FIELD = "localAddress";
     private static final String LOCAL_PORT_FIELD = "localPort";
+    private static final String CONTAINER_PORT_FIELD = "containerPort";
     private static final String DEV_FORWARDED_PORTS_FIELD = "devForwardedPorts";
     private static final String RUNNING_IN_FIELD = "runningIn";
     private static final String CONTAINER_NAME_FIELD = "containerName";
+    private static final String LANGUAGE_FIELD = "language";
 
 
     private final JsonNode root;
@@ -68,8 +70,9 @@ public class JSonParser {
                 String name = item.get(CONTAINER_NAME_FIELD).asText();
                 String host = item.has(LOCAL_ADDRESS_FIELD) ?
                         item.get(LOCAL_ADDRESS_FIELD).asText() : "localhost";
-                String port = item.has(LOCAL_PORT_FIELD) ? item.get(LOCAL_PORT_FIELD).asText() : "8080";
-                result.add(URL.of(name, host, port));
+                String localPort = item.has(LOCAL_PORT_FIELD) ? item.get(LOCAL_PORT_FIELD).asText() : "8080";
+                String containerPort = item.has(CONTAINER_PORT_FIELD) ? item.get(CONTAINER_PORT_FIELD).asText() : "8080";
+                result.add(URL.of(name, host, localPort, containerPort));
             }
         });
         return result;
@@ -91,6 +94,12 @@ public class JSonParser {
                 root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(PROJECT_TYPE_FIELD)) {
             String componentTypeName = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(PROJECT_TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
+        }
+        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
+                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
+                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(LANGUAGE_FIELD)) {
+            String language = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(LANGUAGE_FIELD).asText();
+            builder.withLanguage(language);
         }
         ComponentFeatures features = new ComponentFeatures();
         if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(SUPPORTED_ODO_FEATURES_FIELD)) {

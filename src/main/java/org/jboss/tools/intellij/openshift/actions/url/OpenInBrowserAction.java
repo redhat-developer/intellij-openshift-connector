@@ -34,6 +34,6 @@ public class OpenInBrowserAction extends OdoAction {
   }
 
   protected String getURL(URL url) {
-    return "http://" + url.getHost() + ":" + url.getPort();
+    return "http://" + url.getHost() + ":" + url.getLocalPort();
   }
 }

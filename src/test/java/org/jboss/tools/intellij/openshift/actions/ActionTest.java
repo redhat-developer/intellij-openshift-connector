@@ -163,7 +163,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "localhost", "8080"));
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "localhost", "8080", "8080"));
     AnAction action = getAction();
     action.update(event);
     verifyURL(event.getPresentation().isVisible());

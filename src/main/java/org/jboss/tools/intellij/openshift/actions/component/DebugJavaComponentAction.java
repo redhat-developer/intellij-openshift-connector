@@ -14,6 +14,7 @@ import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.remote.RemoteConfiguration;
 import com.intellij.execution.remote.RemoteConfigurationType;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -22,8 +23,8 @@ public class DebugJavaComponentAction extends DebugComponentAction {
     private static final String JAVA = "java";
 
     @Override
-    protected boolean isDebuggable(@NotNull String componentTypeName) {
-        return componentTypeName.contains(JAVA);
+    protected boolean isDebuggable(@NotNull ComponentInfo componentInfo) {
+        return JAVA.equals(componentInfo.getLanguage()) || componentInfo.getComponentTypeName().contains(JAVA);
     }
 
     @Override
@@ -44,13 +45,4 @@ public class DebugJavaComponentAction extends DebugComponentAction {
             remoteConfiguration.PORT = port.toString();
         }
     }
-
-    @Override
-    protected int getPortFromConfiguration(RunConfiguration configuration) {
-        if (configuration instanceof RemoteConfiguration) {
-            return Integer.parseInt(((RemoteConfiguration) configuration).PORT);
-        }
-        return -1;
-    }
-
 }

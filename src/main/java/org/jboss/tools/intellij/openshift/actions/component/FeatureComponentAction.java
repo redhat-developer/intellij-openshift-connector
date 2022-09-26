@@ -82,7 +82,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        process(odo, namespaceNode.getName(), component, res -> {
+        process(anActionEvent, odo, namespaceNode.getName(), component, res -> {
           if (component.getLiveFeatures().is(feature)) {
             component.getLiveFeatures().removeFeature(feature);
           } else {
@@ -98,7 +98,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     });
   }
 
-  protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback) throws IOException {
+  protected void process(AnActionEvent anActionEvent, Odo odo, String project, Component component, Consumer<Boolean> callback) throws IOException {
     if (odo.isStarted(project, component.getPath(), component.getName(), feature)) {
       odo.stop(project, component.getPath(), component.getName(), feature);
       callback.accept(true);

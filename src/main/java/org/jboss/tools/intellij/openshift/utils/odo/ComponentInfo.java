@@ -14,6 +14,8 @@ public interface ComponentInfo {
 
     String getComponentTypeName();
 
+    String getLanguage();
+
     boolean isMigrated();
 
     ComponentKind getComponentKind();
@@ -27,6 +29,8 @@ public interface ComponentInfo {
         private ComponentKind kind;
 
         private ComponentFeatures features = new ComponentFeatures();
+
+        private String language;
 
         public Builder withComponentTypeName(String componentTypeName) {
             this.componentTypeName = componentTypeName;
@@ -48,12 +52,22 @@ public interface ComponentInfo {
             return this;
         }
 
+        public Builder withLanguage(String language) {
+            this.language = language;
+            return this;
+        }
+
         public ComponentInfo build() {
             return new ComponentInfo() {
 
                 @Override
                 public String getComponentTypeName() {
                     return componentTypeName;
+                }
+
+                @Override
+                public String getLanguage() {
+                    return language;
                 }
 
                 @Override

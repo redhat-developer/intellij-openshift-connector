@@ -280,4 +280,9 @@ public class OdoProjectDecorator implements Odo {
     public boolean isOpenShift() {
         return delegate.isOpenShift();
     }
+
+    @Override
+    public void migrateComponent(String context, String name) throws IOException {
+        delegate.migrateComponent(context, name);
+    }
 }

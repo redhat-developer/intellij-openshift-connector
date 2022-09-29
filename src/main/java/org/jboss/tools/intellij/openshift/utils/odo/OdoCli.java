@@ -46,7 +46,6 @@ import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jetbrains.annotations.NotNull;
@@ -764,6 +763,11 @@ public class OdoCli implements Odo {
     @Override
     public boolean isOpenShift(){
         return ClusterHelper.getClusterInfo(client).isOpenshift();
+    }
+
+    @Override
+    public void migrateComponent(String context, String name) throws IOException {
+        client.apps().deployments().withLabel(KubernetesLabels.COMPONENT_NAME_LABEL, name).delete();
     }
 
     @Override

@@ -54,6 +54,10 @@ public class JSonParser {
         this.root = root;
     }
 
+    static String get(JsonNode node, String name) {
+        return node.has(name)?node.get(name).asText():null;
+    }
+
     public List<URL> parseURLS() {
         List<URL> result = new ArrayList<>();
         if (root.has(DEV_FORWARDED_PORTS_FIELD)) {

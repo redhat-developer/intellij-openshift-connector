@@ -109,4 +109,13 @@ public interface Odo {
     List<DevfileComponentType> getComponentTypes(String name) throws IOException;
 
     boolean isOpenShift();
+
+    /**
+     * Migrate an existing component to the current odo version.
+     *
+     * @param context the component context path
+     * @param name the component name
+     * @throws IOException
+     */
+    void migrateComponent(String context, String name) throws IOException;
 }

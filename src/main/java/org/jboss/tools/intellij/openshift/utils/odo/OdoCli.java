@@ -197,12 +197,12 @@ public class OdoCli implements Odo {
             if (isOpenShift()) {
                 List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
                 if (!projects.isEmpty()) {
-                    ns = projects.get(0).getMetadata().getNamespace();
+                    ns = projects.get(0).getMetadata().getName();
                 }
             } else {
                 List<Namespace> namespaces = client.namespaces().list().getItems();
                 if (!namespaces.isEmpty()) {
-                    ns = namespaces.get(0).getMetadata().getNamespace();
+                    ns = namespaces.get(0).getMetadata().getName();
                 }
             }
         }

@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateComponentAction extends OdoAction {
@@ -47,6 +49,7 @@ public class CreateComponentAction extends OdoAction {
   public static void execute(ParentableNode<? extends Object> parentNode) {
     CreateComponentAction action = (CreateComponentAction) ActionManager.getInstance().getAction(CreateComponentAction.class.getName());
     NamespaceNode namespaceNode = (NamespaceNode) parentNode;
+    action.telemetrySender = new TelemetrySender(PREFIX_ACTION + action.getTelemetryActionName());
     action.doActionPerformed(namespaceNode, namespaceNode.getRoot().getOdo(), namespaceNode.getName(),
               namespaceNode.getRoot(), namespaceNode.getRoot().getProject());
   }

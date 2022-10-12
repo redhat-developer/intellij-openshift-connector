@@ -138,7 +138,7 @@ public abstract class DebugComponentAction extends FeatureComponentAction {
             String[] ports = urls.stream().
                     map(URL::getContainerPort).toArray(String[]::new);
             if (ports.length == 1) {
-                port = Optional.ofNullable(Integer.parseInt(ports[0]));
+                port = Optional.ofNullable(Integer.parseInt(urls.get(0).getLocalPort()));
             } else if (ports.length > 1) {
                 int index = UIHelper.executeInUI(() -> Messages.showChooseDialog("The component " +
                                 component.getName() +

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new feature for IntelliJ OpenShift Connector
+about: Suggest a new feature for IntelliJ OpenShift Toolkit
 ---
 [kind/Feature]
 

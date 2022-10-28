@@ -1,6 +1,6 @@
 ---
 name: Enhancement
-about: Suggest an enhancement for existing IntelliJ OpenShift Connector functionality
+about: Suggest an enhancement for existing IntelliJ OpenShift Toolkit functionality
 ---
 [kind/Enhancement]
 <!--

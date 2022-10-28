@@ -1,4 +1,4 @@
-## [OpenShift Connector by Red Hat](https://github.com/redhat-developer/intellij-openshift-connector)
+## [OpenShift Toolkit by Red Hat](https://github.com/redhat-developer/intellij-openshift-connector)
 
 ### Usage Data
 

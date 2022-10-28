@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a problem with IntelliJ OpenShift Connector to help us resolve it and improve
+about: Report a problem with IntelliJ OpenShift Toolkit to help us resolve it and improve
 ---
 [kind/bug]
 

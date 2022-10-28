@@ -214,13 +214,10 @@
       <!-- application level -->
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
-      <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.application.DescribeApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DescribeApplicationAction" text="Describe"/>
-      <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" id="org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction" text="Delete"/>
       <!-- component level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.url.CreateURLAction" id="org.jboss.tools.intellij.openshift.actions.url.CreateURLAction" text="Create URL"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.CreateStorageAction" text="Create Storage"/>
+      <separator/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" text="Describe"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>
@@ -229,22 +226,15 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" text="Link Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>
       <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.PushComponentAction" text="Push"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction" text="Watch"/>
-      <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.UndeployComponentAction" text="Undeploy"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
       <!-- service level -->
       <action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" text="Describe"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
-      <!-- storage level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" id="org.jboss.tools.intellij.openshift.actions.storage.DeleteStorageAction" text="Delete"/>
       <!-- URL level -->
       <action class="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" text="Open in Browser"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" id="org.jboss.tools.intellij.openshift.actions.url.DeleteURLAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
       <!-- registry management -->

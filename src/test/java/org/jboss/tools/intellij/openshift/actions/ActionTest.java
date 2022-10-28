@@ -16,18 +16,17 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.ui.treeStructure.Tree;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeatures;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
@@ -93,18 +92,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
     assertFalse(visible);
   }
 
-  public void testActionOnApplication() {
-    ApplicationNode applicationNode = mock(ApplicationNode.class);
-    AnActionEvent event = createEvent(applicationNode);
-    AnAction action = getAction();
-    action.update(event);
-    verifyApplication(event.getPresentation().isVisible());
-  }
-
-  protected void verifyApplication(boolean visible) {
-    assertFalse(visible);
-  }
-
   private AnActionEvent setupActionOnComponent(Component component) {
     ComponentNode componentNode = mock(ComponentNode.class);
     when(componentNode.getComponent()).thenReturn(component);
@@ -128,30 +115,31 @@ public abstract class ActionTest extends BasePlatformTestCase {
     return builder.build();
   }
 
-  public void testActionOnPushedComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.PUSHED, ".", mockInfo()));
-    verifyPushedComponent(event.getPresentation().isVisible());
+  public void testActionOnLocalDevComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV),
+            ".", mockInfo()));
+    verifyLocalDevComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyPushedComponent(boolean visible) {
+  protected void verifyLocalDevComponent(boolean visible) {
     assertFalse(visible);
   }
 
-  public void testActionOnNotPushedComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NOT_PUSHED, ".", mockInfo()));
-    verifyNotPushedComponent(event.getPresentation().isVisible());
+  public void testActionOnLocalOnlyComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(), ".", mockInfo()));
+    verifyLocalOnlyComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyNotPushedComponent(boolean visible) {
+  protected void verifyLocalOnlyComponent(boolean visible) {
     assertFalse(visible);
   }
 
-  public void testActionOnNoContextComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", ComponentState.NO_CONTEXT, mockInfo()));
-    verifyNoContextComponent(event.getPresentation().isVisible());
+  public void testActionOnRemoteOnlyDevComponent() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
+    verifyRemoteOnlyDevComponent(event.getPresentation().isVisible());
   }
 
-  protected void verifyNoContextComponent(boolean visible) {
+  protected void verifyRemoteOnlyDevComponent(boolean visible) {
     assertFalse(visible);
   }
 
@@ -170,49 +158,15 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
 
-  public void testActionOnStorage() {
-    PersistentVolumeClaimNode storageNode = mock(PersistentVolumeClaimNode.class);
-    AnActionEvent event = createEvent(storageNode);
-    AnAction action = getAction();
-    action.update(event);
-    verifyStorage(event.getPresentation().isVisible());
-  }
-
-  protected void verifyNotPushedURL(boolean visible) {
+  protected void verifyURL(boolean visible) {
     assertFalse(visible);
   }
 
-  protected void verifyPushedURL(boolean visible) {
-    assertFalse(visible);
-  }
-
-  protected void verifyLocallyDeletedURL(boolean visible) {
-    assertFalse(visible);
-  }
-
-  public void testActionOnNotPushedURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Not Pushed", false));
+  public void testActionOnURL() {
+    AnActionEvent event = setupActionOnURL(URL.of("url1", "localhost", "8080", "8080"));
     AnAction action = getAction();
     action.update(event);
-    verifyNotPushedURL(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnPushedURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Pushed", false));
-    AnAction action = getAction();
-    action.update(event);
-    verifyPushedURL(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnLocallyDeleteURL() {
-    AnActionEvent event = setupActionOnURL(URL.of("url1", "https", "localhost", "8080", "Locally Deleted", false));
-    AnAction action = getAction();
-    action.update(event);
-    verifyLocallyDeletedURL(event.getPresentation().isVisible());
-  }
-
-  protected void verifyStorage(boolean visible) {
-    assertFalse(visible);
+    verifyURL(event.getPresentation().isVisible());
   }
 
   public void testActionOnRegistries() {

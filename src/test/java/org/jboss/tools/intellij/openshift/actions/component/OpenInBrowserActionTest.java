@@ -21,12 +21,7 @@ public class OpenInBrowserActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyPushedURL(boolean visible) {
-    assertTrue(visible);
-  }
-
-  @Override
-  protected void verifyLocallyDeletedURL(boolean visible) {
+  protected void verifyURL(boolean visible) {
     assertTrue(visible);
   }
 }

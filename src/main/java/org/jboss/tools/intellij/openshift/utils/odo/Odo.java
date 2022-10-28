@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -28,26 +29,24 @@ public interface Odo {
      */
     String getNamespace() throws IOException;
 
-    void describeApplication(String project, String application) throws IOException;
+    void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException;
 
-    void deleteApplication(String project, String application) throws IOException;
+    void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
 
-    void push(String project, String application, String context, String component) throws IOException;
+    boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException;
 
-    void pushWithDebug(String project, String application, String context, String component) throws IOException;
+    void describeComponent(String project, String context, String component) throws IOException;
 
-    void describeComponent(String project, String application, String context, String component) throws IOException;
+    List<ComponentMetadata> analyze(String path) throws IOException;
 
-    void watch(String project, String application, String context, String component) throws IOException;
+    void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException;
 
-    void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException;
-
-    void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+    void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
                        String service, ObjectNode spec, boolean wait) throws IOException;
 
-    String getServiceTemplate(String project, String application, String service) throws IOException;
+    String getServiceTemplate(String project, String service) throws IOException;
 
-    void deleteService(String project, String application, Service service) throws IOException;
+    void deleteService(String project, Service service) throws IOException;
 
     List<DevfileComponentType> getComponentTypes() throws IOException;
 
@@ -55,22 +54,19 @@ public interface Odo {
 
     void describeServiceTemplate(String template) throws IOException;
 
-    List<URL> listURLs(String project, String application, String context, String component) throws IOException;
+    List<URL> listURLs(String project, String context, String component) throws IOException;
 
-    ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException;
+    ComponentInfo getComponentInfo(String project, String component, String path, ComponentKind kind) throws IOException;
 
-    void createURL(String project, String application, String context, String component, String name, Integer port,
-                   boolean secure, String host) throws IOException;
+    void deleteURL(String project, String context, String component, String name) throws IOException;
 
-    void deleteURL(String project, String application, String context, String component, String name) throws IOException;
+    void deleteComponent(String project, String context, String component, ComponentKind kind) throws IOException;
 
-    void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException;
+    void follow(String project, String context, String component, boolean deploy) throws IOException;
 
-    void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException;
+    void log(String project, String context, String component, boolean deploy) throws IOException;
 
-    void follow(String project, String application, String context, String component) throws IOException;
-
-    void log(String project, String application, String context, String component) throws IOException;
+    boolean isLogRunning(String context, String component, boolean deploy) throws IOException;
 
     void createProject(String project) throws IOException;
 
@@ -80,13 +76,9 @@ public interface Odo {
 
     void logout() throws IOException;
 
-    List<Application> getApplications(String project) throws IOException;
+    List<Component> getComponents(String project) throws IOException;
 
-    List<Component> getComponents(String project, String application) throws IOException;
-
-    List<Service> getServices(String project, String application) throws IOException;
-
-    List<Storage> getStorages(String project, String application, String context, String component) throws IOException;
+    List<Service> getServices(String project) throws IOException;
 
     void listComponents() throws IOException;
 
@@ -94,17 +86,13 @@ public interface Odo {
 
     void about() throws IOException;
 
-    void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException;
-
-    void deleteStorage(String project, String application, String context, String component, String storage) throws IOException;
-
-    void link(String project, String application, String context, String component, String target) throws IOException;
+    void link(String project, String context, String component, String target) throws IOException;
 
     String consoleURL() throws IOException;
 
-    void debug(String project, String application, String context, String component, Integer port) throws IOException;
+    void debug(String project, String context, String component, Integer port) throws IOException;
 
-    DebugStatus debugStatus(String project, String application, String context, String component) throws IOException;
+    DebugStatus debugStatus(String project, String context, String component) throws IOException;
 
     java.net.URL getMasterUrl();
 
@@ -121,4 +109,13 @@ public interface Odo {
     List<DevfileComponentType> getComponentTypes(String name) throws IOException;
 
     boolean isOpenShift();
+
+    /**
+     * Migrate an existing component to the current odo version.
+     *
+     * @param context the component context path
+     * @param name the component name
+     * @throws IOException
+     */
+    void migrateComponent(String context, String name) throws IOException;
 }

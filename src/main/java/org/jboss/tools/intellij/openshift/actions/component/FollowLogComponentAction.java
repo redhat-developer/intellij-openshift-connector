@@ -13,7 +13,6 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -24,25 +23,13 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-public class FollowLogComponentAction extends PushedComponentAction {
+public class FollowLogComponentAction extends ShowLogComponentAction {
 
   @Override
   protected String getTelemetryActionName() { return "follow component log"; }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    Component component = componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-        odo.follow(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName());
-        sendTelemetryResults(TelemetryResult.SUCCESS);
-      } catch (IOException e) {
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Follow Log"));
-      }
-    });
+    doLog((ComponentNode) selected, odo, true);
   }
 }

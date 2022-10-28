@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Component>> {
 
-    public static final String DEVFILE_FIELD = "devfileComponents";
+    public static final String COMPONENTS_FIELD = "components";
     public static final String OTHER_FIELD = "otherComponents";
     public static final String METADATA_FIELD = "metadata";
     public static final String NAME_FIELD = "name";
@@ -33,8 +33,7 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     @Override
     public List<Component> convert(JsonNode root, DeserializationContext context) {
         List<Component> result = new ArrayList<>();
-        result.addAll(parseComponents(root.get(DEVFILE_FIELD), ComponentKind.DEVFILE));
-        result.addAll(parseComponents(root.get(OTHER_FIELD), ComponentKind.OTHER));
+        result.addAll(parseComponents(root.get(COMPONENTS_FIELD), ComponentKind.DEVFILE));
         return result;
     }
 
@@ -42,10 +41,16 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
         List<Component> result = new ArrayList<>();
         if (tree != null) {
             for (JsonNode item : tree) {
-                result.add(Component.of(getName(item), getComponentInfo(item, kind)));
+                result.add(Component.of(getName(item), getComponentState(item), getComponentInfo(item, kind)));
             }
         }
         return result;
+    }
+
+    private ComponentFeatures getComponentState(JsonNode item) {
+        JSonParser parser = new JSonParser(item);
+        return parser.parseComponentState();
+
     }
 
     private ComponentInfo getComponentInfo(JsonNode item, ComponentKind kind) {
@@ -54,8 +59,8 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     }
 
     private String getName(JsonNode item) {
-        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
-            return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
+        if (item.has(NAME_FIELD)) {
+            return item.get(NAME_FIELD).asText();
         } else {
             return "";
         }

@@ -17,7 +17,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.util.Key;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -38,10 +44,11 @@ import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +62,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
@@ -80,6 +90,8 @@ public class OdoCli implements Odo {
     private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
+
+    private static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
     private static final String WINDOW_TITLE = "OpenShift";
 
     private static final String METADATA_FIELD = "metadata";
@@ -99,6 +111,18 @@ public class OdoCli implements Odo {
     private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
 
     private JSonParser swagger;
+
+    /*
+     Map of process launched for feature (dev, debug,...) related. Key is component name value is map index by the
+      feature and value is the process handler
+     */
+    private Map<String, Map<ComponentFeature, ProcessHandler>> componentFeatureProcesses = new HashMap<>();
+
+    /*
+     Map of process launched for log activity. Key is component name value is list with 2 process handler index 0 is dev
+     index 1 is deploy
+     */
+    private Map<String, List<ProcessHandler>> componentLogProcesses = new HashMap<>();
 
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
@@ -173,12 +197,12 @@ public class OdoCli implements Odo {
             if (isOpenShift()) {
                 List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
                 if (!projects.isEmpty()) {
-                    ns = projects.get(0).getMetadata().getNamespace();
+                    ns = projects.get(0).getMetadata().getName();
                 }
             } else {
                 List<Namespace> namespaces = client.namespaces().list().getItems();
                 if (!namespaces.isEmpty()) {
-                    ns = namespaces.get(0).getMetadata().getNamespace();
+                    ns = namespaces.get(0).getMetadata().getName();
                 }
             }
         }
@@ -216,66 +240,107 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void describeApplication(String project, String application) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, false, envVars, command, "app", "describe", application, "--project", project);
+    public void start(String project, String context, String component, ComponentFeature feature,
+                      Consumer<Boolean> callback) throws IOException {
+        if (feature.getPeer() != null) {
+            stop(project, context, component, feature.getPeer());
+        }
+        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        ProcessHandler handler = componentMap.get(feature);
+        if (handler == null) {
+            List<String> args = new ArrayList<>();
+            args.add(command);
+            args.addAll(feature.getStartArgs());
+            ExecHelper.executeWithTerminal(
+                    this.project, WINDOW_TITLE,
+                    new File(context),
+                    false,
+                    envVars,
+                    (ConsoleView) null,
+                    null,
+                    new ProcessAdapter() {
+                        private boolean callBackCalled = false;
+
+                        @Override
+                        public void startNotified(@NotNull ProcessEvent event) {
+                            componentMap.put(feature, event.getProcessHandler());
+                        }
+
+                        @Override
+                        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+                            if (callback != null && !callBackCalled && event.getText().contains(feature.getOutput())) {
+                                callback.accept(true);
+                                callBackCalled = true;
+                            }
+                        }
+
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            componentMap.remove(feature);
+                        }
+                    },
+                    args.toArray(new String[args.size()]));
+        }
+    }
+
+    private void stopHandler(ProcessHandler handler) {
+        handler.destroyProcess();
     }
 
     @Override
-    public void deleteApplication(String project, String application) throws IOException {
-        execute(command, envVars, "app", "delete", application, "-f", "--project", project);
+    public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
+        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        ProcessHandler handler = componentMap.remove(feature);
+        if (handler != null) {
+            stopHandler(handler);
+            if (!feature.getStopArgs().isEmpty()) {
+                List<String> args = new ArrayList<>();
+                args.add(command);
+                args.addAll(feature.getStopArgs());
+                execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[feature.getStopArgs().size()]));
+            }
+        }
     }
 
     @Override
-    public void push(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(
-                this.project, WINDOW_TITLE,
-                new File(context),
-                true,
-                envVars,
-                command,
-                "push");
+    public boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException {
+        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
+        return componentMap.containsKey(feature);
     }
 
     @Override
-    public void pushWithDebug(String project, String application, String context, String component) throws IOException {
-        ExecHelper.execute(command, true, new File(context), envVars, "push", "--debug");
+    public void describeComponent(String project, String context, String component) throws IOException {
+        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe", "component");
     }
 
     @Override
-    public void describeComponent(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe");
+    public List<ComponentMetadata> analyze(String path) throws IOException {
+        return configureObjectMapper(new ComponentMetadatasDeserializer()).readValue(
+                execute(new File(path), command, envVars, "analyze", "-o", "json"),
+                new TypeReference<List<ComponentMetadata>>() {
+                });
     }
 
     @Override
-    public void watch(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), false, envVars, command, "watch");
-    }
-
-    @Override
-    public void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
         List<String> args = new ArrayList<>();
-        args.add(command);
-        args.add("create");
+        args.add("init");
         if (StringUtils.isNotBlank(devfile)) {
-            args.add("--devfile");
+            args.add("--devfile-path");
             args.add(devfile);
         } else {
             if (StringUtils.isNotBlank(starter)) {
-                args.add("--starter=" + starter);
+                args.add("--starter");
+                args.add(starter);
             }
+            args.add("--devfile");
             args.add(componentType);
-            args.add("--registry");
+            args.add("--devfile-registry");
             args.add(registryName);
         }
+        args.add("--name");
         args.add(component);
-        args.add("--project");
-        args.add(project);
-        args.add("--app");
-        args.add(application);
-        if (push) {
-            args.add("--now");
-        }
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(source), true, envVars, args.toArray(new String[0]));
+        execute(new File(source), command, envVars, args.toArray(new String[0]));
     }
 
     /**
@@ -323,7 +388,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+    public void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
                               String service, ObjectNode spec, boolean wait) throws IOException {
         try {
             CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(serviceCRD);
@@ -344,12 +409,12 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public String getServiceTemplate(String project, String application, String service) throws IOException {
+    public String getServiceTemplate(String project, String service) throws IOException {
         throw new IOException("Not implemented by odo yet");
     }
 
     @Override
-    public void deleteService(String project, String application, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
+    public void deleteService(String project, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
         try {
             CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
             client.customResource(context).delete(project, service.getName());
@@ -361,7 +426,7 @@ public class OdoCli implements Odo {
     @Override
     public List<DevfileComponentType> getComponentTypes() throws IOException {
         return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
-                execute(command, envVars, "catalog", "list", "components", "-o", "json"),
+                execute(command, envVars, "registry", "list", "-o", "json"),
                 new TypeReference<List<DevfileComponentType>>() {
                 });
     }
@@ -412,53 +477,31 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
+    public List<URL> listURLs(String project, String context, String component) throws IOException {
         if (context != null) {
-            return parseURLs(execute(new File(context), command, envVars, "url", "list", "-o", "json"));
+            return parseURLs(execute(new File(context), command, envVars, "describe", "component", "-o", "json"));
         } else {
-            return parseURLs(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"));
+            return Collections.emptyList();
         }
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, String path,
+    public ComponentInfo getComponentInfo(String project, String component, String path,
                                           ComponentKind kind) throws IOException {
         if (path != null) {
-            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"), kind);
+            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind);
         } else {
-            return parseComponentInfo(execute(command, envVars, "describe", "--project", project, "--app", application, component, "-o", "json"), kind);
+            return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind);
         }
     }
 
     private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentInfo(kind);
+        return parser.parseDescribeComponentInfo(kind);
     }
 
     @Override
-    public void createURL(String project, String application, String context, String component, String name, Integer port,
-                          boolean secure, String host) throws IOException {
-        List<String> args = new ArrayList<>();
-        args.add(command);
-        args.add("url");
-        args.add("create");
-        if (StringUtils.isNotEmpty(name)) {
-            args.add(name);
-        }
-        args.add("--port");
-        args.add(port.toString());
-        if (secure) {
-            args.add("--secure");
-        }
-        if (!isOpenShift()){
-            args.add("--host");
-            args.add(host);
-        }
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, new File(context), true, envVars, args.toArray(new String[0]));
-    }
-
-    @Override
-    public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
+    public void deleteURL(String project, String context, String component, String name) throws IOException {
         execute(new File(context), command, envVars, "url", "delete", "-f", name);
     }
 
@@ -471,7 +514,7 @@ public class OdoCli implements Odo {
      * - BuildConfig
      * - ImageStreams
      */
-    private void deleteDeployment(String project, String application, String deployment) throws IOException {
+    private void deleteDeployment(String project, String deployment) throws IOException {
         try {
             client.apps().deployments().inNamespace(project).withName(deployment)
                     .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
@@ -495,61 +538,90 @@ public class OdoCli implements Odo {
         }
     }
 
-    private void undeployComponent(String project, String application, String context, String component,
+    private void undeployComponent(String project, String context, String component,
                                    boolean deleteConfig, ComponentKind kind) throws IOException {
         if (kind != ComponentKind.OTHER) {
             List<String> args = new ArrayList<>();
             args.add("delete");
+            args.add("component");
             args.add("-f");
             if (context != null) {
-                if (deleteConfig) {
-                    args.add("-a");
+                File dir = createWorkingDirectory(context);
+                try {
+                    execute(dir, command, envVars, args.toArray(new String[0]));
+                } catch (IOException e) {
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
-                execute(new File(context), command, envVars, args.toArray(new String[0]));
+                new File(dir, "devfile.yaml").delete();
+                FileUtils.deleteQuietly(new File(dir, PLUGIN_FOLDER));
             } else {
-                args.add("--project");
+                args.add("--namespace");
                 args.add(project);
-                args.add("--app");
-                args.add(application);
+                args.add("--name");
                 args.add(component);
                 execute(command, envVars, args.toArray(new String[0]));
             }
         } else {
-            deleteDeployment(project, application, component);
+            deleteDeployment(project, component);
         }
     }
 
     @Override
-    public void undeployComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-        undeployComponent(project, application, context, component, false, kind);
+    public void deleteComponent(String project, String context, String component, ComponentKind kind) throws IOException {
+        undeployComponent(project, context, component, true, kind);
+    }
+
+    private void doLog(String context, String component, boolean follow, boolean deploy) throws IOException {
+        List<ProcessHandler> handlers = componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
+        int index = deploy ? 1: 0;
+        ProcessHandler handler = handlers.get(index);
+        if (handler == null) {
+            List<String> args = new ArrayList<>();
+            args.add(command);
+            args.add("logs");
+            if (deploy) {
+                args.add("--deploy");
+            } else {
+                args.add("--dev");
+            }
+            if (follow) {
+                args.add("--follow");
+            }
+            ExecHelper.executeWithTerminal(
+                    this.project, WINDOW_TITLE,
+                    new File(context),
+                    false,
+                    envVars,
+                    (ConsoleView) null,
+                    null,
+                    new ProcessAdapter() {
+                        @Override
+                        public void startNotified(@NotNull ProcessEvent event) {
+                            handlers.set(index, event.getProcessHandler());
+                        }
+
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            handlers.set(index, null);
+                        }
+                    },
+                    args.toArray(new String[args.size()]));
+        }
     }
 
     @Override
-    public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-        undeployComponent(project, application, context, component, true, kind);
+    public boolean isLogRunning(String context, String component, boolean deploy) {
+        return componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2])).get(deploy ? 1 : 0) != null;
     }
 
     @Override
-    public void follow(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(
-                this.project, WINDOW_TITLE,
-                createWorkingDirectory(context),
-                true,
-                envVars,
-                command,
-                "log", "-f");
+    public void follow(String project, String context, String component, boolean deploy) throws IOException {
+        doLog(context, component, true, deploy);
     }
 
     @Override
-    public void log(String project, String application, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(
-                this.project,
-                WINDOW_TITLE,
-                createWorkingDirectory(context),
-                true,
-                envVars,
-                command,
-                "log");
+    public void log(String project, String context, String component, boolean deploy) throws IOException {
+        doLog(context, component, false, deploy);
     }
 
     @Nullable
@@ -563,12 +635,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void createProject(String project) throws IOException {
-        execute(command, envVars, "project", "create", project, "-w");
+        execute(command, envVars, "create", "namespace", project, "-w");
     }
 
     @Override
     public void deleteProject(String project) throws IOException {
-        execute(command, envVars, "project", "delete", project, "-f", "-w");
+        execute(command, envVars, "delete", "namespace", project, "-f", "-w");
     }
 
     @Override
@@ -585,29 +657,19 @@ public class OdoCli implements Odo {
         execute(command, envVars, "logout");
     }
 
-    private List<Application> parseApplications(String json) throws IOException {
-        JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseApplications();
-    }
-
     @Override
-    public List<Application> getApplications(String project) throws IOException {
-        return parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json"));
-    }
-
-    @Override
-    public List<Component> getComponents(String project, String application) throws IOException {
+    public List<Component> getComponents(String project) throws IOException {
         return configureObjectMapper(new ComponentDeserializer()).readValue(
-                execute(command, envVars, "list", "--app", application, "--project", project, "-o", "json"),
+                execute(command, envVars, "list", "--namespace", project, "-o", "json"),
                 new TypeReference<List<Component>>() {
                 });
     }
 
     @Override
-    public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project, String application) throws IOException {
-        try {
+    public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project) throws IOException {
+        /*try {
             return configureObjectMapper(new ServiceDeserializer()).readValue(
-                    execute(command, envVars, "service", "list", "--app", application, "--project", project, "-o", "json"),
+                    execute(command, envVars, "service", "list", "--project", project, "-o", "json"),
                     new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
                     });
         } catch (IOException e) {
@@ -616,27 +678,14 @@ public class OdoCli implements Odo {
                 return Collections.emptyList();
             }
             throw e;
-        }
+        }*/
+        return Collections.emptyList();
     }
 
     protected LabelSelector getLabelSelector(String application, String component) {
         return new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application)
                 .addToMatchLabels(KubernetesLabels.COMPONENT_NAME_LABEL, component)
                 .build();
-    }
-
-    @Override
-    public List<Storage> getStorages(String project, String application, String context, String component) throws IOException {
-        if (context != null) {
-            return configureObjectMapper(new StoragesDeserializer()).readValue(
-                    execute(new File(context), command, envVars, "storage", "list", "-o", "json"),
-                    new TypeReference<List<Storage>>() {
-                    });
-        } else {
-            return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
-                    .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
-                            map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());
-        }
     }
 
     @Override
@@ -655,22 +704,12 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
-        execute(new File(context), command, envVars, "storage", "create", name, "--path", mountPath, "--size", storageSize);
-    }
-
-    @Override
-    public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
-        execute(new File(context), command, envVars, "storage", "delete", storage, "-f");
-    }
-
-    @Override
-    public void link(String project, String application, String context, String component, String target) throws IOException {
+    public void link(String project, String context, String component, String target) throws IOException {
         execute(new File(context), command, envVars, "link", target);
     }
 
     @Override
-    public void debug(String project, String application, String context, String component, Integer port) throws IOException {
+    public void debug(String project, String context, String component, Integer port) throws IOException {
         ExecHelper.executeWithTerminal(
                 this.project,
                 WINDOW_TITLE,
@@ -682,7 +721,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
+    public DebugStatus debugStatus(String project, String context, String component) throws IOException {
         try {
             String json = execute(new File(context), command, envVars, "debug", "info", "-o", "json");
             JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
@@ -727,39 +766,43 @@ public class OdoCli implements Odo {
     }
 
     @Override
+    public void migrateComponent(String context, String name) throws IOException {
+        client.apps().deployments().withLabel(KubernetesLabels.COMPONENT_NAME_LABEL, name).delete();
+    }
+
+    @Override
     public List<ComponentDescriptor> discover(String path) throws IOException {
-        return configureObjectMapper(new ComponentDescriptorsDeserializer()).readValue(
-                execute(new File(path), command, envVars, "list", "--path", ".", "-o", "json"),
+        return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
+                execute(new File(path), command, envVars, "list", "-o", "json"),
                 new TypeReference<List<ComponentDescriptor>>() {
                 });
     }
 
     @Override
     public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
-        String json = execute(command, envVars, "catalog", "describe", "component", componentType, "-o", "json");
+        String json = execute(command, envVars, "registry", "list", "--devfile-registry", registryName, "--devfile", componentType, "-o", "json");
         JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-        return parser.parseComponentTypeInfo(registryName);
+        return parser.parseComponentTypeInfo();
     }
 
     @Override
     public List<DevfileRegistry> listDevfileRegistries() throws IOException {
         return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
-                execute(command, envVars, "registry", "list", "-o", "json"),
-                new TypeReference<List<DevfileRegistry>>() {});
-    }
+                execute(command, envVars, "preference", "view", "-o", "json"),
+                new TypeReference<List<DevfileRegistry>>() {});    }
 
     @Override
     public void createDevfileRegistry(String name, String url, String token) throws IOException {
         if (StringUtils.isNotBlank(token)) {
-            execute(command, envVars, "registry", "add", name, url, "--token", token);
+            execute(command, envVars, "preference", "add", "registry", name, url, "--token", token);
         } else {
-            execute(command, envVars, "registry", "add", name, url);
+            execute(command, envVars, "preference", "add", "registry", name, url);
         }
     }
 
     @Override
     public void deleteDevfileRegistry(String name) throws IOException {
-        execute(command, envVars, "registry", "delete", "-f", name);
+        execute(command, envVars, "preference", "remove", "registry", "-f", name);
     }
 
     @Override

@@ -8,11 +8,12 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.tree.application;
+package org.jboss.tools.intellij.openshift.actions.component;
 
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
-public class ApplicationNode extends ParentableNode<NamespaceNode> {
-    public ApplicationNode(NamespaceNode parent, String name) {
-        super(parent.getRoot(), parent, name);
-    }
+public class DeployComponentAction extends FeatureComponentAction {
+  public DeployComponentAction() {
+    super(ComponentFeature.DEPLOY);
+  }
 }

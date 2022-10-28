@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -50,76 +51,61 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void describeApplication(String project, String application) throws IOException {
-        delegate.describeApplication(project, application);
+    public void start(String project, String context, String component, ComponentFeature feature,
+                      Consumer<Boolean> callback) throws IOException {
+        delegate.start(project, context, component, feature, callback);
     }
 
     @Override
-    public void deleteApplication(String project, String application) throws IOException {
-        final IOException[] exception = {null};
-        getComponents(project, application).forEach(component -> {
-            try {
-                deleteComponent(project, application, component.getPath(), component.getName(),
-                        component.getInfo().getComponentKind());
-            } catch (IOException e) {
-                exception[0] = e;
-            }
-        });
-        if (exception[0] != null) {
-            throw exception[0];
-        }
+    public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
+        delegate.stop(project, context, component, feature);
     }
 
     @Override
-    public void push(String project, String application, String context, String component) throws IOException {
-        delegate.push(project, application, context, component);
+    public boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException {
+        return delegate.isStarted(project, context, component, feature);
     }
 
     @Override
-    public void pushWithDebug(String project, String application, String context, String component) throws IOException {
-        delegate.pushWithDebug(project, application, context, component);
+    public void describeComponent(String project, String context, String component) throws IOException {
+        delegate.describeComponent(project, context, component);
     }
 
     @Override
-    public void describeComponent(String project, String application, String context, String component) throws IOException {
-        delegate.describeComponent(project, application, context, component);
+    public List<ComponentMetadata> analyze(String path) throws IOException {
+        return delegate.analyze(path);
     }
 
     @Override
-    public void watch(String project, String application, String context, String component) throws IOException {
-        delegate.watch(project, application, context, component);
-    }
-
-    @Override
-    public void createComponent(String project, String application, String componentType, String registryName, String component, String source, String devfile, String starter, boolean push) throws IOException {
+    public void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
             FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
             File tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
-            delegate.createComponent(project, application, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter, push);
+            delegate.createComponent(project, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);
             FileUtils.deleteQuietly(tmpdir);
             VirtualFile[] files = new VirtualFile[] {VfsUtil.findFileByIoFile(sourceDir,true)};
             VfsUtil.markDirtyAndRefresh(false, true, true, files);
         } else {
-            delegate.createComponent(project, application, componentType, registryName, component, source, devfile, starter, push);
+            delegate.createComponent(project, componentType, registryName, component, source, devfile, starter);
         }
     }
 
     @Override
-    public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+    public void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
                               String service, ObjectNode spec, boolean wait) throws IOException {
-        delegate.createService(project, application, serviceTemplate, serviceCRD, service, spec, wait);
+        delegate.createService(project, serviceTemplate, serviceCRD, service, spec, wait);
     }
 
     @Override
-    public String getServiceTemplate(String project, String application, String service) throws IOException {
-        return delegate.getServiceTemplate(project, application, service);
+    public String getServiceTemplate(String project, String service) throws IOException {
+        return delegate.getServiceTemplate(project, service);
     }
 
     @Override
-    public void deleteService(String project, String application, Service service) throws IOException {
-        delegate.deleteService(project, application, service);
+    public void deleteService(String project, Service service) throws IOException {
+        delegate.deleteService(project, service);
     }
 
     @Override
@@ -138,50 +124,43 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
-        return delegate.listURLs(project, application, context, component);
+    public List<URL> listURLs(String project, String context, String component) throws IOException {
+        return delegate.listURLs(project, context, component);
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String application, String component, String path,
+    public ComponentInfo getComponentInfo(String project, String component, String path,
                                           ComponentKind kind) throws IOException {
-        return delegate.getComponentInfo(project, application, component, path, kind);
+        return delegate.getComponentInfo(project, component, path, kind);
     }
 
     @Override
-    public void createURL(String project, String application, String context, String component, String name,
-                          Integer port, boolean secure, String host) throws IOException {
-        delegate.createURL(project, application, context, component, name, port, secure, host);
+    public void deleteURL(String project, String context, String component, String name) throws IOException {
+        delegate.deleteURL(project, context, component, name);
     }
 
     @Override
-    public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
-        delegate.deleteURL(project, application, context, component, name);
-    }
-
-    @Override
-    public void undeployComponent(String project, String application, String context, String component,
-                                  ComponentKind kind) throws IOException {
-        delegate.undeployComponent(project, application, context, component, kind);
-    }
-
-    @Override
-    public void deleteComponent(String project, String application, String context, String component,
+    public void deleteComponent(String project, String context, String component,
                                 ComponentKind kind) throws IOException {
         if (context != null) {
             root.removeContext(new File(context));
         }
-        delegate.deleteComponent(project, application, context, component, kind);
+        delegate.deleteComponent(project, context, component, kind);
     }
 
     @Override
-    public void follow(String project, String application, String context, String component) throws IOException {
-        delegate.follow(project, application, context, component);
+    public void follow(String project, String context, String component, boolean deploy) throws IOException {
+        delegate.follow(project, context, component, deploy);
     }
 
     @Override
-    public void log(String project, String application, String context, String component) throws IOException {
-        delegate.log(project, application, context, component);
+    public void log(String project, String context, String component, boolean deploy) throws IOException {
+        delegate.log(project, context, component, deploy);
+    }
+
+    @Override
+    public boolean isLogRunning(String context, String component, boolean deploy) throws IOException {
+        return delegate.isLogRunning(context, component, deploy);
     }
 
     @Override
@@ -203,46 +182,28 @@ public class OdoProjectDecorator implements Odo {
     public void logout() throws IOException {
         delegate.logout();
     }
-
+    
     @Override
-    public List<Application> getApplications(String project) throws IOException {
-        List<Application> applications = delegate.getApplications(project);
-        root.getComponents().forEach((path, component) -> {
-            if (component.getProject().equals(project) && applications.stream().noneMatch(application -> application.getName().equals(component.getApplication()))) {
-                applications.add(Application.of(component.getApplication()));
-            }
-        });
-        return applications;
-    }
-
-    @Override
-    public List<Component> getComponents(String project, String application) throws IOException {
-        List<Component> components = delegate.getComponents(project, application);
+    public List<Component> getComponents(String project) throws IOException {
+        List<Component> components = delegate.getComponents(project);
         for (Map.Entry<String, ComponentDescriptor> entry : root.getComponents().entrySet()) {
             String path = entry.getKey();
-            ComponentDescriptor comp = entry.getValue();
-            if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
-                Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(comp.getName())).findFirst();
-                if (found.isPresent()) {
-                    found.get().setState(ComponentState.PUSHED);
-                    found.get().setPath(path);
-                } else {
-                    components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path,
-                            getComponentInfo(project, application, comp.getName(), path, ComponentKind.DEVFILE)));
-                }
+            ComponentDescriptor componentDescriptor = entry.getValue();
+                Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(componentDescriptor.getName())).findFirst();
+            if (found.isPresent()) {
+                found.get().setPath(path);
+                found.get().setInfo(getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE));
+            } else {
+                components.add(Component.of(componentDescriptor.getName(), new ComponentFeatures(), path,
+                        getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE)));
             }
         }
         return components;
     }
 
     @Override
-    public List<Service> getServices(String project, String application) throws IOException {
-        return delegate.getServices(project, application);
-    }
-
-    @Override
-    public List<Storage> getStorages(String project, String application, String context, String component) throws IOException {
-        return delegate.getStorages(project, application, context, component);
+    public List<Service> getServices(String project) throws IOException {
+        return delegate.getServices(project);
     }
 
     @Override
@@ -261,28 +222,18 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
-        delegate.createStorage(project, application, context, component, name, mountPath, storageSize);
+    public void link(String project, String context, String component, String target) throws IOException {
+        delegate.link(project, context, component, target);
     }
 
     @Override
-    public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
-        delegate.deleteStorage(project, application, context, component, storage);
+    public void debug(String project, String context, String component, Integer port) throws IOException {
+        delegate.debug(project, context, component, port);
     }
 
     @Override
-    public void link(String project, String application, String context, String component, String target) throws IOException {
-        delegate.link(project, application, context, component, target);
-    }
-
-    @Override
-    public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-        delegate.debug(project, application, context, component, port);
-    }
-
-    @Override
-    public DebugStatus debugStatus(String project, String application, String context, String component) throws IOException {
-        return delegate.debugStatus(project, application, context, component);
+    public DebugStatus debugStatus(String project, String context, String component) throws IOException {
+        return delegate.debugStatus(project, context, component);
     }
 
     @Override
@@ -328,5 +279,10 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public boolean isOpenShift() {
         return delegate.isOpenShift();
+    }
+
+    @Override
+    public void migrateComponent(String context, String name) throws IOException {
+        delegate.migrateComponent(context, name);
     }
 }

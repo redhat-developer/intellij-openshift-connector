@@ -21,13 +21,12 @@ import java.util.List;
 
 public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
 
-    private static final String ITEMS_FIELD = "items";
-    private static final String DEVFILE_REGISTRY = "Registry";
-    private static final String DEVFILE_DISPLAY_NAME_FIELD = "DisplayName";
-    private static final String DEVFILE_DESCRIPTION_FIELD = "Description";
-    private static final String DEVFILE_LANGUAGE_FIELD = "Language";
-    private static final String DEVFILE_TAGS_FIELD = "Tags";
-    private static final String DEVFILE_NAME_FIELD = "Name";
+    private static final String DEVFILE_REGISTRY = "registry";
+    private static final String DEVFILE_DISPLAY_NAME_FIELD = "displayName";
+    private static final String DEVFILE_DESCRIPTION_FIELD = "description";
+    private static final String DEVFILE_LANGUAGE_FIELD = "language";
+    private static final String DEVFILE_TAGS_FIELD = "tags";
+    private static final String DEVFILE_NAME_FIELD = "name";
 
     public ComponentTypesDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
@@ -36,7 +35,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     @Override
     public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt){
         List<ComponentType> result = new ArrayList<>();
-        result.addAll(parseDevfileItems(root.get(ITEMS_FIELD)));
+        result.addAll(parseDevfileItems(root));
         return result;
     }
     private static String get(JsonNode node, String fieldName) {

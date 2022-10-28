@@ -30,7 +30,7 @@ public class ComponentDescriptorTest {
   public static void setup() {
     MAPPER = new ObjectMapper();
     SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer());
+    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer("."));
     MAPPER.registerModule(module);
   }
 
@@ -56,8 +56,6 @@ public class ComponentDescriptorTest {
     //DevfileDescriptor
     ComponentDescriptor devfileDescriptor = descriptors.get(0);
     Assert.assertNotNull(devfileDescriptor);
-    Assert.assertEquals("dev-app", devfileDescriptor.getApplication());
-    Assert.assertEquals("devproj", devfileDescriptor.getProject());
     Assert.assertEquals("devcomp", devfileDescriptor.getName());
   }
 }

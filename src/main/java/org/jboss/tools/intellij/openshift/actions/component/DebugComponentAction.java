@@ -31,26 +31,26 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
-import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PROP_DEBUG_COMPONENT_LANGUAGE;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-public abstract class DebugComponentAction extends OdoAction {
+public abstract class DebugComponentAction extends FeatureComponentAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(DebugComponentAction.class);
 
@@ -59,11 +59,8 @@ public abstract class DebugComponentAction extends OdoAction {
     private ExecutionEnvironment environment;
 
     protected DebugComponentAction() {
-        super(ComponentNode.class);
+        super(ComponentFeature.DEBUG);
     }
-
-    @Override
-    protected String getTelemetryActionName() { return "debug component"; }
 
     @Override
     public boolean isVisible(Object selected) {
@@ -71,78 +68,39 @@ public abstract class DebugComponentAction extends OdoAction {
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = componentNode.getComponent();
-            return (isPushed(component) && isDebuggable(component.getInfo().getComponentTypeName()));
+            return (hasContext(component) && isDebuggable(component.getInfo()));
         }
         return false;
     }
 
-    private boolean isPushed(Component component) {
-        return component.getState() == ComponentState.PUSHED;
+    private boolean hasContext(Component component) {
+        return component.hasContext();
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-        ComponentNode componentNode = (ComponentNode) selected;
-        Component component = componentNode.getComponent();
-        ApplicationNode applicationNode = componentNode.getParent();
-        NamespaceNode namespaceNode = applicationNode.getParent();
+    protected void process(AnActionEvent anActionEvent, Odo odo, String project, Component component,
+                           Consumer<Boolean> callback) throws IOException {
+        callback = callback.andThen(b -> process(b, anActionEvent, odo, project, component));
+        super.process(anActionEvent, odo, project, component, callback);
+    }
 
+    protected void process(boolean res, AnActionEvent anActionEvent, Odo odo, String namespace, Component component) {
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
             sendTelemetryResults(TelemetryResult.ABORTED);
             return;
         }
 
-        RunManager runManager = RunManager.getInstance(project);
-        final Optional<Integer> port = createOrFindPortFromConfiguration(runManager, component);
-        port.ifPresent(portNumber -> executeDebug(project, component, odo, applicationNode.getName(), namespaceNode.getName(), portNumber));
+        if (component.getLiveFeatures().isDebug()) {
+            RunManager runManager = RunManager.getInstance(project);
+            final Optional<Integer> port = createOrUpdateConfiguration(odo, runManager, namespace, component);
+            port.ifPresent(portNumber -> executeDebug(project, component, odo, namespace, portNumber));
+        }
     }
 
-    private void executeDebug(Project project, Component component, Odo odo, String applicationName, String projectName, Integer port) {
+    private void executeDebug(Project project, Component component, Odo odo, String projectName, Integer port) {
         telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
         ExecHelper.submit(() -> {
-            try {
-                // run odo debug if not already running
-                if (checkOdoDebugNotRunning(odo, projectName, applicationName, component)) {
-                    ProgressManager.getInstance().run(
-                            new Task.Modal(project, "Starting odo", true) {
-                                public void run(@NotNull ProgressIndicator indicator) {
-                                    indicator.setText("Starting debugger session for the component "
-                                            + component.getName() + ".");
-                                    indicator.setIndeterminate(true);
-                                    try {
-                                            indicator.setText2("Please wait while component is switching to debug mode...");
-                                            odo.pushWithDebug(projectName, applicationName, component.getPath(), component.getName());
-                                            indicator.checkCanceled();
-                                            indicator.setText2("Component pushed!");
-                                        odo.debug(
-                                                projectName,
-                                                applicationName,
-                                                component.getPath(),
-                                                component.getName(),
-                                                port);
-                                        indicator.checkCanceled();
-                                        while (!checkOdoDebugRunning(odo, projectName, applicationName, component)) {
-                                            Thread.sleep(10L);
-                                            indicator.checkCanceled();
-                                        }
-                                    } catch (IOException | InterruptedException e) {
-                                        sendTelemetryError(e);
-                                        UIHelper.executeInUI(() -> Messages.showErrorDialog(
-                                                "Error: " + e.getLocalizedMessage(), "Odo Debug"));
-                                        if (e instanceof InterruptedException)
-                                            Thread.currentThread().interrupt();
-                                    }
-                                }
-                            });
-
-                }
-            } catch (IOException e) {
-                sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog(
-                        "Error: " + e.getLocalizedMessage(), "Odo Debug"));
-                return;
-            }
             // check if local debugger process is already running.
             if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
                 UIHelper.executeInUI(() ->
@@ -170,64 +128,47 @@ public abstract class DebugComponentAction extends OdoAction {
 
     }
 
-    private boolean checkOdoDebugNotRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
-        return odo.debugStatus(
-                projectName,
-                applicationName,
-                component.getPath(),
-                component.getName()) == Constants.DebugStatus.NOT_RUNNING;
-
-    }
-
-    private boolean checkOdoDebugRunning(Odo odo, String projectName, String applicationName, Component component) throws IOException {
-        return odo.debugStatus(
-                projectName,
-                applicationName,
-                component.getPath(),
-                component.getName()) == Constants.DebugStatus.RUNNING;
-
-    }
-
-    private Optional<Integer> createOrFindPortFromConfiguration(RunManager runManager, Component component) {
+    private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, String namespace,
+                                                          Component component) {
         ConfigurationType configurationType = getConfigurationType();
         String configurationName = component.getName() + " Remote Debug";
-        Integer port;
-
-        //lookup if existing config already exist, based on name and type
-        runSettings = runManager.findConfigurationByTypeAndName(
-                configurationType.getId(), configurationName);
-        if (runSettings == null) {
-            // no run configuration found, create one and assign an available port
-            runSettings = runManager.createConfiguration(
-                    configurationName, configurationType.getConfigurationFactories()[0]);
-            // also reset environment
-            environment = null;
-            try {
-                // find an available port and use it
-                ServerSocket serverSocket = new ServerSocket(0);
-                port = serverSocket.getLocalPort();
-                serverSocket.close();
-                // delegates configuration of run configuration
-                initConfiguration(runSettings.getConfiguration(), port);
-                runSettings.getConfiguration().setAllowRunningInParallel(false);
-                runManager.addConfiguration(runSettings);
-            } catch (IOException e) {
-                telemetrySender.error(e);
-                Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Odo Debug");
-                return Optional.empty();
-            }
-        } else {
-            port = getPortFromConfiguration(runSettings.getConfiguration());
-            if (port == -1) {
-                String message = "Error when retrieving local port from configuration.";
-                telemetrySender.error(message);
-                Messages.showErrorDialog(message, "Odo Debug");
-                return Optional.empty();
+        Optional<Integer> port = Optional.empty();
+        try {
+            List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
+            String[] ports = urls.stream().
+                    map(URL::getContainerPort).toArray(String[]::new);
+            if (ports.length == 1) {
+                port = Optional.ofNullable(Integer.parseInt(urls.get(0).getLocalPort()));
+            } else if (ports.length > 1) {
+                int index = UIHelper.executeInUI(() -> Messages.showChooseDialog("The component " +
+                                component.getName() +
+                                " has several ports to connect to,\nchoose the one the debugger will connect to",
+                        "Choose debugger port", ports, ports[0], Messages.getQuestionIcon()));
+                if (index >=0) {
+                    port = Optional.of(Integer.parseInt(urls.get(index).getLocalPort()));
+                }
             }
 
+            if (port.isPresent()) {
+                //lookup if existing config already exist, based on name and type
+                runSettings = runManager.findConfigurationByTypeAndName(
+                        configurationType.getId(), configurationName);
+                if (runSettings == null) {
+                    // no run configuration found, create one and assign the selected port
+                    runSettings = runManager.createConfiguration(
+                            configurationName, configurationType.getConfigurationFactories()[0]);
+                    // also reset environment
+                    environment = null;
+                    runSettings.getConfiguration().setAllowRunningInParallel(false);
+                    runManager.addConfiguration(runSettings);
+                }
+                initConfiguration(runSettings.getConfiguration(), port.get());
+                runManager.setSelectedConfiguration(runSettings);
+            }
+        } catch (IOException e) {
+            LOG.warn(e.getLocalizedMessage(), e);
         }
-        runManager.setSelectedConfiguration(runSettings);
-        return Optional.of(port);
+        return port;
     }
 
     private ExecutionEnvironment getEnvironment() {
@@ -243,14 +184,12 @@ public abstract class DebugComponentAction extends OdoAction {
         return environment;
     }
 
-    protected abstract boolean isDebuggable(@NotNull String componentTypeName);
+    protected abstract boolean isDebuggable(@NotNull ComponentInfo componentInfo);
 
     protected abstract String getDebugLanguage();
 
     protected abstract ConfigurationType getConfigurationType();
 
     protected abstract void initConfiguration(RunConfiguration configuration, Integer port);
-
-    protected abstract int getPortFromConfiguration(RunConfiguration configuration);
 
 }

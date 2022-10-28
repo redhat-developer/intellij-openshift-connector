@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jboss.tools.intellij.openshift.actions.application.DeleteApplicationAction;
 
 public class DeleteComponentActionTest extends ActionTest {
     @Override
@@ -21,17 +20,17 @@ public class DeleteComponentActionTest extends ActionTest {
     }
 
     @Override
-    protected void verifyPushedComponent(boolean visible) {
+    protected void verifyLocalDevComponent(boolean visible) {
         assertTrue(visible);
     }
 
     @Override
-    protected void verifyNotPushedComponent(boolean visible) {
+    protected void verifyLocalOnlyComponent(boolean visible) {
         assertTrue(visible);
     }
 
     @Override
-    protected void verifyNoContextComponent(boolean visible) {
+    protected void verifyRemoteOnlyDevComponent(boolean visible) {
         assertTrue(visible);
     }
 

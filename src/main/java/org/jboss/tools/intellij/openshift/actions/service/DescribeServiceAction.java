@@ -14,7 +14,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -35,11 +34,10 @@ public class DescribeServiceAction extends OdoAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
-    ApplicationNode applicationNode = serviceNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    NamespaceNode namespaceNode = serviceNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        String template = odo.getServiceTemplate(namespaceNode.getName(), applicationNode.getName(), serviceNode.getName());
+        String template = odo.getServiceTemplate(namespaceNode.getName(), serviceNode.getName());
         odo.describeServiceTemplate(template);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {

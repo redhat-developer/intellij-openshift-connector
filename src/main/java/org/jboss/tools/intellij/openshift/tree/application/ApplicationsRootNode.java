@@ -11,6 +11,9 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -39,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
 public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener {
     private final Project project;
@@ -110,6 +115,19 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
 
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
+            if (descriptor.isPreOdo3()) {
+                try {
+                    getOdo().migrateComponent(path, descriptor.getName());
+                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Component migration",
+                            "The component " + descriptor.getName() + " has been migrated to odo 3.x",
+                            NotificationType.INFORMATION), project);
+                } catch (IOException e) {
+                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Component migration",
+                            "The component " + descriptor.getName() + " couldn't be migrated to odo 3.x",
+                            NotificationType.INFORMATION), project);
+                }
+
+            }
             components.put(path, descriptor);
         }
     }
@@ -117,8 +135,10 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContext(VirtualFile modulePathFile) {
         if (modulePathFile != null && modulePathFile.isValid() && getOdo() != null) {
             try {
-                List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.getPath());
-                descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
+                List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.toNioPath().toString());
+                descriptors.forEach(descriptor -> {
+                    addContextToSettings(descriptor.getPath(), descriptor);
+                });
             } catch (IOException e) {
             }
         }

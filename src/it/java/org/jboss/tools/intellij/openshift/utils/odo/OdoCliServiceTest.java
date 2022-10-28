@@ -19,18 +19,18 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@Ignore
 public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
     public void checkCreateService() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            createService(project, application, serviceTemplate, crd, service);
+            createService(project, serviceTemplate, crd, service);
         } finally {
             odo.deleteProject(project);
         }
@@ -40,14 +40,13 @@ public class OdoCliServiceTest extends OdoCliTest {
     @Ignore("getServiceTemplate not implemented")
     public void checkCreateServiceAndGetTemplate() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            createService(project, application, serviceTemplate, crd, service);
-            String template = odo.getServiceTemplate(project, application, service);
+            createService(project, serviceTemplate, crd, service);
+            String template = odo.getServiceTemplate(project, service);
             assertNotNull(template);
             assertEquals(SERVICE_TEMPLATE, template);
         } finally {
@@ -58,17 +57,16 @@ public class OdoCliServiceTest extends OdoCliTest {
     @Test
     public void checkCreateDeleteService() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
-        String application = APPLICATION_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
             createProject(project);
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            createService(project, application, serviceTemplate, crd, service);
-            List<Service> services = odo.getServices(project, application);
+            createService(project, serviceTemplate, crd, service);
+            List<Service> services = odo.getServices(project);
             assertNotNull(services);
             assertEquals(1, services.size());
-            odo.deleteService(project, application, services.get(0));
+            odo.deleteService(project, services.get(0));
         } finally {
             odo.deleteProject(project);
         }

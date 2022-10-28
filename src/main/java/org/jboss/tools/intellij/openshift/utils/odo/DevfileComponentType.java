@@ -10,11 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import com.redhat.devtools.alizer.api.DevfileType;
-
 import java.util.List;
 
-public final class DevfileComponentType extends AbstractComponentType implements DevfileType {
+public final class DevfileComponentType extends AbstractComponentType {
 
     private final String displayName;
     private final String description;
@@ -50,11 +48,6 @@ public final class DevfileComponentType extends AbstractComponentType implements
 
     public List<String> getTags() {
         return tags;
-    }
-
-    @Override
-    public String getProjectType() {
-        return null;
     }
 
     @Override

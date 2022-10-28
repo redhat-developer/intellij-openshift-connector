@@ -18,11 +18,9 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentState;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
@@ -44,17 +42,13 @@ public class LinkComponentAction extends OdoAction {
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
-    if (visible) {
-      Component comp = ((ComponentNode)selected).getComponent();
-      visible = (comp.getState() == ComponentState.PUSHED);
-    }
     return visible;
   }
 
-  protected String getSelectedTargetComponent(Odo odo, String project, String application, String component) throws IOException {
+  protected String getSelectedTargetComponent(Odo odo, String project, String component) throws IOException {
     String targetComponent = null;
 
-    List<Component> components = odo.getComponents(project, application)
+    List<Component> components = odo.getComponents(project)
             .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
     if (!components.isEmpty()) {
       if (components.size() == 1) {
@@ -71,16 +65,15 @@ public class LinkComponentAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component sourceComponent = componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        String targetComponent = getSelectedTargetComponent(odo, namespaceNode.getName(), applicationNode.getName(), sourceComponent.getName());
+        String targetComponent = getSelectedTargetComponent(odo, namespaceNode.getName(), sourceComponent.getName());
           if (targetComponent != null) {
               Notification notification = new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Linking component to " + targetComponent,
                       NotificationType.INFORMATION);
               Notifications.Bus.notify(notification);
-              odo.link(namespaceNode.getName(), applicationNode.getName(), sourceComponent.getPath(), sourceComponent.getName(), targetComponent);
+              odo.link(namespaceNode.getName(), sourceComponent.getPath(), sourceComponent.getName(), targetComponent);
               notification.expire();
               Notifications.Bus.notify(new Notification(Constants.GROUP_DISPLAY_ID, "Link component", "Component linked to " + targetComponent,
                       NotificationType.INFORMATION));

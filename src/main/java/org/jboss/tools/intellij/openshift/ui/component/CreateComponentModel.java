@@ -13,11 +13,10 @@ package org.jboss.tools.intellij.openshift.ui.component;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardModel;
-import com.redhat.devtools.alizer.api.LanguageRecognizer;
-import com.redhat.devtools.alizer.api.RecognizerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentMetadata;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -28,18 +27,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class CreateComponentModel extends WizardModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateComponentModel.class);
-    private static final LanguageRecognizer recognizer = new RecognizerFactory().createLanguageRecognizer();
-
     private final Project project;
     private String name = "";
     private String context = "";
-    private String application = "app";
-    private boolean applicationReadOnly;
-    private boolean pushAfterCreate = true;
+    private boolean devModeAfterCreate = true;
 
     private final List<DevfileComponentType> devfileTypes;
     private ComponentType selectedComponentType;
@@ -107,9 +103,13 @@ public class CreateComponentModel extends WizardModel {
         setSelectedComponentStarter(null);
         if (!projectHasDevfile) {
             try {
-                DevfileComponentType type = recognizer.selectDevFileFromTypes(context, devfileTypes);
-                if (type != null) {
-                    setSelectedComponentType(type);
+                List<ComponentMetadata> types = odo.analyze(context);
+                if (!types.isEmpty()) {
+                    ComponentMetadata metadata = types.get(0);
+                    Optional<DevfileComponentType> type = devfileTypes.stream().filter(t -> t.getDevfileRegistry().getName().equals(metadata.getRegistry()) && t.getName().equals(metadata.getComponentType())).findFirst();
+                    if (type.isPresent()) {
+                        setSelectedComponentType(type.get());
+                    }
                 }
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
@@ -117,28 +117,12 @@ public class CreateComponentModel extends WizardModel {
         }
     }
 
-    public String getApplication() {
-        return application;
+    public boolean isDevModeAfterCreate() {
+        return devModeAfterCreate;
     }
 
-    public void setApplication(String application) {
-        this.application = application;
-    }
-
-    public boolean isApplicationReadOnly() {
-        return applicationReadOnly;
-    }
-
-    public void setApplicationReadOnly(boolean applicationReadOnly) {
-        this.applicationReadOnly = applicationReadOnly;
-    }
-
-    public boolean isPushAfterCreate() {
-        return pushAfterCreate;
-    }
-
-    public void setPushAfterCreate(boolean pushAfterCreate) {
-        this.pushAfterCreate = pushAfterCreate;
+    public void setDevModeAfterCreate(boolean pushAfterCreate) {
+        this.devModeAfterCreate = pushAfterCreate;
     }
 
     public ComponentType getSelectedComponentType() {
@@ -162,7 +146,7 @@ public class CreateComponentModel extends WizardModel {
     }
 
     public boolean isValid() {
-        return StringUtils.isNotBlank(getName()) && StringUtils.isNotBlank(getApplication()) &&
+        return StringUtils.isNotBlank(getName()) &&
                 StringUtils.isNotBlank(getContext()) &&
                 (isProjectHasDevfile() || getSelectedComponentType() != null);
     }

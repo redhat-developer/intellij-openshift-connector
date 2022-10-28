@@ -20,8 +20,17 @@ public class LinkServiceActionTest extends ActionTest {
     return new LinkServiceAction();
   }
 
+  protected void verifyLocalDevComponent(boolean visible) {
+    assertTrue(visible);
+  }
+
   @Override
-  protected void verifyPushedComponent(boolean visible) {
+  protected void verifyLocalOnlyComponent(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyRemoteOnlyDevComponent(boolean visible) {
     assertTrue(visible);
   }
 }

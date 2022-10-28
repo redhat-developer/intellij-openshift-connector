@@ -15,7 +15,6 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
@@ -39,8 +38,7 @@ public class DeleteComponentAction extends OdoAction {
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
-    ApplicationNode applicationNode = componentNode.getParent();
-    NamespaceNode namespaceNode = applicationNode.getParent();
+    NamespaceNode namespaceNode = componentNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog("Delete Component '" + component.getName() + "'.\nAre you sure?", "Delete Component",
       Messages.getQuestionIcon())) {
       sendTelemetryResults(TelemetryResult.ABORTED);
@@ -49,7 +47,7 @@ public class DeleteComponentAction extends OdoAction {
 
     CompletableFuture.runAsync(() -> {
       try {
-        odo.deleteComponent(namespaceNode.getName(), applicationNode.getName(), component.getPath(), component.getName(),
+        odo.deleteComponent(namespaceNode.getName(), component.getPath(), component.getName(),
                 component.getInfo().getComponentKind());
         ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(componentNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);

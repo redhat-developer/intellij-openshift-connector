@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
 import static org.junit.Assert.assertNotNull;
 
@@ -82,15 +84,16 @@ public abstract class OdoCliTest extends BaseTest {
         odo.createProject(project);
     }
 
-    protected void createComponent(String project, String application, String component, boolean push) throws IOException {
+    protected void createComponent(String project, String component, ComponentFeature feature) throws IOException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponent(project, application, "java-springboot", REGISTRY_NAME, component, new File(COMPONENT_PATH).getAbsolutePath(), null, null, push);
-    }
-
-    protected void createStorage(String project, String application, String component, boolean push, String storage) throws IOException {
-        createComponent(project, application, component, push);
-        odo.createStorage(project, application, COMPONENT_PATH, component, storage, "/tmp", "1Gi");
+        odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,
+                new File(COMPONENT_PATH).getAbsolutePath(), null, null);
+        if (feature != null) {
+            AtomicBoolean started = new AtomicBoolean();
+            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature, state -> started.getAndSet(state));
+            await().atMost(15, TimeUnit.MINUTES).untilTrue(started);
+        }
     }
 
     private void cleanLocalProjectDirectory() throws IOException {
@@ -112,8 +115,8 @@ public abstract class OdoCliTest extends BaseTest {
         return serviceTemplate;
     }
 
-    protected void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {
+    protected void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {
         cleanLocalProjectDirectory();
-        odo.createService(project, application, serviceTemplate, crd, service, null, false);
+        odo.createService(project, serviceTemplate, crd, service, null, false);
     }
 }

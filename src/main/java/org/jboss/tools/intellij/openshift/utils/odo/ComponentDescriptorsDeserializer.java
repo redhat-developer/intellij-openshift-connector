@@ -16,87 +16,41 @@ import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+
+import static org.jboss.tools.intellij.openshift.utils.odo.ComponentDeserializer.COMPONENTS_FIELD;
+import static org.jboss.tools.intellij.openshift.utils.odo.ComponentDeserializer.NAME_FIELD;
+import static org.jboss.tools.intellij.openshift.utils.odo.JSonParser.get;
 
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
 
-    public static final String DEVFILE_FIELD = "devfileComponents";
-    public static final String PORTS_FIELD = "ports";
-    public static final String METADATA_FIELD = "metadata";
-    public static final String SPEC_FIELD = "spec";
-    public static final String APP_FIELD = "app";
-    public static final String STATUS_FIELD = "status";
-    public static final String CONTEXT_FIELD = "context";
-    public static final String NAMESPACE_FIELD = "namespace";
-    public static final String NAME_FIELD = "name";
+    public static final String COMPONENT_IN_DEVFILE_FIELD = "componentInDevfile";
+    private static final String MANAGED_BY_FIELD = "managedBy";
+    private static final String MANAGED_BY_VERSION_FIELD = "managedByVersion";
+    private final String path;
 
-    public ComponentDescriptorsDeserializer() {
+    public ComponentDescriptorsDeserializer(String path) {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
+        this.path = path;
     }
 
     @Override
     public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) {
         List<ComponentDescriptor> result = new ArrayList<>();
-        result.addAll(parseComponents(root.get(DEVFILE_FIELD)));
-        return result;
-    }
-
-    private Collection<? extends ComponentDescriptor> parseComponents(JsonNode tree) {
-        List<ComponentDescriptor> result = new ArrayList<>();
-        if (tree != null) {
-            for (JsonNode item : tree) {
-                result.add(new ComponentDescriptor(getProject(item), getApplication(item), getPath(item), getName(item),
-                        getPorts(item)));
-            }
-        }
-        return result;
-    }
-
-    private List<Integer> getPorts(JsonNode item) {
-        List<Integer> ports = new ArrayList<>();
-        if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(PORTS_FIELD)) {
-            for (JsonNode portNode : item.get(SPEC_FIELD).get(PORTS_FIELD)) {
-                String port = portNode.asText();
-                if (port.endsWith("/TCP")) {
-                    ports.add(Integer.parseInt(port.substring(0, port.length() - 4)));
-                } else {
-                    ports.add(Integer.parseInt(port));
+        if (root.has(COMPONENT_IN_DEVFILE_FIELD)) {
+            String devFileName = root.get(COMPONENT_IN_DEVFILE_FIELD).asText();
+            if (root.has(COMPONENTS_FIELD)) {
+                for(JsonNode node : root.get(COMPONENTS_FIELD)) {
+                    String name = get(node, NAME_FIELD);
+                    String managedBy = get(node, MANAGED_BY_FIELD);
+                    String managedByVersion = get(node, MANAGED_BY_VERSION_FIELD);
+                    if (devFileName.equals(name)) {
+                        result.add(new ComponentDescriptor(devFileName, path, managedBy, managedByVersion));
+                    }
                 }
             }
         }
-        return ports;
+        return result;
     }
 
-    private String getProject(JsonNode item) {
-        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAMESPACE_FIELD)) {
-            return item.get(METADATA_FIELD).get(NAMESPACE_FIELD).asText();
-        } else {
-            return "";
-        }
-    }
-
-    private String getApplication(JsonNode item) {
-        if (item.has(ComponentDescriptorsDeserializer.SPEC_FIELD) && item.get(ComponentDescriptorsDeserializer.SPEC_FIELD).has(APP_FIELD)) {
-            return item.get(ComponentDescriptorsDeserializer.SPEC_FIELD).get(APP_FIELD).asText();
-        } else {
-            return "";
-        }
-    }
-
-    private String getPath(JsonNode item) {
-        if (item.has(STATUS_FIELD) && item.get(STATUS_FIELD).has(CONTEXT_FIELD)) {
-            return item.get(STATUS_FIELD).get(CONTEXT_FIELD).asText();
-        } else {
-            return "";
-        }
-    }
-
-    private String getName(JsonNode item) {
-        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
-            return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
-        } else {
-            return "";
-        }
-    }
 }

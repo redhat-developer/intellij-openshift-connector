@@ -13,9 +13,9 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 public interface Component {
     String getName();
 
-    ComponentState getState();
+    ComponentFeatures getLiveFeatures();
 
-    void setState(ComponentState state);
+    void setLiveFeatures(ComponentFeatures state);
 
     String getPath();
 
@@ -27,13 +27,15 @@ public interface Component {
 
     ComponentInfo getInfo();
 
+    void setInfo(ComponentInfo componentInfo);
+
     class ComponentImpl implements Component {
         private final String name;
-        private ComponentState state;
+        private ComponentFeatures state;
         private String path;
-        private final ComponentInfo info;
+        private ComponentInfo info;
 
-        private ComponentImpl(String name, ComponentState state, String path, ComponentInfo info) {
+        private ComponentImpl(String name, ComponentFeatures state, String path, ComponentInfo info) {
             this.name = name;
             this.state = state;
             this.path = path;
@@ -45,13 +47,12 @@ public interface Component {
             return name;
         }
 
-        @Override
-        public ComponentState getState() {
+        public ComponentFeatures getLiveFeatures() {
             return state;
         }
 
         @Override
-        public void setState(ComponentState state) {
+        public void setLiveFeatures(ComponentFeatures state) {
             this.state = state;
         }
 
@@ -69,17 +70,18 @@ public interface Component {
         public ComponentInfo getInfo() {
             return info;
         }
+
+        @Override
+        public void setInfo(ComponentInfo componentInfo) {
+            this.info = componentInfo;
+        }
     }
 
-    static Component of(String name, ComponentInfo info) {
-        return of(name, ComponentState.NO_CONTEXT, info);
-    }
-
-    static Component of(String name, ComponentState state, ComponentInfo info) {
+    static Component of(String name, ComponentFeatures state, ComponentInfo info) {
         return of(name, state, null, info);
     }
 
-    static Component of(String name, ComponentState state, String path, ComponentInfo info) {
+    static Component of(String name, ComponentFeatures state, String path, ComponentInfo info) {
         return new ComponentImpl(name, state, path, info);
     }
 }

@@ -13,26 +13,17 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import java.util.List;
 
 public class ComponentDescriptor {
-    private final String path;
-    private final String project;
-    private final String application;
+    private final String managedByVersion;
+    private String path;
     private final String name;
-    private final List<Integer> ports;
 
-    public ComponentDescriptor(String project, String application, String path, String name, List<Integer> ports) {
-        this.project = project;
-        this.application = application;
-        this.path = path;
+    private final String managedBy;
+
+    public ComponentDescriptor(String name, String path, String managedBy, String managedByVersion) {
         this.name = name;
-        this.ports = ports;
-    }
-
-    public String getProject() {
-        return project;
-    }
-
-    public String getApplication() {
-        return application;
+        this.path = path;
+        this.managedBy = managedBy;
+        this.managedByVersion = managedByVersion;
     }
 
     public String getName() {
@@ -43,7 +34,16 @@ public class ComponentDescriptor {
         return path;
     }
 
-    public List<Integer> getPorts() {
-        return ports;
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getManagedBy() {
+        return managedBy;
+    }
+
+    public boolean isPreOdo3() {
+        return managedBy != null && "odo".equals(managedBy) && managedByVersion != null && managedByVersion.length() > 1
+                && managedByVersion.charAt(1) - '0' < 3;
     }
 }

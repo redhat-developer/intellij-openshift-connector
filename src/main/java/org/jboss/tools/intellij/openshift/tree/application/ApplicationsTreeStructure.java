@@ -18,7 +18,7 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.jboss.tools.intellij.openshift.utils.odo.Application;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
@@ -97,12 +97,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             if (element instanceof ApplicationsRootNode) {
                 return getNamespaces((ApplicationsRootNode) element);
             } else if (element instanceof NamespaceNode) {
-                return getApplications(((NamespaceNode) element));
-            } else if (element instanceof ApplicationNode) {
-                return getComponentsAndServices((ApplicationNode) element);
+                return getComponentsAndServices(((NamespaceNode) element));
             } else if (element instanceof ComponentNode) {
-                return getStoragesAndURLs((ComponentNode) element);
-            } else if (element instanceof DevfileRegistriesNode) {
+                return getURLs((ComponentNode) element);
+            }else if (element instanceof DevfileRegistriesNode) {
                 return getRegistries(root, odo);
             } else if (element instanceof DevfileRegistryNode) {
                 return getRegistryComponentTypes((DevfileRegistryNode) element);
@@ -144,33 +142,18 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return namespaces.toArray();
     }
 
-    private Object[] getApplications(NamespaceNode element) {
-        List<Object> applications = new ArrayList<>();
-        try {
-            List<Application> apps = element.getParent().getOdo().getApplications(element.getName());
-            if (apps.isEmpty()) {
-                applications.add(new CreateComponentLinkNode(element.getRoot(), element));
-            } else {
-                apps.forEach(app -> applications.add(new ApplicationNode(element, app.getName())));
-            }
-        } catch (IOException e) {
-            applications.add(new MessageNode(element.getRoot(), element, FAILED_TO_LOAD_APPLICATIONS));
-        }
-        return applications.toArray();
-    }
-
-    private Object[] getComponentsAndServices(ApplicationNode element) {
+    private Object[] getComponentsAndServices(NamespaceNode element) {
         List<Object> results = new ArrayList<>();
 
         ApplicationsRootNode rootNode = element.getRoot();
         Odo odo = rootNode.getOdo();
         try {
-            odo.getComponents(element.getParent().getName(), element.getName()).forEach(dc -> results.add(new ComponentNode(element, dc)));
+            odo.getComponents(element.getName()).forEach(dc -> results.add(new ComponentNode(element, dc)));
         } catch (KubernetesClientException | IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
         }
         try {
-            odo.getServices(element.getParent().getName(), element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
+            odo.getServices(element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
         } catch (IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application services"));
         }
@@ -181,18 +164,14 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results.toArray();
     }
 
-    private Object[] getStoragesAndURLs(ComponentNode element) {
+    private Object[] getURLs(ComponentNode element) {
         List<Object> results = new ArrayList<>();
         Odo odo = element.getRoot().getOdo();
         try {
-            odo.getStorages(element.getParent().getParent().getName(), element.getParent().getName(),
-                    element.getComponent().getPath(), element.getName()).forEach(storage -> results.add(new PersistentVolumeClaimNode(element, storage)));
-        } catch (KubernetesClientException | IOException e) {
-        }
-        try {
-            odo.listURLs(element.getParent().getParent().getName(), element.getParent().getName(),
+            odo.listURLs(element.getParent().getName(),
                     element.getComponent().getPath(), element.getName()).forEach(url -> results.add(new URLNode(element, url)));
         } catch (IOException e) {
+            e.printStackTrace();
         }
         return results.toArray();
     }
@@ -202,7 +181,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
         try {
             odo.listDevfileRegistries().forEach(registry -> result.add(new DevfileRegistryNode(root, registries, registry)));
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return result.toArray();
     }
 
@@ -245,24 +226,18 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } else if (element instanceof NamespaceNode) {
             return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
-        } else if (element instanceof ApplicationNode) {
-            return new LabelAndIconDescriptor(project, element, ((ApplicationNode) element)::getName, APPLICATION_ICON,
-                    parentDescriptor);
         } else if (element instanceof ComponentNode) {
             return new LabelAndIconDescriptor(project, element,
-                    () -> ((ComponentNode) element).getName() + ' ' + ((ComponentNode) element).getComponent().getState(),
+                    () -> ((ComponentNode) element).getName() + ' ' + getComponentSuffix((ComponentNode) element),
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
             return new LabelAndIconDescriptor(project, element,
                     ((ServiceNode) element)::getName, () -> ((ServiceNode) element).getService().getKind(), SERVICE_ICON, parentDescriptor);
-        } else if (element instanceof PersistentVolumeClaimNode) {
-            return new LabelAndIconDescriptor(project, element,
-                    ((PersistentVolumeClaimNode) element)::getName, STORAGE_ICON, parentDescriptor);
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
             return new LabelAndIconDescriptor(project, element,
-                    () -> url.getName() + " (" + url.getPort() + ") (" + url.getState() + ')',
-                    () -> url.isSecure()?URL_SECURE_ICON:URL_ICON, parentDescriptor);
+                    () -> url.getName() + " (" + url.getLocalPort() + ")",
+                    () -> URL_ICON, parentDescriptor);
         } else if (element instanceof MessageNode) {
             return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
         } else if (element instanceof DevfileRegistriesNode) {
@@ -275,6 +250,15 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeStarterNode)element).getName(), ((DevfileRegistryComponentTypeStarterNode)element).getStarter().getDescription(), STARTER_ICON, parentDescriptor);
         }
         return new LabelAndIconDescriptor(project, element, element.toString(), null, parentDescriptor);
+    }
+
+    private static String getComponentSuffix(ComponentNode element) {
+        Component comp = element.getComponent();
+        String suffix = comp.getLiveFeatures().toString();
+        if (!comp.hasContext()) {
+            suffix = "no context" + (suffix.isEmpty()?"":",") + suffix;
+        }
+        return suffix;
     }
 
     @Override

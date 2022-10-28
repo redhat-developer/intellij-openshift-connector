@@ -12,11 +12,9 @@ package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.PersistentVolumeClaimNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
@@ -55,15 +53,7 @@ public class CreateProjectActionTest extends ActionTest {
     assertFalse(event.getPresentation().isVisible());
   }
 
-  public void testActionOnApplication() {
-    ApplicationNode applicationNode = mock(ApplicationNode.class);
-    AnActionEvent event = createEvent(applicationNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnPushedComponent() {
+  public void testActionOnLocalDevComponent() {
     ComponentNode componentNode = mock(ComponentNode.class);
     AnActionEvent event = createEvent(componentNode);
     AnAction action = getAction();
@@ -78,14 +68,4 @@ public class CreateProjectActionTest extends ActionTest {
     action.update(event);
     assertFalse(event.getPresentation().isVisible());
   }
-
-
-  public void testActionOnStorage() {
-    PersistentVolumeClaimNode storageNode = mock(PersistentVolumeClaimNode.class);
-    AnActionEvent event = createEvent(storageNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
-  }
-
 }

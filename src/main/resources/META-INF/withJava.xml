@@ -2,8 +2,8 @@
     <actions>
         <action class="org.jboss.tools.intellij.openshift.actions.component.DebugJavaComponentAction"
                 id="org.jboss.tools.intellij.openshift.actions.component.DebugJavaComponentAction" text="Debug">
-            <add-to-group group-id="org.jboss.tools.intellij.tree"
-                          relative-to-action="org.jboss.tools.intellij.openshift.actions.component.WatchComponentAction"
+            <add-to-group group-id="org.jboss.tools.intellij.openshift.actions.component.actions"
+                          relative-to-action="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"
                           anchor="after"/>
         </action>
     </actions>

@@ -216,8 +216,10 @@
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
       <!-- component level -->
       <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"/>
+      <group id="org.jboss.tools.intellij.openshift.actions.component.actions">
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"/>
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"/>
+      </group>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" text="Describe"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>

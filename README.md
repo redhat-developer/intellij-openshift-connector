@@ -1,4 +1,4 @@
-# OpenShift Connector
+# OpenShift Toolkit
 [plugin-repo]: https://plugins.jetbrains.com/plugin/12030-openshift-connector-by-red-hat
 [plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/12030-openshift-connector-by-red-hat.svg
 [plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/12030-openshift-connector-by-red-hat.svg
@@ -35,7 +35,7 @@ In order to use Developer Sandbox, you must own a Red Hat SSO account (which can
 - first your phone number and country code
 - then a verification code that you will receive on your smartphone.
 
-So it is now possible to provision and log in to Developer Sandbox from the OpenShift Connector and connect it to the Developer Sandbox environment.
+So it is now possible to provision and log in to Developer Sandbox from the OpenShift Toolkit and connect it to the Developer Sandbox environment.
 
 Open the `OpenShift` window (`Window → OpenShift`):
 
@@ -83,7 +83,7 @@ You’re now ready to work against this environment for free !!!.
 
 ### Operator based services
 
-When developing cloud native applications on OpenShift, developer may need to launch services (databases, messaging system,…) that the application under development may need to connect to. The OpenShift Connector allowed to launch such services but it was based on the service catalog which is not available anymore on OpenShift 4.
+When developing cloud native applications on OpenShift, developer may need to launch services (databases, messaging system,…) that the application under development may need to connect to. The OpenShift Toolkit allowed to launch such services but it was based on the service catalog which is not available anymore on OpenShift 4.
 
 The new feature is based on operators which is the devops way of installing and managing software on Kubernetes clusters. So when you want to launch a service for your application, you will have to choose from the list of installed operators on your cluster and then select type of deployment you want.
 
@@ -113,7 +113,7 @@ When a new component is to be created, a wizard was displayed and the user has t
 
 ### Devfile registries management
 
-The preferred way of developing components is now based on devfile, which is a YAML file that describe how to build the component and if required, launch other containers with other containers. When you create a component, you need to specify a devfile that describe your component. So either you component source contains its own devfile or you need to pick a devfile that is related to your component. In the second case, OpenShift Connector supports devfile registries that contains a set of different devfiles. There is a default registry (https://registry.devfile.io) but you may want to have your own registries. It is now possible to add and remove registries as you want.
+The preferred way of developing components is now based on devfile, which is a YAML file that describe how to build the component and if required, launch other containers with other containers. When you create a component, you need to specify a devfile that describe your component. So either you component source contains its own devfile or you need to pick a devfile that is related to your component. In the second case, OpenShift Toolkit supports devfile registries that contains a set of different devfiles. There is a default registry (https://registry.devfile.io) but you may want to have your own registries. It is now possible to add and remove registries as you want.
 
 The registries are displayed in the OpenShift Application Explorer under the Devfile registries node:
 
@@ -187,7 +187,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 ## Commands and features
 
 
-`OpenShift Connector` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the context menu.
+`OpenShift Toolkit` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the context menu.
 
 ### General Commands
 

@@ -44,5 +44,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: '${{ github.workspace }}/build/distributions/org.jboss.tools.intellij.openshift-${{ steps.get_version.outputs.VERSION }}.zip'
-          asset_name: 'OpenShift Connector-${{ steps.get_version.outputs.VERSION }}.zip'
+          asset_name: 'OpenShift Toolkit-${{ steps.get_version.outputs.VERSION }}.zip'
           asset_content_type: application/zip

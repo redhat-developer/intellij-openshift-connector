@@ -1,6 +1,6 @@
 <idea-plugin>
   <id>org.jboss.tools.intellij.openshift</id>
-  <name>OpenShift Connector by Red Hat</name>
+  <name>OpenShift Toolkit by Red Hat</name>
   <version>1.0</version>
   <vendor email="developers@redhat.com" url="http://www.redhat.com">Red-Hat</vendor>
 

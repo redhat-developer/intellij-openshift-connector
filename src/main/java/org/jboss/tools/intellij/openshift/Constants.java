@@ -17,10 +17,10 @@ public class Constants {
 
     public static final String MIGRATION_HELP_PAGE_URL = "https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0";
 
-    public static final String GROUP_DISPLAY_ID = "OpenShift Connector";
+    public static final String GROUP_DISPLAY_ID = "OpenShift Toolkit";
 
     public static final String COMPONENT_MIGRATION_TITLE = "Component migrated";
-    public static final String COMPONENT_MIGRATION_MESSAGE = "This component must be undeployed before new version is pushed, because it was created and deployed with previous version of OpenShift Connector plugin";
+    public static final String COMPONENT_MIGRATION_MESSAGE = "This component must be undeployed before new version is pushed, because it was created and deployed with previous version of OpenShift Toolkit plugin";
 
     public static final String UNDEPLOY_LABEL = "Undeploy";
     public static final String HELP_LABEL = "Help";

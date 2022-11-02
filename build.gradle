@@ -12,10 +12,13 @@ repositories {
     mavenLocal()
     maven { url 'https://repository.jboss.org' }
     mavenCentral()
+    maven {
+        url 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies'
+    }
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 intellij {
     version = ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
@@ -63,6 +66,18 @@ task integrationTest(type: Test) {
     mustRunAfter test
 }
 
+task integrationUITest(type: Test) {
+    useJUnitPlatform {
+    	includeTags 'ui-test'
+    }
+    description = 'Runs the integration UI tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { true }
+    mustRunAfter test
+}
+
 dependencies {
     compile 'io.fabric8:openshift-client:5.12.2'
     compile 'org.apache.commons:commons-compress:1.21'
@@ -75,6 +90,10 @@ dependencies {
     testCompile 'org.awaitility:awaitility:4.1.0'
     testCompile 'org.mock-server:mockserver-client-java:5.13.2'
     testCompile 'org.mock-server:mockserver-netty:5.13.2'
+    testImplementation 'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 
     compile 'io.jsonwebtoken:jjwt-impl:0.11.2'
     compile 'io.jsonwebtoken:jjwt-jackson:0.11.2'
@@ -111,10 +130,6 @@ jacocoTestReport {
 runIde {
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
     //systemProperties['jboss.sandbox.api.endpoint'] = 'http://localhost:3000'
-}
-
-runIdeForUiTests {
-    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
 }
 
 task runSandbox(type: JavaExec) {

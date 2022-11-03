@@ -31,13 +31,17 @@ public class ProjectUtils {
             File[] files = project.listFiles();
             if (files != null && files.length > 0) {
                 for (File f : project.listFiles()) {
-                    if (!f.getName().startsWith(".")) {
+                    if (!f.getName().startsWith(".") && !isProjectFile(f.getName())) {
                         return false;
                     }
                 }
             }
         }
         return true;
+    }
+
+    private static boolean isProjectFile(String name) {
+        return name.endsWith(".iml") || name.endsWith(".ipr") || name.endsWith(".iws");
     }
 
     public static VirtualFile getDefaultDirectory(Project project) {

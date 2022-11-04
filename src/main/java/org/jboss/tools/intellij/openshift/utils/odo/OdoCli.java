@@ -745,16 +745,18 @@ public class OdoCli implements Odo {
     @Override
     public String consoleURL() throws IOException {
         try {
-            VersionInfo version = client.getVersion();
-            if (isOpenShift() && "4".equals(version.getMajor())) { // assuming kubernetes version 1 is version 4
-                ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
-                if (configMap != null) {
-                    return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+            if (isOpenShift()) {
+                VersionInfo info = client.adapt(OpenShiftClient.class).getOpenShiftV3Version();
+                if (info == null) {
+                    ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
+                    if (configMap != null) {
+                        return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+                    }
+                } else {
+                    ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
+                    String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
+                    return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
                 }
-            } else if (isOpenShift() && "3".equals(version.getMajor())) {
-                ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
-                String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
-                return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
             }
             //https://<master-ip>:<apiserver-port>/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
             return client.getMasterUrl() + "console";

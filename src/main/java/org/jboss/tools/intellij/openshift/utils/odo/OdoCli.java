@@ -641,6 +641,9 @@ public class OdoCli implements Odo {
     @Override
     public void deleteProject(String project) throws IOException {
         execute(command, envVars, "delete", "namespace", project, "-f", "-w");
+        if (project.equals(namespace)) {
+            namespace = null;
+        }
     }
 
     @Override

@@ -23,6 +23,8 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.Icon;
 import java.io.IOException;
@@ -33,6 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsTreeStructure.class);
+
     private final Project project;
     private final ApplicationsRootNode root;
 
@@ -151,11 +155,13 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             odo.getComponents(element.getName()).forEach(dc -> results.add(new ComponentNode(element, dc)));
         } catch (KubernetesClientException | IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
+            LOGGER.warn(e.getLocalizedMessage(),e);
         }
         try {
             odo.getServices(element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
         } catch (IOException e) {
             results.add(new MessageNode(element.getRoot(), element, "Failed to load application services"));
+            LOGGER.warn(e.getLocalizedMessage(),e);
         }
 
         if (results.isEmpty()) {

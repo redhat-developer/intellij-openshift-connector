@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FileUtils;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,8 +81,14 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
-            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
-            File tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
+            File tmpdir;
+            if (SystemInfo.isWindows) {
+                tmpdir = Files.createTempDirectory("odotmp").toFile();
+            } else {
+                FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(
+                        PosixFilePermissions.fromString("rwxr-x---"));
+                tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
+            }
             delegate.createComponent(project, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
             File sourceDir = new File(source);
             FileUtils.copyDirectory(tmpdir, sourceDir);

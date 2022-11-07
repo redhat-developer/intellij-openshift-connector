@@ -18,6 +18,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateProjectAction extends LoggedInClusterAction {
@@ -34,6 +36,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
 
   public static void execute(ApplicationsRootNode rootNode) {
     CreateProjectAction action = (CreateProjectAction) ActionManager.getInstance().getAction(CreateProjectAction.class.getName());
+    action.telemetrySender = new TelemetrySender(PREFIX_ACTION + action.getTelemetryActionName());
     action.doActioPerformed(rootNode);
   }
   @Override

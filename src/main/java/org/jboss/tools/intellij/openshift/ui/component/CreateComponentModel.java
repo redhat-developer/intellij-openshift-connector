@@ -112,7 +112,9 @@ public class CreateComponentModel extends WizardModel {
                     }
                 }
             } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+                if (!e.getLocalizedMessage().contains("No valid devfile found")) {
+                    LOGGER.warn(e.getLocalizedMessage(), e);
+                }
             }
         }
     }

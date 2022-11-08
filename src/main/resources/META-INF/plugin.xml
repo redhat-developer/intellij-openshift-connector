@@ -12,6 +12,14 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.0.0</b></p>
+  <ul>
+  <li>Plugin renamed to OpenShift Toolkit to avoid confusion</li>
+  <li>New workflow based on odo 3.x</li>
+  <li>Security fixes</li>
+  <li>Bug fixes</li>
+  </ul>
+  </br>
   <p><b>0.11.0</b></p>
   <ul>
   <li>Add delete command for non Odo commands</li>

@@ -28,6 +28,7 @@ import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
@@ -130,7 +131,12 @@ public class OdoCli implements Odo {
         this.client = new DefaultKubernetesClient(new ConfigBuilder().build());
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
-            this.envVars.put("ODO_DISABLE_TELEMETRY", "true");
+            if (TelemetryConfiguration.getInstance().isEnabled()) {
+                this.envVars.put("ODO_TRACKING_CONSENT", "yes");
+                this.envVars.put("TELEMETRY_CALLER", "intellij");
+            } else {
+                this.envVars.put("ODO_TRACKING_CONSENT", "no");
+            }
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }

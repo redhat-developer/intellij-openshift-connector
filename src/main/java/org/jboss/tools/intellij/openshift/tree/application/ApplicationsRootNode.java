@@ -72,6 +72,9 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
 
     public CompletableFuture<Odo> initializeOdo() {
         return OdoCliFactory.getInstance().getOdo(project).whenComplete((odo, err) -> {
+            if (this.odo != null) {
+                this.odo.release();
+            }
             this.odo = new OdoProjectDecorator(odo, this);
             loadProjectModel(project);
         });

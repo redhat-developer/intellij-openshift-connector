@@ -293,4 +293,9 @@ public class OdoProjectDecorator implements Odo {
     public void migrateComponent(String context, String name) throws IOException {
         delegate.migrateComponent(context, name);
     }
+
+    @Override
+    public void release() {
+        delegate.release();
+    }
 }

@@ -23,7 +23,9 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Key;
+import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -105,6 +107,8 @@ public class OdoCli implements Odo {
 
     private final KubernetesClient client;
 
+    private final MessageBusConnection connection;
+
     private Map<String, String> envVars;
 
     private String namespace;
@@ -128,19 +132,30 @@ public class OdoCli implements Odo {
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
         this.project = project;
+        this.connection = ApplicationManager.getApplication().getMessageBus().connect();
         this.client = new DefaultKubernetesClient(new ConfigBuilder().build());
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
-            if (TelemetryConfiguration.getInstance().isEnabled()) {
-                this.envVars.put("ODO_TRACKING_CONSENT", "yes");
-                this.envVars.put("TELEMETRY_CALLER", "intellij");
-            } else {
-                this.envVars.put("ODO_TRACKING_CONSENT", "no");
-            }
+            computeTelemetrySettings();
+            this.connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
+                    (String key, String value) -> {
+                        if (TelemetryConfiguration.KEY_MODE.equals(key)) {
+                            computeTelemetrySettings();
+                        }
+                    });
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
         reportTelemetry();
+    }
+
+    private void computeTelemetrySettings() {
+        if (TelemetryConfiguration.getInstance().isEnabled()) {
+            this.envVars.put("ODO_TRACKING_CONSENT", "yes");
+            this.envVars.put("TELEMETRY_CALLER", "intellij");
+        } else {
+            this.envVars.put("ODO_TRACKING_CONSENT", "no");
+        }
     }
 
     private void reportTelemetry() {
@@ -779,6 +794,11 @@ public class OdoCli implements Odo {
     @Override
     public void migrateComponent(String context, String name) throws IOException {
         client.apps().deployments().withLabel(KubernetesLabels.COMPONENT_NAME_LABEL, name).delete();
+    }
+
+    @Override
+    public void release() {
+        connection.disconnect();
     }
 
     @Override

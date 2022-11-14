@@ -118,4 +118,6 @@ public interface Odo {
      * @throws IOException
      */
     void migrateComponent(String context, String name) throws IOException;
+
+    void release();
 }

@@ -25,6 +25,10 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public class LoginAction extends OdoAction {
 
+    public LoginAction() {
+        super(ApplicationsRootNode.class);
+    }
+
     @Override
     protected String getTelemetryActionName() { return "login to cluster"; }
 

@@ -20,11 +20,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class DebugJavaComponentAction extends DebugComponentAction {
 
-    private static final String JAVA = "java";
+    private static final String JAVA_LEGACY = "java";
+    private static final String JAVA = "Java";
 
     @Override
     protected boolean isDebuggable(@NotNull ComponentInfo componentInfo) {
-        return JAVA.equals(componentInfo.getLanguage()) || componentInfo.getComponentTypeName().contains(JAVA);
+        return JAVA.equals(componentInfo.getLanguage()) ||
+                JAVA_LEGACY.equals(componentInfo.getLanguage()) ||
+                componentInfo.getComponentTypeName().contains(JAVA) ||
+                componentInfo.getComponentTypeName().contains(JAVA_LEGACY);
     }
 
     @Override

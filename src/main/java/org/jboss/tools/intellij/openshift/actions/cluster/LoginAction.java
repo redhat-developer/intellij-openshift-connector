@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.cluster.LoginDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -22,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-public class LoginAction extends LoggedOutClusterAction {
+public class LoginAction extends OdoAction {
 
     @Override
     protected String getTelemetryActionName() { return "login to cluster"; }

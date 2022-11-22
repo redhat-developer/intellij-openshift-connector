@@ -214,7 +214,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LogoutAction" text="Log out"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>

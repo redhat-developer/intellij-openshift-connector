@@ -20,6 +20,11 @@ public class LoginActionTest extends ActionTest {
   }
 
   @Override
+  protected void verifyLoggedInCluster(boolean visible) {
+    assertTrue(visible);
+  }
+
+  @Override
   protected void verifyLoggedOutCluster(boolean visible) {
     assertTrue(visible);
   }

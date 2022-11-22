@@ -117,8 +117,8 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         URL gifStartDevLesson = getLessonGif("start-dev.gif");
         GettingStartedLesson startDevLesson = new GettingStartedLesson(
                 "Start a component in development mode",
-                "<html><p>This is inner loop development and allows you to code, build, run and test the" +
-                        "application in a continuous workflow. It continuously watches teh directory for any new " +
+                "<html><p>This is inner loop development and allows you to code, build, run and test the " +
+                        "application in a continuous workflow. It continuously watches the directory for any new " +
                         "changes and automatically syncs them with the application running on the cluster.</p>" +
                         "<p>This also forwards a port on the development system to the port on the container cluster " +
                         "allowing you remote access to your deployed application</p></html>",
@@ -129,7 +129,7 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         URL gifStartDebugLesson = getLessonGif("start-debug.gif");
         GettingStartedLesson startDebugLesson = new GettingStartedLesson(
                 "Debug the component",
-                "<html><p>Start the component in debug mode. The devfile.yaml should be specified with the" +
+                "<html><p>Start the component in debug mode. The devfile.yaml should be specified with the " +
                         "debug port as an endpoint for the debug to work.</p></html>",
                 Collections.emptyList(),
                 gifStartDebugLesson

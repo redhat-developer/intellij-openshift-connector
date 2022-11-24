@@ -107,9 +107,9 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         URL gifCreateComponentLesson = getLessonGif("create-component.gif");
         GettingStartedLesson createComponentLesson = new GettingStartedLesson(
                 "Create a Component",
-                "<html><p>Create a component in the local workspace using the selected started project and " +
-                "associated 'devfile.yaml' configuration. Devfile is a manifest file that contains information about " +
-                "various resources (URL, Storage, Services, etc.) that correspond to your component</p></html>",
+                "<html><p>Create a component in the local workspace using the selected starter project and " +
+                "associated 'devfile.yaml' configuration. With devfiles, you record the instructions for configuring and running your build environment as a YAML-formatted text file and provide Build, Run and Deployment information within the file." +
+                "</p></html>",
                 Collections.emptyList(),
                 gifCreateComponentLesson
         );

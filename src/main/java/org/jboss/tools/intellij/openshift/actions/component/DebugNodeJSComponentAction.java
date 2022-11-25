@@ -19,11 +19,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class DebugNodeJSComponentAction extends DebugComponentAction {
 
-    private static final String NODE_JS = "nodejs";
+    private static final String NODE_JS_LEGACY = "nodejs";
+    private static final String NODE_JS = "Node.js";
 
     @Override
     protected boolean isDebuggable(@NotNull ComponentInfo componentInfo) {
-        return NODE_JS.equals(componentInfo.getLanguage()) || componentInfo.getComponentTypeName().contains(NODE_JS);
+        return NODE_JS.equals(componentInfo.getLanguage()) ||
+                NODE_JS_LEGACY.equals(componentInfo.getLanguage()) ||
+                componentInfo.getComponentTypeName().contains(NODE_JS) ||
+                componentInfo.getComponentTypeName().contains(NODE_JS_LEGACY);
     }
 
     @Override

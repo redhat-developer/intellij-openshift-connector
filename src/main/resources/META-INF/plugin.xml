@@ -187,6 +187,8 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow id="OpenShift" anchor="left" factoryClass="org.jboss.tools.intellij.openshift.WindowToolFactory" icon="/META-INF/OpenShiftPluginIcon13x13.svg"/>
+    <toolWindow id="OpenShiftGettingStarted" anchor="right" factoryClass="org.jboss.tools.intellij.openshift.GettingStartedToolWindow" canCloseContents="false" />
+    <applicationService id="org.jboss.tools.intellij.openshift.settings.SettingsState" serviceImplementation="org.jboss.tools.intellij.openshift.settings.SettingsState"/>
   </extensions>
 
   <extensionPoints>
@@ -216,6 +218,9 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
       <separator/>
+      <action id="org.jboss.tools.intellij.openshift.actions.OpenGettingStartedAction"
+              class="org.jboss.tools.intellij.openshift.actions.OpenGettingStartedAction"
+              text="Getting Started" />
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>
       <separator/>
       <!-- application level -->

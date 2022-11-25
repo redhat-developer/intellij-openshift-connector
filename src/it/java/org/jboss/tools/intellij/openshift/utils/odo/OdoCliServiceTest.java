@@ -30,6 +30,9 @@ public class OdoCliServiceTest extends OdoCliTest {
             ServiceTemplate serviceTemplate = getServiceTemplate();
             OperatorCRD crd = getOperatorCRD(serviceTemplate);
             createService(project, serviceTemplate, crd, service);
+            List<Service> services = odo.getServices(project);
+            assertNotNull(services);
+            assertEquals(1, services.size());
         } finally {
             odo.deleteProject(project);
         }
@@ -54,6 +57,7 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
 
     @Test
+    @Ignore("see https://github.com/redhat-developer/odo/issues/6347")
     public void checkCreateDeleteService() throws IOException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();

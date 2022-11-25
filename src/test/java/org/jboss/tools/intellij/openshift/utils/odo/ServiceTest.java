@@ -44,7 +44,7 @@ public class ServiceTest {
   public void verifyThatServicesReturnsItems() throws IOException {
     List<Service> services = MAPPER.readValue(url, new TypeReference<List<Service>>() {});
     Assert.assertNotNull(services);
-    Assert.assertEquals(4, services.size());
+    Assert.assertEquals(1, services.size());
     Assert.assertNotNull(services.get(0));
   }
 
@@ -52,7 +52,7 @@ public class ServiceTest {
   public void verifyThatServicesReturnsName() throws IOException {
     List<Service> services = MAPPER.readValue(url, new TypeReference<List<Service>>() {});
     Assert.assertNotNull(services);
-    Assert.assertEquals(4, services.size());
+    Assert.assertEquals(1, services.size());
     Service service = services.get(0);
     Assert.assertNotNull(service);
     Assert.assertEquals("my-cluster", service.getName());

@@ -36,7 +36,6 @@ public class CreateServiceDialog extends DialogWrapper {
     private JTextField nameField;
     private JComboBox serviceTemplatesComboBox;
     private JComboBox serviceCRDComboBox;
-    private JTextField applicationTextField;
     private JsonSchemaWidget jsonSchemaWidget;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -115,19 +114,7 @@ public class CreateServiceDialog extends DialogWrapper {
         if (nameField.getText().length() == 0) {
             validations.add(new ValidationInfo("Name must be provided", nameField));
         }
-        if (applicationTextField.getText().length() == 0) {
-            validations.add(new ValidationInfo("Application must be provided", applicationTextField));
-        }
         return validations;
-    }
-
-    public void setApplication(String application){
-        applicationTextField.setText(application);
-        applicationTextField.setEditable(false);
-    }
-
-    public String getApplication(){
-        return applicationTextField.getText();
     }
 
     private void createUIComponents() {

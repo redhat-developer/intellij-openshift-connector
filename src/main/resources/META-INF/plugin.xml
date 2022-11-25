@@ -225,7 +225,7 @@
       <separator/>
       <!-- application level -->
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New Component"/>
-      <!--<action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>-->
+      <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
       <!-- component level -->
       <separator/>
       <group id="org.jboss.tools.intellij.openshift.actions.component.actions">

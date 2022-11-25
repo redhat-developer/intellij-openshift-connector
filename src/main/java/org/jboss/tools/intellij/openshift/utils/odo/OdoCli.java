@@ -47,6 +47,8 @@ import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftOperatorHubAPIGroupClient;
+import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
@@ -480,10 +482,13 @@ public class OdoCli implements Odo {
 
     @Override
     public List<ServiceTemplate> getServiceTemplates() throws IOException {
-        return configureObjectMapper(new ServiceTemplatesDeserializer(this::findSchema)).readValue(
-                execute(command, envVars, "catalog", "list", "services", "-o", "json"),
-                new TypeReference<List<ServiceTemplate>>() {
-                });
+        try {
+            OpenShiftOperatorHubAPIGroupDSL hubClient = new OpenShiftOperatorHubAPIGroupClient(client);
+            ServiceTemplatesDeserializer deserializer = new ServiceTemplatesDeserializer(this::findSchema);
+            return deserializer.fromList(hubClient.clusterServiceVersions().list());
+        } catch (KubernetesClientException e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -691,19 +696,20 @@ public class OdoCli implements Odo {
 
     @Override
     public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project) throws IOException {
-        /*try {
+        try {
             return configureObjectMapper(new ServiceDeserializer()).readValue(
-                    execute(command, envVars, "service", "list", "--project", project, "-o", "json"),
+                    execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
                     new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
                     });
         } catch (IOException e) {
             //https://github.com/openshift/odo/issues/5010
-            if (e.getMessage().contains("\"no operator backed services found in namespace:") || (e.getMessage().contains("failed to list Operator backed services"))) {
+            if (e.getMessage().contains("\"no operator backed services found in namespace:") ||
+                    e.getMessage().contains("failed to list Operator backed services") ||
+                    e.getMessage().contains("Service Binding Operator is not installed")) {
                 return Collections.emptyList();
             }
             throw e;
-        }*/
-        return Collections.emptyList();
+        }
     }
 
     protected LabelSelector getLabelSelector(String application, String component) {

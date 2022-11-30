@@ -6,8 +6,14 @@
 
   <description><![CDATA[
       <img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/openshift_extension.png" width="32" height="32"/>
-      <p>A plugin for interacting with Red Hat OpenShift using a local or remote instance of OpenShift clusters providing a streamlined developer experience. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.</p>
-      <p>To run the instance of OpenShift cluster locally, developers can use <a href="https://github.com/minishift/minishift/releases">minishift</a> / <a href="https://developers.redhat.com/products/cdk/download/">CDK</a>. Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.</p>
+      <p>The OpenShift Toolkit provides all of the power and convenience of IDEs for developing cloud-native Kubernetes applications, without leaving the comfort of your IDE. For a developer to run the local code on an OpenShift instance, test & debug it and deploy it on production without worrying about the complexities around different K8s tools.</p>
+      <p>OpenShift Toolkit plugin provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:</p>
+      <ul>
+      <li>Developers can easily create, deploy and debug container applications running on OpenShift.</li>
+      <li>Create <a href="https://devfile.io">devfile</a> based components directly from Devfile Registries View</li>
+      <li>Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs.</li>
+      <li>Provision free <a href="https://developers.redhat.com/developer-sandbox">Developer Sandbox for Red Hat OpenShift</a> instance from IDE</li>
+      </ul>
     ]]></description>
 
   <change-notes><![CDATA[

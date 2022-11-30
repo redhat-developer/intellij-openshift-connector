@@ -34,6 +34,7 @@ import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfig
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -72,6 +73,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -480,11 +482,36 @@ public class OdoCli implements Odo {
         return null;
     }
 
+    private void getTargetCRD(GenericKubernetesResource resource,
+                                                         List<GenericKubernetesResource> bindableKinds) {
+        if (resource.getAdditionalPropertiesNode() != null &&
+                resource.getAdditionalPropertiesNode().has("status")) {
+            for(JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
+                if (status.has("group") && status.has("kind") && status.has("version")) {
+                    GenericKubernetesResource bindableKind = new GenericKubernetesResource();
+                    bindableKind.setApiVersion(status.get("group").asText() + '/' + status.get("version").asText());
+                    bindableKind.setKind(status.get("kind").asText());
+                    bindableKinds.add(bindableKind);
+                }
+            }
+        }
+    }
+
+    private List<GenericKubernetesResource> getBindableKinds() {
+        List<GenericKubernetesResource> bindableKinds = new ArrayList<>();
+        client.genericKubernetesResources("binding.operators.coreos.com/v1alpha1", "BindableKinds")
+                .list()
+                .getItems()
+                .forEach(r -> getTargetCRD(r, bindableKinds));
+        return bindableKinds;
+    }
+
     @Override
     public List<ServiceTemplate> getServiceTemplates() throws IOException {
         try {
+            List<GenericKubernetesResource> bindableKinds = getBindableKinds();
             OpenShiftOperatorHubAPIGroupDSL hubClient = new OpenShiftOperatorHubAPIGroupClient(client);
-            ServiceTemplatesDeserializer deserializer = new ServiceTemplatesDeserializer(this::findSchema);
+            ServiceTemplatesDeserializer deserializer = new ServiceTemplatesDeserializer(this::findSchema, bindableKinds);
             return deserializer.fromList(hubClient.clusterServiceVersions().list());
         } catch (KubernetesClientException e) {
             return Collections.emptyList();

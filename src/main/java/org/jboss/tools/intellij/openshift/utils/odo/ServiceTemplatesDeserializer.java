@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.openshift.api.model.operatorhub.v1alpha1.CRDDescription;
 import io.fabric8.openshift.api.model.operatorhub.v1alpha1.ClusterServiceVersion;
 import io.fabric8.openshift.api.model.operatorhub.v1alpha1.ClusterServiceVersionList;
@@ -40,9 +41,12 @@ public class ServiceTemplatesDeserializer  {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final Function<String, ObjectNode> schemaMapper;
+    private final List<GenericKubernetesResource> bindableKinds;
 
-    public ServiceTemplatesDeserializer(Function<String, ObjectNode> schemaMapper) {
+    public ServiceTemplatesDeserializer(Function<String, ObjectNode> schemaMapper,
+                                        List<GenericKubernetesResource> bindableKinds) {
         this.schemaMapper = schemaMapper;
+        this.bindableKinds = bindableKinds;
     }
 
     private List<OperatorCRDSpecDescriptor> getSpecDescriptors(CRDDescription node) {
@@ -136,6 +140,11 @@ public class ServiceTemplatesDeserializer  {
         };
     }
 
+    private boolean isBindable(CRDDescription crd) {
+        String apiVersion = crd.getName().substring(crd.getName().indexOf('.') + 1) + '/' + crd.getVersion();
+        return bindableKinds.stream().anyMatch(bk -> bk.getKind().equals(crd.getKind()) && bk.getApiVersion().equals(apiVersion));
+    }
+
     public ServiceTemplate fromPOJO(ClusterServiceVersion csv) {
         try {
             String name = csv.getMetadata().getName();
@@ -149,8 +158,10 @@ public class ServiceTemplatesDeserializer  {
             if (csv.getSpec().getCustomresourcedefinitions() != null &&
                     csv.getSpec().getCustomresourcedefinitions().getOwned() != null) {
                 for(CRDDescription crd : csv.getSpec().getCustomresourcedefinitions().getOwned()) {
-                    List<OperatorCRDSpecDescriptor> descriptors = getSpecDescriptors(crd);
-                    crds.add(getOperatorCRD(crd, samples, descriptors));
+                    if (isBindable(crd)) {
+                        List<OperatorCRDSpecDescriptor> descriptors = getSpecDescriptors(crd);
+                        crds.add(getOperatorCRD(crd, samples, descriptors));
+                    }
                 }
             }
             if (!crds.isEmpty()) {

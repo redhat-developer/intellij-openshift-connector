@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.openshift.api.model.operatorhub.v1alpha1.ClusterServiceVersionList;
 import org.junit.Assert;
@@ -18,6 +19,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +34,10 @@ public class ServiceTemplateTest {
 
   @BeforeClass
   public static void setup() {
-    DESERIALIZER = new ServiceTemplatesDeserializer(s -> null);
+    GenericKubernetesResource kafkaKind = new GenericKubernetesResource();
+    kafkaKind.setApiVersion("kafka.strimzi.io/v1beta2");
+    kafkaKind.setKind("Kafka");
+    DESERIALIZER = new ServiceTemplatesDeserializer(s -> null, Collections.singletonList(kafkaKind));
   }
 
   @Test
@@ -70,7 +75,7 @@ public class ServiceTemplateTest {
     assertTrue(serviceTemplate instanceof ServiceTemplate);
     ServiceTemplate operatorServiceTemplate = (ServiceTemplate) serviceTemplate;
     assertNotNull(operatorServiceTemplate.getCRDs());
-    assertEquals(10, operatorServiceTemplate.getCRDs().size());
+    assertEquals(1, operatorServiceTemplate.getCRDs().size());
   }
 
   @Test
@@ -84,7 +89,7 @@ public class ServiceTemplateTest {
     assertTrue(serviceTemplate instanceof ServiceTemplate);
     ServiceTemplate operatorServiceTemplate = (ServiceTemplate) serviceTemplate;
     assertNotNull(operatorServiceTemplate.getCRDs());
-    assertEquals(10, operatorServiceTemplate.getCRDs().size());
+    assertEquals(1, operatorServiceTemplate.getCRDs().size());
     OperatorCRD crd = operatorServiceTemplate.getCRDs().get(0);
     assertEquals("kafkas.kafka.strimzi.io", crd.getName());
     assertEquals("v1beta2", crd.getVersion());

@@ -6,12 +6,21 @@
 
   <description><![CDATA[
       <img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/openshift_extension.png" width="32" height="32"/>
-      <h2>Overview</h2>
       <p>A plugin for interacting with Red Hat OpenShift using a local or remote instance of OpenShift clusters providing a streamlined developer experience. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.</p>
       <p>To run the instance of OpenShift cluster locally, developers can use <a href="https://github.com/minishift/minishift/releases">minishift</a> / <a href="https://developers.redhat.com/products/cdk/download/">CDK</a>. Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.</p>
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.1.0</b></p>
+  <ul>
+  <li>Add support for ARM architecture</li>
+  <li>Add Getting Started page</li>
+  <li>Switch to odo 3.2.0</li>
+  <li>Improved cluster login management</li>
+  <li>Security fixes</li>
+  <li>Bug fixes</li>
+  </ul>
+  </br>
   <p><b>1.0.0</b></p>
   <ul>
   <li>Plugin renamed to OpenShift Toolkit to avoid confusion</li>

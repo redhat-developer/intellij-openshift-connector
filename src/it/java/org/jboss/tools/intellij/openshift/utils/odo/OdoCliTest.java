@@ -34,7 +34,7 @@ public abstract class OdoCliTest extends BaseTest {
     public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
     public static final String SERVICE_TEMPLATE = "cloud-native-postgresql.v1.15.1";
     public static final String SERVICE_CRD = "clusters.postgresql.k8s.enterprisedb.io";
-    public static final String REGISTRY_URL = "https://registry.devfile.io";
+    public static final String REGISTRY_URL = "https://registry.stage.devfile.io";
     public static final String REGISTRY_NAME = "RegistryForITTests";
 
     protected Odo odo;

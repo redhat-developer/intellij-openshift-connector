@@ -46,8 +46,11 @@ public class JSonParser {
     private static final String RUNNING_IN_FIELD = "runningIn";
     private static final String CONTAINER_NAME_FIELD = "containerName";
     private static final String LANGUAGE_FIELD = "language";
-
-
+    public static final String INGRESSES_FIELD = "ingresses";
+    private static final String ROUTES_FIELD = "routes";
+    private static final String HOST_FIELD = "host";
+    private static final String RULES_FIELD = "rules";
+    
     private final JsonNode root;
 
     public JSonParser(JsonNode root) {
@@ -63,6 +66,12 @@ public class JSonParser {
         if (root.has(DEV_FORWARDED_PORTS_FIELD)) {
             result.addAll(parseURLItems(root.get(DEV_FORWARDED_PORTS_FIELD)));
         }
+        if (root.has(INGRESSES_FIELD)) {
+            result.addAll(parseIngresses(root.get(INGRESSES_FIELD)));
+        }
+        if (root.has(ROUTES_FIELD)) {
+            result.addAll(parseIngresses(root.get(ROUTES_FIELD)));
+        }
         return result;
     }
 
@@ -77,6 +86,29 @@ public class JSonParser {
                 String localPort = item.has(LOCAL_PORT_FIELD) ? item.get(LOCAL_PORT_FIELD).asText() : "8080";
                 String containerPort = item.has(CONTAINER_PORT_FIELD) ? item.get(CONTAINER_PORT_FIELD).asText() : "8080";
                 result.add(URL.of(name, host, localPort, containerPort));
+            }
+        });
+        return result;
+    }
+
+    private List<URL> parseIngresses(JsonNode ingresses) {
+        List<URL> result = new ArrayList<>();
+        ingresses.forEach(item -> {
+            //odo incorrectly reports urls created with the web ui without names
+            if (item.has(NAME_FIELD)) {
+                String name = item.get(NAME_FIELD).asText();
+                if (item.has(RULES_FIELD)) {
+                    item.get(RULES_FIELD).forEach(rule -> {
+                        String host = rule.has(HOST_FIELD) ?
+                                rule.get(HOST_FIELD).asText() : "localhost";
+                        if (rule.has(JSonParser.PATHS_FIELD)) {
+                            rule.get(PATHS_FIELD).forEach(path -> {
+                                result.add(URL.of(name, host, "80", "80",
+                                        path.asText()));
+                            });
+                        }
+                    });
+                }
             }
         });
         return result;

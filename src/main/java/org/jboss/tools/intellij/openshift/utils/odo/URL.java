@@ -17,11 +17,13 @@ public interface URL {
 
   String getHost();
 
+  String getPath();
+
   String getLocalPort();
 
   String getContainerPort();
 
-  static URL of(String name, String host, String localPort, String containerPort) {
+  static URL of(String name, String host, String localPort, String containerPort, String path) {
     return new URL() {
       @Override
       public String getName() {
@@ -31,6 +33,11 @@ public interface URL {
       @Override
       public String getHost() {
         return host;
+      }
+
+      @Override
+      public String getPath() {
+        return path;
       }
 
       @Override
@@ -48,5 +55,13 @@ public interface URL {
         return containerPort;
       }
     };
+  }
+
+  static URL of(String name, String host, String localPort, String containerPort) {
+    return of(name, host, localPort, containerPort, "/");
+  }
+
+  default String asURL() {
+    return "http://" + getHost() + ":" + getLocalPort() + getPath();
   }
 }

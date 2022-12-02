@@ -242,7 +242,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
             return new LabelAndIconDescriptor(project, element,
-                    () -> url.getName() + " (" + url.getLocalPort() + ")",
+                    () -> url.getName() + " (" + url.getContainerPort() + ")",
+                    () -> url.asURL(),
                     () -> URL_ICON, parentDescriptor);
         } else if (element instanceof MessageNode) {
             return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);

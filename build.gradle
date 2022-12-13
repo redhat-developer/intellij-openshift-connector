@@ -1,6 +1,6 @@
 
 plugins {
-    id "org.jetbrains.intellij" version "1.9.0"
+    id "org.jetbrains.intellij" version "1.10.1"
     id "com.adarshr.test-logger" version "1.7.0"
     id "idea"
     id "java"
@@ -40,7 +40,7 @@ publishPlugin {
 }
 
 configurations {
-    compile {
+    implementation {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
     integrationTestImplementation.extendsFrom testImplementation

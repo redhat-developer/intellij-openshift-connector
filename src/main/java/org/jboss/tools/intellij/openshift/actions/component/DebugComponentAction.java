@@ -23,17 +23,13 @@ import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
@@ -45,12 +41,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PROP_DEBUG_COMPONENT_LANGUAGE;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
-public abstract class DebugComponentAction extends FeatureComponentAction {
+public abstract class DebugComponentAction extends ContextAwareComponentAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(DebugComponentAction.class);
 
@@ -58,43 +53,44 @@ public abstract class DebugComponentAction extends FeatureComponentAction {
 
     private ExecutionEnvironment environment;
 
-    protected DebugComponentAction() {
-        super(ComponentFeature.DEBUG);
-    }
-
     @Override
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
             ComponentNode componentNode = (ComponentNode) selected;
             Component component = componentNode.getComponent();
-            return (hasContext(component) && isDebuggable(component.getInfo()));
+            return (isDebugRunning(component) && isDebuggable(component.getInfo()));
         }
         return false;
     }
 
-    private boolean hasContext(Component component) {
-        return component.hasContext();
+    private boolean isDebugRunning(Component component) {
+        return component.getLiveFeatures().isDebug();
     }
 
     @Override
-    protected void process(AnActionEvent anActionEvent, Odo odo, String project, Component component,
-                           Consumer<Boolean> callback) throws IOException {
-        callback = callback.andThen(b -> process(b, anActionEvent, odo, project, component));
-        super.process(anActionEvent, odo, project, component, callback);
+    protected String getTelemetryActionName() {
+        return "debug component";
     }
 
-    protected void process(boolean res, AnActionEvent anActionEvent, Odo odo, String namespace, Component component) {
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo){
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
             sendTelemetryResults(TelemetryResult.ABORTED);
             return;
         }
+        ComponentNode componentNode = (ComponentNode) selected;
+        Component component = componentNode.getComponent();
+        NamespaceNode namespaceNode = componentNode.getParent();
+
 
         if (component.getLiveFeatures().isDebug()) {
             RunManager runManager = RunManager.getInstance(project);
-            final Optional<Integer> port = createOrUpdateConfiguration(odo, runManager, namespace, component);
-            port.ifPresent(portNumber -> executeDebug(project, component, odo, namespace, portNumber));
+            final Optional<Integer> port = createOrUpdateConfiguration(odo, runManager, namespaceNode.getNamespace(),
+                    component);
+            port.ifPresent(portNumber -> executeDebug(project, component, odo, namespaceNode.getNamespace(),
+                    portNumber));
         }
     }
 

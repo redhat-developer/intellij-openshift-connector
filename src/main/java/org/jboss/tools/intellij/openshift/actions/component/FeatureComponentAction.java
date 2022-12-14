@@ -56,8 +56,9 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
       ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
       Component component = componentNode.getComponent();
       try {
+        var feat = getComponentFeature(component);
         if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
-                component.getName(), feature)) {
+                component.getName(), feat)) {
           e.getPresentation().setText("Stop " + feature.getLabel() + " mode");
         } else {
           e.getPresentation().setText("Start " + feature.getLabel() + " mode");
@@ -82,11 +83,12 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     NamespaceNode namespaceNode = componentNode.getParent();
     CompletableFuture.runAsync(() -> {
       try {
-        process(anActionEvent, odo, namespaceNode.getName(), component, res -> {
-          if (component.getLiveFeatures().is(feature)) {
-            component.getLiveFeatures().removeFeature(feature);
+        var feat = getComponentFeature(component);
+        process(anActionEvent, odo, namespaceNode.getName(), component, feat, res -> {
+          if (component.getLiveFeatures().is(feat)) {
+            component.getLiveFeatures().removeFeature(feat);
           } else {
-            component.getLiveFeatures().addFeature(feature);
+            component.getLiveFeatures().addFeature(feat);
           }
           ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
         });
@@ -98,12 +100,19 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     });
   }
 
-  protected void process(AnActionEvent anActionEvent, Odo odo, String project, Component component, Consumer<Boolean> callback) throws IOException {
-    if (odo.isStarted(project, component.getPath(), component.getName(), feature)) {
-      odo.stop(project, component.getPath(), component.getName(), feature);
+  private ComponentFeature getComponentFeature(Component component) {
+    var feat = ((feature.getPeer() != null) && component.getInfo().getFeatures().is(feature.getPeer())) ?
+            feature.getPeer() : feature;
+    return feat;
+  }
+
+  protected void process(AnActionEvent anActionEvent, Odo odo, String project, Component component,
+                         ComponentFeature feat, Consumer<Boolean> callback) throws IOException {
+    if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
+      odo.stop(project, component.getPath(), component.getName(), feat);
       callback.accept(true);
     } else {
-      odo.start(project, component.getPath(), component.getName(), feature, callback);
+      odo.start(project, component.getPath(), component.getName(), feat, callback);
     }
   }
 }

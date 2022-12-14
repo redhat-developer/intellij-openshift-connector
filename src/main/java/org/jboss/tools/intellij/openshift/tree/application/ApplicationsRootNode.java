@@ -101,7 +101,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     protected void loadProjectModel(Project project) {
-        for(Module module : project.getComponent(ModuleManager.class).getModules()) {
+        for(Module module : ModuleManager.getInstance(project).getModules()) {
             addContext(ProjectUtils.getModuleRoot(module));
         }
     }

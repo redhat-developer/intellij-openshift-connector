@@ -31,7 +31,7 @@ public class ModuleSelectionDialog extends DialogWrapper {
     init();
     setTitle("Select module");
     DefaultListModel model = new DefaultListModel();
-    for (Module m : project.getComponent(ModuleManager.class).getModules()) {
+    for (Module m : ModuleManager.getInstance(project).getModules()) {
       if (filter.test(m)) {
         model.addElement(m);
       }

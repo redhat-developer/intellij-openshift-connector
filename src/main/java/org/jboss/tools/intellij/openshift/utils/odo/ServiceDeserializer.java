@@ -23,7 +23,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>>
   private static final String NAME_FIELD = "name";
 
   private static final String KIND_FIELD = "kind";
-  private static final String GROUP_FIELD = "group";
+  private static final String APIVERSION_FIELD = "apiVersion";
   public static final String BINDABLE_SERVICES_FIELD = "bindableServices";
 
   public ServiceDeserializer() {
@@ -42,7 +42,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>>
   }
 
   public static Service getService(JsonNode service) {
-    String apiVersion = service.get(GROUP_FIELD).asText();
+    String apiVersion = service.get(APIVERSION_FIELD).asText();
     String kind = service.get(KIND_FIELD).asText();
     return Service.of(service.get(NAME_FIELD).asText(), apiVersion, kind);
   }

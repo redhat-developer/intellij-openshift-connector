@@ -4,8 +4,8 @@
       "name": "my-cluster",
       "namespace": "jeff",
       "kind": "PerconaServerMongoDB",
-      "group": "psmdb.percona.com",
-      "service": "minimal-cluster/PerconaServerMongoDB.psmdb.percona.com"
+      "apiVersion": "psmdb.percona.com/v1",
+      "service": "my-cluster/PerconaServerMongoDB.psmdb.percona.com/v1"
     }
   ]
 }

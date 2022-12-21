@@ -760,9 +760,37 @@ public class OdoCli implements Odo {
         ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "version");
     }
 
+    private String generateBindingName(List<Binding> bindings) {
+        var counter = 0;
+        int finalCounter = counter;
+        while (bindings.stream().anyMatch(binding -> binding.getName().equals("b" + finalCounter))) {
+            counter++;
+        }
+        return "b" + counter;
+    }
+
     @Override
-    public void link(String project, String context, String component, String target) throws IOException {
-        execute(new File(context), command, envVars, "link", target);
+    public Binding link(String project, String context, String component, String target) throws IOException {
+        var bindings = listBindings(project, context, component);
+        var bindingName = generateBindingName(bindings);
+        execute(new File(context), command, envVars, "add", "binding", "--name", bindingName, "--service",
+                target, "--bind-as-files=false");
+        return listBindings(project, context, component).stream().filter(b -> bindingName.equals(b.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public List<Binding> listBindings(String project, String context, String component) throws IOException {
+        return configureObjectMapper(new BindingDeserializer()).readValue(
+                execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
+                new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Binding>>() {
+                });
+    }
+
+    @Override
+    public void deleteBinding(String project, String context, String component, String binding) throws IOException {
+        execute(new File(context), command, envVars, "remove", "binding", "--name", binding);
     }
 
     @Override

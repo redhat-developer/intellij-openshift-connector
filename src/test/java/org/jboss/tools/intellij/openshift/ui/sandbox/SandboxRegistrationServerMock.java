@@ -77,6 +77,7 @@ public class SandboxRegistrationServerMock {
 
     private static String afterVerification2SignupResponse = "{\n" +
             "            \"apiEndpoint\": \"https://api.crc.testing:6443\",\n" +
+            "            \"proxyURL\": \"https://api.crc.testing:6443\",\n" +
             "            \"cheDashboardURL\": \"\",\n" +
             "            \"clusterName\": \"\",\n" +
             "            \"company\": \"\",\n" +

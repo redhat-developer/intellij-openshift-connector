@@ -44,14 +44,11 @@ public class SandboxModel extends WizardModel {
   
   private String clusterURL;
   
-  private String clusterToken;
-
   private boolean complete;
 
   public SandboxModel(@NlsContexts.DialogTitle String title, Project project, TelemetrySender sender) {
     super(title);
     add(new SandboxWorkflowPage(this, project));
-    add(new SandboxLoginPage(this, project));
     this.sender = sender;
   }
 
@@ -123,28 +120,18 @@ public class SandboxModel extends WizardModel {
    */
   public void setClusterURL(String clusterURL) {
     this.clusterURL = clusterURL;
+    this.complete = true;
   }
 
   /**
    * @return the clusterToken
    */
   public String getClusterToken() {
-    return clusterToken;
-  }
-
-  /**
-   * @param clusterToken the clusterToken to set
-   */
-  public void setClusterToken(String clusterToken) {
-    this.clusterToken = clusterToken;
+    return getIDToken();
   }
 
   public boolean isComplete() {
     return complete;
-  }
-
-  public void setComplete(boolean complete) {
-    this.complete = complete;
   }
 
   public void recordTelemetryEvent(String property, String value) {

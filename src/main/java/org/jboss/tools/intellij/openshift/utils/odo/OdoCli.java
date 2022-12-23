@@ -46,9 +46,10 @@ import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
+import io.fabric8.kubernetes.client.utils.Serialization;
+import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftOperatorHubAPIGroupClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +74,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -392,7 +394,7 @@ public class OdoCli implements Odo {
         return new CustomResourceDefinitionContext.Builder()
                 .withName(crd.getName())
                 .withGroup(group)
-                .withScope("Namespaced")
+                .withScope(Scope.NAMESPACED.value())
                 .withKind(crd.getKind())
                 .withPlural(plural)
                 .withVersion(crd.getVersion())
@@ -405,7 +407,7 @@ public class OdoCli implements Odo {
         return new CustomResourceDefinitionContext.Builder()
                 .withName(service.getKind().toLowerCase() + "s." + group)
                 .withGroup(group)
-                .withScope("Namespaced")
+                .withScope(Scope.NAMESPACED.value())
                 .withKind(service.getKind())
                 .withPlural(service.getKind().toLowerCase() + "s")
                 .withVersion(version)
@@ -452,20 +454,21 @@ public class OdoCli implements Odo {
     public List<DevfileComponentType> getComponentTypes() throws IOException {
         return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
                 execute(command, envVars, "registry", "list", "-o", "json"),
-                new TypeReference<List<DevfileComponentType>>() {
-                });
+                new TypeReference<>() {}
+        );
     }
 
 
     private void loadSwagger() {
         try {
-
             HttpRequest req = client.getHttpClient().newHttpRequestBuilder().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
-            HttpResponse<String> response = client.getHttpClient().send(req, String.class);
+            CompletableFuture<HttpResponse<byte[]>> completableFuture = client.getHttpClient()
+                            .sendAsync(req, byte[].class);
+            HttpResponse<byte[]> response = completableFuture.get();
             if (response.isSuccessful()) {
                 swagger = new JSonParser(new ObjectMapper().readTree(response.body()));
             }
-        } catch (IOException e) {
+        } catch (IOException | ExecutionException | InterruptedException e ) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
@@ -507,7 +510,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public List<ServiceTemplate> getServiceTemplates() throws IOException {
+    public List<ServiceTemplate> getServiceTemplates() {
         try {
             List<GenericKubernetesResource> bindableKinds = getBindableKinds();
             OpenShiftOperatorHubAPIGroupDSL hubClient = new OpenShiftOperatorHubAPIGroupClient(client);
@@ -515,6 +518,15 @@ public class OdoCli implements Odo {
             return deserializer.fromList(hubClient.clusterServiceVersions().list());
         } catch (KubernetesClientException e) {
             return Collections.emptyList();
+        }
+    }
+
+    private OpenShiftClient toOpenShiftClient(KubernetesClient client) {
+        OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
+        if (osClient.isSupported()) {
+            return osClient;
+        } else {
+            return null;
         }
     }
 
@@ -574,8 +586,8 @@ public class OdoCli implements Odo {
             client.services().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment).list()
                     .getItems().forEach(service -> client.services().withName(service.getMetadata().getName())
                             .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
-            if (client.isAdaptable(OpenShiftClient.class)) {
-                OpenShiftClient oclient = client.adapt(OpenShiftClient.class);
+            OpenShiftClient oclient = toOpenShiftClient(client);
+            if (oclient != null) {
                 oclient.routes().inNamespace(project).withLabelIn(KubernetesLabels.COMPONENT_LABEL, deployment).list()
                         .getItems().forEach(route -> oclient.routes().withName(route.getMetadata().getName())
                                 .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());

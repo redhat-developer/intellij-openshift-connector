@@ -1,6 +1,13 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+buildscript {
+    ext {
+        ijGradlePluginVersion = (DefaultNativePlatform.currentOperatingSystem.isMacOsX() ? "1.7.0" : "1.12.0")
+    }
+}
 
 plugins {
-    id "org.jetbrains.intellij" version "1.10.1"
+    id "org.jetbrains.intellij" version "${ijGradlePluginVersion}"
     id "com.adarshr.test-logger" version "3.2.0"
     id "idea"
     id "java"
@@ -12,9 +19,7 @@ repositories {
     mavenLocal()
     maven { url 'https://repository.jboss.org' }
     mavenCentral()
-    maven {
-        url 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies'
-    }
+    maven { url 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies' }
 }
 
 sourceCompatibility = '11'
@@ -23,7 +28,17 @@ targetCompatibility = '11'
 intellij {
     version = ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName = 'org.jboss.tools.intellij.openshift'
-    plugins = ['java', 'terminal', 'JavaScriptDebugger', 'JavaScript', 'com.intellij.css', 'yaml', 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.6.1.167']
+    // use '<git repo clone>/build/idea-sandbox/plugins/<plugin>' if working from source
+    plugins = [
+            'java',
+            'terminal',
+            'JavaScriptDebugger',
+            'JavaScript',
+            'com.intellij.css',
+            'yaml',
+            'com.redhat.devtools.intellij.telemetry:0.0.3.33',
+            'com.redhat.devtools.intellij.kubernetes:0.7.1.208'
+    ]
 	updateSinceUntilBuild = false
 }
 
@@ -86,26 +101,28 @@ task integrationUITest(type: Test) {
 }
 
 dependencies {
-    implementation 'io.fabric8:openshift-client:5.12.4'
-    implementation 'org.apache.commons:commons-compress:1.21'
-    implementation 'org.apache.commons:commons-exec:1.3'
-    implementation 'org.apache.commons:commons-lang3:3.9'
-    implementation 'com.redhat.devtools.intellij:intellij-common:1.8.0'
-    testImplementation 'org.mockito:mockito-core:4.9.0'
-    testImplementation 'org.easytesting:fest-assert:1.4'
-    testImplementation 'com.redhat.devtools.intellij:intellij-common:1.8.0:test'
-    testImplementation 'org.awaitility:awaitility:4.1.0'
-    testImplementation 'org.mock-server:mockserver-client-java:5.13.2'
-    testImplementation 'org.mock-server:mockserver-netty:5.13.2'
-    testImplementation 'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    implementation(
+            'io.fabric8:openshift-client:6.4.0',
+            'org.apache.commons:commons-compress:1.21',
+            'org.apache.commons:commons-exec:1.3',
+            'org.apache.commons:commons-lang3:3.9',
+            'com.redhat.devtools.intellij:intellij-common:1.9.0-SNAPSHOT',
+            'io.jsonwebtoken:jjwt-impl:0.11.2',
+            'io.jsonwebtoken:jjwt-jackson:0.11.2',
+            'org.keycloak:keycloak-installed-adapter:18.0.0',
+            'com.squareup.retrofit2:converter-jackson:2.9.0')
+    testImplementation(
+            'org.mockito:mockito-core:4.9.0',
+            'org.easytesting:fest-assert:1.4',
+            'com.redhat.devtools.intellij:intellij-common:1.9.0:test',
+            'org.awaitility:awaitility:4.1.0',
+            'org.mock-server:mockserver-client-java:5.13.2',
+            'org.mock-server:mockserver-netty:5.13.2',
+            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
+            'org.junit.jupiter:junit-jupiter-engine:5.8.2',
+            'org.junit.jupiter:junit-jupiter-api:5.8.2',
+            'org.junit.jupiter:junit-jupiter:5.8.2')
 
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
-    implementation 'org.keycloak:keycloak-installed-adapter:18.0.0'
-    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
     constraints {
         //may be removed when Keycloak dependency is updated
         implementation('org.bouncycastle:bcprov-jdk15on:1.70') {

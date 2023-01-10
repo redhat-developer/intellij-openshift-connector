@@ -21,8 +21,9 @@
   <ul>
   <li>Add support for ARM architecture</li>
   <li>Add Getting Started page</li>
-  <li>Switch to odo 3.2.0</li>
+  <li>Switch to odo 3.4.0</li>
   <li>Improved cluster login management</li>
+  <li>Simplified Red Hat Developer Sandbox login workflow</li>
   <li>Security fixes</li>
   <li>Bug fixes</li>
   </ul>

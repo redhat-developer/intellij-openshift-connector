@@ -43,8 +43,6 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected static final String PROJECT_PREFIX = "prj";
 
-    protected static final String APPLICATION_PREFIX = "app";
-
     protected static final String COMPONENT_PREFIX = "comp";
 
     protected static final String SERVICE_PREFIX = "srv";

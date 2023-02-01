@@ -33,12 +33,9 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
     private ComponentFeature feature;
-
     private String project;
     private String component;
     private String service;
-    private String storage;
-    private String host;
 
     public OdoCliComponentTest(ComponentFeature feature) {
         this.feature = feature;
@@ -54,8 +51,6 @@ public class OdoCliComponentTest extends OdoCliTest {
         project = PROJECT_PREFIX + random.nextInt();
         component = COMPONENT_PREFIX + random.nextInt();
         service = SERVICE_PREFIX + random.nextInt();
-        storage = STORAGE_PREFIX + random.nextInt();
-        host = odo.getMasterUrl().getHost();
     }
 
     @Test

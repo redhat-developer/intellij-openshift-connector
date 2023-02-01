@@ -28,6 +28,14 @@ public class SandboxDialog extends WizardDialog<SandboxModel> {
     @Override
     protected Dimension getWindowPreferredSize() {
         Frame f = WindowManager.getInstance().getFrame(project);
-        return new Dimension(f.getWidth() * 2 / 4, f.getHeight() * 3 / 4);
+        return new Dimension(f.getWidth() * 3 / 4, f.getHeight() * 3 / 4);
+    }
+
+    @Override
+    public void onStepChanged() {
+        super.onStepChanged();
+        if (myModel.getCurrentStep() instanceof SandboxLoginPage) {
+            getRootPane().setDefaultButton(null);
+        }
     }
 }

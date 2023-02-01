@@ -165,11 +165,15 @@ public class SandboxProcessor {
    */
   public String getClusterURL() {
     if (signupPayload != null) {
-      if (signupPayload.has("proxyURL")) {
-        return signupPayload.get("proxyURL").asText();
+      if (signupPayload.has("apiEndpoint")) {
+        return signupPayload.get("apiEndpoint").asText();
+      } else {
+        return patch(signupPayload.get("consoleURL").asText());
       }
     }
-    throw new IllegalStateException();
+    else {
+      throw new IllegalStateException();
+    }
   }
 
   /**

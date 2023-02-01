@@ -144,7 +144,7 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
             case READY:
                 setStatus("Your Red Hat Developer Sandbox is ready, let's login now !!!");
                 model.setClusterURL(processor.getClusterURL());
-                model.getCurrentNavigationState().FINISH.setEnabled(true);
+                model.getCurrentNavigationState().NEXT.setEnabled(true);
                 break;
         }
     }
@@ -210,8 +210,6 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
     @Override
     public JComponent prepare(WizardNavigationState state) {
         state.FINISH.setEnabled(false);
-        //recent versions of IJ display Create when new.project.wizard feature is enabled
-        state.FINISH.setName("Finish");
         state.NEXT.setEnabled(false);
         state.PREVIOUS.setEnabled(false);
         updateGroups();

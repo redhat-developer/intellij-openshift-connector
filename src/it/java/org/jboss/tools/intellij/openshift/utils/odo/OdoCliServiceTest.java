@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
-    public void checkCreateService() throws IOException {
+    public void checkCreateService() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
@@ -37,7 +38,7 @@ public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
     @Ignore("getServiceTemplate not implemented")
-    public void checkCreateServiceAndGetTemplate() throws IOException {
+    public void checkCreateServiceAndGetTemplate() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
@@ -51,8 +52,8 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore("see https://github.com/redhat-developer/odo/issues/6347")
-    public void checkCreateDeleteService() throws IOException {
+    //@Ignore("see https://github.com/redhat-developer/odo/issues/6347")
+    public void checkCreateDeleteService() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
@@ -69,7 +70,7 @@ public class OdoCliServiceTest extends OdoCliTest {
         }
     }
 
-    private void createService(String project, String service) throws IOException {
+    private void createService(String project, String service) throws IOException, ExecutionException, InterruptedException {
         createProject(project);
         ServiceTemplate serviceTemplate = getServiceTemplate();
         OperatorCRD crd = getOperatorCRD(serviceTemplate);

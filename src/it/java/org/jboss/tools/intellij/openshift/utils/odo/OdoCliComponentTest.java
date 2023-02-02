@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 import static org.junit.Assert.assertEquals;
@@ -54,7 +55,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponent() throws IOException {
+    public void checkCreateComponent() throws IOException, ExecutionException, InterruptedException {
         try {
             createComponent(project, component, feature);
             List<Component> components = odo.getComponents(project);
@@ -67,7 +68,7 @@ public class OdoCliComponentTest extends OdoCliTest {
 
 
     @Test
-    public void checkCreateAndDiscoverComponent() throws IOException {
+    public void checkCreateAndDiscoverComponent() throws IOException, ExecutionException, InterruptedException {
         try {
             createComponent(project, component, feature);
             List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
@@ -81,7 +82,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateAndDeleteComponent() throws IOException {
+    public void checkCreateAndDeleteComponent() throws IOException, ExecutionException, InterruptedException {
         try {
             createComponent(project, component, feature);
             odo.deleteComponent(project, COMPONENT_PATH, component, ComponentKind.DEVFILE);
@@ -92,7 +93,7 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     @Ignore
-    public void checkCreateComponentAndLinkService() throws IOException {
+    public void checkCreateComponentAndLinkService() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
@@ -112,7 +113,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentAndListURLs() throws IOException {
+    public void checkCreateComponentAndListURLs() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
@@ -125,7 +126,7 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @Test
     @Ignore
-    public void checkCreateComponentAndDebug() throws IOException {
+    public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
@@ -152,7 +153,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateComponentStarter() throws IOException {
+    public void checkCreateComponentStarter() throws IOException, ExecutionException, InterruptedException {
         try {
             createProject(project);
             odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,

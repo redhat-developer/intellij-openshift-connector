@@ -47,8 +47,6 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected static final String SERVICE_PREFIX = "srv";
 
-    protected static final String STORAGE_PREFIX = "stor";
-
     protected static final String REGISTRY_PREFIX = "reg";
 
     protected static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
@@ -78,11 +76,14 @@ public abstract class OdoCliTest extends BaseTest {
         odo.deleteDevfileRegistry(REGISTRY_NAME);
     }
 
-    protected void createProject(String project) throws IOException {
+    protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
         odo.createProject(project);
+        // need to refresh kubernetes client with the correct namespace
+        OdoCliFactory.getInstance().resetOdo();
+        odo = OdoCliFactory.getInstance().getOdo(this.project).get();
     }
 
-    protected void createComponent(String project, String component, ComponentFeature feature) throws IOException {
+    protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
         odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,

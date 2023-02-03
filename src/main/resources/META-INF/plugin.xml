@@ -241,7 +241,7 @@
       <separator/>
       <!-- application level -->
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New Component"/>
-      <!--<action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>-->
+      <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
       <!-- component level -->
       <separator/>
       <group id="org.jboss.tools.intellij.openshift.actions.component.actions">
@@ -253,18 +253,21 @@
       <action class="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ShowLogComponentAction" text="Show Log"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.FollowLogComponentAction" text="Follow Log"/>
       <separator/>
-      <!--<action class="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" text="Link Component"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>-->
+      <!--<action class="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkComponentAction" text="Link Component"/>-->
+      <action class="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" id="org.jboss.tools.intellij.openshift.actions.component.LinkServiceAction" text="Link Service"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.ImportComponentAction" text="Import"/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeleteComponentAction" text="Delete"/>
       <!-- service level -->
       <!--<action class="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" id="org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction" text="Link Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DescribeServiceAction" text="Describe"/>
-      <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>-->
+      <separator/>-->
+      <action class="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.DeleteServiceAction" text="Delete"/>
       <!-- URL level -->
       <action class="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" text="Open in Browser"/>
+      <!-- binding level -->
+      <action class="org.jboss.tools.intellij.openshift.actions.binding.ShowBindingDetailsAction" id="org.jboss.tools.intellij.openshift.actions.binding.ShowBindingDetailsAction" text="Show binding information"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.binding.DeleteBindingAction" id="org.jboss.tools.intellij.openshift.actions.binding.DeleteBindingAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
       <!-- registry management -->

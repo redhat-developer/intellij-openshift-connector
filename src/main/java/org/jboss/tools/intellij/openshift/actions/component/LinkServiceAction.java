@@ -14,11 +14,13 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
+import org.jboss.tools.intellij.openshift.ui.binding.BindingDetailDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
@@ -38,11 +40,6 @@ public class LinkServiceAction extends OdoAction {
   @Override
   protected String getTelemetryActionName() { return "link component to service"; }
 
-  @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    return visible;
-  }
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
@@ -54,22 +51,28 @@ public class LinkServiceAction extends OdoAction {
         List<Service> services = odo.getServices(namespaceNode.getName());
         if (!services.isEmpty()) {
           Service service;
-          if (services.size() == 1) {
-            service = services.get(0);
-          } else {
-            String[] servicesArray = services.stream().map(Service::getName).toArray(String[]::new);
-            String serviceName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
-            service = services.stream().filter(s -> serviceName.equals(s.getName())).findAny().get();
-          }
+          String[] servicesArray = services.stream().map(Service::getName).toArray(String[]::new);
+          String serviceName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service", "Select service", Messages.getQuestionIcon(), servicesArray, servicesArray[0], null));
+          service = services.stream().filter(s -> serviceName.equals(s.getName())).findAny().get();
           if (service != null) {
             Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", "Linking component to service " + service.getName(), NotificationType.INFORMATION);
             Notifications.Bus.notify(notification);
-            String target = service.getKind() + "/" + service.getName();
-            odo.link(namespaceNode.getName(), component.getPath(), component.getName(), target);
+            String target = service.getName() + '/' + service.getKind() + "." + service.getApiVersion();
+            var binding = odo.link(namespaceNode.getName(), component.getPath(), component.getName(), target);
             notification.expire();
             Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link service", "Component linked to " + service.getName(),
             NotificationType.INFORMATION));
+            componentNode.getRoot().getStructure().fireModified(componentNode);
             sendTelemetryResults(TelemetryResult.SUCCESS);
+            if (!binding.getEnvironmentVariables().isEmpty()) {
+              ApplicationManager.getApplication().invokeLater(() -> {
+                var dialog = new BindingDetailDialog(anActionEvent.getProject(), null, binding);
+                dialog.show();
+              });
+
+            }
+          } else {
+            sendTelemetryResults(TelemetryResult.ABORTED);
           }
        } else {
           String message = "No services to link to";

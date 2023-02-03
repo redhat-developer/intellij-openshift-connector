@@ -32,7 +32,9 @@ import static org.junit.Assert.assertNotNull;
 public abstract class OdoCliTest extends BaseTest {
 
     public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
-    public static final String SERVICE_TEMPLATE = "cloud-native-postgresql.v1.15.1";
+
+    // see https://operatorhub.io/operator/cloud-native-postgresql/ STABLE channel for versions
+    public static final String SERVICE_TEMPLATE = "cloud-native-postgresql.v1.16.2";
     public static final String SERVICE_CRD = "clusters.postgresql.k8s.enterprisedb.io";
     public static final String REGISTRY_URL = "https://registry.stage.devfile.io";
     public static final String REGISTRY_NAME = "RegistryForITTests";
@@ -43,13 +45,9 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected static final String PROJECT_PREFIX = "prj";
 
-    protected static final String APPLICATION_PREFIX = "app";
-
     protected static final String COMPONENT_PREFIX = "comp";
 
     protected static final String SERVICE_PREFIX = "srv";
-
-    protected static final String STORAGE_PREFIX = "stor";
 
     protected static final String REGISTRY_PREFIX = "reg";
 
@@ -80,11 +78,14 @@ public abstract class OdoCliTest extends BaseTest {
         odo.deleteDevfileRegistry(REGISTRY_NAME);
     }
 
-    protected void createProject(String project) throws IOException {
+    protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
         odo.createProject(project);
+        // need to refresh kubernetes client with the correct namespace
+        OdoCliFactory.getInstance().resetOdo();
+        odo = OdoCliFactory.getInstance().getOdo(this.project).get();
     }
 
-    protected void createComponent(String project, String component, ComponentFeature feature) throws IOException {
+    protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
         odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,

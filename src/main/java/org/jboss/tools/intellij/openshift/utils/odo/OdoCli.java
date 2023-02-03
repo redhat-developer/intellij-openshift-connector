@@ -34,6 +34,7 @@ import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfig
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -47,6 +48,8 @@ import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftOperatorHubAPIGroupClient;
+import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
@@ -70,6 +73,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -478,12 +482,40 @@ public class OdoCli implements Odo {
         return null;
     }
 
+    private void getTargetCRD(GenericKubernetesResource resource,
+                                                         List<GenericKubernetesResource> bindableKinds) {
+        if (resource.getAdditionalPropertiesNode() != null &&
+                resource.getAdditionalPropertiesNode().has("status")) {
+            for(JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
+                if (status.has("group") && status.has("kind") && status.has("version")) {
+                    GenericKubernetesResource bindableKind = new GenericKubernetesResource();
+                    bindableKind.setApiVersion(status.get("group").asText() + '/' + status.get("version").asText());
+                    bindableKind.setKind(status.get("kind").asText());
+                    bindableKinds.add(bindableKind);
+                }
+            }
+        }
+    }
+
+    private List<GenericKubernetesResource> getBindableKinds() {
+        List<GenericKubernetesResource> bindableKinds = new ArrayList<>();
+        client.genericKubernetesResources("binding.operators.coreos.com/v1alpha1", "BindableKinds")
+                .list()
+                .getItems()
+                .forEach(r -> getTargetCRD(r, bindableKinds));
+        return bindableKinds;
+    }
+
     @Override
     public List<ServiceTemplate> getServiceTemplates() throws IOException {
-        return configureObjectMapper(new ServiceTemplatesDeserializer(this::findSchema)).readValue(
-                execute(command, envVars, "catalog", "list", "services", "-o", "json"),
-                new TypeReference<List<ServiceTemplate>>() {
-                });
+        try {
+            List<GenericKubernetesResource> bindableKinds = getBindableKinds();
+            OpenShiftOperatorHubAPIGroupDSL hubClient = new OpenShiftOperatorHubAPIGroupClient(client);
+            ServiceTemplatesDeserializer deserializer = new ServiceTemplatesDeserializer(this::findSchema, bindableKinds);
+            return deserializer.fromList(hubClient.clusterServiceVersions().list());
+        } catch (KubernetesClientException e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -691,19 +723,20 @@ public class OdoCli implements Odo {
 
     @Override
     public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project) throws IOException {
-        /*try {
+        try {
             return configureObjectMapper(new ServiceDeserializer()).readValue(
-                    execute(command, envVars, "service", "list", "--project", project, "-o", "json"),
+                    execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
                     new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
                     });
         } catch (IOException e) {
             //https://github.com/openshift/odo/issues/5010
-            if (e.getMessage().contains("\"no operator backed services found in namespace:") || (e.getMessage().contains("failed to list Operator backed services"))) {
+            if (e.getMessage().contains("\"no operator backed services found in namespace:") ||
+                    e.getMessage().contains("failed to list Operator backed services") ||
+                    e.getMessage().contains("Service Binding Operator is not installed")) {
                 return Collections.emptyList();
             }
             throw e;
-        }*/
-        return Collections.emptyList();
+        }
     }
 
     protected LabelSelector getLabelSelector(String application, String component) {
@@ -727,9 +760,37 @@ public class OdoCli implements Odo {
         ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "version");
     }
 
+    private String generateBindingName(List<Binding> bindings) {
+        var counter = 0;
+        int finalCounter = counter;
+        while (bindings.stream().anyMatch(binding -> binding.getName().equals("b" + finalCounter))) {
+            counter++;
+        }
+        return "b" + counter;
+    }
+
     @Override
-    public void link(String project, String context, String component, String target) throws IOException {
-        execute(new File(context), command, envVars, "link", target);
+    public Binding link(String project, String context, String component, String target) throws IOException {
+        var bindings = listBindings(project, context, component);
+        var bindingName = generateBindingName(bindings);
+        execute(new File(context), command, envVars, "add", "binding", "--name", bindingName, "--service",
+                target, "--bind-as-files=false");
+        return listBindings(project, context, component).stream().filter(b -> bindingName.equals(b.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public List<Binding> listBindings(String project, String context, String component) throws IOException {
+        return configureObjectMapper(new BindingDeserializer()).readValue(
+                execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
+                new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Binding>>() {
+                });
+    }
+
+    @Override
+    public void deleteBinding(String project, String context, String component, String binding) throws IOException {
+        execute(new File(context), command, envVars, "remove", "binding", "--name", binding);
     }
 
     @Override

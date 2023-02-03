@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.with;
@@ -23,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 public class OdoCliCatalogTest extends OdoCliTest {
 
     @Test
-    public void checkGetComponentTypes() throws IOException {
+    public void checkGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -36,7 +37,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
 
     @Test
     @Ignore
-    public void checkGetServiceTemplates() throws IOException {
+    public void checkGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -50,7 +51,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
 
     @Test
     @Ignore
-    public void checkMultiPlansServiceTemplates() throws IOException {
+    public void checkMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);

@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +22,7 @@ public class OdoCliProjectTest extends OdoCliTest {
 
 
     @Test
-    public void checkCreateProject() throws IOException {
+    public void checkCreateProject() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -31,7 +32,7 @@ public class OdoCliProjectTest extends OdoCliTest {
     }
 
     @Test
-    public void checkListProjects() throws IOException {
+    public void checkListProjects() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);

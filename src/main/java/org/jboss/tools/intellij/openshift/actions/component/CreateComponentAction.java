@@ -93,7 +93,7 @@ public class CreateComponentAction extends OdoAction {
 
   private void createComponent(Odo odo, String project, CreateComponentModel model) throws IOException{
     computeTelemetry(model);
-    odo.createComponent(project, model.getSelectedComponentType().getName(),
+    odo.createComponent(project, model.getSelectedComponentType() != null ? model.getSelectedComponentType().getName():null,
               model.getSelectedComponentType() instanceof DevfileComponentType?((DevfileComponentType)model.getSelectedComponentType()).getDevfileRegistry().getName():null,
               model.getName(),
               model.getContext(),
@@ -119,7 +119,7 @@ public class CreateComponentAction extends OdoAction {
                 .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
         telemetrySender
                 .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
-        if (StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
+        if (!model.isProjectHasDevfile() && StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
             telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
         }
         if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {

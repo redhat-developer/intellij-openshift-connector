@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsTreeStructure.class);
@@ -103,8 +105,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             } else if (element instanceof NamespaceNode) {
                 return getComponentsAndServices(((NamespaceNode) element));
             } else if (element instanceof ComponentNode) {
-                return getURLs((ComponentNode) element);
-            }else if (element instanceof DevfileRegistriesNode) {
+                var urls = getURLs((ComponentNode) element);
+                var bindings = getBindings((ComponentNode) element);
+                return Stream.of(urls, bindings).flatMap(Stream::of).toArray();
+            } else if (element instanceof DevfileRegistriesNode) {
                 return getRegistries(root, odo);
             } else if (element instanceof DevfileRegistryNode) {
                 return getRegistryComponentTypes((DevfileRegistryNode) element);
@@ -182,13 +186,25 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results.toArray();
     }
 
+    private Object[] getBindings(ComponentNode element) {
+        List<Object> results = new ArrayList<>();
+        Odo odo = element.getRoot().getOdo();
+        try {
+            odo.listBindings(element.getParent().getName(),
+                    element.getComponent().getPath(), element.getName()).forEach(binding -> results.add(new BindingNode(element, binding)));
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+        return results.toArray();
+    }
+
     private Object[] getRegistries(ApplicationsRootNode root, Odo odo) {
         List<DevfileRegistryNode> result = new ArrayList<>();
 
         try {
             odo.listDevfileRegistries().forEach(registry -> result.add(new DevfileRegistryNode(root, registries, registry)));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return result.toArray();
     }
@@ -245,6 +261,12 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                     () -> url.getName() + " (" + url.getContainerPort() + ")",
                     () -> url.asURL(),
                     () -> URL_ICON, parentDescriptor);
+        } else if (element instanceof BindingNode) {
+            Binding binding = ((BindingNode) element).getBinding();
+            return new LabelAndIconDescriptor(project, element,
+                    () -> binding.getName(),
+                    () -> "Bound to " + binding.getService().getName(),
+                    () -> null, parentDescriptor);
         } else if (element instanceof MessageNode) {
             return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
         } else if (element instanceof DevfileRegistriesNode) {

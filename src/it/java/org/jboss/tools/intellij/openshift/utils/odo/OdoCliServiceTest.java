@@ -15,22 +15,22 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@Ignore
 public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
-    public void checkCreateService() throws IOException {
+    public void checkCreateService() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createProject(project);
-            ServiceTemplate serviceTemplate = getServiceTemplate();
-            OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            createService(project, serviceTemplate, crd, service);
+            createService(project, service);
+            List<Service> services = odo.getServices(project);
+            assertNotNull(services);
+            assertEquals(1, services.size());
         } finally {
             odo.deleteProject(project);
         }
@@ -38,14 +38,11 @@ public class OdoCliServiceTest extends OdoCliTest {
 
     @Test
     @Ignore("getServiceTemplate not implemented")
-    public void checkCreateServiceAndGetTemplate() throws IOException {
+    public void checkCreateServiceAndGetTemplate() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createProject(project);
-            ServiceTemplate serviceTemplate = getServiceTemplate();
-            OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            createService(project, serviceTemplate, crd, service);
+            createService(project, service);
             String template = odo.getServiceTemplate(project, service);
             assertNotNull(template);
             assertEquals(SERVICE_TEMPLATE, template);
@@ -55,20 +52,28 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
 
     @Test
-    public void checkCreateDeleteService() throws IOException {
+    //@Ignore("see https://github.com/redhat-developer/odo/issues/6347")
+    public void checkCreateDeleteService() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         String service = SERVICE_PREFIX + random.nextInt();
         try {
-            createProject(project);
-            ServiceTemplate serviceTemplate = getServiceTemplate();
-            OperatorCRD crd = getOperatorCRD(serviceTemplate);
-            createService(project, serviceTemplate, crd, service);
+            createService(project, service);
             List<Service> services = odo.getServices(project);
             assertNotNull(services);
             assertEquals(1, services.size());
             odo.deleteService(project, services.get(0));
+            services = odo.getServices(project);
+            assertNotNull(services);
+            assertEquals(0, services.size());
         } finally {
             odo.deleteProject(project);
         }
+    }
+
+    private void createService(String project, String service) throws IOException, ExecutionException, InterruptedException {
+        createProject(project);
+        ServiceTemplate serviceTemplate = getServiceTemplate();
+        OperatorCRD crd = getOperatorCRD(serviceTemplate);
+        createService(project, serviceTemplate, crd, service);
     }
 }

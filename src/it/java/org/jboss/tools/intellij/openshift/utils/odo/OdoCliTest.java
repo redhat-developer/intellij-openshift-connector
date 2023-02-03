@@ -109,6 +109,7 @@ public abstract class OdoCliTest extends BaseTest {
 
     protected ServiceTemplate getServiceTemplate() throws IOException {
         with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
+        System.out.println(odo.getServiceTemplates().get(0).getName());
         ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE)).findFirst().orElse(null);
         assertNotNull(serviceTemplate);
         return serviceTemplate;

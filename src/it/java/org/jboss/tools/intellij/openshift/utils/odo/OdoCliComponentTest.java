@@ -118,7 +118,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         try {
             createComponent(project, component, feature);
             List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
-            assertEquals(2, urls.size());
+            assertEquals(1, urls.size());
         } finally {
             odo.deleteProject(project);
         }

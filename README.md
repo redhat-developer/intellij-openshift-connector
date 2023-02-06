@@ -22,7 +22,7 @@ To run the instance of OpenShift cluster locally, developers can use the followi
 * Kubernetes 1.x - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 * ~~OpenShift 3.x~~ - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/)
 
-The extension also supports OpenShift running on Azure, AWS.
+The extension also supports OpenShift running on Azure, AWS, ...
 
 ## New features
 
@@ -156,7 +156,7 @@ The YAML editor will now assist during edition of this file with syntax validati
 
 ### Devfile support
 
-The plugin is now based on Odo 2.x, which brings support for Devfiles. A devfile is describing the way your component should be built, rebuilt, debugged. When creating a component, there is now two different choices:
+The plugin is now based on [Odo](https://odo.dev), which brings support for Devfiles. A devfile is describing the way your component should be built, rebuilt, debugged. When creating a component, there is now two different choices:
 
 - Pick a devfile from a registry. The registry will contain devfiles specific to your component language, framework and variants (ex Java/Quarkus, Java/SpringBoot, Python/Django,...)
 - Your component has its own devfile and the plugin will automatically use it if it's there
@@ -194,40 +194,26 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 * `Log in to cluster` - Log in to your server and save login for subsequent use.
     * Credentials : Log in to the given server with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
-* `Log out` - Logs out of the current OpenShift Cluster.
-* `List catalog components` - List all available Component Types from OpenShift's Image Builder.
-* `List catalog services` - Lists all available Services e.g. mysql-persistent. Only visible if the Service Catalog is enabled on the cluster.
-* `New Project` - Create new project inside the OpenShift Cluster.
-* `Open Console` - Opens the OpenShift webconsole URL.
-* `Refresh`- Refresh the tree with latest resources from the cluster.
-* `About` - Provides the information about the OpenShift tools.
+* `New Project` - Create new project inside the OpenShift cluster / Create new namespace inside the Kubernetes cluster.
+* `Open Console Dashboard` - Opens the OpenShift webconsole URL.
+* `Refresh`- Refresh the tree with the latest resources from the cluster.
+* `Getting Started` - Open the Getting Started tour.
+* `About` - Provides the information about the OpenShift tools used.
 
-#### Actions available for an OpenShift Cluster Project
+#### Actions available for a Cluster Project
 
-* `New Component` - Create a new Component from the Project.
-    * local - Use a local directory as a source for the Component.
-    * git - Use a git repository as the source for the Component.
-    * binary - Use a binary file as a source for the Component
+* `New Component` - Create locally a new Component.
 * `New Service` - Perform Service Catalog operations when it is enabled.
-* `Delete` - Delete an existing Project.
+* `Delete` - Delete an existing Project/Namespace. 
 
-#### Actions available for an Application in a Project
+#### Actions available for a Component in a Project
 
-* `New Component` - Create a new Component inside the selected Application.
-    * local - Use a local directory as a source for the Component.
-    * git - Use a git repository as the source for the Component.
-    * binary - Use a binary file as a source for the Component
-* `New Service` - Perform Service Catalog operations when it is enabled.
-* `Describe` - Describe the given Application in a terminal window.
-* `Delete` - Delete an existing Application.
+##### Components can be in 4 stages:
 
-#### Actions available for a Component in an Application
-
-##### Components can be in 3 stages:
-
-      pushed - When the components are deployed into the cluster.
-      not pushed - When are the components are in local config but NOT deployed into the cluster.
-      no context - When there is no context folder associated with the component in the project.
+      locally created - When the components are in local config but NOT deployed/pushed into the cluster.
+      deploy          - When the components are deployed into the cluster.
+      dev             - When the components are pushed into the cluster in dev mode, that is every changes are synced and when terminating the command, the component will be deleted from the cluster.
+      debug           - When the components are pushed into the cluster in debug mode, same as dev mode plus the ability to put breakpoints in the code and use the debugger.
 
 #### Actions for a Pushed Component
 

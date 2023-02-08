@@ -24,95 +24,89 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public abstract class FeatureComponentAction extends ContextAwareComponentAction {
-  private static Logger LOGGER = Logger.getLogger(FeatureComponentAction.class.getName());
 
-  protected final ComponentFeature feature;
+    protected final ComponentFeature feature;
 
-  public FeatureComponentAction(ComponentFeature feature) {
-    this.feature = feature;
-  }
-
-  @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    if (visible && selected instanceof ComponentNode) {
-      Component component = ((ComponentNode) selected).getComponent();
-      visible = component.getInfo().getFeatures().is(feature);
+    public FeatureComponentAction(ComponentFeature feature) {
+        this.feature = feature;
     }
-    return visible;
-  }
 
-  @Override
-  public void update(AnActionEvent e) {
-    super.update(e);
-    Object node = adjust(getSelected(getTree(e)));
-    if (node instanceof ComponentNode) {
-      ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
-      Component component = componentNode.getComponent();
-      try {
-        var feat = getComponentFeature(component);
-        if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
-                component.getName(), feat)) {
-          e.getPresentation().setText("Stop " + feature.getLabel() + " mode");
-        } else {
-          e.getPresentation().setText("Start " + feature.getLabel() + " mode");
+    @Override
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
+        if (visible && selected instanceof ComponentNode) {
+            Component component = ((ComponentNode) selected).getComponent();
+            visible = component.getInfo().getFeatures().is(feature);
         }
-      } catch (IOException ex) {
-        LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
-      }
+        return visible;
     }
-  }
 
-  protected String getActionName() {
-    return feature.getLabel();
-  }
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        Object node = adjust(getSelected(getTree(e)));
+        if (node instanceof ComponentNode) {
+            ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
+            Component component = componentNode.getComponent();
+            var feat = getComponentFeature(component);
+            if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
+                    component.getName(), feat)) {
+                e.getPresentation().setText("Stop " + feature.getLabel() + " mode");
+            } else {
+                e.getPresentation().setText("Start " + feature.getLabel() + " mode");
+            }
+        }
+    }
 
-  @Override
-  protected String getTelemetryActionName() { return feature.getLabel() + " component"; }
+    protected String getActionName() {
+        return feature.getLabel();
+    }
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    Component component = componentNode.getComponent();
-    NamespaceNode namespaceNode = componentNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-        var feat = getComponentFeature(component);
-        process(anActionEvent, odo, namespaceNode.getName(), component, feat, res -> {
-          if (component.getLiveFeatures().is(feat)) {
-            component.getLiveFeatures().removeFeature(feat);
-          } else {
-            component.getLiveFeatures().addFeature(feat);
-          }
-          ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+    @Override
+    protected String getTelemetryActionName() {
+        return feature.getLabel() + " component";
+    }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+        ComponentNode componentNode = (ComponentNode) selected;
+        Component component = componentNode.getComponent();
+        NamespaceNode namespaceNode = componentNode.getParent();
+        CompletableFuture.runAsync(() -> {
+            try {
+                var feat = getComponentFeature(component);
+                process(odo, namespaceNode.getName(), component, feat, res -> {
+                    if (component.getLiveFeatures().is(feat)) {
+                        component.getLiveFeatures().removeFeature(feat);
+                    } else {
+                        component.getLiveFeatures().addFeature(feat);
+                    }
+                    ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                });
+                sendTelemetryResults(TelemetryResult.SUCCESS);
+            } catch (IOException e) {
+                sendTelemetryError(e);
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+            }
         });
-        sendTelemetryResults(TelemetryResult.SUCCESS);
-      } catch (IOException e) {
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
-      }
-    });
-  }
-
-  private ComponentFeature getComponentFeature(Component component) {
-    var feat = ((feature.getPeer() != null) && component.getInfo().getFeatures().is(feature.getPeer())) ?
-            feature.getPeer() : feature;
-    return feat;
-  }
-
-  protected void process(AnActionEvent anActionEvent, Odo odo, String project, Component component,
-                         ComponentFeature feat, Consumer<Boolean> callback) throws IOException {
-    if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
-      odo.stop(project, component.getPath(), component.getName(), feat);
-      callback.accept(true);
-    } else {
-      odo.start(project, component.getPath(), component.getName(), feat, callback);
     }
-  }
+
+    private ComponentFeature getComponentFeature(Component component) {
+        return ((feature.getPeer() != null) && component.getInfo().getFeatures().is(feature.getPeer())) ?
+                feature.getPeer() : feature;
+    }
+
+    protected void process(Odo odo, String project, Component component,
+                           ComponentFeature feat, Consumer<Boolean> callback) throws IOException {
+        if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
+            odo.stop(project, component.getPath(), component.getName(), feat);
+            callback.accept(true);
+        } else {
+            odo.start(project, component.getPath(), component.getName(), feat, callback);
+        }
+    }
 }

@@ -33,7 +33,7 @@ public interface Odo {
 
     void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
 
-    boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException;
+    boolean isStarted(String project, String context, String component, ComponentFeature feature);
 
     void describeComponent(String project, String context, String component) throws IOException;
 
@@ -119,9 +119,8 @@ public interface Odo {
      *
      * @param context the component context path
      * @param name the component name
-     * @throws IOException
      */
-    void migrateComponent(String context, String name) throws IOException;
+    void migrateComponent(String context, String name);
 
     void release();
 }

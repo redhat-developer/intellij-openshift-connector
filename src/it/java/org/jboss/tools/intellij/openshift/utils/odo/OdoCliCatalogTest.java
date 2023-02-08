@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,7 +35,6 @@ public class OdoCliCatalogTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore
     public void checkGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
@@ -50,7 +48,6 @@ public class OdoCliCatalogTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore
     public void checkMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {

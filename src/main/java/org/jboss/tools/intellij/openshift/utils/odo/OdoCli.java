@@ -237,7 +237,7 @@ public class OdoCli implements Odo {
         if (namespace == null) {
             namespace = validateNamespace(client.getNamespace());
         }
-        return "".equals(namespace)?null:namespace;
+        return "".equals(namespace) ? null : namespace;
     }
 
     private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
@@ -407,10 +407,10 @@ public class OdoCli implements Odo {
     }
 
     private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
-        ((ObjectNode)node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
-        ((ObjectNode)node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
+        ((ObjectNode) node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
+        ((ObjectNode) node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
         if (spec != null) {
-            ((ObjectNode)node).set(SPEC_FIELD, spec);
+            ((ObjectNode) node).set(SPEC_FIELD, spec);
         }
     }
 
@@ -433,7 +433,8 @@ public class OdoCli implements Odo {
     public List<DevfileComponentType> getComponentTypes() throws IOException {
         return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
                 execute(command, envVars, "registry", "list", "-o", "json"),
-                new TypeReference<>() {}
+                new TypeReference<>() {
+                }
         );
     }
 
@@ -442,12 +443,14 @@ public class OdoCli implements Odo {
         try {
             HttpRequest req = client.getHttpClient().newHttpRequestBuilder().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
             CompletableFuture<HttpResponse<byte[]>> completableFuture = client.getHttpClient()
-                            .sendAsync(req, byte[].class);
+                    .sendAsync(req, byte[].class);
             HttpResponse<byte[]> response = completableFuture.get();
             if (response.isSuccessful()) {
                 swagger = new JSonParser(new ObjectMapper().readTree(response.body()));
             }
-        } catch (IOException | ExecutionException | InterruptedException e ) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (IOException | ExecutionException e){
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
@@ -460,15 +463,16 @@ public class OdoCli implements Odo {
             if (swagger != null) {
                 return swagger.findSchema("/apis/" + crd);
             }
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
         return null;
     }
 
     private void getTargetCRD(GenericKubernetesResource resource,
-                                                         List<GenericKubernetesResource> bindableKinds) {
+                              List<GenericKubernetesResource> bindableKinds) {
         if (resource.getAdditionalPropertiesNode() != null &&
                 resource.getAdditionalPropertiesNode().has("status")) {
-            for(JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
+            for (JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
                 if (status.has("group") && status.has("kind") && status.has("version")) {
                     GenericKubernetesResource bindableKind = new GenericKubernetesResource();
                     bindableKind.setApiVersion(status.get("group").asText() + '/' + status.get("version").asText());
@@ -610,7 +614,7 @@ public class OdoCli implements Odo {
 
     private void doLog(String context, String component, boolean follow, boolean deploy) throws IOException {
         List<ProcessHandler> handlers = componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
-        int index = deploy ? 1: 0;
+        int index = deploy ? 1 : 0;
         ProcessHandler handler = handlers.get(index);
         if (handler == null) {
             List<String> args = new ArrayList<>();
@@ -806,11 +810,14 @@ public class OdoCli implements Odo {
     public String consoleURL() throws IOException {
         try {
             if (isOpenShift()) {
-                VersionInfo info = toOpenShiftClient().getOpenShiftV3Version();
-                if (info == null) {
-                    ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
-                    if (configMap != null) {
-                        return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+                OpenShiftClient oclient = toOpenShiftClient();
+                if (oclient != null) {
+                    VersionInfo info = oclient.getOpenShiftV3Version();
+                    if (info == null) {
+                        ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
+                        if (configMap != null) {
+                            return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+                        }
                     }
                 } else {
                     ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
@@ -826,7 +833,7 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public boolean isOpenShift(){
+    public boolean isOpenShift() {
         return ClusterHelper.getClusterInfo(client).isOpenshift();
     }
 
@@ -859,7 +866,9 @@ public class OdoCli implements Odo {
     public List<DevfileRegistry> listDevfileRegistries() throws IOException {
         return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
                 execute(command, envVars, "preference", "view", "-o", "json"),
-                new TypeReference<List<DevfileRegistry>>() {});    }
+                new TypeReference<List<DevfileRegistry>>() {
+                });
+    }
 
     @Override
     public void createDevfileRegistry(String name, String url, String token) throws IOException {

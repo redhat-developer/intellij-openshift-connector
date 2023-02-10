@@ -34,6 +34,8 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProjectDecorator;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,14 +44,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
 public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener {
 
-    private static final Logger LOGGER = Logger.getLogger(ApplicationsRootNode.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
     private final ApplicationsTreeStructure structure;
     private Odo odo;
@@ -140,7 +140,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
                         addContextToSettings(descriptor.getPath(), descriptor)
                 );
             } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+                LOGGER.error(ex.getLocalizedMessage(), ex);
             }
         }
     }

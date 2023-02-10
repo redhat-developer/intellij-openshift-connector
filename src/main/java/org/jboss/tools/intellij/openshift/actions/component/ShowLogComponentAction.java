@@ -17,17 +17,17 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class ShowLogComponentAction extends ContextAwareComponentAction {
-  private static final Logger LOGGER = Logger.getLogger(ShowLogComponentAction.class.getName());
+  private static final Logger LOGGER = LoggerFactory.getLogger(ShowLogComponentAction.class);
 
   @Override
   protected String getTelemetryActionName() { return "show component log"; }
@@ -49,7 +49,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
                         !componentNode.getRoot().getOdo().isLogRunning(component.getPath(), component.getName(), true));
       }
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, e, e::getLocalizedMessage);
+      LOGGER.warn(e.getLocalizedMessage(), e);
     }
     return visible;
   }

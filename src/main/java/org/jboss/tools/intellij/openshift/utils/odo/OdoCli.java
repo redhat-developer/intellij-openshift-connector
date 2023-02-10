@@ -240,10 +240,10 @@ public class OdoCli implements Odo {
         return "".equals(namespace) ? null : namespace;
     }
 
-    private static String execute(File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
+    private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
         ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
         try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {
-            BinaryOperator<String> reducer = new BinaryOperator<String>() {
+            BinaryOperator<String> reducer = new BinaryOperator<>() {
                 private boolean notificationFound = false;
 
                 @Override
@@ -330,7 +330,9 @@ public class OdoCli implements Odo {
 
     @Override
     public void describeComponent(String project, String context, String component) throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe", "component");
+        if (context != null) {
+            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe", "component");
+        }
     }
 
     @Override
@@ -464,6 +466,7 @@ public class OdoCli implements Odo {
                 return swagger.findSchema("/apis/" + crd);
             }
         } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return null;
     }
@@ -667,11 +670,10 @@ public class OdoCli implements Odo {
 
     @Nullable
     private File createWorkingDirectory(String context) {
-        File workingDirectory = null;
         if (context != null) {
-            workingDirectory = new File(context);
+            return new File(context);
         }
-        return workingDirectory;
+        return null;
     }
 
     @Override
@@ -764,10 +766,13 @@ public class OdoCli implements Odo {
 
     @Override
     public List<Binding> listBindings(String project, String context, String component) throws IOException {
-        return configureObjectMapper(new BindingDeserializer()).readValue(
-                execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
-                new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Binding>>() {
-                });
+        if (context != null) {
+            return configureObjectMapper(new BindingDeserializer()).readValue(
+                    execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
+                    new TypeReference<>() {
+                    });
+        }
+        return Collections.emptyList();
     }
 
     @Override

@@ -109,7 +109,7 @@ dependencies {
             'com.redhat.devtools.intellij:intellij-common:1.9.0',
             'io.jsonwebtoken:jjwt-impl:0.11.2',
             'io.jsonwebtoken:jjwt-jackson:0.11.2',
-            'org.keycloak:keycloak-installed-adapter:18.0.0',
+            'org.keycloak:keycloak-installed-adapter:20.0.3',
             'com.squareup.retrofit2:converter-jackson:2.9.0')
     testImplementation(
             'org.mockito:mockito-core:4.9.0',
@@ -122,17 +122,6 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.8.2',
             'org.junit.jupiter:junit-jupiter-api:5.8.2',
             'org.junit.jupiter:junit-jupiter:5.8.2')
-
-    constraints {
-        //may be removed when Keycloak dependency is updated
-        implementation('org.bouncycastle:bcprov-jdk15on:1.70') {
-            because 'https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-2841508'
-        }
-        //may be removed when Keycloak dependency is updated
-        implementation('io.undertow:undertow-core:2.2.11.Final') {
-            because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-2847922'
-        }
-    }
 }
 
 sonarqube {

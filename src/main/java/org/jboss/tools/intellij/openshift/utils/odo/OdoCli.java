@@ -306,18 +306,16 @@ public class OdoCli implements Odo {
         }
     }
 
-    private void stopHandler(ProcessHandler handler) {
-        handler.destroyProcess();
-    }
-
     @Override
     public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
-        Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
-        ProcessHandler handler = componentMap.remove(feature);
-        if (handler != null) {
-            stopHandler(handler);
-            if (!feature.getStopArgs().isEmpty()) {
-                execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[feature.getStopArgs().size()]));
+        if (context != null) {
+            Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
+            ProcessHandler handler = componentMap.remove(feature);
+            if (handler != null) {
+                handler.destroyProcess();
+                if (!feature.getStopArgs().isEmpty()) {
+                    execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[feature.getStopArgs().size()]));
+                }
             }
         }
     }

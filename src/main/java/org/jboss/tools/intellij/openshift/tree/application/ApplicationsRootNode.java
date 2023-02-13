@@ -34,6 +34,8 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProjectDecorator;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +48,8 @@ import java.util.concurrent.CompletableFuture;
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
 public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
     private final ApplicationsTreeStructure structure;
     private Odo odo;
@@ -101,7 +105,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     protected void loadProjectModel(Project project) {
-        for(Module module : ModuleManager.getInstance(project).getModules()) {
+        for (Module module : ModuleManager.getInstance(project).getModules()) {
             addContext(ProjectUtils.getModuleRoot(module));
         }
     }
@@ -119,17 +123,10 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
             if (descriptor.isPreOdo3()) {
-                try {
-                    getOdo().migrateComponent(path, descriptor.getName());
-                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Component migration",
-                            "The component " + descriptor.getName() + " has been migrated to odo 3.x",
-                            NotificationType.INFORMATION), project);
-                } catch (IOException e) {
-                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Component migration",
-                            "The component " + descriptor.getName() + " couldn't be migrated to odo 3.x",
-                            NotificationType.INFORMATION), project);
-                }
-
+                getOdo().migrateComponent(path, descriptor.getName());
+                Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Component migration",
+                        "The component " + descriptor.getName() + " has been migrated to odo 3.x",
+                        NotificationType.INFORMATION), project);
             }
             components.put(path, descriptor);
         }
@@ -139,10 +136,11 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         if (modulePathFile != null && modulePathFile.isValid() && getOdo() != null) {
             try {
                 List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.toNioPath().toString());
-                descriptors.forEach(descriptor -> {
-                    addContextToSettings(descriptor.getPath(), descriptor);
-                });
-            } catch (IOException e) {
+                descriptors.forEach(descriptor ->
+                        addContextToSettings(descriptor.getPath(), descriptor)
+                );
+            } catch (IOException ex) {
+                LOGGER.error(ex.getLocalizedMessage(), ex);
             }
         }
     }
@@ -157,6 +155,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
             structure.fireModified(this);
         }
     }
+
     public void removeContext(File file) {
         if (file.exists()) {
             removeContextFromSettings(file.getPath());

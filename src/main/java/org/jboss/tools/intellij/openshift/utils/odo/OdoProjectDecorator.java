@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,7 +63,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException {
+    public boolean isStarted(String project, String context, String component, ComponentFeature feature) {
         return delegate.isStarted(project, context, component, feature);
     }
 
@@ -300,7 +299,7 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void migrateComponent(String context, String name) throws IOException {
+    public void migrateComponent(String context, String name){
         delegate.migrateComponent(context, name);
     }
 

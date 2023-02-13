@@ -6,7 +6,7 @@
 
   <description><![CDATA[
       <img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/openshift_extension.png" width="32" height="32"/>
-      <p>The OpenShift Toolkit provides all of the power and convenience of IDEs for developing cloud-native Kubernetes applications, without leaving the comfort of your IDE. For a developer to run the local code on an OpenShift instance, test & debug it and deploy it on production without worrying about the complexities around different K8s tools.</p>
+      <p>The OpenShift Toolkit provides all the power and convenience of IDEs for developing cloud-native Kubernetes applications, without leaving the comfort of your IDE. For a developer to run the local code on an OpenShift instance, test & debug it and deploy it on production without worrying about the complexities around different K8s tools.</p>
       <p>OpenShift Toolkit plugin provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:</p>
       <ul>
       <li>Developers can easily create, deploy and debug container applications running on OpenShift.</li>
@@ -17,6 +17,14 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.2.0</b></p>
+  <ul>
+  <li>Switch to odo 3.6.0</li>
+  <li>Implemented service creation for odo v3</li>
+  <li>Kubernetes client dependency updates</li>
+  <li>Bug fixes</li>
+  </ul>
+  </br>
   <p><b>1.1.0</b></p>
   <ul>
   <li>Add support for ARM architecture</li>
@@ -224,6 +232,7 @@
     <group id="org.jboss.tools.intellij.tree" popup="true">
       <!-- Application Explorer -->
       <!-- Top level: cluster -->
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
       <separator/>
       <!--<action class="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" text="List Catalog Components"/>
@@ -231,7 +240,6 @@
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
       <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
       <separator/>
       <action id="org.jboss.tools.intellij.openshift.actions.OpenGettingStartedAction"
@@ -239,7 +247,7 @@
               text="Getting Started" />
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" id="org.jboss.tools.intellij.openshift.actions.cluster.AboutAction" text="About"/>
       <separator/>
-      <!-- application level -->
+      <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction" text="New Component"/>
       <action class="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" id="org.jboss.tools.intellij.openshift.actions.service.CreateServiceAction" text="New Service"/>
       <!-- component level -->

@@ -22,7 +22,7 @@ To run the instance of OpenShift cluster locally, developers can use the followi
 * Kubernetes 1.x - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 * ~~OpenShift 3.x~~ - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/)
 
-The extension also supports OpenShift running on Azure, AWS.
+The extension also supports OpenShift running on Azure, AWS, and any others supported environments.
 
 ## New features
 
@@ -125,7 +125,7 @@ Please note that expanding the registry node will list all devfiles from that re
 
 ### Integration with the Kubernetes by Red Hat plugin
 
-Connection from the plugin to the cluster is managed through the well known kubeconfig file. in previous versions of this plugin, it was possible to switch between contexts inside this file but the features were very limited. In order to offer a better user experience for Kubernetes developers, all kubeconfig related features have been moved out from this plugin and delegated to the [Kubernetes by Red Hat plugin](https://plugins.jetbrains.com/plugin/15921-kubernetes-by-red-hat).
+Connection from the plugin to the cluster is managed through the well known kubeconfig file. In previous versions of this plugin, it was possible to switch between contexts inside this file but the features were very limited. In order to offer a better user experience for Kubernetes developers, all kubeconfig related features have been moved out from this plugin and delegated to the [Kubernetes by Red Hat plugin](https://plugins.jetbrains.com/plugin/15921-kubernetes-by-red-hat).
 
 So the Kubernetes by Red Hat plugin is now a required dependency of this plugin and you can access his features through the Kubernetes window:
 
@@ -150,13 +150,13 @@ When you create a component from a devfile, if the selected devfile contains sta
 ### Enhanced devfile editing experience
 
 Devfile based components now have a local devfile added to the local module when the component is created. A devfile is a YAML file with a specific syntax. It is now possible for the end user to edit this file (in case specific settings needs to be updated or added).
-The YAML editor will now assist during edition of this file with syntax validation and code assist
+The YAML editor will now assist during edition of this file with syntax validation and code assist.
 
 ![](images/0.5.0/openshift2.gif)
 
 ### Devfile support
 
-The plugin is now based on Odo 2.x, which brings support for Devfiles. A devfile is describing the way your component should be built, rebuilt, debugged. When creating a component, there is now two different choices:
+The plugin is now based on [Odo](https://odo.dev), which brings support for Devfiles. A devfile is describing the way your component should be built, rebuilt, debugged. When creating a component, there is now two different choices:
 
 - Pick a devfile from a registry. The registry will contain devfiles specific to your component language, framework and variants (ex Java/Quarkus, Java/SpringBoot, Python/Django,...)
 - Your component has its own devfile and the plugin will automatically use it if it's there
@@ -175,116 +175,88 @@ CLI tool odo. A workaround is to refresh the tree.
 
 ### Breaking Changes
 
-Post `0.1.1` releases contains breaking changes mentioned below.
+Post `1.0.0` releases contains breaking changes mentioned below.
 
-* The Components created with previous versions(<=0.0.6) will no longer be visible in OpenShift Application Explorer view.
-* New Component, Url and Storage objects are created locally in context folder and not immediately pushed to the cluster.
+* The Components created with previous versions(<=1.0.0) will be automatically migrated to use odo v3 workflow.
 
-> **Please follow the [migration](https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
+> **Please follow the [migration](https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0) guide to resolve any possible issues for older breaking changes.**
 
 In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
 
 ## Commands and features
 
 
-`OpenShift Toolkit` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the context menu.
+`OpenShift Toolkit` supports a number of commands & actions for interacting with OpenShift/Kubernetes clusters; these are accessible via the context menu.
 
 ### General Commands
 
-* `Log in to cluster` - Log in to your server and save login for subsequent use.
-    * Credentials : Log in to the given server with the given credentials.
+* `Log in to cluster` - Log in to your cluster and save login for subsequent use.
+    * Credentials : Log in to the given cluster with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
-* `Log out` - Logs out of the current OpenShift Cluster.
-* `List catalog components` - List all available Component Types from OpenShift's Image Builder.
-* `List catalog services` - Lists all available Services e.g. mysql-persistent. Only visible if the Service Catalog is enabled on the cluster.
-* `New Project` - Create new project inside the OpenShift Cluster.
-* `Open Console` - Opens the OpenShift webconsole URL.
-* `Refresh`- Refresh the tree with latest resources from the cluster.
-* `About` - Provides the information about the OpenShift tools.
+* `New Project` - Create new project inside the OpenShift cluster / Create new namespace inside the Kubernetes cluster.
+* `Open Console Dashboard` - Opens the OpenShift webconsole URL.
+* `Refresh`- Refresh the tree with the latest resources from the cluster.
+* `Getting Started` - Open the Getting Started tour.
+* `About` - Provides the information about the OpenShift tools used.
 
-#### Actions available for an OpenShift Cluster Project
+#### Actions available for a Cluster Project
 
-* `New Component` - Create a new Component from the Project.
-    * local - Use a local directory as a source for the Component.
-    * git - Use a git repository as the source for the Component.
-    * binary - Use a binary file as a source for the Component
-* `New Service` - Perform Service Catalog operations when it is enabled.
-* `Delete` - Delete an existing Project.
+* `New Component` - Create locally a new Component.
+* `New Service` - Perform Service Catalog operations when it is enabled in the cluster.the created service can then be linked to a component.
+* `Delete` - Delete an existing Project/Namespace. 
+** WARNING ** Use the above delete action will perform the same delete action as in the cluster. That means all resources tied to that project/namespace will be also deleted (ie secrets, configMaps,...)  
 
-#### Actions available for an Application in a Project
+#### Actions available for a Component
 
-* `New Component` - Create a new Component inside the selected Application.
-    * local - Use a local directory as a source for the Component.
-    * git - Use a git repository as the source for the Component.
-    * binary - Use a binary file as a source for the Component
-* `New Service` - Perform Service Catalog operations when it is enabled.
-* `Describe` - Describe the given Application in a terminal window.
-* `Delete` - Delete an existing Application.
+##### Components can be in 4 stages:
 
-#### Actions available for a Component in an Application
+      locally created - When the components are in local config but NOT deployed/pushed into the cluster.
+      dev             - When the components are pushed into the cluster in dev mode, that is every changes are synced and when terminating the command, the component will be deleted from the cluster.
+      debug           - When the components are pushed into the cluster in debug mode, same as dev mode plus the ability to put breakpoints in the code and use the debugger.
+      deploy          - When the components are deployed into the cluster.
 
-##### Components can be in 3 stages:
+#### Common Actions for every component type
 
-      pushed - When the components are deployed into the cluster.
-      not pushed - When are the components are in local config but NOT deployed into the cluster.
-      no context - When there is no context folder associated with the component in the project.
+* `Describe` - Describe the given component in a terminal window.
+* `Link Service` - Link the component to an existing service in the cluster. That will create a binding from the component to the service.
+* `Delete` - Delete an existing component from the local config.
 
-#### Actions for a Pushed Component
+#### Actions for a locally created component
 
-* `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
-* `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-* `Describe` - Describe the given Component in a terminal window.
+* `Start dev mode` - Push the local component in the Cluster inside the project/namespace in dev mode.
+
+#### Actions for a pushed component (Dev/Debug)
+
+* `Stop dev mode` - Stop the dev mode and delete the component from the cluster.
+* `Debug` - Connect a local debugger to the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more details.
 * `Show Log` - Retrieve the log for the given Component.
 * `Follow Log` - Follow logs for the given Component.
-* `Link Component` - Link Component to another Component.
-* `Link Service` - Link Component to a Service.
-* `Unlink` - Unlink Component from Component/Service.
-* `Open in Browser` - Open the exposed URL in a browser.
-* `Push` - Push the source code to a Component.
-* `Watch` - Watch for changes, update Component on change. This is not supported for Git based components.
-* `Debug` - Connect a local debugger with the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more details.
-* `Undeploy` - Undeploy a Component from the cluster. The component still resides in the local config.
-* `Delete` - Delete an existing Component from the cluster and removes the local config also.
-
-#### Actions for a Not Pushed Component
-
-* `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
-* `Push` - Push the source code to a Component.
-* `Delete` - Delete an existing Component from the local config.
-
-
-#### Actions for a no context Component
-
-* `Describe` - Describe the given Component in a terminal window.
-* `Delete` - Delete an existing Component from the local config.
-* `Import` - If the component was created using old version of the extension (`<=0.0.6`), users can use the `Import` action to migrate to the latest version and import the metadata changes.
 
 #### Actions available for a URL in a Component
 
-* `Delete` - Delete a URL from a Component.
-* `Open URL` - Click on the icon opens the specific URL in Browser.
+* `Open in Browser` - Open the exposed URL in a browser.
+** NOTE ** URLs are exposed only when the component is pushed or deployed in the cluster. THe URL definitions are stored in the devfile file.
 
-#### Actions available for a Storage in a Component
+#### Actions available for a Service in a project
 
-* `Delete` - Delete a Storage from a Component.
+* `Delete` - Delete the Service from the project. 
 
-#### Actions available for a Service in an Application
+#### Actions available for a binding in a component
 
-* `Describe` - Describe a Service Type for a selected Component
-* `Delete` - Delete a Service from an Application
-
-**NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
+* `Show binding information` - Show the binding information a dialog.
+* `Delete` - Delete the binding from the component.
 
 #### Icons Representation
 
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" alt="Cluster Resource"/><span style="margin: 20px"> Cluster Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" alt="Project Resource"/><span style="margin: 20px"> Project Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/application.png" width="15" height="15" alt="Application Resource"/><span style="margin: 20px"> Application Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px"> Component Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" alt="Service Resource"/><span style="margin: 20px"> Service Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/storage.png" width="15" height="15" alt="Storage Resource"/><span style="margin: 20px"> Storage Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" alt="URL Resource"/><span style="margin: 20px"> URL Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node-secure.png" width="15" height="15" alt="Secure URL Resource"/><span style="margin: 20px"> Secure URL Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" alt="Cluster Resource"/><span style="margin: 20px">Cluster Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" alt="Project Resource"/><span style="margin: 20px">Project Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px">Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" alt="Service Resource"/><span style="margin: 20px">Service Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" alt="URL Resource"/><span style="margin: 20px">URL Resource</span></div>
+
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/registry.svg" width="15" height="15" alt="Registry Resource"/><span style="margin: 20px">Registry Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component-type-light.png" width="15" height="15" alt="Component Type Resource"/><span style="margin: 20px">Component Type Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/start-project-light.png" width="15" height="15" alt="Starter Resource"/><span style="margin: 20px">Starter Resource</span></div>
 
 ### Dependencies
 

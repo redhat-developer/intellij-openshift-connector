@@ -233,48 +233,48 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     @Override
-    public NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
+    public @NotNull NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
         if (element == this) {
-            return new LabelAndIconDescriptor(project, element, "Root", null, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, "Root", null, parentDescriptor);
         }
         else if (element instanceof ApplicationsRootNode) {
             ApplicationsRootNode root = (ApplicationsRootNode) element;
-            return new LabelAndIconDescriptor(project, element, () -> root.getOdo() != null?root.getOdo().getMasterUrl().toString():"Loading", CLUSTER_ICON,
+            return new LabelAndIconDescriptor<>(project, element, () -> root.getOdo() != null?root.getOdo().getMasterUrl().toString():"Loading", CLUSTER_ICON,
                     parentDescriptor);
         } else if (element instanceof NamespaceNode) {
-            return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
+            return new LabelAndIconDescriptor<>(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
-            return new LabelAndIconDescriptor(project, element,
+            return new LabelAndIconDescriptor<>(project, element,
                     () -> ((ComponentNode) element).getName() + ' ' + getComponentSuffix((ComponentNode) element),
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
-            return new LabelAndIconDescriptor(project, element,
+            return new LabelAndIconDescriptor<>(project, element,
                     ((ServiceNode) element)::getName, () -> ((ServiceNode) element).getService().getKind(), SERVICE_ICON, parentDescriptor);
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
-            return new LabelAndIconDescriptor(project, element,
+            return new LabelAndIconDescriptor<>(project, element,
                     () -> url.getName() + " (" + url.getContainerPort() + ")",
                     () -> url.asURL(),
                     () -> URL_ICON, parentDescriptor);
         } else if (element instanceof BindingNode) {
             Binding binding = ((BindingNode) element).getBinding();
-            return new LabelAndIconDescriptor(project, element,
-                    () -> binding.getName(),
+            return new LabelAndIconDescriptor<>(project, element,
+                                                binding::getName,
                     () -> "Bound to " + binding.getService().getName(),
                     () -> null, parentDescriptor);
         } else if (element instanceof MessageNode) {
-            return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element,((MessageNode)element).getName(), null, parentDescriptor);
         } else if (element instanceof DevfileRegistriesNode) {
-            return new LabelAndIconDescriptor(project, element, "Devfile registries", REGISTRY_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, "Devfile registries", REGISTRY_ICON, parentDescriptor);
         } else if (element instanceof DevfileRegistryNode) {
-            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryNode)element).getName(), ((DevfileRegistryNode)element).getRegistry().getURL(), REGISTRY_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((DevfileRegistryNode)element).getName(), ((DevfileRegistryNode)element).getRegistry().getURL(), REGISTRY_ICON, parentDescriptor);
         } else if (element instanceof DevfileRegistryComponentTypeNode) {
-            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeNode)element).getName(), ((DevfileRegistryComponentTypeNode)element).getComponentType().getDescription(), COMPONENT_TYPE_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((DevfileRegistryComponentTypeNode)element).getName(), ((DevfileRegistryComponentTypeNode)element).getComponentType().getDescription(), COMPONENT_TYPE_ICON, parentDescriptor);
         } else if (element instanceof DevfileRegistryComponentTypeStarterNode) {
-            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeStarterNode)element).getName(), ((DevfileRegistryComponentTypeStarterNode)element).getStarter().getDescription(), STARTER_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((DevfileRegistryComponentTypeStarterNode)element).getName(), ((DevfileRegistryComponentTypeStarterNode)element).getStarter().getDescription(), STARTER_ICON, parentDescriptor);
         }
-        return new LabelAndIconDescriptor(project, element, element.toString(), null, parentDescriptor);
+        return new LabelAndIconDescriptor<>(project, element, element.toString(), null, parentDescriptor);
     }
 
     private static String getComponentSuffix(ComponentNode element) {

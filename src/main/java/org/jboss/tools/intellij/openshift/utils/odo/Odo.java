@@ -29,7 +29,7 @@ public interface Odo {
      */
     String getNamespace() throws IOException;
 
-    void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException;
+    void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
 
     void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
 

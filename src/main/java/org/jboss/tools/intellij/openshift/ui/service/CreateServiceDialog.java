@@ -38,8 +38,8 @@ public class CreateServiceDialog extends DialogWrapper {
 
     private JPanel contentPane;
     private JTextField nameField;
-    private JComboBox serviceTemplatesComboBox;
-    private JComboBox serviceCRDComboBox;
+    private JComboBox<ServiceTemplate> serviceTemplatesComboBox;
+    private JComboBox<OperatorCRD> serviceCRDComboBox;
     private JsonSchemaWidget jsonSchemaWidget;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -65,14 +65,14 @@ public class CreateServiceDialog extends DialogWrapper {
             }
         });
         serviceTemplatesComboBox.addItemListener(item -> templateSelected((ServiceTemplate) item.getItem()));
-        serviceTemplatesComboBox.setModel(new DefaultComboBoxModel(serviceTemplates));
+        serviceTemplatesComboBox.setModel(new DefaultComboBoxModel<>(serviceTemplates));
         if (serviceTemplates.length > 0) {
             templateSelected(serviceTemplates[0]);
         }
     }
 
     private void templateSelected(ServiceTemplate template) {
-        serviceCRDComboBox.setModel(new DefaultComboBoxModel(template.getCRDs().toArray()));
+        serviceCRDComboBox.setModel(new DefaultComboBoxModel<>(template.getCRDs().toArray(new OperatorCRD[]{})));
         serviceCRDComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {

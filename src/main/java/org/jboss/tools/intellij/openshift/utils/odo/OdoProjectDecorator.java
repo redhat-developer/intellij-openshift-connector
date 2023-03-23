@@ -53,8 +53,8 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public void start(String project, String context, String component, ComponentFeature feature,
-                      Consumer<Boolean> callback) throws IOException {
-        delegate.start(project, context, component, feature, callback);
+                      Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
+        delegate.start(project, context, component, feature, callback, processTerminatedCallback);
     }
 
     @Override

@@ -265,7 +265,7 @@ public class OdoCli implements Odo {
 
     @Override
     public void start(String project, String context, String component, ComponentFeature feature,
-                      Consumer<Boolean> callback) throws IOException {
+                      Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
         if (feature.getPeer() != null) {
             stop(project, context, component, feature.getPeer());
         }
@@ -301,6 +301,7 @@ public class OdoCli implements Odo {
                         @Override
                         public void processTerminated(@NotNull ProcessEvent event) {
                             componentMap.remove(feature);
+                            processTerminatedCallback.accept(true);
                         }
                     },
                     args.toArray(new String[0]));

@@ -79,12 +79,14 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         CompletableFuture.runAsync(() -> {
             try {
                 ComponentFeature feat = getComponentFeature(component);
-                process(odo, namespaceNode.getName(), component, feat, res -> {
+                process(odo, namespaceNode.getName(), component, feat, b1 -> {
                     if (component.getLiveFeatures().is(feat)) {
                         component.getLiveFeatures().removeFeature(feat);
                     } else {
                         component.getLiveFeatures().addFeature(feat);
                     }
+                    ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                }, b2 -> {
                     ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
                 });
                 sendTelemetryResults(TelemetryResult.SUCCESS);
@@ -101,12 +103,11 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     }
 
     protected void process(Odo odo, String project, Component component,
-                           ComponentFeature feat, Consumer<Boolean> callback) throws IOException {
+                           ComponentFeature feat, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
         if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
             odo.stop(project, component.getPath(), component.getName(), feat);
-            callback.accept(true);
         } else {
-            odo.start(project, component.getPath(), component.getName(), feat, callback);
+            odo.start(project, component.getPath(), component.getName(), feat, callback, processTerminatedCallback);
         }
     }
 }

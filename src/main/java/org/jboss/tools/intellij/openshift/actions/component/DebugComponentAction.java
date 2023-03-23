@@ -136,16 +136,19 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
                 port = Optional.of(Integer.parseInt(urls.get(0).getLocalPort()));
             } else if (ports.length > 1) {
 
-                String index = UIHelper.executeInUI(() ->
-                                                            Messages.showEditableChooseDialog("The component " +
-                                                                                                    component.getName() +
-                                                                                                    " has several ports to connect to,\nchoose the one the debugger will connect to",
-                                                                                              "Choose debugger port",
-                                                                                              Messages.getQuestionIcon(),
-                                                                                              ports,
-                                                                                              ports[0],
-                                                                                              null));
-                port = Optional.of(Integer.parseInt(index));
+                String selected = UIHelper.executeInUI(() ->
+                                                               Messages.showEditableChooseDialog("The component " +
+                                                                                                         component.getName() +
+                                                                                                         " has several ports to connect to,\nchoose the one the debugger will connect to",
+                                                                                                 "Choose debugger port",
+                                                                                                 Messages.getQuestionIcon(),
+                                                                                                 ports,
+                                                                                                 ports[0],
+                                                                                                 null));
+                //get the local mapped port
+                Optional<String> remotePort = urls.stream().filter(url -> url.getContainerPort().equals(selected)).
+                                                  map(URL::getLocalPort).findFirst();
+                port = Optional.of(Integer.parseInt(remotePort.orElseThrow()));
             }
 
             if (port.isPresent()) {

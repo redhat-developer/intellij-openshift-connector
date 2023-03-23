@@ -543,11 +543,6 @@ public class OdoCli implements Odo {
         return parser.parseDescribeComponentInfo(kind);
     }
 
-    @Override
-    public void deleteURL(String project, String context, String component, String name) throws IOException {
-        execute(new File(context), command, envVars, "url", "delete", "-f", name);
-    }
-
     /*
      * We should emulate oc delete all -l app.kubernetes.io/component=comp_name but as the Kubernetes client does not allow
      * to retrieve all APIGroups we reduce the scope to:
@@ -696,11 +691,6 @@ public class OdoCli implements Odo {
         } else {
             execute(command, envVars, "login", url, "-t", String.valueOf(token), " --insecure-skip-tls-verify");
         }
-    }
-
-    @Override
-    public void logout() throws IOException {
-        execute(command, envVars, "logout");
     }
 
     @Override

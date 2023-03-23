@@ -47,7 +47,7 @@ public class WindowToolFactory implements ToolWindowFactory {
         tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);
         tree.setCellRenderer(new NodeRenderer());
         tree.setRootVisible(false);
-        PopupHandler.installPopupMenu(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
+        PopupHandler.installPopupMenu(tree, "org.jboss.tools.intellij.tree", ActionPlaces.MAIN_MENU);
         panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
         toolWindow.getContentManager().addContent(content);
         TreeHelper.addLinkSupport(tree);

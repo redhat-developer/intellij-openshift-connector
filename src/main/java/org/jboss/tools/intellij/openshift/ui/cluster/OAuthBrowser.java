@@ -73,18 +73,6 @@ public class OAuthBrowser extends JPanel implements CefLoadHandler {
         listeners.add(listener);
     }
 
-    public void removeTokenListener(TokenListener listener) {
-        listeners.remove(listener);
-    }
-
-    public void addLoadHandler(CefLoadHandler listener) {
-        client.addLoadHandler(listener, browser.getCefBrowser());
-    }
-
-    public void removeLoadHandler(CefLoadHandler listener) {
-        client.removeLoadHandler(listener, browser.getCefBrowser());
-    }
-
     protected void fireTokenReceived(String token) {
         TokenEvent event = new TokenEvent(this, token);
         listeners.forEach(l -> l.tokenReceived(event));
@@ -101,7 +89,7 @@ public class OAuthBrowser extends JPanel implements CefLoadHandler {
     @Override
     public void onLoadEnd(CefBrowser cefBrowser, CefFrame cefFrame, int i) {
         cefBrowser.getSource(s -> {
-            TokenExtractor extractor = new TokenExtractor(s.toString());
+            TokenExtractor extractor = new TokenExtractor(s);
             if (extractor.isTokenPage()) {
                 fireTokenReceived(extractor.getToken());
             }

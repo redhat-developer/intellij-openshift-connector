@@ -52,7 +52,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         if (node instanceof ComponentNode) {
             ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
             Component component = componentNode.getComponent();
-            var feat = getComponentFeature(component);
+            ComponentFeature feat = getComponentFeature(component);
             if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
                     component.getName(), feat)) {
                 e.getPresentation().setText("Stop " + feature.getLabel() + " mode");
@@ -78,7 +78,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         NamespaceNode namespaceNode = componentNode.getParent();
         CompletableFuture.runAsync(() -> {
             try {
-                var feat = getComponentFeature(component);
+                ComponentFeature feat = getComponentFeature(component);
                 process(odo, namespaceNode.getName(), component, feat, res -> {
                     if (component.getLiveFeatures().is(feat)) {
                         component.getLiveFeatures().removeFeature(feat);

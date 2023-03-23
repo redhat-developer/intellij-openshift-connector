@@ -11,9 +11,7 @@
 package org.jboss.tools.intellij.openshift.oauth.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
-import com.intellij.ui.jcef.JBCefClient;
 import org.jboss.tools.intellij.openshift.oauth.LoginResponse;
 import org.keycloak.OAuthErrorException;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -31,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.keycloak.adapters.installed.KeycloakInstalled.DesktopProvider;
 
 public class OAuthBrowser extends JPanel {
-    private JBCefClient client = JBCefApp.getInstance().createClient();
+
     private JBCefBrowser browser;
     private KeycloakInstalled adapter;
     private CompletableFuture<LoginResponse> redirectFuture = new CompletableFuture<>();
@@ -65,11 +63,11 @@ public class OAuthBrowser extends JPanel {
         adapter = new KeycloakInstalled(deployment);
         adapter.setDesktopProvider(new DesktopProvider() {
             @Override
-            public void browse(URI uri) throws IOException {
+            public void browse(URI uri) {
                 browser.loadURL(uri.toString());
             }
         });
-        ApplicationManager.getApplication().executeOnPooledThread(() -> processRedirect());
+        ApplicationManager.getApplication().executeOnPooledThread(this::processRedirect);
     }
 
     public CompletableFuture<LoginResponse> getRedirectFuture() {

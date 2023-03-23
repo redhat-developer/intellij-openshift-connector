@@ -19,12 +19,6 @@ public class OAuthRefreshException extends OAuthException {
 
 	public static final int NO_STATUS = -1;
 
-	public OAuthRefreshException(IAccount account, int status) {
-		super("Error refreshing token for " + account.getId() + " on autorization server " + account.getAuthorizationServer().getDisplayName());
-		this.account = account;
-		this.status = status;
-	}
-
 	public OAuthRefreshException(IAccount account, Throwable t) {
 		super("Error refreshing token for " + account.getId() + " on autorization server " + account.getAuthorizationServer().getId(), t);
 		this.account = account;

@@ -19,6 +19,9 @@ import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Starter;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -37,11 +40,12 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings({"java:S1171","java:S100"})
+@SuppressWarnings({"java:S1171", "java:S100"})
 public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateComponentDialogStep.class);
     private JTextField nameTextField;
     private JTextField contextTextField;
     private JCheckBox devModeAfterCreateCheckBox;
@@ -50,7 +54,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private JButton browseFolderButton;
     private JComboBox<Starter> componentStartersCombo;
     private JLabel informationLabel;
-    private JList componentTypeList;
+    private JList<DevfileComponentType> componentTypeList;
     private final CreateComponentModel model;
 
     public CreateComponentDialogStep(CreateComponentModel model) {
@@ -61,14 +65,14 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
     private void registerListeners() {
         nameTextField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
-            protected void textChanged(DocumentEvent e) {
+            protected void textChanged(@NotNull DocumentEvent e) {
                 model.setName(nameTextField.getText());
                 updateState();
             }
         });
         contextTextField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
-            protected void textChanged(DocumentEvent e) {
+            protected void textChanged(@NotNull DocumentEvent e) {
                 model.setContext(contextTextField.getText());
                 informationLabel.setVisible(model.isProjectHasDevfile() || model.isProjectIsEmpty());
                 componentTypeList.setEnabled(!model.isProjectHasDevfile());
@@ -109,7 +113,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
         componentTypeList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         componentTypeList.addListSelectionListener(e -> {
-            DevfileComponentType type = (DevfileComponentType) componentTypeList.getSelectedValue();
+            DevfileComponentType type = componentTypeList.getSelectedValue();
 
             if (type == null)
                 //Nothing is selected.
@@ -117,16 +121,17 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
 
             model.setSelectedComponentType(type);
             componentStartersCombo.setEnabled(model.isProjectIsEmpty());
-            List<Starter> starters = Collections.emptyList();
+            DefaultComboBoxModel<Starter> jCombBoxModel  = new DefaultComboBoxModel<>();
             if (model.isProjectIsEmpty()) {
                 try {
                     // TODO: create a loader indicator as shown https://jetbrains.design/intellij/controls/progress_indicators/#05
-                    starters = model.getOdo().getComponentTypeInfo(type.getName(), type.getDevfileRegistry().getName()).getStarters();
-                } catch (IOException ioException) {
-                    starters = Collections.emptyList();
+                    List<Starter> starters = model.getOdo().getComponentTypeInfo(type.getName(), type.getDevfileRegistry().getName()).getStarters();
+                    jCombBoxModel.addAll(starters);
+                } catch (IOException ioe) {
+                    LOGGER.error(ioe.getLocalizedMessage(), e);
                 }
             }
-            componentStartersCombo.setModel(new DefaultComboBoxModel(starters.toArray()));
+            componentStartersCombo.setModel(jCombBoxModel);
             componentStartersCombo.setRenderer(SimpleListCellRenderer.create("", Starter::getName));
             componentStartersCombo.setSelectedIndex(-1);
             updateState();

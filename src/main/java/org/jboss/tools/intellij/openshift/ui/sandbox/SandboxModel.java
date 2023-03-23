@@ -20,17 +20,6 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
  *
  */
 public class SandboxModel extends WizardModel {
-  public static final String PROPERTY_ID_TOKEN = "IDToken";
-  
-  public static final String PROPERTY_PHONE_NUMBER = "phoneNumber";
-  
-  public static final String PROPERTY_COUNTRY_CODE = "countryCode";
-  
-  public static final String PROPERTY_VERIFICATION_CODE = "verificationCode";
-  
-  public static final String PROPERTY_CLUSTER_URL = "clusterURL";
-  
-  public static final String PROPERTY_CLUSTER_TOKEN = "clusterToken";
 
   private final TelemetrySender sender;
 

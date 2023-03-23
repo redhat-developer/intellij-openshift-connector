@@ -16,15 +16,12 @@ public interface ComponentInfo {
 
     String getLanguage();
 
-    boolean isMigrated();
-
     ComponentKind getComponentKind();
 
     ComponentFeatures getFeatures();
 
     class Builder {
         private String componentTypeName;
-        private boolean migrated;
 
         private ComponentKind kind;
 
@@ -34,11 +31,6 @@ public interface ComponentInfo {
 
         public Builder withComponentTypeName(String componentTypeName) {
             this.componentTypeName = componentTypeName;
-            return this;
-        }
-
-        public Builder withMigrated(boolean migrated) {
-            this.migrated = migrated;
             return this;
         }
 
@@ -68,11 +60,6 @@ public interface ComponentInfo {
                 @Override
                 public String getLanguage() {
                     return language;
-                }
-
-                @Override
-                public boolean isMigrated() {
-                    return migrated;
                 }
 
                 @Override

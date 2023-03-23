@@ -25,6 +25,7 @@ import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.common.tree.TreeHelper;
+import com.redhat.devtools.intellij.common.utils.IDEAContentFactory;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,7 @@ import java.awt.BorderLayout;
 public class WindowToolFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        ContentFactory contentFactory = IDEAContentFactory.getInstance();
 
         JBPanel<JBPanel> panel = new JBPanel<>();
         panel.setLayout(new BorderLayout());
@@ -46,7 +47,7 @@ public class WindowToolFactory implements ToolWindowFactory {
         tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);
         tree.setCellRenderer(new NodeRenderer());
         tree.setRootVisible(false);
-        PopupHandler.installPopupHandler(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
+        PopupHandler.installPopupMenu(tree, "org.jboss.tools.intellij.tree", ActionPlaces.UNKNOWN);
         panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
         toolWindow.getContentManager().addContent(content);
         TreeHelper.addLinkSupport(tree);

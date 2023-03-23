@@ -14,7 +14,7 @@ public interface ComponentMetadata {
     String getRegistry();
     String getComponentType();
 
-    public static ComponentMetadata of(String registry, String componentType) {
+    static ComponentMetadata of(String registry, String componentType) {
         return new ComponentMetadata() {
             @Override
             public String getRegistry() {

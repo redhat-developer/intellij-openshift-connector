@@ -12,23 +12,8 @@ package org.jboss.tools.intellij.openshift.oauth.exception;
 
 public class OAuthConfigurationException extends OAuthException {
 
-	public OAuthConfigurationException() {
-	}
-
 	public OAuthConfigurationException(String message) {
 		super(message);
 	}
 
-	public OAuthConfigurationException(Throwable cause) {
-		super(cause);
-	}
-
-	public OAuthConfigurationException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public OAuthConfigurationException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
 }

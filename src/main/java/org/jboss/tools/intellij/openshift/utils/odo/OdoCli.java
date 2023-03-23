@@ -69,6 +69,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -122,14 +123,14 @@ public class OdoCli implements Odo {
      Key is component name
      Value is map index by the feature and value is the process handler
      */
-    private Map<String, Map<ComponentFeature, ProcessHandler>> componentFeatureProcesses = new HashMap<>();
+    private final Map<String, Map<ComponentFeature, ProcessHandler>> componentFeatureProcesses = new HashMap<>();
 
     /*
      Map of process launched for log activity.
      Key is component name
      Value is list with 2 process handler index 0 is dev; index 1 is deploy
      */
-    private Map<String, List<ProcessHandler>> componentLogProcesses = new HashMap<>();
+    private final Map<String, List<ProcessHandler>> componentLogProcesses = new HashMap<>();
 
     OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
@@ -187,7 +188,7 @@ public class OdoCli implements Odo {
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
         final SimpleModule module = new SimpleModule();
         module.addDeserializer(List.class, deserializer);
-        return JSON_MAPPER.registerModule(module);
+        return new ObjectMapper(new JsonFactory()).registerModule(module);
     }
 
     @Override
@@ -302,7 +303,7 @@ public class OdoCli implements Odo {
                             componentMap.remove(feature);
                         }
                     },
-                    args.toArray(new String[args.size()]));
+                    args.toArray(new String[0]));
         }
     }
 
@@ -314,7 +315,7 @@ public class OdoCli implements Odo {
             if (handler != null) {
                 handler.destroyProcess();
                 if (!feature.getStopArgs().isEmpty()) {
-                    execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[feature.getStopArgs().size()]));
+                    execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[0]));
                 }
             }
         }
@@ -337,7 +338,7 @@ public class OdoCli implements Odo {
     public List<ComponentMetadata> analyze(String path) throws IOException {
         return configureObjectMapper(new ComponentMetadatasDeserializer()).readValue(
                 execute(new File(path), command, envVars, "analyze", "-o", "json"),
-                new TypeReference<List<ComponentMetadata>>() {
+                new TypeReference<>() {
                 });
     }
 
@@ -450,7 +451,7 @@ public class OdoCli implements Odo {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } catch (IOException | ExecutionException e){
+        } catch (IOException | ExecutionException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
@@ -582,6 +583,7 @@ public class OdoCli implements Odo {
 
     private void undeployComponent(String project, String context, String component,
                                    ComponentKind kind) throws IOException {
+        cleanupComponent(component);
         if (kind != ComponentKind.OTHER) {
             List<String> args = new ArrayList<>();
             args.add("delete");
@@ -647,7 +649,7 @@ public class OdoCli implements Odo {
                             handlers.set(index, null);
                         }
                     },
-                    args.toArray(new String[args.size()]));
+                    args.toArray(new String[0]));
         }
     }
 
@@ -705,7 +707,7 @@ public class OdoCli implements Odo {
     public List<Component> getComponents(String project) throws IOException {
         return configureObjectMapper(new ComponentDeserializer()).readValue(
                 execute(command, envVars, "list", "--namespace", project, "-o", "json"),
-                new TypeReference<List<Component>>() {
+                new TypeReference<>() {
                 });
     }
 
@@ -714,7 +716,7 @@ public class OdoCli implements Odo {
         try {
             return configureObjectMapper(new ServiceDeserializer()).readValue(
                     execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
-                    new TypeReference<List<org.jboss.tools.intellij.openshift.utils.odo.Service>>() {
+                    new TypeReference<>() {
                     });
         } catch (IOException e) {
             //https://github.com/openshift/odo/issues/5010
@@ -743,7 +745,7 @@ public class OdoCli implements Odo {
     }
 
     private String generateBindingName(List<Binding> bindings) {
-        var counter = 0;
+        int counter = 0;
         int finalCounter = counter;
         while (bindings.stream().anyMatch(binding -> binding.getName().equals("b" + finalCounter))) {
             counter++;
@@ -753,8 +755,8 @@ public class OdoCli implements Odo {
 
     @Override
     public Binding link(String project, String context, String component, String target) throws IOException {
-        var bindings = listBindings(project, context, component);
-        var bindingName = generateBindingName(bindings);
+        List<Binding> bindings = listBindings(project, context, component);
+        String bindingName = generateBindingName(bindings);
         execute(new File(context), command, envVars, "add", "binding", "--name", bindingName, "--service",
                 target, "--bind-as-files=false");
         return listBindings(project, context, component).stream().filter(b -> bindingName.equals(b.getName()))
@@ -854,7 +856,7 @@ public class OdoCli implements Odo {
     public List<ComponentDescriptor> discover(String path) throws IOException {
         return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
                 execute(new File(path), command, envVars, "list", "-o", "json"),
-                new TypeReference<List<ComponentDescriptor>>() {
+                new TypeReference<>() {
                 });
     }
 
@@ -869,7 +871,7 @@ public class OdoCli implements Odo {
     public List<DevfileRegistry> listDevfileRegistries() throws IOException {
         return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
                 execute(command, envVars, "preference", "view", "-o", "json"),
-                new TypeReference<List<DevfileRegistry>>() {
+                new TypeReference<>() {
                 });
     }
 
@@ -900,5 +902,21 @@ public class OdoCli implements Odo {
             return osClient;
         }
         return null;
+    }
+
+    /**
+     * Stop all running processes for a component
+     *
+     * @param component the component name
+     */
+    private void cleanupComponent(String component) {
+       Map<ComponentFeature, ProcessHandler> featureHandlers = componentFeatureProcesses.remove(component);
+        if (featureHandlers != null) {
+            featureHandlers.forEach((feat, handler) -> handler.destroyProcess());
+        }
+        List<ProcessHandler> logHandlers = componentLogProcesses.remove(component);
+        if (logHandlers != null) {
+            logHandlers.stream().filter(Objects::nonNull).forEach(ProcessHandler::destroyProcess);
+        }
     }
 }

@@ -11,17 +11,8 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.ui.Messages;
-import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class FollowLogComponentAction extends ShowLogComponentAction {
 

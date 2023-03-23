@@ -18,7 +18,7 @@ public interface Starter {
   String getName();
   String getDescription();
   
-  public class Builder {
+  class Builder {
     private String name;
     private String description;
     
@@ -31,7 +31,7 @@ public interface Starter {
       this.description = description;
       return this;
     }
-    
+
     public Starter build() {
       return new Starter() {
 

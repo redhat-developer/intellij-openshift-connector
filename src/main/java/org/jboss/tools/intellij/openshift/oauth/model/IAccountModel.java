@@ -14,14 +14,8 @@ import java.util.List;
 
 public interface IAccountModel {
 
-	void addAuthorizationServer(IAuthorizationServer server);
-
 	List<IAuthorizationServer> getAuthorizationServers();
 
-	void removeAuthorizationServer(IAuthorizationServer server);
-
 	IAuthorizationServer createAuthorizationServer(String id);
-
-	void save();
 
 }

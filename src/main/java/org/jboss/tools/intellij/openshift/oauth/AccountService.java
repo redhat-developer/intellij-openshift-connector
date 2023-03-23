@@ -111,7 +111,7 @@ public class AccountService {
 
 	private String performLogin(IAuthorizationServer server, IAccount account, int tokenType, Object context) {
 		if (null != provider) {
-			LoginResponse response = provider.login(server, account, context);
+			LoginResponse response = provider.login(server, context);
 			if (null != response) {
 				if (null == account) {
 					IAccount newAccount = createAccount(server, response);

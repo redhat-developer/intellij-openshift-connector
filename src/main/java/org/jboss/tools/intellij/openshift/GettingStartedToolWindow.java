@@ -16,7 +16,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener;
-import com.intellij.openapi.wm.impl.ToolWindowManagerImpl;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedContent;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedCourse;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedCourseBuilder;
@@ -36,7 +35,7 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
         toolWindow.setStripeTitle("Getting Started");
-        ((ToolWindowManagerImpl)ToolWindowManager.getInstance(project)).addToolWindowManagerListener(new ToolWindowManagerListener() {
+        project.getMessageBus().connect().subscribe(ToolWindowManagerListener.TOPIC, new ToolWindowManagerListener() {
             @Override
             public void stateChanged(@NotNull ToolWindowManager toolWindowManager) {
                 if (hasToShowToolWindow()) {

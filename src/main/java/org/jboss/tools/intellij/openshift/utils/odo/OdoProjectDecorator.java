@@ -142,11 +142,6 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void deleteURL(String project, String context, String component, String name) throws IOException {
-        delegate.deleteURL(project, context, component, name);
-    }
-
-    @Override
     public void deleteComponent(String project, String context, String component,
                                 ComponentKind kind) throws IOException {
         if (context != null) {
@@ -185,11 +180,6 @@ public class OdoProjectDecorator implements Odo {
         delegate.login(url, userName, password, token);
     }
 
-    @Override
-    public void logout() throws IOException {
-        delegate.logout();
-    }
-    
     @Override
     public List<Component> getComponents(String project) throws IOException {
         List<Component> components = delegate.getComponents(project);

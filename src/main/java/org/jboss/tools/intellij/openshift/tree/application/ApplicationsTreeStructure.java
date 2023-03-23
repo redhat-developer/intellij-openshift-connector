@@ -31,6 +31,7 @@ import javax.swing.Icon;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -48,22 +49,16 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private static final String LOGIN = "Please log in to the cluster";
-    private static final String FAILED_TO_LOAD_APPLICATIONS = "Failed to load applications";
 
     private static final Supplier<Icon> CLUSTER_ICON = () -> IconLoader.findIcon("/images/cluster.png", ApplicationsTreeStructure.class);
 
     private static final Supplier<Icon> NAMESPACE_ICON = () -> IconLoader.findIcon("/images/project.png", ApplicationsTreeStructure.class);
 
-    private static final Supplier<Icon> APPLICATION_ICON = () -> IconLoader.findIcon("/images/application.png", ApplicationsTreeStructure.class);
-
     private static final Supplier<Icon> COMPONENT_ICON = () -> IconLoader.findIcon("/images/component.png", ApplicationsTreeStructure.class);
 
     private static final Supplier<Icon> SERVICE_ICON = () -> IconLoader.findIcon("/images/service.png", ApplicationsTreeStructure.class);
 
-    private static final Supplier<Icon> STORAGE_ICON = () -> IconLoader.findIcon("/images/storage.png", ApplicationsTreeStructure.class);
-
     private static final Icon URL_ICON = IconLoader.findIcon("/images/url-node.png", ApplicationsTreeStructure.class);
-    private static final Icon URL_SECURE_ICON = IconLoader.findIcon("/images/url-node-secure.png", ApplicationsTreeStructure.class);
 
     private static final Icon COMPONENT_TYPE_ICON = IconLoader.findIcon("/images/component-type-light.png", ApplicationsTreeStructure.class);
 
@@ -105,9 +100,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             } else if (element instanceof NamespaceNode) {
                 return getComponentsAndServices(((NamespaceNode) element));
             } else if (element instanceof ComponentNode) {
-                var urls = getURLs((ComponentNode) element);
-                var bindings = getBindings((ComponentNode) element);
-                return Stream.of(urls, bindings).flatMap(Stream::of).toArray();
+                List<URLNode> urls = getURLs((ComponentNode) element);
+                List<BindingNode> bindings = getBindings((ComponentNode) element);
+                return Stream.of(urls, bindings).filter(item -> !item.isEmpty()).flatMap(Collection::stream).toArray();
             } else if (element instanceof DevfileRegistriesNode) {
                 return getRegistries(root, odo);
             } else if (element instanceof DevfileRegistryNode) {
@@ -144,9 +139,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             }
             element.setLogged(false);
         }
-        if (namespaces.isEmpty()) {
-            namespaces.add(new CreateNamespaceLinkNode(element));
-        }
         return namespaces.toArray();
     }
 
@@ -174,20 +166,20 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results.toArray();
     }
 
-    private Object[] getURLs(ComponentNode element) {
-        List<Object> results = new ArrayList<>();
+    private List<URLNode> getURLs(ComponentNode element) {
+        List<URLNode> results = new ArrayList<>();
         Odo odo = element.getRoot().getOdo();
         try {
             odo.listURLs(element.getParent().getName(),
                     element.getComponent().getPath(), element.getName()).forEach(url -> results.add(new URLNode(element, url)));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
-        return results.toArray();
+        return results;
     }
 
-    private Object[] getBindings(ComponentNode element) {
-        List<Object> results = new ArrayList<>();
+    private List<BindingNode> getBindings(ComponentNode element) {
+        List<BindingNode> results = new ArrayList<>();
         Odo odo = element.getRoot().getOdo();
         try {
             odo.listBindings(element.getParent().getName(),
@@ -195,7 +187,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
-        return results.toArray();
+        return results;
     }
 
     private Object[] getRegistries(ApplicationsRootNode root, Odo odo) {
@@ -213,7 +205,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
         try {
             element.getRoot().getOdo().getComponentTypes(element.getName()).forEach(type -> result.add(new DevfileRegistryComponentTypeNode(root, element, type)));
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
         return result.toArray();
     }
 
@@ -221,7 +215,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
         try {
             element.getRoot().getOdo().getComponentTypeInfo(element.getName(), element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
         return result.toArray();
     }
 

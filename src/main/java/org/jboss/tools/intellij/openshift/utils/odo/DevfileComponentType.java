@@ -10,24 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import java.util.List;
-
 public final class DevfileComponentType extends AbstractComponentType {
 
     private final String displayName;
     private final String description;
     private final DevfileRegistry devfileRegistry;
-    private final String language;
-    private final List<String> tags;
 
-    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry,
-                                String language, List<String> tags) {
+
+    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry) {
         super(name);
         this.displayName = displayName;
         this.description = description;
         this.devfileRegistry = devfileRegistry;
-        this.language = language;
-        this.tags = tags;
     }
 
     public String getDisplayName() {
@@ -40,14 +34,6 @@ public final class DevfileComponentType extends AbstractComponentType {
 
     public DevfileRegistry getDevfileRegistry() {
         return devfileRegistry;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public List<String> getTags() {
-        return tags;
     }
 
     @Override

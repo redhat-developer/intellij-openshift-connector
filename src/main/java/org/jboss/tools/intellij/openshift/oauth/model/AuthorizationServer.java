@@ -20,10 +20,6 @@ import java.util.List;
 @Tag("server")
 public class AuthorizationServer implements IAuthorizationServer {
 
-    private static final String REALM_KEY = "realm";
-    private static final String URL_KEY = "url";
-    private static final String CLIENT_ID_KEY = "clientId";
-
     @Attribute
     private String id;
 
@@ -113,15 +109,6 @@ public class AuthorizationServer implements IAuthorizationServer {
     @Override
     public List<IAccount> getAccounts() {
         return accounts;
-    }
-
-    public void setAccounts(List<IAccount> accounts) {
-        this.accounts = accounts;
-    }
-
-    @Override
-    public void removeAccount(IAccount account) {
-        accounts.remove(account);
     }
 
     @Override

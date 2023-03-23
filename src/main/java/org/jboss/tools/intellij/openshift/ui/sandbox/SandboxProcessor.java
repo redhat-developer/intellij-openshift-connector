@@ -47,9 +47,9 @@ public class SandboxProcessor {
     NEEDS_APPROVAL(false),
     READY(true);
     
-    private boolean needsInteraction;
+    private final boolean needsInteraction;
 
-    private State(boolean needsInteraction) {
+    State(boolean needsInteraction) {
       this.needsInteraction = needsInteraction;
     }
 

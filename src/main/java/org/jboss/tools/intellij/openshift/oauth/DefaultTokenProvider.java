@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.oauth;
 
 import com.intellij.openapi.components.Service;
-import com.intellij.openapi.project.Project;
 import org.jboss.tools.intellij.openshift.oauth.exception.OAuthException;
 
 /**

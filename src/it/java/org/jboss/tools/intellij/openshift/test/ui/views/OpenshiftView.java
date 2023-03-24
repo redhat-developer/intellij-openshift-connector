@@ -19,7 +19,9 @@ import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
 import org.jetbrains.annotations.NotNull;
+
 import java.time.Duration;
+
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 
@@ -41,7 +43,7 @@ public class OpenshiftView extends ContainerFixture {
     toolWindowsPane.stripeButton("OpenShift", false).click();
   }
 
-  public void expandOpenshiftViewTree(String path) throws InterruptedException {
+  public void expandOpenshiftViewTree(String path) {
       getOpenshiftConnectorTree().expand(path);
   }
 

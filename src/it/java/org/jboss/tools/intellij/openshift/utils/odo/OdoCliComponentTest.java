@@ -43,7 +43,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Parameterized.Parameters(name = "feature: {0}")
-    public static Iterable<? extends Object> data() {
+    public static Iterable<?> data() {
         return Arrays.asList(null, ComponentFeature.DEV);
     }
 
@@ -106,7 +106,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             Service deployedService = deployedServices.get(0);
             assertNotNull(deployedService);
             odo.link(project, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null);
+            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
         } finally {
             odo.deleteProject(project);
         }
@@ -130,7 +130,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null);
+            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
             List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
             assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
             int debugPort;

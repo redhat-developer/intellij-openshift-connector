@@ -92,7 +92,7 @@ public abstract class OdoCliTest extends BaseTest {
                 new File(COMPONENT_PATH).getAbsolutePath(), null, null);
         if (feature != null) {
             AtomicBoolean started = new AtomicBoolean();
-            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature, state -> started.getAndSet(state));
+            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature, started::getAndSet, null);
             await().atMost(15, TimeUnit.MINUTES).untilTrue(started);
         }
     }

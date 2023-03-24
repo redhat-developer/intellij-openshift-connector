@@ -46,14 +46,6 @@ public class IdeaRunner {
 		}
 	}
 
-	public void startIDE(IntelliJVersion ideaVersion) {
-		startIDE(ideaVersion);
-	}
-	
-	public int getPort() {
-		return port;
-	}
-
 	public RemoteRobot getRemoteRobot() {
 		return robot;
 	}

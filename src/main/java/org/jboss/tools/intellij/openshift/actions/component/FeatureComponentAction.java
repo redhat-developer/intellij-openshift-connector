@@ -86,9 +86,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
                         component.getLiveFeatures().addFeature(feat);
                     }
                     ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                }, b2 -> {
-                    ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                });
+                }, b2 -> ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode));
                 sendTelemetryResults(TelemetryResult.SUCCESS);
             } catch (IOException e) {
                 sendTelemetryError(e);

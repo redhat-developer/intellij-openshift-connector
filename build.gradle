@@ -2,7 +2,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 buildscript {
     ext {
-        ijGradlePluginVersion = (DefaultNativePlatform.currentOperatingSystem.isMacOsX() ? "1.7.0" : "1.13.1")
+        ijGradlePluginVersion = (DefaultNativePlatform.currentOperatingSystem.isMacOsX() ? "1.7.0" : "1.13.3")
     }
 }
 
@@ -29,6 +29,7 @@ targetCompatibility = '11'
 
 intellij {
     version = ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    type = "IU"
     pluginName = 'org.jboss.tools.intellij.openshift'
     // use '<git repo clone>/build/idea-sandbox/plugins/<plugin>' if working from source
     plugins = [
@@ -39,7 +40,7 @@ intellij {
             'com.intellij.css',
             'yaml',
             'com.redhat.devtools.intellij.telemetry:0.0.3.33',
-            'com.redhat.devtools.intellij.kubernetes:0.7.1.208'
+            'com.redhat.devtools.intellij.kubernetes:0.8.0.220'
     ]
 	updateSinceUntilBuild = false
 }

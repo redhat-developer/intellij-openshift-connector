@@ -29,7 +29,7 @@ targetCompatibility = '11'
 
 intellij {
     version = ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    type = "IU"
+    type = ideaType
     pluginName = 'org.jboss.tools.intellij.openshift'
     // use '<git repo clone>/build/idea-sandbox/plugins/<plugin>' if working from source
     plugins = [
@@ -49,7 +49,7 @@ intellij {
 buildSearchableOptions.enabled = false
 
 runPluginVerifier {
-    ideVersions = [ideaVersion]
+    ideVersions = [ideaType+"-"+ideaVersion]
 }
 
 publishPlugin {
@@ -153,6 +153,10 @@ tasks.register('runSandbox', JavaExec) {
     description = "Run the Sandbox registration server in port 3000"
     classpath = sourceSets.test.runtimeClasspath
     getMainClass().set 'org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 group 'org.jboss.tools.intellij'

@@ -10,9 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.telemetry;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TelemetrySenderTest {
 
@@ -24,8 +25,8 @@ public class TelemetrySenderTest {
         // when
         String anonymized = TelemetrySender.anonymizeToken(msgWithToken);
         // then
-        assertThat(anonymized).doesNotContain(token);
-        assertThat(anonymized).contains(TelemetrySender.ANONYMOUS_TOKEN);
+        assertFalse(anonymized.contains(token));
+        assertTrue(anonymized.contains(TelemetrySender.ANONYMOUS_TOKEN));
     }
 
     @Test
@@ -36,7 +37,7 @@ public class TelemetrySenderTest {
         // when
         String anonymized = TelemetrySender.anonymizeClusterUrl(msgWithClusterUrl);
         // then
-        assertThat(anonymized).doesNotContain(clusterUrl);
-        assertThat(anonymized).contains(TelemetrySender.ANONYMOUS_CLUSTER_URL);
+        assertFalse(anonymized.contains(clusterUrl));
+        assertTrue(anonymized.contains(TelemetrySender.ANONYMOUS_CLUSTER_URL));
     }
 }

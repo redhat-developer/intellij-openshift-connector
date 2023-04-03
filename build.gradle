@@ -154,9 +154,5 @@ tasks.register('runSandbox', JavaExec) {
     getMainClass().set 'org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock'
 }
 
-test {
-    useJUnitPlatform()
-}
-
 group 'org.jboss.tools.intellij'
 version projectVersion // Plugin version

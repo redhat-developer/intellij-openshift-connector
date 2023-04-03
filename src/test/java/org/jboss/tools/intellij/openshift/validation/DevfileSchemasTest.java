@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.validation;
 
 import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
@@ -30,7 +31,7 @@ public class DevfileSchemasTest {
     @Before
     public void setup() throws Exception {
         IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder(null);
+        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder((LightProjectDescriptor)null);
         IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
 
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture, factory.createTempDirTestFixture());

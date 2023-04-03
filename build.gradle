@@ -29,7 +29,6 @@ targetCompatibility = '11'
 
 intellij {
     version = ideaVersion //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    type = ideaType
     pluginName = 'org.jboss.tools.intellij.openshift'
     // use '<git repo clone>/build/idea-sandbox/plugins/<plugin>' if working from source
     plugins = [
@@ -49,7 +48,7 @@ intellij {
 buildSearchableOptions.enabled = false
 
 runPluginVerifier {
-    ideVersions = [ideaType+"-"+ideaVersion]
+    ideVersions = [ideaVersion]
 }
 
 publishPlugin {

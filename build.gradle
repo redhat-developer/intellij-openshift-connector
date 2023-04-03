@@ -1,13 +1,5 @@
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
-
-buildscript {
-    ext {
-        ijGradlePluginVersion = (DefaultNativePlatform.currentOperatingSystem.isMacOsX() ? "1.7.0" : "1.13.3")
-    }
-}
-
 plugins {
-    id "org.jetbrains.intellij" version "${ijGradlePluginVersion}"
+    id "org.jetbrains.intellij" version "1.13.3"
     id "com.adarshr.test-logger" version "3.2.0"
     id "idea"
     id "java"

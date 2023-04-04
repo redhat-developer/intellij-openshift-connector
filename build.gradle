@@ -65,6 +65,11 @@ sourceSets {
     }
 }
 
+test {
+    // Discover and execute JUnit4-based tests
+    useJUnit()
+}
+
 tasks.register('integrationTest', Test) {
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
     description = 'Runs the integration tests.'

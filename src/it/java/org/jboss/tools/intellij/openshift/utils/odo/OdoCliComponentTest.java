@@ -14,7 +14,6 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.fest.util.Files;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,13 +26,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
-    private ComponentFeature feature;
+    private final ComponentFeature feature;
     private String project;
     private String component;
     private String service;
@@ -92,7 +89,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore
     public void checkCreateComponentAndLinkService() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {
@@ -105,8 +101,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             assertEquals(1, deployedServices.size());
             Service deployedService = deployedServices.get(0);
             assertNotNull(deployedService);
-            odo.link(project, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
+           Binding binding = odo.link(project, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
         } finally {
             odo.deleteProject(project);
         }
@@ -125,7 +120,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore
     public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {

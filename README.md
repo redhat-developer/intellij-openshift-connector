@@ -209,14 +209,15 @@ WARNING: Use the above delete action will perform the same delete action as in t
 
 #### Actions available for a Component
 
-##### Components can be in 4 stages:
+##### Components can be in 5 stages:
 
-      locally created - When the components are in local config but NOT deployed/pushed into the cluster.
-      dev             - When the components are pushed into the cluster in dev mode, that is every changes are synced and when terminating the command, the component will be deleted from the cluster.
-      debug           - When the components are pushed into the cluster in debug mode, same as dev mode plus the ability to put breakpoints in the code and use the debugger.
-      deploy          - When the components are deployed into the cluster.
+      no local context - When the component is present into the cluster but not in local config.
+      locally created  - When the component is in local config but NOT pushed/deployed into the cluster.
+      dev              - When the component is pushed into the cluster in dev mode, that is every changes are synced and when terminating the command, the component will be deleted from the cluster.
+      debug            - When the component is pushed into the cluster in debug mode, same as dev mode plus the ability to put breakpoints in the code and use the debugger.
+      deploy           - When the component is deployed into the cluster.
 
-#### Common Actions for every component type
+#### Common Actions
 
 * `Describe` - Describe the given component in a terminal window.
 * `Link Service` - Link the component to an existing service in the cluster. That will create a binding from the component to the service.
@@ -268,7 +269,7 @@ This extension uses the following CLI tool to interact with OpenShift cluster:
 * odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
 
 > If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically.
-The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
+> The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
 
 **NOTE:** This plugin is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!

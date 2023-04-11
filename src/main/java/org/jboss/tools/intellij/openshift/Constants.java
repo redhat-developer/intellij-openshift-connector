@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift;
 
+import io.fabric8.kubernetes.client.Config;
+
 public class Constants {
     public static final String HOME_FOLDER = System.getProperty("user.home");
 
@@ -26,6 +28,8 @@ public class Constants {
     public static final String DEVFILE_NAME = "devfile.yaml";
 
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
+
+    public static final String DEFAULT_KUBE_URL = Config.DEFAULT_MASTER_URL.substring(8);
 
     /**
      * Home sub folder for the plugin

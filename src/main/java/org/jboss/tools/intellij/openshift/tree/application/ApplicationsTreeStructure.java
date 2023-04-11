@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -43,27 +44,21 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private final ApplicationsRootNode root;
 
     private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
-    private DevfileRegistriesNode registries;
+    private final DevfileRegistriesNode registries;
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private static final String LOGIN = "Please log in to the cluster";
-    private static final String FAILED_TO_LOAD_APPLICATIONS = "Failed to load applications";
 
     private static final Supplier<Icon> CLUSTER_ICON = () -> IconLoader.findIcon("/images/cluster.png", ApplicationsTreeStructure.class);
 
     private static final Supplier<Icon> NAMESPACE_ICON = () -> IconLoader.findIcon("/images/project.png", ApplicationsTreeStructure.class);
 
-    private static final Supplier<Icon> APPLICATION_ICON = () -> IconLoader.findIcon("/images/application.png", ApplicationsTreeStructure.class);
-
     private static final Supplier<Icon> COMPONENT_ICON = () -> IconLoader.findIcon("/images/component.png", ApplicationsTreeStructure.class);
 
     private static final Supplier<Icon> SERVICE_ICON = () -> IconLoader.findIcon("/images/service.png", ApplicationsTreeStructure.class);
 
-    private static final Supplier<Icon> STORAGE_ICON = () -> IconLoader.findIcon("/images/storage.png", ApplicationsTreeStructure.class);
-
     private static final Icon URL_ICON = IconLoader.findIcon("/images/url-node.png", ApplicationsTreeStructure.class);
-    private static final Icon URL_SECURE_ICON = IconLoader.findIcon("/images/url-node-secure.png", ApplicationsTreeStructure.class);
 
     private static final Icon COMPONENT_TYPE_ICON = IconLoader.findIcon("/images/component-type-light.png", ApplicationsTreeStructure.class);
 
@@ -94,9 +89,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @NotNull
     @Override
-    public Object[] getChildElements(@NotNull Object element) {
+    public Object @NotNull [] getChildElements(@NotNull Object element) {
         if (element == this) {
-            return new Object[] {getApplicationsRoot(), registries};
+            return new Object[]{getApplicationsRoot(), registries};
         }
         Odo odo = root.getOdo();
         if (odo != null) {
@@ -133,19 +128,18 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             if (e instanceof KubernetesClientException) {
                 KubernetesClientException kce = (KubernetesClientException) e;
                 if (kce.getCode() == 401) {
-                    namespaces.add(new MessageNode(element, element, LOGIN));
+                    namespaces.add(new MessageNode<>(element, element, LOGIN));
                 } else if (kce.getCause() instanceof NoRouteToHostException) {
-                    namespaces.add(new MessageNode(element, element, kce.getCause().getMessage()));
+                    namespaces.add(new MessageNode<>(element, element, kce.getCause().getMessage()));
+                } else if (kce.getCause().getMessage().contains(Constants.DEFAULT_KUBE_URL)) {
+                    namespaces.add(new MessageNode<>(element, element, LOGIN));
                 } else {
-                    namespaces.add(new MessageNode(element, element, "Unable to get namespaces: " + e.getMessage()));
+                    namespaces.add(new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage()));
                 }
             } else {
-                namespaces.add(new MessageNode(element, element, "Unable to get namespaces: " + e.getMessage()));
+                namespaces.add(new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage()));
             }
             element.setLogged(false);
-        }
-        if (namespaces.isEmpty()) {
-            namespaces.add(new CreateNamespaceLinkNode(element));
         }
         return namespaces.toArray();
     }
@@ -158,14 +152,14 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         try {
             odo.getComponents(element.getName()).forEach(dc -> results.add(new ComponentNode(element, dc)));
         } catch (KubernetesClientException | IOException e) {
-            results.add(new MessageNode(element.getRoot(), element, "Failed to load application deployment configs"));
-            LOGGER.warn(e.getLocalizedMessage(),e);
+            results.add(new MessageNode<>(element.getRoot(), element, "Failed to load application deployment configs"));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         try {
             odo.getServices(element.getName()).forEach(si -> results.add(new ServiceNode(element, si)));
         } catch (IOException e) {
-            results.add(new MessageNode(element.getRoot(), element, "Failed to load application services"));
-            LOGGER.warn(e.getLocalizedMessage(),e);
+            results.add(new MessageNode<>(element.getRoot(), element, "Failed to load application services"));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
 
         if (results.isEmpty()) {
@@ -213,22 +207,28 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
         try {
             element.getRoot().getOdo().getComponentTypes(element.getName()).forEach(type -> result.add(new DevfileRegistryComponentTypeNode(root, element, type)));
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
+        }
         return result.toArray();
     }
 
     private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode element) {
         List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
         try {
-            element.getRoot().getOdo().getComponentTypeInfo(element.getName(), element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
-        } catch (IOException e) {}
+            element.getRoot().getOdo().getComponentTypeInfo(element.getName(),
+                    element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter -> result.add(
+                    new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
+        } catch (IOException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
+        }
         return result.toArray();
     }
 
     @Override
     public Object getParentElement(@NotNull Object element) {
         if (element instanceof ParentableNode) {
-            return ((ParentableNode) element).getParent();
+            return ((ParentableNode<?>) element).getParent();
         }
         if (element instanceof ApplicationsRootNode) {
             return this;
@@ -237,55 +237,65 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     @Override
-    public NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
+    public @NotNull NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
         if (element == this) {
-            return new LabelAndIconDescriptor(project, element, "Root", null, parentDescriptor);
-        }
-        else if (element instanceof ApplicationsRootNode) {
+            return new LabelAndIconDescriptor<>(project, element, "Root", null, parentDescriptor);
+        } else if (element instanceof ApplicationsRootNode) {
             ApplicationsRootNode root = (ApplicationsRootNode) element;
-            return new LabelAndIconDescriptor(project, element, () -> root.getOdo() != null?root.getOdo().getMasterUrl().toString():"Loading", CLUSTER_ICON,
+            return new LabelAndIconDescriptor<>(project, root,
+                    () -> root.getOdo() != null ? root.getOdo().getMasterUrl().toString() : "Loading", CLUSTER_ICON,
                     parentDescriptor);
         } else if (element instanceof NamespaceNode) {
-            return new LabelAndIconDescriptor(project, element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
+            return new LabelAndIconDescriptor<>(project, (NamespaceNode) element, ((NamespaceNode) element)::getName, NAMESPACE_ICON,
                     parentDescriptor);
         } else if (element instanceof ComponentNode) {
-            return new LabelAndIconDescriptor(project, element,
-                    () -> ((ComponentNode) element).getName() + ' ' + getComponentSuffix((ComponentNode) element),
+            return new LabelAndIconDescriptor<>(project, (ComponentNode) element,
+                    ((ComponentNode) element)::getName,
+                    () -> getComponentSuffix((ComponentNode) element),
                     COMPONENT_ICON, parentDescriptor);
         } else if (element instanceof ServiceNode) {
-            return new LabelAndIconDescriptor(project, element,
-                    ((ServiceNode) element)::getName, () -> ((ServiceNode) element).getService().getKind(), SERVICE_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, (ServiceNode) element,
+                    ((ServiceNode) element)::getName, () -> ((ServiceNode) element).getService().getKind(),
+                    SERVICE_ICON, parentDescriptor);
         } else if (element instanceof URLNode) {
             URL url = ((URLNode) element).getUrl();
-            return new LabelAndIconDescriptor(project, element,
+            return new LabelAndIconDescriptor<>(project, (URLNode) element,
                     () -> url.getName() + " (" + url.getContainerPort() + ")",
-                    () -> url.asURL(),
+                    url::asURL,
                     () -> URL_ICON, parentDescriptor);
         } else if (element instanceof BindingNode) {
             Binding binding = ((BindingNode) element).getBinding();
-            return new LabelAndIconDescriptor(project, element,
-                    () -> binding.getName(),
+            return new LabelAndIconDescriptor<>(project, (BindingNode) element,
+                    binding::getName,
                     () -> "Bound to " + binding.getService().getName(),
                     () -> null, parentDescriptor);
         } else if (element instanceof MessageNode) {
-            return new LabelAndIconDescriptor(project, element,((MessageNode)element).getName(), null, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, (MessageNode<?>) element, ((MessageNode<?>) element).getName(), null, parentDescriptor);
         } else if (element instanceof DevfileRegistriesNode) {
-            return new LabelAndIconDescriptor(project, element, "Devfile registries", REGISTRY_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, (DevfileRegistriesNode) element, "Devfile registries", REGISTRY_ICON, parentDescriptor);
         } else if (element instanceof DevfileRegistryNode) {
-            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryNode)element).getName(), ((DevfileRegistryNode)element).getRegistry().getURL(), REGISTRY_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, (DevfileRegistryNode) element, ((DevfileRegistryNode) element).getName(), ((DevfileRegistryNode) element).getRegistry().getURL(), REGISTRY_ICON, parentDescriptor);
         } else if (element instanceof DevfileRegistryComponentTypeNode) {
-            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeNode)element).getName(), ((DevfileRegistryComponentTypeNode)element).getComponentType().getDescription(), COMPONENT_TYPE_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, (DevfileRegistryComponentTypeNode) element, ((DevfileRegistryComponentTypeNode) element).getName(),
+                    ((DevfileRegistryComponentTypeNode) element).getComponentType().getDescription(),
+                    COMPONENT_TYPE_ICON, parentDescriptor);
         } else if (element instanceof DevfileRegistryComponentTypeStarterNode) {
-            return new LabelAndIconDescriptor(project, element, ((DevfileRegistryComponentTypeStarterNode)element).getName(), ((DevfileRegistryComponentTypeStarterNode)element).getStarter().getDescription(), STARTER_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, (DevfileRegistryComponentTypeStarterNode) element,
+                    ((DevfileRegistryComponentTypeStarterNode) element).getName(),
+                    ((DevfileRegistryComponentTypeStarterNode) element).getStarter().getDescription(), STARTER_ICON,
+                    parentDescriptor);
         }
-        return new LabelAndIconDescriptor(project, element, element.toString(), null, parentDescriptor);
+        return new LabelAndIconDescriptor<>(project, element, element.toString(), null, parentDescriptor);
     }
 
     private static String getComponentSuffix(ComponentNode element) {
         Component comp = element.getComponent();
+        if (comp.hasContext() && !comp.getLiveFeatures().isOnCluster()) {
+            return "locally created";
+        }
         String suffix = comp.getLiveFeatures().toString();
         if (!comp.hasContext()) {
-            suffix = "no context" + (suffix.isEmpty()?"":",") + suffix;
+            suffix = "no local context" + (suffix.isEmpty() ? "" : ", ") + suffix;
         }
         return suffix;
     }

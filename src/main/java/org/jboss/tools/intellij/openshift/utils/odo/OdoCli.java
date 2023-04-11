@@ -187,7 +187,7 @@ public class OdoCli implements Odo {
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
         final SimpleModule module = new SimpleModule();
         module.addDeserializer(List.class, deserializer);
-        return JSON_MAPPER.registerModule(module);
+        return new ObjectMapper(new JsonFactory()).registerModule(module);
     }
 
     @Override

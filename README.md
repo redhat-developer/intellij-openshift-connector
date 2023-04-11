@@ -208,14 +208,15 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions available for a Component
 
-##### Components can be in 4 stages:
+##### Components can be in 5 stages:
 
-      locally created - When the components are in local config but NOT deployed/pushed into the cluster.
-      dev             - When the components are pushed into the cluster in dev mode, that is every changes are synced and when terminating the command, the component will be deleted from the cluster.
-      debug           - When the components are pushed into the cluster in debug mode, same as dev mode plus the ability to put breakpoints in the code and use the debugger.
-      deploy          - When the components are deployed into the cluster.
+      no local context - When the component is present into the cluster but not in local config.
+      locally created  - When the component is in local config but NOT pushed/deployed into the cluster.
+      dev              - When the component is pushed into the cluster in dev mode, that is every changes are synced and when terminating the command, the component will be deleted from the cluster.
+      debug            - When the component is pushed into the cluster in debug mode, same as dev mode plus the ability to put breakpoints in the code and use the debugger.
+      deploy           - When the component is deployed into the cluster.
 
-#### Common Actions for every component type
+#### Common Actions
 
 * `Describe` - Describe the given component in a terminal window.
 * `Link Service` - Link the component to an existing service in the cluster. That will create a binding from the component to the service.

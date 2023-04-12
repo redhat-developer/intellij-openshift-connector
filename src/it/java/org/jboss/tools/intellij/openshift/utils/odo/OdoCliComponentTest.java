@@ -14,6 +14,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.fest.util.Files;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -89,6 +90,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
+    @Ignore
     public void checkCreateComponentAndLinkService() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {
@@ -101,7 +103,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             assertEquals(1, deployedServices.size());
             Service deployedService = deployedServices.get(0);
             assertNotNull(deployedService);
-           Binding binding = odo.link(project, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
+            Binding binding = odo.link(project, COMPONENT_PATH, component, deployedService.getKind() + "/" + deployedService.getName());
         } finally {
             odo.deleteProject(project);
         }

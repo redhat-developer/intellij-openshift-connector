@@ -50,7 +50,7 @@ public class JSonParser {
     private static final String ROUTES_FIELD = "routes";
     private static final String HOST_FIELD = "host";
     private static final String RULES_FIELD = "rules";
-    
+
     private final JsonNode root;
 
     public JSonParser(JsonNode root) {
@@ -58,7 +58,7 @@ public class JSonParser {
     }
 
     static String get(JsonNode node, String name) {
-        return node.has(name)?node.get(name).asText():null;
+        return node.has(name) ? node.get(name).asText() : null;
     }
 
     public List<URL> parseURLS() {
@@ -104,7 +104,7 @@ public class JSonParser {
                         if (rule.has(JSonParser.PATHS_FIELD)) {
                             rule.get(PATHS_FIELD).forEach(path -> {
                                 result.add(URL.of(name, host, "80", "80",
-                                        path.asText()));
+                                                  path.asText()));
                             });
                         }
                     });
@@ -160,9 +160,9 @@ public class JSonParser {
 
 
     public DebugStatus parseDebugStatus() {
-        if (root.has(SPEC_FIELD)&& root.get(SPEC_FIELD).has(DEBUG_PROCESS_ID_FIELD)){
+        if (root.has(SPEC_FIELD) && root.get(SPEC_FIELD).has(DEBUG_PROCESS_ID_FIELD)) {
             String processID = root.get(SPEC_FIELD).get(DEBUG_PROCESS_ID_FIELD).asText();
-            if (StringUtils.isNumeric(processID)){
+            if (StringUtils.isNumeric(processID)) {
                 return DebugStatus.RUNNING;
             }
         }
@@ -172,14 +172,11 @@ public class JSonParser {
     public ComponentTypeInfo parseComponentTypeInfo() {
         ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
         for (JsonNode element : root) {
-                    if (element.has(NAME_FIELD)) {
-                        builder.withName(element.get(NAME_FIELD).asText());
-                    }
-                    if (element.has(STARTER_PROJECTS_FIELD)) {
-                        for (JsonNode starter : element.get(STARTER_PROJECTS_FIELD)) {
-                            builder.withStarter(parseStarter(starter));
-                        }
-                    }
+            if (element.has(STARTER_PROJECTS_FIELD)) {
+                for (JsonNode starter : element.get(STARTER_PROJECTS_FIELD)) {
+                    builder.withStarter(parseStarter(starter));
+                }
+            }
         }
         return builder.build();
     }
@@ -196,7 +193,7 @@ public class JSonParser {
             JsonNode child = node.get(name);
             if (child.has(DOLLAR_REF_FIELD)) {
                 JsonNode replaced = resolve(root, child.get(DOLLAR_REF_FIELD).asText());
-                ((ObjectNode)node).set(name, replaced);
+                ((ObjectNode) node).set(name, replaced);
             } else {
                 resolveRefs(root, child);
             }
@@ -207,7 +204,7 @@ public class JSonParser {
     private JsonNode resolve(JsonNode root, String ref) throws IOException {
         JsonNode node = root;
         String[] ids = ref.split("/");
-        for(String id : ids) {
+        for (String id : ids) {
             if (!"#".equals(id)) {
                 if (node.has(id)) {
                     node = node.get(id);
@@ -223,7 +220,7 @@ public class JSonParser {
         if (root.has(PATHS_FIELD)) {
             JsonNode node = root.get(PATHS_FIELD).get(crd);
             if (node != null && node.has(POST_FIELD) && node.get(POST_FIELD).has(PARAMETERS_FIELD)) {
-                for(JsonNode parameter : node.get(POST_FIELD).get(PARAMETERS_FIELD)) {
+                for (JsonNode parameter : node.get(POST_FIELD).get(PARAMETERS_FIELD)) {
                     if (parameter.has(NAME_FIELD) && parameter.get(NAME_FIELD).asText().equals(BODY_VALUE) && parameter.has(SCHEMA_FIELD)) {
                         JsonNode schema = parameter.get(SCHEMA_FIELD);
                         if (schema.has(DOLLAR_REF_FIELD)) {

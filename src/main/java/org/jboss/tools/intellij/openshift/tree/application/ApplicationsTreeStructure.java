@@ -32,6 +32,7 @@ import javax.swing.Icon;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -100,9 +101,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             } else if (element instanceof NamespaceNode) {
                 return getComponentsAndServices(((NamespaceNode) element));
             } else if (element instanceof ComponentNode) {
-                var urls = getURLs((ComponentNode) element);
-                var bindings = getBindings((ComponentNode) element);
-                return Stream.of(urls, bindings).flatMap(Stream::of).toArray();
+                List<URLNode> urls = getURLs((ComponentNode) element);
+                List<BindingNode> bindings = getBindings((ComponentNode) element);
+                return Stream.of(urls, bindings).filter(item -> !item.isEmpty()).flatMap(Collection::stream).toArray();
             } else if (element instanceof DevfileRegistriesNode) {
                 return getRegistries(root, odo);
             } else if (element instanceof DevfileRegistryNode) {
@@ -168,20 +169,20 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results.toArray();
     }
 
-    private Object[] getURLs(ComponentNode element) {
-        List<Object> results = new ArrayList<>();
+    private List<URLNode> getURLs(ComponentNode element) {
+        List<URLNode> results = new ArrayList<>();
         Odo odo = element.getRoot().getOdo();
         try {
             odo.listURLs(element.getParent().getName(),
                     element.getComponent().getPath(), element.getName()).forEach(url -> results.add(new URLNode(element, url)));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
-        return results.toArray();
+        return results;
     }
 
-    private Object[] getBindings(ComponentNode element) {
-        List<Object> results = new ArrayList<>();
+    private List<BindingNode> getBindings(ComponentNode element) {
+        List<BindingNode> results = new ArrayList<>();
         Odo odo = element.getRoot().getOdo();
         try {
             odo.listBindings(element.getParent().getName(),
@@ -189,7 +190,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
-        return results.toArray();
+        return results;
     }
 
     private Object[] getRegistries(ApplicationsRootNode root, Odo odo) {

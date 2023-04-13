@@ -14,8 +14,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBHtmlEditorKit;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
@@ -23,13 +21,11 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxDialog;
 import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxModel;
 import org.jboss.tools.intellij.openshift.utils.OCCommandUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -37,8 +33,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.HyperlinkEvent;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -73,7 +67,6 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         labelEditorPane.addHyperlinkListener(this::loginToSandbox);
     }
 
-    @NotNull
     private void loginToSandbox(HyperlinkEvent e) {
         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
             TelemetrySender telemetrySender = new TelemetrySender(TelemetryService.DEVSANDBOX_LOGIN_DIALOG);

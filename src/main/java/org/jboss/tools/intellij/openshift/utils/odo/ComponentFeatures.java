@@ -31,10 +31,6 @@ public class ComponentFeatures {
         features.remove(feature);
     }
 
-    public void setFeatures(Set<ComponentFeature> features) {
-        this.features = features;
-    }
-
     public boolean is(ComponentFeature feature) {
         return features.contains(feature);
     }
@@ -56,13 +52,13 @@ public class ComponentFeatures {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         if (isDev()) {
-            first = append(builder, first, ComponentFeature.DEV.getLabel());
+            first = append(builder, true, ComponentFeature.DEV.getLabel());
         }
         if (isDebug()) {
             first = append(builder, first, ComponentFeature.DEBUG.getLabel());
         }
         if (isDeploy()) {
-            first = append(builder, first, ComponentFeature.DEPLOY.getLabel());
+            append(builder, first, ComponentFeature.DEPLOY.getLabel());
         }
         return builder.toString();
     }

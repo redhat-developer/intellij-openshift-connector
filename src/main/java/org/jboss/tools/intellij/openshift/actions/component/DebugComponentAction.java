@@ -74,7 +74,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo){
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
             sendTelemetryResults(TelemetryResult.ABORTED);
@@ -88,23 +88,22 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
         if (component.getLiveFeatures().isDebug()) {
             RunManager runManager = RunManager.getInstance(project);
             final Optional<Integer> port = createOrUpdateConfiguration(odo, runManager, namespaceNode.getNamespace(),
-                    component);
-            port.ifPresent(portNumber -> executeDebug(project, component, odo, namespaceNode.getNamespace(),
-                    portNumber));
+                                                                       component);
+            port.ifPresent(portNumber -> executeDebug());
         }
     }
 
-    private void executeDebug(Project project, Component component, Odo odo, String projectName, Integer port) {
+    private void executeDebug() {
         telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
         ExecHelper.submit(() -> {
             // check if local debugger process is already running.
             if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
                 UIHelper.executeInUI(() ->
-                        Messages.showMessageDialog(
-                                "'" + runSettings.getName() + "' is a single-instance run configuration "
-                                        + "and already running.",
-                                "Process '" + runSettings.getName() + "' is already running",
-                                Messages.getInformationIcon()));
+                                             Messages.showMessageDialog(
+                                                     "'" + runSettings.getName() + "' is a single-instance run configuration "
+                                                             + "and already running.",
+                                                     "Process '" + runSettings.getName() + "' is already running",
+                                                     Messages.getInformationIcon()));
                 return;
             }
             // if debugger not running, run the debug config
@@ -132,17 +131,24 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
         try {
             List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
             String[] ports = urls.stream().
-                    map(URL::getContainerPort).toArray(String[]::new);
+                                 map(URL::getContainerPort).toArray(String[]::new);
             if (ports.length == 1) {
-                port = Optional.ofNullable(Integer.parseInt(urls.get(0).getLocalPort()));
+                port = Optional.of(Integer.parseInt(urls.get(0).getLocalPort()));
             } else if (ports.length > 1) {
-                int index = UIHelper.executeInUI(() -> Messages.showChooseDialog("The component " +
-                                component.getName() +
-                                " has several ports to connect to,\nchoose the one the debugger will connect to",
-                        "Choose debugger port", ports, ports[0], Messages.getQuestionIcon()));
-                if (index >=0) {
-                    port = Optional.of(Integer.parseInt(urls.get(index).getLocalPort()));
-                }
+
+                String selected = UIHelper.executeInUI(() ->
+                                                               Messages.showEditableChooseDialog("The component " +
+                                                                                                         component.getName() +
+                                                                                                         " has several ports to connect to,\nchoose the one the debugger will connect to",
+                                                                                                 "Choose debugger port",
+                                                                                                 Messages.getQuestionIcon(),
+                                                                                                 ports,
+                                                                                                 ports[0],
+                                                                                                 null));
+                //get the local mapped port
+                Optional<String> remotePort = urls.stream().filter(url -> url.getContainerPort().equals(selected)).
+                                                  map(URL::getLocalPort).findFirst();
+                port = Optional.of(Integer.parseInt(remotePort.orElseThrow()));
             }
 
             if (port.isPresent()) {

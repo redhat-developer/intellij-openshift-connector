@@ -15,22 +15,11 @@ import org.jboss.tools.intellij.openshift.oauth.model.IAuthorizationServer;
 
 public class OAuthLoginException extends OAuthException {
 
-	private final IAuthorizationServer authorizationServer;
-
 	private final IAccount account;
 
 	public OAuthLoginException(IAuthorizationServer server, IAccount account) {
 		super("Error login to authorization server " + server.getDisplayName());
-		this.authorizationServer = server;
 		this.account = account;
-
-	}
-
-	/**
-	 * @return the authorization server
-	 */
-	public IAuthorizationServer getAuthorizationServer() {
-		return authorizationServer;
 	}
 
 	/**

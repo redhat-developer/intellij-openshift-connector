@@ -13,8 +13,8 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import com.redhat.devtools.intellij.common.tree.LinkElement;
 import org.jboss.tools.intellij.openshift.actions.component.CreateComponentAction;
 
-public class CreateComponentLinkNode extends MessageNode<ParentableNode<? extends Object>> implements LinkElement {
-    protected CreateComponentLinkNode(ApplicationsRootNode root, ParentableNode<? extends Object> parent) {
+public class CreateComponentLinkNode extends MessageNode<ParentableNode<?>> implements LinkElement {
+    protected CreateComponentLinkNode(ApplicationsRootNode root, ParentableNode<?> parent) {
         super(root, parent, "<a>No deployments, click here to create one.</a>");
     }
 

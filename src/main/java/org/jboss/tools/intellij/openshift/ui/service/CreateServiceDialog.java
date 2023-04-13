@@ -14,16 +14,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.jboss.tools.intellij.openshift.ui.widgets.JsonSchemaWidget;
 import org.jboss.tools.intellij.openshift.utils.odo.OperatorCRD;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +38,8 @@ public class CreateServiceDialog extends DialogWrapper {
 
     private JPanel contentPane;
     private JTextField nameField;
-    private JComboBox serviceTemplatesComboBox;
-    private JComboBox serviceCRDComboBox;
+    private JComboBox<ServiceTemplate> serviceTemplatesComboBox;
+    private JComboBox<OperatorCRD> serviceCRDComboBox;
     private JsonSchemaWidget jsonSchemaWidget;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -61,14 +65,14 @@ public class CreateServiceDialog extends DialogWrapper {
             }
         });
         serviceTemplatesComboBox.addItemListener(item -> templateSelected((ServiceTemplate) item.getItem()));
-        serviceTemplatesComboBox.setModel(new DefaultComboBoxModel(serviceTemplates));
+        serviceTemplatesComboBox.setModel(new DefaultComboBoxModel<>(serviceTemplates));
         if (serviceTemplates.length > 0) {
             templateSelected(serviceTemplates[0]);
         }
     }
 
     private void templateSelected(ServiceTemplate template) {
-        serviceCRDComboBox.setModel(new DefaultComboBoxModel(((ServiceTemplate) template).getCRDs().toArray()));
+        serviceCRDComboBox.setModel(new DefaultComboBoxModel<>(template.getCRDs().toArray(new OperatorCRD[]{})));
         serviceCRDComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -79,7 +83,7 @@ public class CreateServiceDialog extends DialogWrapper {
         serviceCRDComboBox.addItemListener(item -> templateCRDSelected((OperatorCRD) item.getItem()));
         serviceCRDComboBox.setSelectedIndex(-1);
         serviceCRDComboBox.setSelectedIndex(0);
-        serviceCRDComboBox.setEnabled(((ServiceTemplate) template).getCRDs().size() >= 2);
+        serviceCRDComboBox.setEnabled(template.getCRDs().size() >= 2);
     }
 
     private void templateCRDSelected(OperatorCRD crd) {

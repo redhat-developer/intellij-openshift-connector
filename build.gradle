@@ -1,13 +1,5 @@
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
-
-buildscript {
-    ext {
-        ijGradlePluginVersion = (DefaultNativePlatform.currentOperatingSystem.isMacOsX() ? "1.7.0" : "1.12.0")
-    }
-}
-
 plugins {
-    id "org.jetbrains.intellij" version "${ijGradlePluginVersion}"
+    id "org.jetbrains.intellij" version "1.13.3"
     id "com.adarshr.test-logger" version "3.2.0"
     id "idea"
     id "java"
@@ -19,7 +11,9 @@ repositories {
     mavenLocal()
     maven { url 'https://repository.jboss.org' }
     mavenCentral()
-    maven { url 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies' }
+    maven { url 'https://www.jetbrains.com/intellij-repository/snapshots' }
+    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
 }
 
 sourceCompatibility = '11'
@@ -37,7 +31,7 @@ intellij {
             'com.intellij.css',
             'yaml',
             'com.redhat.devtools.intellij.telemetry:1.0.0.44',
-            'com.redhat.devtools.intellij.kubernetes:0.7.1.208'
+            'com.redhat.devtools.intellij.kubernetes:0.8.0.220'
     ]
 	updateSinceUntilBuild = false
 }
@@ -66,19 +60,25 @@ sourceSets {
     integrationTest {
         java.srcDir file('src/it/java')
         resources.srcDir file('src/it/resources')
-        compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+        compileClasspath += sourceSets.main.output + sourceSets.test.output + configurations.testRuntimeClasspath
         runtimeClasspath += output + compileClasspath
     }
 }
 
-task integrationTest(type: Test) {
+test {
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+
+    // Discover and execute JUnit4-based tests
+    useJUnit()
+}
+
+tasks.register('integrationTest', Test) {
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
     description = 'Runs the integration tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
-    mustRunAfter test
     testlogger {
         showStandardStreams true
         showPassedStandardStreams false
@@ -88,9 +88,9 @@ task integrationTest(type: Test) {
     }
 }
 
-task integrationUITest(type: Test) {
+tasks.register('integrationUITest', Test) {
     useJUnitPlatform {
-    	includeTags 'ui-test'
+        includeTags 'ui-test'
     }
     description = 'Runs the integration UI tests.'
     group = 'verification'
@@ -114,7 +114,7 @@ dependencies {
     testImplementation(
             'org.mockito:mockito-core:4.9.0',
             'org.easytesting:fest-assert:1.4',
-            'com.redhat.devtools.intellij:intellij-common:1.9.0:test',
+            'com.redhat.devtools.intellij:intellij-common:1.9.1:test',
             'org.awaitility:awaitility:4.1.0',
             'org.mock-server:mockserver-client-java:5.13.2',
             'org.mock-server:mockserver-netty:5.13.2',
@@ -136,7 +136,7 @@ sonarqube {
 jacocoTestReport {
     getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
-        xml.enabled = true
+        xml.getRequired().set true
     }
 }
 
@@ -145,11 +145,11 @@ runIde {
     //systemProperties['jboss.sandbox.api.endpoint'] = 'http://localhost:3000'
 }
 
-task runSandbox(type: JavaExec) {
+tasks.register('runSandbox', JavaExec) {
     group = "Execution"
     description = "Run the Sandbox registration server in port 3000"
     classpath = sourceSets.test.runtimeClasspath
-    main = 'org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock'
+    getMainClass().set 'org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock'
 }
 
 group 'org.jboss.tools.intellij'

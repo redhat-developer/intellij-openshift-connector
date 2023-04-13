@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.oauth;
 
 import com.intellij.openapi.application.ApplicationManager;
-import org.jboss.tools.intellij.openshift.oauth.model.IAccount;
 import org.jboss.tools.intellij.openshift.oauth.model.IAuthorizationServer;
 import org.jboss.tools.intellij.openshift.oauth.ui.DefaultLoginProvider;
 
@@ -20,7 +19,7 @@ import org.jboss.tools.intellij.openshift.oauth.ui.DefaultLoginProvider;
  * This involves UI.
  */
 public interface LoginProvider {
-	LoginResponse login(IAuthorizationServer server, IAccount account, Object context);
+	LoginResponse login(IAuthorizationServer server, Object context);
 
 	static LoginProvider get() {
 		return ApplicationManager.getApplication().getService(DefaultLoginProvider.class);

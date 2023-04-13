@@ -13,7 +13,6 @@ package org.jboss.tools.intellij.openshift.actions.registry;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.ThrowableComputable;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
@@ -42,7 +41,7 @@ public class CreateRegistryAction extends OdoAction {
         DevfileRegistriesNode registriesNode = (DevfileRegistriesNode) selected;
         try {
             List<DevfileRegistry> registries = ProgressManager.getInstance().
-                    runProcessWithProgressSynchronously((ThrowableComputable<List<DevfileRegistry>, IOException>)() -> odo.listDevfileRegistries(), "Retrieving registries", true, anActionEvent.getProject());
+                    runProcessWithProgressSynchronously(odo::listDevfileRegistries, "Retrieving registries", true, anActionEvent.getProject());
             CreateRegistryDialog dialog = new CreateRegistryDialog(registries);
             dialog.show();
             if (dialog.isOK()) {

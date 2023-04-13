@@ -15,8 +15,6 @@ public interface Component {
 
     ComponentFeatures getLiveFeatures();
 
-    void setLiveFeatures(ComponentFeatures state);
-
     String getPath();
 
     void setPath(String path);
@@ -47,13 +45,9 @@ public interface Component {
             return name;
         }
 
+        @Override
         public ComponentFeatures getLiveFeatures() {
             return state;
-        }
-
-        @Override
-        public void setLiveFeatures(ComponentFeatures state) {
-            this.state = state;
         }
 
         @Override

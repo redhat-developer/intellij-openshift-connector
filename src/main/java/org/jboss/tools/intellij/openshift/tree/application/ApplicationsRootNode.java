@@ -140,7 +140,9 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
                         addContextToSettings(descriptor.getPath(), descriptor)
                 );
             } catch (IOException ex) {
-                LOGGER.error(ex.getLocalizedMessage(), ex);
+                if (!(ex.getMessage().contains("Unauthorized") || ex.getMessage().contains("unable to access the cluster: servicebindings.binding.operators.coreos.com"))) {
+                    LOGGER.error(ex.getLocalizedMessage(), ex);
+                }
             }
         }
     }

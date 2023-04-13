@@ -27,13 +27,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
-    private ComponentFeature feature;
+    private final ComponentFeature feature;
     private String project;
     private String component;
     private String service;
@@ -43,7 +41,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Parameterized.Parameters(name = "feature: {0}")
-    public static Iterable<? extends Object> data() {
+    public static Iterable<?> data() {
         return Arrays.asList(null, ComponentFeature.DEV);
     }
 
@@ -105,8 +103,7 @@ public class OdoCliComponentTest extends OdoCliTest {
             assertEquals(1, deployedServices.size());
             Service deployedService = deployedServices.get(0);
             assertNotNull(deployedService);
-            odo.link(project, COMPONENT_PATH, component, deployedService.getKind()+"/"+deployedService.getName());
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null);
+            Binding binding = odo.link(project, COMPONENT_PATH, component, deployedService.getKind() + "/" + deployedService.getName());
         } finally {
             odo.deleteProject(project);
         }
@@ -125,12 +122,11 @@ public class OdoCliComponentTest extends OdoCliTest {
     }
 
     @Test
-    @Ignore
     public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         try {
             createComponent(project, component, feature);
-            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null);
+            odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
             List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
             assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
             int debugPort;

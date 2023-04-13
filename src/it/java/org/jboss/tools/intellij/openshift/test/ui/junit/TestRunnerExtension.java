@@ -10,14 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.test.ui.junit;
 
+import com.redhat.devtools.intellij.commonuitest.UITestRunner;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
-
-import com.redhat.devtools.intellij.commonuitest.UITestRunner;
 
 /**
  * JUnit 5 test extension providing wrapper for tests and initiate connection to IDEA under test
@@ -27,7 +26,7 @@ import com.redhat.devtools.intellij.commonuitest.UITestRunner;
 public class TestRunnerExtension implements BeforeAllCallback, CloseableResource {
 
 	@Override
-	public void beforeAll(ExtensionContext context) throws Exception {
+	public void beforeAll(ExtensionContext context) {
 		System.out.println("Initialize IdeaRunner and start IDE");
 		// need to initialize store, so that close method will be called at the testing end
 		context.getRoot().getStore(Namespace.GLOBAL).put("InitializeTest", this);
@@ -35,7 +34,7 @@ public class TestRunnerExtension implements BeforeAllCallback, CloseableResource
 	}
 
 	@Override
-	public void close() throws Throwable {
+	public void close() {
 		System.out.println("Closing IDE");
 		UITestRunner.closeIde();
 	}

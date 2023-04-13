@@ -16,11 +16,9 @@ import com.intellij.openapi.components.Service;
 import org.jboss.tools.intellij.openshift.oauth.LoginProvider;
 import org.jboss.tools.intellij.openshift.oauth.LoginResponse;
 import org.jboss.tools.intellij.openshift.oauth.OAuthUtils;
-import org.jboss.tools.intellij.openshift.oauth.model.IAccount;
 import org.jboss.tools.intellij.openshift.oauth.model.IAuthorizationServer;
 import org.keycloak.adapters.KeycloakDeployment;
 
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -38,18 +36,18 @@ public final class DefaultLoginProvider implements LoginProvider {
 	private static final int TIMEOUT_JOB_ON_UI_THREAD = 5 * 60 * 1000;
 
 	@Override
-	public LoginResponse login(IAuthorizationServer server, IAccount account, Object context) {
+	public LoginResponse login(IAuthorizationServer server, Object context) {
 		if (ApplicationManager.getApplication().isDispatchThread()) {
-			return loginInUI(server, account, context);
+			return loginInUI(server, context);
 		} else {
-			return runInJob(server, account, context);
+			return runInJob(server, context);
 		}
 	}
 
-	LoginResponse runInJob(IAuthorizationServer server, IAccount account, Object context) {
+	LoginResponse runInJob(IAuthorizationServer server, Object context) {
 		CompletableFuture<LoginResponse> result = new CompletableFuture<>();
 		ApplicationManager.getApplication().invokeLater(() -> {
-			result.complete(loginInUI(server, account, context));
+			result.complete(loginInUI(server, context));
 		}, ModalityState.any());
 		try {
 			return result.get(TIMEOUT_JOB_ON_UI_THREAD, TimeUnit.MILLISECONDS);
@@ -61,7 +59,7 @@ public final class DefaultLoginProvider implements LoginProvider {
 		}
 	}
 	
-	public LoginResponse loginInUI(IAuthorizationServer server, IAccount account, Object context) {
+	public LoginResponse loginInUI(IAuthorizationServer server, Object context) {
 		KeycloakDeployment deployment = OAuthUtils.getDeployment(server);
 		BrowserBasedLoginDialog dialog = new BrowserBasedLoginDialog((Frame) context, deployment);
 		dialog.pack();

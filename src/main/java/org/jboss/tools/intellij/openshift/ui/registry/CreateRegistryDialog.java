@@ -19,17 +19,16 @@ public class CreateRegistryDialog extends DialogWrapper {
     private JTextField urlTextField;
     private JTextField tokenTextField;
 
-    private final DocumentAdapter adapter = new DocumentAdapter() {
-        @Override
-        protected void textChanged(@NotNull DocumentEvent e) {
-            validate();
-        }
-    };
-
     public CreateRegistryDialog(List<DevfileRegistry> registries) {
         super(null, false, IdeModalityType.IDE);
         init();
         setTitle("Create registry");
+        DocumentAdapter adapter = new DocumentAdapter() {
+            @Override
+            protected void textChanged(@NotNull DocumentEvent e) {
+                validate();
+            }
+        };
         nameTextField.getDocument().addDocumentListener(adapter);
         urlTextField.getDocument().addDocumentListener(adapter);
         this.registries = registries;

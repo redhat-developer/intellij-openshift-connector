@@ -29,7 +29,7 @@ public interface Odo {
      */
     String getNamespace() throws IOException;
 
-    void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException;
+    void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
 
     void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
 
@@ -58,8 +58,6 @@ public interface Odo {
 
     ComponentInfo getComponentInfo(String project, String component, String path, ComponentKind kind) throws IOException;
 
-    void deleteURL(String project, String context, String component, String name) throws IOException;
-
     void deleteComponent(String project, String context, String component, ComponentKind kind) throws IOException;
 
     void follow(String project, String context, String component, boolean deploy) throws IOException;
@@ -73,8 +71,6 @@ public interface Odo {
     void deleteProject(String project) throws IOException;
 
     void login(String url, String userName, char[] password, char[] token) throws IOException;
-
-    void logout() throws IOException;
 
     List<Component> getComponents(String project) throws IOException;
 

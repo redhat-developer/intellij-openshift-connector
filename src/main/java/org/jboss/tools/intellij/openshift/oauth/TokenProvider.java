@@ -15,13 +15,13 @@ import org.jboss.tools.intellij.openshift.oauth.exception.OAuthException;
 
 public interface TokenProvider {
 
-    public static final int ID_TOKEN = 0;
-    public static final int ACCESS_TOKEN = 1;
-    public static final int REFRESH_TOKEN = 2;
+    int ID_TOKEN = 0;
+    int ACCESS_TOKEN = 1;
+    int REFRESH_TOKEN = 2;
 
     String getToken(String serverId, int tokentype, Object context) throws OAuthException;
 
-    public static TokenProvider get() {
+    static TokenProvider get() {
         return ApplicationManager.getApplication().getService(DefaultTokenProvider.class);
     }
 }

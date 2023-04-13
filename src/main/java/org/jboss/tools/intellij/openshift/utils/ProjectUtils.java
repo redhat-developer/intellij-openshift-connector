@@ -13,12 +13,14 @@ package org.jboss.tools.intellij.openshift.utils;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public class ProjectUtils {
 
@@ -30,7 +32,7 @@ public class ProjectUtils {
         if (Files.exists(project.toPath())) {
             File[] files = project.listFiles();
             if (files != null && files.length > 0) {
-                for (File f : project.listFiles()) {
+                for (File f : Objects.requireNonNull(project.listFiles())) {
                     if (!f.getName().startsWith(".") && !isProjectFile(f.getName())) {
                         return false;
                     }
@@ -58,7 +60,7 @@ public class ProjectUtils {
         if (roots.length > 0) {
             return roots[0];
         } else {
-            return LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent());
+            return LocalFileSystem.getInstance().findFileByPath(Objects.requireNonNull(ProjectUtil.guessModuleDir(module)).getPath());
         }
     }
 }

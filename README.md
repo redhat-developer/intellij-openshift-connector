@@ -203,8 +203,9 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 * `New Component` - Create locally a new Component.
 * `New Service` - Perform Service Catalog operations when it is enabled in the cluster.the created service can then be linked to a component.
-* `Delete` - Delete an existing Project/Namespace. 
-** WARNING ** Use the above delete action will perform the same delete action as in the cluster. That means all resources tied to that project/namespace will be also deleted (ie secrets, configMaps,...)  
+* `Delete` - Delete an existing Project/Namespace.
+
+WARNING: Use the above delete action will perform the same delete action as in the cluster. That means all resources tied to that project/namespace will be also deleted (ie secrets, configMaps,...)  
 
 #### Actions available for a Component
 
@@ -249,15 +250,15 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Icons Representation
 
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" alt="Cluster Resource"/><span style="margin: 20px">Cluster Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" alt="Project Resource"/><span style="margin: 20px">Project Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px">Component Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" alt="Service Resource"/><span style="margin: 20px">Service Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" alt="URL Resource"/><span style="margin: 20px">URL Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" alt="Cluster Resource"/><span style="margin: 20px"> Cluster Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" alt="Project Resource"/><span style="margin: 20px"> Project Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px"> Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" alt="Service Resource"/><span style="margin: 20px"> Service Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" alt="URL Resource"/><span style="margin: 20px"> URL Resource</span></div>
 
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/registry.svg" width="15" height="15" alt="Registry Resource"/><span style="margin: 20px">Registry Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component-type-light.png" width="15" height="15" alt="Component Type Resource"/><span style="margin: 20px">Component Type Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/start-project-light.png" width="15" height="15" alt="Starter Resource"/><span style="margin: 20px">Starter Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/registry.svg" width="15" height="15" alt="Registry Resource"/><span style="margin: 20px"> Registry Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component-type-light.png" width="15" height="15" alt="Component Type Resource"/><span style="margin: 20px"> Component Type Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/start-project-light.png" width="15" height="15" alt="Starter Resource"/><span style="margin: 20px"> Starter Resource</span></div>
 
 ### Dependencies
 
@@ -268,7 +269,7 @@ This extension uses the following CLI tool to interact with OpenShift cluster:
 * odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
 
 > If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically.
-The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
+> The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
 
 **NOTE:** This plugin is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!

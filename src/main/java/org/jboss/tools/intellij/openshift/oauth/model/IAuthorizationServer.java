@@ -36,7 +36,5 @@ public interface IAuthorizationServer {
 	@Attribute
 	List<IAccount> getAccounts();
 
-	void removeAccount(IAccount account);
-
 	IAccount createAccount(String id);
 }

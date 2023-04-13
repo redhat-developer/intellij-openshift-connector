@@ -203,7 +203,7 @@
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="211"/>
+  <idea-version since-build="212"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -214,7 +214,7 @@
 
   <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
   <depends optional="true" config-file="withJavaScriptDebugger.xml">JavaScriptDebugger</depends>
-  <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
+  <depends optional="true" config-file="plugin-openshift-validation-json.xml">com.intellij.modules.json</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow id="OpenShift" anchor="left" factoryClass="org.jboss.tools.intellij.openshift.WindowToolFactory" icon="/META-INF/OpenShiftPluginIcon13x13.svg"/>

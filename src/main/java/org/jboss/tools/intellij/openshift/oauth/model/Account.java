@@ -14,23 +14,9 @@ import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
 import org.jboss.tools.intellij.openshift.oauth.TokenProvider;
 
-import java.io.IOException;
-
 
 @Tag("account")
 public class Account implements IAccount {
-
-	private static final String ACCESS_TOKEN_EXPIRY_TIME_KEY = "accessTokenExpiryTime";
-
-	private static final String REFRESH_TOKEN_EXPIRY_TIME_KEY = "refreshTokenExpiryTime";
-
-	private static final String LAST_REFRESHED_TIME_KEY = "lastRefreshTime";
-
-	private static final String ID_TOKEN_KEY = "IDToken";
-	
-	private static final String ACCESS_TOKEN_KEY = "accessToken";
-
-	private static final String REFRESH_TOKEN_KEY = "refreshToken";
 
 	@Attribute
 	private String id;

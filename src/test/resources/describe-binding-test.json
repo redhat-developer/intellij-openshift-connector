@@ -1,0 +1,24 @@
+[
+  {
+    "name": "my-nodejs-app-cluster-sample-k8s",
+    "spec": {
+      "application": {
+        "kind": "Deployment",
+        "name": "my-nodejs-app-app",
+        "apiVersion": "apps/v1"
+      },
+      "services": [
+        {
+          "kind": "Cluster",
+          "name": "cluster-sample",
+          "apiVersion": "postgresql.k8s.enterprisedb.io/v1"
+        }
+      ],
+      "detectBindingResources": true,
+      "bindAsFiles": false
+    }
+  },
+  {
+    "name": "my-nodejs-app-cluster-sample-ocp"
+  }
+]

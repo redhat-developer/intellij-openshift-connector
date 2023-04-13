@@ -13,10 +13,18 @@ package org.jboss.tools.intellij.openshift.telemetry;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.regex.Pattern;
+
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult.ERROR;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.VALUE_ABORTED;
 
 public class TelemetrySender implements TelemetryHandler {
+
+    private static final Pattern CLUSTER_URL_PATTERN=Pattern.compile("http(.*)/apis",Pattern.CASE_INSENSITIVE);
+    public static final String ANONYMOUS_CLUSTER_URL = "<CLUSTER_URL>";
+
+    private static final Pattern TOKEN_PATTERN=Pattern.compile("token-(.*):([\\d]+)",Pattern.CASE_INSENSITIVE);
+    public static final String ANONYMOUS_TOKEN = "<TOKEN>";
 
     private final TelemetryMessageBuilder.ActionMessage telemetry;
 
@@ -59,6 +67,15 @@ public class TelemetrySender implements TelemetryHandler {
     }
 
     public void error(String message) {
-        telemetry.error(message);
+        // anonymize cluster address and token
+        telemetry.error(anonymizeToken(anonymizeClusterUrl(message)));
+    }
+
+    public static String anonymizeClusterUrl(String string) {
+        return string != null && !string.isEmpty() ? CLUSTER_URL_PATTERN.matcher(string).replaceAll(ANONYMOUS_CLUSTER_URL) : string;
+    }
+
+    public static String anonymizeToken(String string) {
+        return string != null && !string.isEmpty() ? TOKEN_PATTERN.matcher(string).replaceAll(ANONYMOUS_TOKEN) : string;
     }
 }

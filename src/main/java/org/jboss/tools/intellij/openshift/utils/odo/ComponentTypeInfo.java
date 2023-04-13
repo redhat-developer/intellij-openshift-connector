@@ -18,37 +18,20 @@ import java.util.List;
  *
  */
 public interface ComponentTypeInfo {
-  String getName();
   List<Starter> getStarters();
   
   class Builder {
-    private String name;
-    
+
     private List<Starter> starters = new ArrayList<>();
     
-    public Builder withName(String name) {
-      this.name = name;
-      return this;
-    }
-    
+
     public Builder withStarter(Starter starter) {
      starters.add(starter);
      return this;
     }
     
     public ComponentTypeInfo build() {
-      return new ComponentTypeInfo() {
-
-        @Override
-        public String getName() {
-          return name;
-        }
-
-        @Override
-        public List<Starter> getStarters() {
-          return starters;
-        }
-      };
+      return () -> starters;
     }
   }
 }

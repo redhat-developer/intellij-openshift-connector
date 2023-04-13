@@ -31,7 +31,7 @@ public class JsonParserTest {
   }
 
   @Test
-  public void verifyThatCRDCanBeLoader() throws IOException {
+  public void verifyThatCRDCanBeLoaded() throws IOException {
     URL url = JsonParserTest.class.getResource("/swagger.json");
     JSonParser parser = new JSonParser(MAPPER.readTree(url));
     JsonNode schema = parser.findSchema("/apis/kafka.strimzi.io/v1beta2/namespaces/{namespace}/kafkas");
@@ -84,4 +84,5 @@ public class JsonParserTest {
     assertEquals("my-nodejs-app-jmaury-dev.apps.sandbox.x8i5.p1.openshiftapps.com", urls.get(0).getHost());
     assertEquals("/", urls.get(0).getPath());
   }
+
 }

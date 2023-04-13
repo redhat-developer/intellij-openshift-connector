@@ -24,7 +24,7 @@ public class BindingDetailDialog extends DialogWrapper {
     private JPanel contentPane;
     private javax.swing.JTextField serviceName;
     private javax.swing.JTextField bindingName;
-    private com.intellij.ui.components.JBList environmentVariables;
+    private com.intellij.ui.components.JBList<String> environmentVariables;
 
     public BindingDetailDialog(Project project, Component parent, Binding binding) {
         super(project, parent, false, IdeModalityType.IDE);
@@ -39,19 +39,9 @@ public class BindingDetailDialog extends DialogWrapper {
         return contentPane;
     }
 
-    private void onOK() {
-        // add your code here
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
-    }
-
     public void setBinding(Binding binding) {
         bindingName.setText(binding.getName());
         serviceName.setText(binding.getService().getName());
-        environmentVariables.setModel(new CollectionListModel(binding.getEnvironmentVariables()));
+        environmentVariables.setModel(new CollectionListModel<>(binding.getEnvironmentVariables()));
     }
 }

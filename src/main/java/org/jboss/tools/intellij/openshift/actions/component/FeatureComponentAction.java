@@ -52,7 +52,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         if (node instanceof ComponentNode) {
             ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
             Component component = componentNode.getComponent();
-            var feat = getComponentFeature(component);
+            ComponentFeature feat = getComponentFeature(component);
             if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
                     component.getName(), feat)) {
                 e.getPresentation().setText("Stop " + feature.getLabel() + " mode");
@@ -78,15 +78,15 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         NamespaceNode namespaceNode = componentNode.getParent();
         CompletableFuture.runAsync(() -> {
             try {
-                var feat = getComponentFeature(component);
-                process(odo, namespaceNode.getName(), component, feat, res -> {
+                ComponentFeature feat = getComponentFeature(component);
+                process(odo, namespaceNode.getName(), component, feat, b1 -> {
                     if (component.getLiveFeatures().is(feat)) {
                         component.getLiveFeatures().removeFeature(feat);
                     } else {
                         component.getLiveFeatures().addFeature(feat);
                     }
                     ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                });
+                }, b2 -> ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode));
                 sendTelemetryResults(TelemetryResult.SUCCESS);
             } catch (IOException e) {
                 sendTelemetryError(e);
@@ -101,12 +101,11 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     }
 
     protected void process(Odo odo, String project, Component component,
-                           ComponentFeature feat, Consumer<Boolean> callback) throws IOException {
+                           ComponentFeature feat, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
         if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
             odo.stop(project, component.getPath(), component.getName(), feat);
-            callback.accept(true);
         } else {
-            odo.start(project, component.getPath(), component.getName(), feat, callback);
+            odo.start(project, component.getPath(), component.getName(), feat, callback, processTerminatedCallback);
         }
     }
 }

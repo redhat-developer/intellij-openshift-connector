@@ -35,27 +35,18 @@ public enum ComponentFeature {
 
     private final List<String> stopArgs;
 
-    private ComponentFeature(String label, String output, List<String> startArgs, List<String> stopArgs) {
+    ComponentFeature(String label, String output, List<String> startArgs, List<String> stopArgs) {
         this.label = label;
         this.output = output;
         this.startArgs = startArgs;
         this.stopArgs = stopArgs;
     }
 
-    private ComponentFeature(String label, String output, List<String> startArgs) {
+    ComponentFeature(String label, String output, List<String> startArgs) {
         this(label, output, startArgs, Collections.emptyList());
     }
 
     public ComponentFeature getPeer() {
-        return null;
-    }
-
-    public static ComponentFeature fromLabel(String label) {
-        for(ComponentFeature feature : values()) {
-            if (feature.label.equalsIgnoreCase(label)) {
-                return feature;
-            }
-        }
         return null;
     }
 

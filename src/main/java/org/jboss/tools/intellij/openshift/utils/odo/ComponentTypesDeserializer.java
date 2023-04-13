@@ -24,8 +24,6 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     private static final String DEVFILE_REGISTRY = "registry";
     private static final String DEVFILE_DISPLAY_NAME_FIELD = "displayName";
     private static final String DEVFILE_DESCRIPTION_FIELD = "description";
-    private static final String DEVFILE_LANGUAGE_FIELD = "language";
-    private static final String DEVFILE_TAGS_FIELD = "tags";
     private static final String DEVFILE_NAME_FIELD = "name";
 
     public ComponentTypesDeserializer() {
@@ -34,9 +32,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
 
     @Override
     public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt){
-        List<ComponentType> result = new ArrayList<>();
-        result.addAll(parseDevfileItems(root));
-        return result;
+        return new ArrayList<>(parseDevfileItems(root));
     }
     private static String get(JsonNode node, String fieldName) {
         return node.has(fieldName)?node.get(fieldName).asText():"";
@@ -49,13 +45,8 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
                 String name = get(item, DEVFILE_NAME_FIELD);
                 String displayName = get(item, DEVFILE_DISPLAY_NAME_FIELD);
                 String description = get(item, DEVFILE_DESCRIPTION_FIELD);
-                String language = get(item, DEVFILE_LANGUAGE_FIELD);
-                List<String> tags = new ArrayList<>();
-                if (item.has(DEVFILE_TAGS_FIELD)) {
-                    item.get(DEVFILE_TAGS_FIELD).elements().forEachRemaining(node -> tags.add(node.asText()));
-                }
                 DevfileRegistry registry = DevfileRegistriesDeserializer.getRegistry(item.get(DEVFILE_REGISTRY));
-                result.add(new DevfileComponentType(name, displayName, description, registry, language, tags));
+                result.add(new DevfileComponentType(name, displayName, description, registry));
             }
         }
         return result;

@@ -31,13 +31,8 @@ import java.util.stream.Collectors;
 public class ServiceTemplatesDeserializer  {
 
     private static final String ALM_EXAMPLES_FIELD = "alm-examples";
-    private static final String VERSION_FIELD = "version";
     private static final String KIND_FIELD = "kind";
-    private static final String DESCRIPTION_FIELD = "description";
     private static final String API_VERSION_FIELD = "apiVersion";
-    private static final String SPEC_DESCRIPTORS_FIELD = "specDescriptors";
-    private static final String PATH_FIELD = "path";
-    private static final String DESCRIPTORS_FIELD = "x-descriptors";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final Function<String, ObjectNode> schemaMapper;

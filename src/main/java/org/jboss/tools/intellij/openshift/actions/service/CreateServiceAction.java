@@ -13,7 +13,6 @@ package org.jboss.tools.intellij.openshift.actions.service;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
@@ -72,7 +71,7 @@ public class CreateServiceAction extends OdoAction {
 
     protected CreateServiceDialog showDialog(List<ServiceTemplate> templates) {
         CreateServiceDialog dialog = new CreateServiceDialog();
-        dialog.setServiceTemplates(templates.toArray(new ServiceTemplate[templates.size()]));
+        dialog.setServiceTemplates(templates.toArray(new ServiceTemplate[0]));
         dialog.show();
         return dialog;
     }

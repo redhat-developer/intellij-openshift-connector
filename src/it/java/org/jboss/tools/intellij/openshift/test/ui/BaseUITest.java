@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.test.ui;
 
-import java.time.Duration;
-
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 
@@ -30,7 +30,7 @@ public class BaseUITest extends AbstractBaseTest {
 	}
 
 	@Test
-	public void openshiftViewTest() throws InterruptedException {
+	public void openshiftViewTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
 		view.openView();
 		view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);

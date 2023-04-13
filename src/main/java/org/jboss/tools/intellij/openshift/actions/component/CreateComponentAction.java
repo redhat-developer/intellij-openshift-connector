@@ -46,7 +46,7 @@ public class CreateComponentAction extends OdoAction {
     super(clazz);
   }
 
-  public static void execute(ParentableNode<? extends Object> parentNode) {
+  public static void execute(ParentableNode<?> parentNode) {
     CreateComponentAction action = (CreateComponentAction) ActionManager.getInstance().getAction(CreateComponentAction.class.getName());
     NamespaceNode namespaceNode = (NamespaceNode) parentNode;
     action.telemetrySender = new TelemetrySender(PREFIX_ACTION + action.getTelemetryActionName());
@@ -66,7 +66,7 @@ public class CreateComponentAction extends OdoAction {
     doActionPerformed((ParentableNode<Object>) selected, odo, projectName, rootNode, project);
   }
 
-  private void doActionPerformed(ParentableNode<? extends Object> selected, Odo odo, String projectName, ApplicationsRootNode rootNode, Project project) {
+  private void doActionPerformed(ParentableNode<?> selected, Odo odo, String projectName, ApplicationsRootNode rootNode, Project project) {
     CompletableFuture.runAsync(() -> {
       try {
         CreateComponentModel model = getModel(project, odo, p -> rootNode.getComponents().containsKey(p));
@@ -78,7 +78,7 @@ public class CreateComponentAction extends OdoAction {
     });
   }
 
-  protected void process(ParentableNode<? extends Object> selected, Odo odo, String projectName,
+  protected void process(ParentableNode<?> selected, Odo odo, String projectName,
                          ApplicationsRootNode rootNode, CreateComponentModel model, ApplicationsTreeStructure structure) throws IOException {
     boolean doit = UIHelper.executeInUI(() -> showDialog(model));
     if (doit) {

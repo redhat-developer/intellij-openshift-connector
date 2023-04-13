@@ -36,7 +36,7 @@ intellij {
             'JavaScript',
             'com.intellij.css',
             'yaml',
-            'com.redhat.devtools.intellij.telemetry:0.0.3.33',
+            'com.redhat.devtools.intellij.telemetry:1.0.0.44',
             'com.redhat.devtools.intellij.kubernetes:0.7.1.208'
     ]
 	updateSinceUntilBuild = false
@@ -106,7 +106,7 @@ dependencies {
             'org.apache.commons:commons-compress:1.21',
             'org.apache.commons:commons-exec:1.3',
             'org.apache.commons:commons-lang3:3.9',
-            'com.redhat.devtools.intellij:intellij-common:1.9.0',
+            'com.redhat.devtools.intellij:intellij-common:1.9.1',
             'io.jsonwebtoken:jjwt-impl:0.11.2',
             'io.jsonwebtoken:jjwt-jackson:0.11.2',
             'org.keycloak:keycloak-installed-adapter:20.0.3',

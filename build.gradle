@@ -132,7 +132,7 @@ dependencies {
         implementation('org.jboss.resteasy:resteasy-core:4.7.8.Final') {
             because 'https://app.snyk.io/vuln/SNYK-JAVA-ORGJBOSSRESTEASY-3338627'
         }
-        implementation('org.jboss.xnio:xnio-api:3.8.8') {
+        implementation('org.jboss.xnio:xnio-api:3.8.8.Final') {
             because 'https://app.snyk.io/vuln/SNYK-JAVA-ORGJBOSSXNIO-2994360'
         }
         testImplementation('maven:junit:junit:4.13.1') {

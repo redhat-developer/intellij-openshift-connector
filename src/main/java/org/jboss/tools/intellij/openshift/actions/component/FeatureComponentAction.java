@@ -22,6 +22,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -55,9 +56,9 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
             ComponentFeature feat = getComponentFeature(component);
             if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
                     component.getName(), feat)) {
-                e.getPresentation().setText("Stop " + feature.getLabel() + " mode");
+                e.getPresentation().setText("Stop " + getActionName());
             } else {
-                e.getPresentation().setText("Start " + feature.getLabel() + " mode");
+                e.getPresentation().setText("Start " + getActionName());
             }
         }
     }
@@ -85,8 +86,8 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
                     } else {
                         component.getLiveFeatures().addFeature(feat);
                     }
-                    ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                }, b2 -> ((ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode));
+                    ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                }, b2 -> ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode));
                 sendTelemetryResults(TelemetryResult.SUCCESS);
             } catch (IOException e) {
                 sendTelemetryError(e);
@@ -95,7 +96,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         });
     }
 
-    private ComponentFeature getComponentFeature(Component component) {
+    protected ComponentFeature getComponentFeature(Component component) {
         return ((feature.getPeer() != null) && component.getInfo().getFeatures().is(feature.getPeer())) ?
                 feature.getPeer() : feature;
     }

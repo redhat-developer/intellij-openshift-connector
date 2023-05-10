@@ -20,6 +20,7 @@ public enum ComponentFeature {
             return DEBUG;
         }
     },
+    DEV_ON_PODMAN("dev on Podman", "Watching for changes in the current directory", Arrays.asList("dev", "--platform", "podman", "--forward-localhost")),
     DEBUG("debug", "Watching for changes in the current directory", Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;

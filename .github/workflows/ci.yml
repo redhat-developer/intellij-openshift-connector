@@ -83,8 +83,10 @@ jobs:
           done
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle
+      - name: Play integration tests
         run: ./gradlew integrationTest --continue
+      - name: Play integration UI tests
+        run: ./gradlew integrationUITest --continue
       - uses: actions/upload-artifact@v2
         if: always()
         with:

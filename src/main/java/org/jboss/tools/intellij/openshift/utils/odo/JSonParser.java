@@ -149,6 +149,7 @@ public class JSonParser {
     private static void getComponentsFeatures(ComponentFeatures features, JsonNode featuresNode) {
         if (featuresNode.has(ComponentFeature.DEV.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getLabel().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEV);
+            features.addFeature(ComponentFeature.DEV_ON_PODMAN);
         }
         if (featuresNode.has(ComponentFeature.DEBUG.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getLabel().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEBUG);

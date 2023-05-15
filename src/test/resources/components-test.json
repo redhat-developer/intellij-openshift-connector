@@ -1,11 +1,26 @@
 {
-	"componentInDevfile": "nodejs1",
+	"componentInDevfile": "nodejs",
 	"components": [
 		{
-			"name": "nodejs1",
-			"managedBy": "",
-			"runningIn": [],
-			"projectType": "nodejs"
+			"name": "nodejs",
+			"managedBy": "odo",
+			"managedByVersion": "v3.9.0",
+			"runningIn": {
+				"deploy": false,
+				"dev": true
+			},
+			"projectType": "nodejs",
+			"runningOn": "cluster",
+			"platform": "cluster"
+		},
+		{
+			"name": "nondevcomp",
+			"managedBy": "whatever",
+			"managedByVersion": "",
+			"runningIn": null,
+			"projectType": "Unknown",
+			"runningOn": "cluster",
+			"platform": "cluster"
 		}
 	]
 }

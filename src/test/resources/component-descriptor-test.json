@@ -3,9 +3,16 @@
   "components": [
     {
       "name": "devcomp",
-      "managedBy": "",
-      "runningIn": [],
-      "projectType": "nodejs"
+      "managedBy": "odo",
+      "managedByVersion": "v3.9.0",
+      "runningIn": {
+        "deploy": false,
+        "dev": true
+      },
+      "projectType": "Quarkus",
+      "runningOn": "cluster",
+      "platform": "cluster"
     }
   ]
 }
+

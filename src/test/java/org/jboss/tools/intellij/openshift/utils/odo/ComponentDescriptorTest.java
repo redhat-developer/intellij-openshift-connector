@@ -36,13 +36,13 @@ public class ComponentDescriptorTest {
 
   @Test
   public void verifyThatComponentDescriptorsCanLoad() throws IOException {
-    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
+    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(descriptors);
   }
 
   @Test
   public void verifyThatComponentDescriptorsReturnsComponentDescriptor() throws IOException {
-    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
+    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(descriptors);
     Assert.assertEquals(1, descriptors.size());
     Assert.assertNotNull(descriptors.get(0));
@@ -50,7 +50,7 @@ public class ComponentDescriptorTest {
 
   @Test
   public void verifyThatComponentDescriptorsReturnsComponentDescriptorProperties() throws IOException {
-    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
+    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(descriptors);
     Assert.assertEquals(1, descriptors.size());
     //DevfileDescriptor

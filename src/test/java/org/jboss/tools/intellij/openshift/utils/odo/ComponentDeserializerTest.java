@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -37,39 +36,69 @@ public class ComponentDeserializerTest {
 
   @Test
   public void verifyThatComponentsCanLoad() throws IOException {
-    List<Component> components = MAPPER.readValue(url, new TypeReference<List<Component>>() {});
+    List<Component> components = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(components);
   }
 
   @Test
   public void verifyThatComponentDeserializerReturnsComponents() throws IOException {
-    List<Component> components = MAPPER.readValue(url, new TypeReference<List<Component>>() {});
+    List<Component> components = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(components);
-    Assert.assertEquals(1, components.size());
+    Assert.assertEquals(2, components.size());
     Assert.assertNotNull(components.get(0));
-    //Assert.assertNotNull(components.get(1));
+    Assert.assertNotNull(components.get(1));
   }
 
   @Test
   public void verifyThatComponentDeserializerReturnsComponentsPropertiesForDevfileComponent() throws IOException {
-    List<Component> components = MAPPER.readValue(url, new TypeReference<List<Component>>() {});
+    List<Component> components = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(components);
-    Assert.assertEquals(1, components.size());
+    Assert.assertEquals(2, components.size());
     //Devfile components
     Component component = components.get(0);
     Assert.assertNotNull(component);
-    Assert.assertEquals("nodejs1", component.getName());
+    Assert.assertEquals("nodejs", component.getName());
+    ComponentFeatures liveFeatures = component.getLiveFeatures();
+    Assert.assertNotNull(liveFeatures);
+    Assert.assertFalse(liveFeatures.isDebug());
+    Assert.assertFalse(liveFeatures.isDeploy());
+    Assert.assertTrue(liveFeatures.isDev());
+    ComponentInfo info = component.getInfo();
+    Assert.assertNotNull(info);
+    Assert.assertEquals("nodejs", info.getComponentTypeName());
+    Assert.assertEquals(ComponentKind.DEVFILE, info.getComponentKind());
+    Assert.assertNull(info.getLanguage());
+    ComponentFeatures features = info.getFeatures();
+    Assert.assertNotNull(features);
+    Assert.assertFalse(features.isDebug());
+    Assert.assertFalse(features.isDeploy());
+    Assert.assertFalse(features.isDev());
   }
 
   @Test
-  @Ignore
   public void verifyThatComponentDeserializerReturnsComponentsPropertiesForNonOdoComponent() throws IOException {
-    List<Component> components = MAPPER.readValue(url, new TypeReference<List<Component>>() {});
+    List<Component> components = MAPPER.readValue(url, new TypeReference<>() {});
     Assert.assertNotNull(components);
     Assert.assertEquals(2, components.size());
+
     //non odo components
     Component component = components.get(1);
     Assert.assertNotNull(component);
-    Assert.assertEquals("quarkus1", component.getName());
+    Assert.assertEquals("nondevcomp", component.getName());
+    ComponentFeatures liveFeatures = component.getLiveFeatures();
+    Assert.assertNotNull(liveFeatures);
+    Assert.assertFalse(liveFeatures.isDebug());
+    Assert.assertFalse(liveFeatures.isDeploy());
+    Assert.assertFalse(liveFeatures.isDev());
+    ComponentInfo info = component.getInfo();
+    Assert.assertNotNull(info);
+    Assert.assertEquals("Unknown", info.getComponentTypeName());
+    Assert.assertEquals(ComponentKind.DEVFILE, info.getComponentKind());
+    Assert.assertNull(info.getLanguage());
+    ComponentFeatures features = info.getFeatures();
+    Assert.assertNotNull(features);
+    Assert.assertFalse(features.isDebug());
+    Assert.assertFalse(features.isDeploy());
+    Assert.assertFalse(features.isDev());
   }
 }

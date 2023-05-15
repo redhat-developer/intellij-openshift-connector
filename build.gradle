@@ -1,10 +1,10 @@
 plugins {
-    id "org.jetbrains.intellij" version "1.13.3"
-    id "com.adarshr.test-logger" version "3.2.0"
-    id "idea"
-    id "java"
-    id "jacoco"
-    id "org.sonarqube" version "3.0"
+    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'com.adarshr.test-logger' version '3.2.0'
+    id 'idea'
+    id 'java'
+    id 'jacoco'
+    id 'org.sonarqube' version '3.0'
 }
 
 repositories {
@@ -12,8 +12,8 @@ repositories {
     maven { url 'https://repository.jboss.org' }
     mavenCentral()
     maven { url 'https://www.jetbrains.com/intellij-repository/snapshots' }
-    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
-    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
+    maven { url 'https://www.jetbrains.com/intellij-repository/releases' }
+    maven { url 'https://cache-redirector.jetbrains.com/intellij-dependencies' }
 }
 
 sourceCompatibility = '11'
@@ -102,7 +102,7 @@ tasks.register('integrationUITest', Test) {
 
 dependencies {
     implementation(
-            'io.fabric8:openshift-client:6.4.0',
+            'io.fabric8:openshift-client:6.4.1',
             'org.apache.commons:commons-compress:1.21',
             'org.apache.commons:commons-exec:1.3',
             'org.apache.commons:commons-lang3:3.9',
@@ -116,12 +116,29 @@ dependencies {
             'org.easytesting:fest-assert:1.4',
             'com.redhat.devtools.intellij:intellij-common:1.9.1:test',
             'org.awaitility:awaitility:4.1.0',
-            'org.mock-server:mockserver-client-java:5.13.2',
-            'org.mock-server:mockserver-netty:5.13.2',
+            'org.mock-server:mockserver-client-java:5.15.0',
+            'org.mock-server:mockserver-netty:5.15.0',
             'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
             'org.junit.jupiter:junit-jupiter-engine:5.8.2',
             'org.junit.jupiter:junit-jupiter-api:5.8.2',
             'org.junit.jupiter:junit-jupiter:5.8.2')
+    constraints {
+        implementation('io.undertow:undertow-core:2.2.24.Final') {
+            because 'https://app.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3339519'
+        }
+        implementation('com.squareup.okhttp3:okhttp:4.9.2') {
+            because 'https://app.snyk.io/vuln/SNYK-JAVA-COMSQUAREUPOKHTTP3-2958044'
+        }
+        implementation('org.jboss.resteasy:resteasy-core:4.7.8.Final') {
+            because 'https://app.snyk.io/vuln/SNYK-JAVA-ORGJBOSSRESTEASY-3338627'
+        }
+        implementation('org.jboss.xnio:xnio-api:3.8.8.Final') {
+            because 'https://app.snyk.io/vuln/SNYK-JAVA-ORGJBOSSXNIO-2994360'
+        }
+        testImplementation('maven:junit:junit:4.13.1') {
+            because 'https://github.com/advisories/GHSA-269g-pwp5-87pp'
+        }
+    }
 }
 
 sonarqube {

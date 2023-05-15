@@ -1,10 +1,13 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
-import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
-public class DevOnPodmanComponentAction extends DevComponentAction {
+public class DevOnPodmanComponentAction extends FeatureComponentAction {
+
+    public DevOnPodmanComponentAction() {
+        super(ComponentFeature.DEV_ON_PODMAN);
+    }
 
     @Override
     protected String getActionName() {

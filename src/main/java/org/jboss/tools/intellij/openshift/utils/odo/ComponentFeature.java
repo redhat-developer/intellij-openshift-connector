@@ -15,18 +15,18 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", "Watching for changes in the current directory", Collections.singletonList("dev")) {
+    DEV("dev", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Collections.singletonList("dev")) {
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
-    DEV_ON_PODMAN("dev on Podman", "Watching for changes in the current directory", Arrays.asList("dev", "--platform", "podman", "--forward-localhost")),
-    DEBUG("debug", "Watching for changes in the current directory", Arrays.asList("dev", "--debug")) {
+    DEV_ON_PODMAN("dev on Podman", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--platform", "podman", "--forward-localhost")),
+    DEBUG("debug", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;
         }
     },
-    DEPLOY("deploy", "Your Devfile has been successfully deployed", Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
+    DEPLOY("deploy", Constants.YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED, Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
 
     private final String label;
 
@@ -65,5 +65,10 @@ public enum ComponentFeature {
 
     public CharSequence getOutput() {
         return output;
+    }
+
+    private static class Constants {
+        public static final String WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY = "Watching for changes in the current directory";
+        public static final String YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED = "Your Devfile has been successfully deployed";
     }
 }

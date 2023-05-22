@@ -242,9 +242,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
       <separator/>
-      <!--<action class="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListComponentsAction" text="List Catalog Components"/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" id="org.jboss.tools.intellij.openshift.actions.cluster.ListServicesAction" text="List Catalog Services"/>-->
-      <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
@@ -261,6 +258,7 @@
       <separator/>
       <group id="org.jboss.tools.intellij.openshift.actions.component.actions">
         <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"/>
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DevOnPodmanComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevOnPodmanComponentAction"/>
         <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"/>
       </group>
       <separator/>

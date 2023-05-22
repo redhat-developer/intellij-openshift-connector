@@ -15,18 +15,20 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", "Watching for changes in the current directory", Collections.singletonList("dev")) {
+    DEV("dev", "dev on Cluster", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Collections.singletonList("dev")) {
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
-    DEBUG("debug", "Watching for changes in the current directory", Arrays.asList("dev", "--debug")) {
+    DEV_ON_PODMAN("dev", "dev on Podman", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--platform", "podman", "--forward-localhost")),
+    DEBUG("debug", "debug", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;
         }
     },
-    DEPLOY("deploy", "Your Devfile has been successfully deployed", Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
+    DEPLOY("deploy", "deploy", Constants.YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED, Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
 
+    private final String kind;
     private final String label;
 
     private final String output;
@@ -35,19 +37,24 @@ public enum ComponentFeature {
 
     private final List<String> stopArgs;
 
-    ComponentFeature(String label, String output, List<String> startArgs, List<String> stopArgs) {
+    ComponentFeature(String kind, String label, String output, List<String> startArgs, List<String> stopArgs) {
+        this.kind = kind;
         this.label = label;
         this.output = output;
         this.startArgs = startArgs;
         this.stopArgs = stopArgs;
     }
 
-    ComponentFeature(String label, String output, List<String> startArgs) {
-        this(label, output, startArgs, Collections.emptyList());
+    ComponentFeature(String kind, String label, String output, List<String> startArgs) {
+        this(kind, label, output, startArgs, Collections.emptyList());
     }
 
     public ComponentFeature getPeer() {
         return null;
+    }
+
+    public String getKind() {
+        return kind;
     }
 
     public String getLabel() {
@@ -64,5 +71,10 @@ public enum ComponentFeature {
 
     public CharSequence getOutput() {
         return output;
+    }
+
+    private static class Constants {
+        public static final String WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY = "Watching for changes in the current directory";
+        public static final String YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED = "Your Devfile has been successfully deployed";
     }
 }

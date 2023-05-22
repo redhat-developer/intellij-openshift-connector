@@ -149,8 +149,6 @@ public class JSonParser {
     private static void getComponentsFeatures(ComponentFeatures features, JsonNode featuresNode) {
         if (featuresNode.has(ComponentFeature.DEV.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getKind().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEV);
-        }
-        if (featuresNode.has(ComponentFeature.DEV_ON_PODMAN.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEV_ON_PODMAN.getKind().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEV_ON_PODMAN);
         }
         if (featuresNode.has(ComponentFeature.DEBUG.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getKind().toLowerCase()).asBoolean()) {

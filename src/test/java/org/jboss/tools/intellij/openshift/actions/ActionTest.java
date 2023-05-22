@@ -95,8 +95,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
   private AnActionEvent setupActionOnComponent(Component component) {
     ComponentNode componentNode = mock(ComponentNode.class);
     when(componentNode.getComponent()).thenReturn(component);
-    when(componentNode.getRoot()).thenReturn(mock(ApplicationsRootNode.class));
-    when(componentNode.getRoot().getOdo()).thenReturn(mock(Odo.class));
     AnActionEvent event = createEvent(componentNode);
     AnAction action = getAction();
     action.update(event);

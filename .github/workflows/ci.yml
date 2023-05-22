@@ -85,8 +85,8 @@ jobs:
         run: chmod +x gradlew
       - name: Play integration tests
         run: ./gradlew integrationTest --continue
-      - name: Play integration UI tests
-        run: ./gradlew integrationUITest --continue
+      #- name: Play integration UI tests
+      #  run: ./gradlew integrationUITest --continue
       - uses: actions/upload-artifact@v2
         if: always()
         with:

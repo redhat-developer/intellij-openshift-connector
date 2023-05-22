@@ -49,16 +49,18 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
-        Object node = adjust(getSelected(getTree(e)));
-        if (node instanceof ComponentNode) {
-            ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
-            Component component = componentNode.getComponent();
-            ComponentFeature feat = getComponentFeature(component);
-            if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
-                    component.getName(), feat)) {
-                e.getPresentation().setText("Stop " + getActionName());
-            } else {
-                e.getPresentation().setText("Start " + getActionName());
+        if (e.getPresentation().isVisible()) {
+            Object node = adjust(getSelected(getTree(e)));
+            if (node instanceof ComponentNode) {
+                ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
+                Component component = componentNode.getComponent();
+                ComponentFeature feat = getComponentFeature(component);
+                if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
+                        component.getName(), feat)) {
+                    e.getPresentation().setText("Stop " + getActionName());
+                } else {
+                    e.getPresentation().setText("Start " + getActionName());
+                }
             }
         }
     }

@@ -147,14 +147,16 @@ public class JSonParser {
     }
 
     private static void getComponentsFeatures(ComponentFeatures features, JsonNode featuresNode) {
-        if (featuresNode.has(ComponentFeature.DEV.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getLabel().toLowerCase()).asBoolean()) {
+        if (featuresNode.has(ComponentFeature.DEV.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getKind().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEV);
+        }
+        if (featuresNode.has(ComponentFeature.DEV_ON_PODMAN.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEV_ON_PODMAN.getKind().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEV_ON_PODMAN);
         }
-        if (featuresNode.has(ComponentFeature.DEBUG.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getLabel().toLowerCase()).asBoolean()) {
+        if (featuresNode.has(ComponentFeature.DEBUG.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getKind().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEBUG);
         }
-        if (featuresNode.has(ComponentFeature.DEPLOY.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEPLOY.getLabel().toLowerCase()).asBoolean()) {
+        if (featuresNode.has(ComponentFeature.DEPLOY.getKind().toLowerCase()) && featuresNode.get(ComponentFeature.DEPLOY.getKind().toLowerCase()).asBoolean()) {
             features.addFeature(ComponentFeature.DEPLOY);
         }
     }

@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class ComponentFeatures {
 
-    private Set<ComponentFeature> features = new HashSet<>();
+    private final Set<ComponentFeature> features = new HashSet<>();
 
     public ComponentFeatures(ComponentFeature feature) {
         addFeature(feature);
@@ -36,7 +36,7 @@ public class ComponentFeatures {
     }
 
     public boolean isDev() {
-        return is(ComponentFeature.DEV);
+        return is(ComponentFeature.DEV) || is(ComponentFeature.DEV_ON_PODMAN);
     }
 
     public boolean isDeploy() {
@@ -52,13 +52,13 @@ public class ComponentFeatures {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         if (isDev()) {
-            first = append(builder, true, ComponentFeature.DEV.getLabel());
+            first = append(builder, true, ComponentFeature.DEV.getKind());
         }
         if (isDebug()) {
-            first = append(builder, first, ComponentFeature.DEBUG.getLabel());
+            first = append(builder, first, ComponentFeature.DEBUG.getKind());
         }
         if (isDeploy()) {
-            append(builder, first, ComponentFeature.DEPLOY.getLabel());
+            append(builder, first, ComponentFeature.DEPLOY.getKind());
         }
         return builder.toString();
     }

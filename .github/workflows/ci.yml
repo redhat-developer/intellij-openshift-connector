@@ -82,7 +82,7 @@ jobs:
             nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
           done
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew --no-daemon
+        run: chmod +x gradlew
       - name: Play integration tests
         run: ./gradlew integrationTest --continue --no-daemon
       #- name: Play integration UI tests

@@ -11,21 +11,13 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.TestDialog;
-import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
-import com.redhat.devtools.intellij.common.utils.MessagesHelper;
+import com.intellij.testFramework.fixtures.*;
 import io.fabric8.kubernetes.api.model.AuthInfo;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import org.apache.commons.lang.StringUtils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -36,30 +28,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-public class ApplicationTreeModelConfigUpdateTest {
+public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
 
-    private CodeInsightTestFixture myFixture;
-    private TestDialog previousTestDialog;
-
-    @Before
-    public void before() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder((LightProjectDescriptor) null);
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
-        previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-    }
-
-    @After
-    public void after() throws Exception {
-        myFixture.tearDown();
-        MessagesHelper.setTestDialog(previousTestDialog);
-    }
-
-
-    @Test
-    public void shouldNotRefreshIfContextDoesntChange() {
+    public void testShouldNotRefreshIfContextDoesntChange() {
         // given
         String user = "papa-smurf";
         String cluster = "localhost";
@@ -69,7 +40,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo(token);
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(getProject(), cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo(token);
@@ -80,34 +51,31 @@ public class ApplicationTreeModelConfigUpdateTest {
         verify(model, never()).refresh();
     }
 
-    @Test
-    public void shouldRefreshIfContextUserChanges() {
+    public void testShouldRefreshIfContextUserChanges() {
         // given
         Context context = createContext();
         doReturn("papa-smurf","smurfette").when(context).getUser();
         Config config = createConfig(context);
-        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), config);
+        ApplicationsRootNode model = createApplicationsRootNode(getProject(), config);
         // when
         model.onUpdate(null, config);
         // then
         verify(model).refresh();
     }
 
-    @Test
-    public void shouldRefreshIfContextClusterChanges() {
+    public void testShouldRefreshIfContextClusterChanges() {
         // given
         Context context = createContext();
         doReturn("localhost","www.openshift.com").when(context).getCluster();
         Config config = createConfig(context);
-        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), config);
+        ApplicationsRootNode model = createApplicationsRootNode(getProject(), config);
         // when
         model.onUpdate(null, config);
         // then
         verify(model).refresh();
     }
 
-    @Test
-    public void shouldRefreshIfContextUserTokenChanges() {
+    public void testShouldRefreshIfContextUserTokenChanges() {
         // given
         String user = "papa-smurf";
         String cluster = "localhost";
@@ -116,7 +84,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo("token1");
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(getProject(), cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo("token2");
@@ -127,8 +95,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         verify(model).refresh();
     }
 
-    @Test
-    public void shouldNotRefreshIfContextUserLogout() {
+    public void testShouldNotRefreshIfContextUserLogout() {
         // given
         String user = "papa-smurf";
         String cluster = "localhost";
@@ -137,7 +104,7 @@ public class ApplicationTreeModelConfigUpdateTest {
         AuthInfo authInfo1 = createAuthInfo("token1");
         Config cfg1 = createConfig(ctx1, user, authInfo1);
 
-        ApplicationsRootNode model = createApplicationsRootNode(myFixture.getProject(), cfg1);
+        ApplicationsRootNode model = createApplicationsRootNode(getProject(), cfg1);
 
         Context ctx2 = createContext(user, cluster);
         AuthInfo authInfo2 = createAuthInfo(null);

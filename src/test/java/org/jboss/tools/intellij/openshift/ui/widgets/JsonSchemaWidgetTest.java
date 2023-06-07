@@ -14,10 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
+import com.intellij.testFramework.fixtures.*;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.junit.After;
 import org.junit.Before;
@@ -35,26 +32,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 
-public class JsonSchemaWidgetTest {
-    private CodeInsightTestFixture myFixture;
-
-    @Before
-    public void setup() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder((LightProjectDescriptor) null);
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
-    }
-
-    @After
-    public void after() throws Exception {
-        myFixture.tearDown();
-    }
+public class JsonSchemaWidgetTest extends BasePlatformTestCase {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Test
     public void testSimpleTextField() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -75,7 +56,6 @@ public class JsonSchemaWidgetTest {
         assertEquals("", ((JTextField)widget.getComponents()[1]).getText());
     }
 
-    @Test
     public void testSimpleTextFieldWithDefault() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -100,7 +80,6 @@ public class JsonSchemaWidgetTest {
         assertEquals("the name", ((JTextField)widget.getComponents()[1]).getText());
     }
 
-    @Test
     public void testBooleanField() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -121,7 +100,6 @@ public class JsonSchemaWidgetTest {
         assertFalse(((JCheckBox)widget.getComponents()[1]).isSelected());
     }
 
-    @Test
     public void testBooleanWithDefault() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -146,7 +124,6 @@ public class JsonSchemaWidgetTest {
         assertTrue(((JCheckBox)widget.getComponents()[1]).isSelected());
     }
 
-    @Test
     public void testObjectField() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -180,7 +157,6 @@ public class JsonSchemaWidgetTest {
         assertEquals("", ((JTextField)widget1.getComponents()[1]).getText());
     }
 
-    @Test
     public void testObjectWithDefault() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -220,7 +196,6 @@ public class JsonSchemaWidgetTest {
         assertEquals("the name", ((JTextField)widget1.getComponents()[1]).getText());
     }
 
-    @Test
     public void testArrayField() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +
@@ -250,7 +225,6 @@ public class JsonSchemaWidgetTest {
         assertEquals("Add Names", ((JButton)panel1.getComponents()[0]).getText());
     }
 
-    @Test
     public void testArrayFieldWithDefault() throws JsonProcessingException {
         String schema = "{\n" +
                 "    \"type\": \"object\",\n" +

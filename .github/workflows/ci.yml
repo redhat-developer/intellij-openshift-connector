@@ -43,7 +43,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build --continue
+        run: ./gradlew build --continue --no-daemon
       - uses: actions/upload-artifact@v3
         if: always()
         with:
@@ -82,9 +82,9 @@ jobs:
             nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
           done
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: chmod +x gradlew --no-daemon
       - name: Play integration tests
-        run: ./gradlew integrationTest --continue
+        run: ./gradlew integrationTest --continue --no-daemon
       #- name: Play integration UI tests
       #  run: ./gradlew integrationUITest --continue
       - uses: actions/upload-artifact@v3

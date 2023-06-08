@@ -151,13 +151,13 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void follow(String project, String context, String component, boolean deploy) throws IOException {
-        delegate.follow(project, context, component, deploy);
+    public void follow(String project, String context, String component, boolean deploy, String platform) throws IOException {
+        delegate.follow(project, context, component, deploy, platform);
     }
 
     @Override
-    public void log(String project, String context, String component, boolean deploy) throws IOException {
-        delegate.log(project, context, component, deploy);
+    public void log(String project, String context, String component, boolean deploy, String platform) throws IOException {
+        delegate.log(project, context, component, deploy, platform);
     }
 
     @Override

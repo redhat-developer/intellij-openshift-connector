@@ -52,13 +52,13 @@ public class ComponentFeatures {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         if (isDev()) {
-            first = append(builder, true, ComponentFeature.DEV.getKind());
+            first = append(builder, true, ComponentFeature.DEV.getKind().getLabel());
         }
         if (isDebug()) {
-            first = append(builder, first, ComponentFeature.DEBUG.getKind());
+            first = append(builder, first, ComponentFeature.DEBUG.getKind().getLabel());
         }
         if (isDeploy()) {
-            append(builder, first, ComponentFeature.DEPLOY.getKind());
+            append(builder, first, ComponentFeature.DEPLOY.getKind().getLabel());
         }
         return builder.toString();
     }

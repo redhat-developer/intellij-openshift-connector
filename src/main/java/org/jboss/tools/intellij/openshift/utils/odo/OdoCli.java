@@ -611,7 +611,7 @@ public class OdoCli implements Odo {
         undeployComponent(project, context, component, kind);
     }
 
-    private void doLog(String context, String component, boolean follow, boolean deploy) throws IOException {
+    private void doLog(String context, String component, boolean follow, boolean deploy, String platform) throws IOException {
         List<ProcessHandler> handlers = componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
         int index = deploy ? 1 : 0;
         ProcessHandler handler = handlers.get(index);
@@ -626,6 +626,10 @@ public class OdoCli implements Odo {
             }
             if (follow) {
                 args.add("--follow");
+            }
+            if (StringUtils.isNotBlank(platform)){
+                args.add("--platform");
+                args.add(platform);
             }
             ExecHelper.executeWithTerminal(
                     this.project, WINDOW_TITLE,
@@ -655,13 +659,13 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void follow(String project, String context, String component, boolean deploy) throws IOException {
-        doLog(context, component, true, deploy);
+    public void follow(String project, String context, String component, boolean deploy, String platform) throws IOException {
+        doLog(context, component, true, deploy, platform);
     }
 
     @Override
-    public void log(String project, String context, String component, boolean deploy) throws IOException {
-        doLog(context, component, false, deploy);
+    public void log(String project, String context, String component, boolean deploy, String platform) throws IOException {
+        doLog(context, component, false, deploy, platform);
     }
 
     @Nullable

@@ -16,6 +16,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
       if (visible) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = ((ComponentNode) selected).getComponent();
-        visible &= ((component.getLiveFeatures().isDev() || component.getLiveFeatures().isDebug()) &&
+        visible = ((component.getLiveFeatures().isDev() || component.getLiveFeatures().isDebug()) &&
                 !componentNode.getRoot().getOdo().isLogRunning(component.getPath(), component.getName(), false)) ||
                 (component.getLiveFeatures().isDeploy() &&
                         !componentNode.getRoot().getOdo().isLogRunning(component.getPath(), component.getName(), true));
@@ -59,28 +60,28 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     doLog((ComponentNode) selected, odo, false);
   }
 
-  protected void doLog(ComponentNode selected, Odo odo, boolean follow) {
+  protected void doLog(ComponentNode componentNode, Odo odo, boolean follow) {
     try {
-      ComponentNode componentNode = selected;
       Component component = componentNode.getComponent();
       NamespaceNode namespaceNode = componentNode.getParent();
-      Optional<Boolean> deploy = isDeploy(odo, selected);
+      Optional<Boolean> deploy = isDeploy(odo, component);
       if (deploy.isEmpty()) {
-        int choice = Messages.showDialog(componentNode.getRoot().getProject(), "Component is running in both dev and deploy mode, which container do you want to get logs from ?", getActionName(),new String[] {"Dev", "Deploy"}, 0, null);
+        int choice = Messages.showDialog(componentNode.getRoot().getProject(), "Component is running in both dev and deploy mode, which container do you want to get logs from ?", getActionName(), new String[] {"Dev", "Deploy"}, 0, null);
         if (choice == 0) {
           deploy = Optional.of(Boolean.FALSE);
         } else if (choice == 1) {
           deploy = Optional.of(Boolean.TRUE);
         }
       }
+      String platform = getPlatform(component);
       if (deploy.isPresent()) {
         Optional<Boolean> finalDeploy = deploy;
         CompletableFuture.runAsync(() -> {
           try {
             if (follow) {
-              odo.follow(namespaceNode.getName(), component.getPath(), component.getName(), finalDeploy.get());
+              odo.follow(namespaceNode.getName(), component.getPath(), component.getName(), finalDeploy.get(), platform);
             } else {
-              odo.log(namespaceNode.getName(), component.getPath(), component.getName(), finalDeploy.get());
+              odo.log(namespaceNode.getName(), component.getPath(), component.getName(), finalDeploy.get(), platform);
             }
             sendTelemetryResults(TelemetryResult.SUCCESS);
           } catch (IOException e) {
@@ -94,9 +95,8 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     }
   }
 
-  private Optional<Boolean> isDeploy(Odo odo, ComponentNode componentNode) throws IOException {
+  private Optional<Boolean> isDeploy(Odo odo, Component component) throws IOException {
     Optional<Boolean> result = Optional.empty();
-    Component component = componentNode.getComponent();
     if ((component.getLiveFeatures().isDev() || component.getLiveFeatures().isDebug()) &&
             !component.getLiveFeatures().isDeploy() &&
             !odo.isLogRunning(component.getPath(), component.getName(), false)) {
@@ -116,5 +116,12 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
       }
     }
     return result;
+  }
+
+  private String getPlatform(Component component){
+    if (component.getLiveFeatures().is(ComponentFeature.DEV_ON_PODMAN)){
+      return ComponentFeature.Constants.PODMAN;
+    }
+    return null;
   }
 }

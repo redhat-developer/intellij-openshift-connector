@@ -12,10 +12,7 @@ package org.jboss.tools.intellij.openshift.validation;
 
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
+import com.intellij.testFramework.fixtures.*;
 import com.redhat.devtools.intellij.common.utils.VfsRootAccessHelper;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
 import org.junit.After;
@@ -25,42 +22,15 @@ import org.junit.Test;
 
 import java.io.File;
 
-public class DevfileSchemasTest {
-    private CodeInsightTestFixture myFixture;
+public class DevfileSchemasTest extends BasePlatformTestCase {
 
-    @Before
-    public void setup() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder((LightProjectDescriptor)null);
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture, factory.createTempDirTestFixture());
-
+    public void testQuarkusDevfile() {
         myFixture.setTestDataPath("src/test/resources");
-        myFixture.setUp();
         myFixture.enableInspections(YamlJsonSchemaHighlightingInspection.class);
         String path = new File("src").getAbsoluteFile().getParentFile().getAbsolutePath();
         VfsRootAccessHelper.allowRootAccess(path);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        myFixture.tearDown();
-    }
-
-    private boolean shouldRun() {
-        ApplicationInfo info = ApplicationInfo.getInstance();
-        return !"2019".equals(info.getMajorVersion()) || !"2".equals(info.getMinorVersion());
-    }
-
-    @Test
-    public void testQuarkusDevfile() {
-        if (shouldRun()) {
-            myFixture.configureByFile("devfiles/java-quarkus.yaml");
-            myFixture.checkHighlighting();
-        } else {
-            Assume.assumeFalse(true);
-        }
+        myFixture.configureByFile("devfiles/java-quarkus.yaml");
+        myFixture.checkHighlighting();
     }
 
 }

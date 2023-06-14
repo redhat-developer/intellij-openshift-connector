@@ -18,8 +18,8 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertNotNull;
 
 public class OdoCliFactoryTest extends BasePlatformTestCase {
-    @Test
-    public void getOdo() throws ExecutionException, InterruptedException {
+ 
+    public void testGetOdo() throws ExecutionException, InterruptedException {
         Odo odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
         assertNotNull(odo);
     }

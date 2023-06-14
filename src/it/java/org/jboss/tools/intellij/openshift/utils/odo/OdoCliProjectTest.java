@@ -20,9 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OdoCliProjectTest extends OdoCliTest {
 
-
-    @Test
-    public void checkCreateProject() throws IOException, ExecutionException, InterruptedException {
+    public void testCheckCreateProject() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -31,8 +29,7 @@ public class OdoCliProjectTest extends OdoCliTest {
         }
     }
 
-    @Test
-    public void checkListProjects() throws IOException, ExecutionException, InterruptedException {
+    public void testCheckListProjects() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);

@@ -59,8 +59,9 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
 
     private TestDialog previousTestDialog;
 
-    @Before
-    public void init() throws IOException, ExecutionException, InterruptedException {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
         odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
         if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
@@ -72,10 +73,11 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
         }
     }
 
-    @After
-    public void shutdown() throws IOException {
+    @Override
+    protected void tearDown() throws Exception {
         MessagesHelper.setTestDialog(previousTestDialog);
         odo.deleteDevfileRegistry(REGISTRY_NAME);
+        super.tearDown();
     }
 
     protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {

@@ -12,10 +12,8 @@ package org.jboss.tools.intellij.openshift.test.ui.views;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.ContainerFixture;
-import com.intellij.remoterobot.fixtures.DefaultXpath;
-import com.intellij.remoterobot.fixtures.FixtureName;
-import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
 import org.jetbrains.annotations.NotNull;
@@ -27,39 +25,38 @@ import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 
 /**
  * 
- * @author Ihor Okhrimenko, Ondrej Dockal
+ * @author Richard Kocian
  *
  */
-@DefaultXpath(by = "OpenshiftView type", xpath = "//div[@class='IdeFrameImpl']")
-@FixtureName(name = "Openshift View")
-public class OpenshiftView extends ContainerFixture {
-  public OpenshiftView(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
+@DefaultXpath(by = "Getting Started type", xpath = "//div[@class='IdeFrameImpl']")
+@FixtureName(name = "GettingStarted View")
+public class GettingStartedView extends ContainerFixture {
+
+  private final Locator editorPaneLocator = byXpath("//div[@class='JEditorPane']");
+  private final Locator backToMainViewLocator = byXpath("//div[@accessiblename='<< Getting Started with OpenShift Toolkit' and @class='JLabel' and @text='<< Getting Started with OpenShift Toolkit']");
+  public GettingStartedView(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
     super(remoteRobot, remoteComponent);
   }
 
   public void openView() {
     final ToolWindowsPane toolWindowsPane = find(ToolWindowsPane.class);
-    waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable(toolWindowsPane, "OpenShift"));
-    toolWindowsPane.stripeButton("OpenShift", false).click();
+    waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Getting Started' stripe button is not available.", () -> isStripeButtonAvailable(toolWindowsPane, "OpenShift"));
+    toolWindowsPane.stripeButton("Getting Started", false).click();
   }
 
   public void closeView() {
     final ToolWindowsPane toolWindowsPane = find(ToolWindowsPane.class);
-    toolWindowsPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
-  }
-
-  public void expandOpenshiftViewTree(String path) {
-      getOpenshiftConnectorTree().expand(path);
+    toolWindowsPane.button(byXpath("//div[@tooltiptext='Getting Started']"), Duration.ofSeconds(2)).click();
   }
 
   public void waitForTreeItem(String itemText, int duration, int interval) {
     waitFor(Duration.ofSeconds(duration),
         Duration.ofSeconds(interval),
         "The " + itemText + " project is still not available.",
-        () -> getOpenshiftConnectorTree().hasText(itemText));
+        () -> getGettingStartedTree().hasText(itemText));
   }
 
-  public JTreeFixture getOpenshiftConnectorTree(){
+  public JTreeFixture getGettingStartedTree(){
     return find(JTreeFixture.class, byXpath("//div[@class='Tree']"), Duration.ofSeconds(30));
   }
 
@@ -70,6 +67,14 @@ public class OpenshiftView extends ContainerFixture {
       return false;
     }
     return true;
+  }
+
+  public ComponentFixture findEditorPaneFixture() {
+    return getRemoteRobot().find(GettingStartedView.class, editorPaneLocator);
+  }
+
+  public ComponentFixture findBackToMainButton() {
+    return getRemoteRobot().find(GettingStartedView.class, backToMainViewLocator);
   }
 
 }

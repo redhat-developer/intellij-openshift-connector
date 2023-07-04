@@ -22,8 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OdoCliCatalogTest extends OdoCliTest {
 
-    @Test
-    public void checkGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
+    public void testCheckGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -34,8 +33,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
         }
     }
 
-    @Test
-    public void checkGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
+    public void testCheckGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);
@@ -47,8 +45,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
         }
     }
 
-    @Test
-    public void checkMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
+    public void testCheckMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
         String project = PROJECT_PREFIX + random.nextInt();
         try {
             createProject(project);

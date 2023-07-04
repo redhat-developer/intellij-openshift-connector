@@ -11,9 +11,9 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.ui.TestDialog;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.apache.commons.io.FileUtils;
-import org.jboss.tools.intellij.openshift.BaseTest;
 import org.junit.After;
 import org.junit.Before;
 
@@ -29,7 +29,7 @@ import static org.awaitility.Awaitility.with;
 import static org.junit.Assert.assertNotNull;
 
 
-public abstract class OdoCliTest extends BaseTest {
+public abstract class OdoCliTest extends BasePlatformTestCase {
 
     public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
 
@@ -59,30 +59,32 @@ public abstract class OdoCliTest extends BaseTest {
 
     private TestDialog previousTestDialog;
 
-    @Before
-    public void init() throws IOException, ExecutionException, InterruptedException {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-        odo = OdoCliFactory.getInstance().getOdo(project).get();
+        odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
         if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
             odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
 
         if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
             odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
-            odo = OdoCliFactory.getInstance().getOdo(project).get();
+            odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
         }
     }
 
-    @After
-    public void shutdown() throws IOException {
+    @Override
+    protected void tearDown() throws Exception {
         MessagesHelper.setTestDialog(previousTestDialog);
         odo.deleteDevfileRegistry(REGISTRY_NAME);
+        super.tearDown();
     }
 
     protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
         odo.createProject(project);
         // need to refresh kubernetes client with the correct namespace
         OdoCliFactory.getInstance().resetOdo();
-        odo = OdoCliFactory.getInstance().getOdo(this.project).get();
+        odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
     }
 
     protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {

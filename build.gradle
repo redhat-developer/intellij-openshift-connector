@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'org.jetbrains.intellij' version '1.14.1'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'idea'
     id 'java'
@@ -117,7 +117,8 @@ dependencies {
             'io.jsonwebtoken:jjwt-impl:0.11.2',
             'io.jsonwebtoken:jjwt-jackson:0.11.2',
             'org.keycloak:keycloak-installed-adapter:20.0.3',
-            'com.squareup.retrofit2:converter-jackson:2.9.0')
+            'com.squareup.retrofit2:converter-jackson:2.9.0',
+            'com.google.code.gson:gson:2.9.0')
     testImplementation(
             'org.mockito:mockito-core:4.9.0',
             'org.easytesting:fest-assert:1.4',

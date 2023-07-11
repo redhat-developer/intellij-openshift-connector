@@ -21,7 +21,7 @@ jobs:
           echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
       - name: Find existing PR for ODO version
         run: |
-          echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update odo ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
+          echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state open --search "update odo ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
       - name: Update tools.json with latest odo version
         if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
         run: |

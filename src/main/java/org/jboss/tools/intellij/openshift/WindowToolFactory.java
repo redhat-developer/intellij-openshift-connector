@@ -11,7 +11,9 @@
 package org.jboss.tools.intellij.openshift;
 
 import com.intellij.ide.util.treeView.NodeRenderer;
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
@@ -33,12 +35,12 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 
 public class WindowToolFactory implements ToolWindowFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WindowToolFactory.class);
-
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -57,6 +59,9 @@ public class WindowToolFactory implements ToolWindowFactory {
             PopupHandlerAdapter.install(tree, "org.jboss.tools.intellij.tree", ActionPlaces.MAIN_MENU);
             panel.add(new JBScrollPane(tree), BorderLayout.CENTER);
             toolWindow.getContentManager().addContent(content);
+            ArrayList<AnAction> actions = new ArrayList<>();
+            actions.add(ActionManager.getInstance().getAction("org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction"));
+            toolWindow.setTitleActions(actions);
             TreeHelper.addLinkSupport(tree);
         } catch (IllegalAccessException | InvocationTargetException e) {
             LOGGER.error(e.getMessage(), e);

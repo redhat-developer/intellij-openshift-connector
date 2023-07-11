@@ -15,6 +15,8 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.DocumentAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -29,6 +31,8 @@ import java.util.regex.Pattern;
 public class FeedBackDialog extends DialogWrapper {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}", Pattern.CASE_INSENSITIVE);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedBackDialog.class);
 
     private JPanel contentPane;
 
@@ -67,7 +71,7 @@ public class FeedBackDialog extends DialogWrapper {
         try {
             htmlPane.read(inputStream, null);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(e.getMessage(), e);
         }
         htmlPane.setBackground(getRootPane().getBackground());
 
@@ -205,7 +209,6 @@ public class FeedBackDialog extends DialogWrapper {
             }
         }
     }
-
 
 
 }

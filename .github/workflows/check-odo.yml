@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
         TOOL_REPO: redhat-developer/odo
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.ODO_CHECK_TOKEN }}
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3

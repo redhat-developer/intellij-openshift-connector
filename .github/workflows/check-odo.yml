@@ -27,7 +27,7 @@ jobs:
         run: |
           jq --indent 4 '.tools.odo.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/main/resources/tools.json | jq --indent 4 '.tools.odo.versionMatchRegExpr = "${{ env.LATEST_TOOL_RELEASE }}"' > src/main/resources/tools.json.new
           mv src/main/resources/tools.json.new src/main/resources/tools.json
-          for platform in win osx osx-arm64 lnx lnx-arm64; do
+          for platform in win osx "osx-arm64" lnx "lnx-arm64"; do
             old_url=`jq -r .tools.odo.platforms.${platform}.url src/main/resources/tools.json`
             new_url=`echo ${old_url} | sed "s|${{ env.REPO_ODO_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|"`
             jq --indent 4 ".tools.odo.platforms.${platform}.url = \"${new_url}\"" src/main/resources/tools.json  > src/main/resources/tools.json.new

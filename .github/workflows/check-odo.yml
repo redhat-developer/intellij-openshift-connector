@@ -39,6 +39,6 @@ jobs:
           git config --global user.email "openshifttools-bot@users.noreply.github.com"
           git config --global user.name "openshifttools-bot"
           git checkout -b "odo-${{ env.LATEST_TOOL_RELEASE }}"
-          git commit -am "Update odo to ${{ env.LATEST_TOOL_RELEASE }}"
+          git commit -am "fix: Update odo to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "odo-${{ env.LATEST_TOOL_RELEASE }}"
           gh pr create --title "Update odo to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"

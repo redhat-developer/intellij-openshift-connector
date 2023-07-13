@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.ui.feedback;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -22,8 +23,11 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -37,7 +41,6 @@ public class FeedBackDialog extends DialogWrapper {
     private JPanel contentPane;
 
     private JTextPane topTextFeedback;
-    private JEditorPane htmlPane;
     private JLabel label1;
     private JSlider slider1;
     private JLabel label2;
@@ -60,22 +63,36 @@ public class FeedBackDialog extends DialogWrapper {
     private JLabel comment3;
     private JTextField textField3;
     private JScrollPane scrollPaneComment2;
+    private JLabel openshiftPic;
+    private JLabel openshiftToolkitText;
+    private JLabel octoPic;
+    private JLabel opinionMattersText;
+    private JEditorPane gitHubContact;
+    private JLabel jetBrainsPic;
+    private JTextPane marketplaceRate;
 
     public FeedBackDialog() {
         super(null, false, IdeModalityType.IDE);
         init();
         setModal(true);
         setTitle("Share Feedback");
-        InputStream inputStream = this.getClass().getResourceAsStream("/feedback/feedback_header.html");
-        htmlPane.addHyperlinkListener(new HyperlinkMouseListener());
-        try {
-            htmlPane.read(inputStream, null);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        htmlPane.setBackground(getRootPane().getBackground());
 
-        topTextFeedback.setText("The Red Hat OpenShift Toolkit extension team would like to learn from your experience to improve the extension workflow.\nThis survey will take about 2 minutes. Your feedback is extremely valuable and will directly impact the product moving forward.");
+        // Top images
+        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 100, 100));
+        octoPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/github-mark.png"), 50, 50));
+        jetBrainsPic.setIcon(createResizedImageIcon("https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png", 50, 50));
+
+        // Top labels
+        openshiftToolkitText.setText("<html><font color=red size=+1><b>OpenShift</b></font><b>  Toolkit</b></html>");
+        opinionMattersText.setText("<html><font size=+2><b>Your opinion matters to us!</b></font></html>");
+        gitHubContact.setText("<a href='https://github.com/redhat-developer/intellij-openshift-connector/issues'>Contact us on GitHub</a>");
+        gitHubContact.addHyperlinkListener(new HyperlinkMouseListener());
+        marketplaceRate.setText("<a href='https://plugins.jetbrains.com/plugin/12030-openshift-toolkit-by-red-hat/'>Rate us on Marketplace</a>");
+        marketplaceRate.addHyperlinkListener(new HyperlinkMouseListener());
+
+
+        // Feedback section
+        topTextFeedback.setText("\nThe Red Hat OpenShift Toolkit extension team would like to learn from your experience to improve the extension workflow.\nThis survey will take about 2 minutes. Your feedback is extremely valuable and will directly impact the product moving forward.\n");
         label1.setText("1. Overall, how satisfied are you about the extension?");
         comment1.setText("What's the main reason for your score?");
         label2.setText("2. How likely would you recommend the OpenShift Toolkit extension to a friend or colleague?");
@@ -101,6 +118,8 @@ public class FeedBackDialog extends DialogWrapper {
         textArea2.getDocument().addDocumentListener(adapter);
         validate();
     }
+
+
 
     private void refreshForm() {
         if (slider1.getValue() <= 3) {
@@ -210,5 +229,32 @@ public class FeedBackDialog extends DialogWrapper {
         }
     }
 
+    private ImageIcon createImageIcon(URL resource) {
+        Objects.requireNonNull(resource);
+        return new ImageIcon(resource);
+    }
+
+    private ImageIcon createResizedImageIcon(URL resource, int w, int h) {
+        return new ImageIcon(getScaledImage(createImageIcon(resource).getImage(), w,h));
+    }
+
+
+    private ImageIcon createResizedImageIcon(String resource, int w, int h) {
+        try {
+            URL url = new URL(resource);
+            return createResizedImageIcon(url,w,h);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Image getScaledImage(Image srcImg, int w, int h){
+        BufferedImage resizedImg = UIUtil.createImage(getRootPane(), w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+        return resizedImg;
+    }
 
 }

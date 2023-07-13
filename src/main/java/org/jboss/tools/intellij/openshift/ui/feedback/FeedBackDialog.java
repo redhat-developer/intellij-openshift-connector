@@ -25,8 +25,6 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
@@ -120,7 +118,6 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
 
-
     private void refreshForm() {
         if (slider1.getValue() <= 3) {
             comment1.setVisible(true);
@@ -163,7 +160,7 @@ public class FeedBackDialog extends DialogWrapper {
         setOKActionEnabled(true);
 
         if (!textFieldContact.getText().isBlank() && !EMAIL_PATTERN.matcher(textFieldContact.getText()).matches()) {
-            setErrorText("Email is incorrect", textFieldContact);
+            setErrorText("The email format should be xxx@xxx.com", textFieldContact);
             setOKActionEnabled(false);
         }
 
@@ -217,6 +214,34 @@ public class FeedBackDialog extends DialogWrapper {
         return textFieldContact.getText();
     }
 
+    private ImageIcon createImageIcon(URL resource) {
+        Objects.requireNonNull(resource);
+        return new ImageIcon(resource);
+    }
+
+    private ImageIcon createResizedImageIcon(URL resource, int w, int h) {
+        return new ImageIcon(getScaledImage(createImageIcon(resource).getImage(), w, h));
+    }
+
+    private ImageIcon createResizedImageIcon(String resource, int w, int h) {
+        try {
+            URL url = new URL(resource);
+            return createResizedImageIcon(url, w, h);
+        } catch (MalformedURLException e) {
+            LOGGER.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = UIUtil.createImage(getRootPane(), w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+        return resizedImg;
+    }
+
     private static final class HyperlinkMouseListener implements HyperlinkListener {
 
         public void hyperlinkUpdate(HyperlinkEvent event) {
@@ -227,34 +252,6 @@ public class FeedBackDialog extends DialogWrapper {
                 }
             }
         }
-    }
-
-    private ImageIcon createImageIcon(URL resource) {
-        Objects.requireNonNull(resource);
-        return new ImageIcon(resource);
-    }
-
-    private ImageIcon createResizedImageIcon(URL resource, int w, int h) {
-        return new ImageIcon(getScaledImage(createImageIcon(resource).getImage(), w,h));
-    }
-
-
-    private ImageIcon createResizedImageIcon(String resource, int w, int h) {
-        try {
-            URL url = new URL(resource);
-            return createResizedImageIcon(url,w,h);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Image getScaledImage(Image srcImg, int w, int h){
-        BufferedImage resizedImg = UIUtil.createImage(getRootPane(), w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = resizedImg.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.drawImage(srcImg, 0, 0, w, h, null);
-        g2.dispose();
-        return resizedImg;
     }
 
 }

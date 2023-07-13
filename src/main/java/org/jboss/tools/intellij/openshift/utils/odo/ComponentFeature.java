@@ -74,6 +74,10 @@ public enum ComponentFeature {
     }
 
     public static class Constants {
+
+        private Constants() {
+            //hide constructor.
+        }
         private static final String WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY = "Watching for changes in the current directory";
         private static final String YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED = "Your Devfile has been successfully deployed";
         public static final String PODMAN = "podman";

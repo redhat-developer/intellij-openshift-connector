@@ -27,6 +27,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -65,7 +66,7 @@ public class FeedBackDialog extends DialogWrapper {
     private JLabel openshiftToolkitText;
     private JLabel octoPic;
     private JLabel opinionMattersText;
-    private JEditorPane gitHubContact;
+    private JTextPane gitHubContact;
     private JLabel jetBrainsPic;
     private JTextPane marketplaceRate;
 
@@ -76,16 +77,16 @@ public class FeedBackDialog extends DialogWrapper {
         setTitle("Share Feedback");
 
         // Top images
-        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 100, 100));
-        octoPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/github-mark.png"), 50, 50));
-        jetBrainsPic.setIcon(createResizedImageIcon("https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png", 50, 50));
+        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 60, 60));
+        octoPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/github-mark.png"), 20, 20));
+        jetBrainsPic.setIcon(createResizedImageIcon("https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png", 30, 30));
 
         // Top labels
         openshiftToolkitText.setText("<html><font color=red size=+1><b>OpenShift</b></font><b>  Toolkit</b></html>");
-        opinionMattersText.setText("<html><font size=+2><b>Your opinion matters to us!</b></font></html>");
-        gitHubContact.setText("<a href='https://github.com/redhat-developer/intellij-openshift-connector/issues'>Contact us on GitHub</a>");
+        opinionMattersText.setText("<html><font size=+3><b>Your opinion matters to us!</b></font></html>");
+        gitHubContact.setText("<a style='font-family:sans-serif' href='https://github.com/redhat-developer/intellij-openshift-connector/issues'>Contact us on GitHub</a>");
         gitHubContact.addHyperlinkListener(new HyperlinkMouseListener());
-        marketplaceRate.setText("<a href='https://plugins.jetbrains.com/plugin/12030-openshift-toolkit-by-red-hat/'>Rate us on Marketplace</a>");
+        marketplaceRate.setText("<a style='font-family:sans-serif' href='https://plugins.jetbrains.com/plugin/12030-openshift-toolkit-by-red-hat/'>Rate us on Marketplace</a>");
         marketplaceRate.addHyperlinkListener(new HyperlinkMouseListener());
 
 
@@ -119,31 +120,17 @@ public class FeedBackDialog extends DialogWrapper {
 
 
     private void refreshForm() {
-        if (slider1.getValue() <= 3) {
-            comment1.setVisible(true);
-            scrollPaneComment1.setVisible(true);
-            textArea1.setVisible(true);
-        } else {
-            comment1.setVisible(false);
-            scrollPaneComment1.setVisible(false);
-            textArea1.setVisible(false);
-        }
-        if (slider2.getValue() <= 3) {
-            comment2.setVisible(true);
-            scrollPaneComment2.setVisible(true);
-            textArea2.setVisible(true);
-        } else {
-            comment2.setVisible(false);
-            scrollPaneComment2.setVisible(false);
-            textArea2.setVisible(false);
-        }
-        if (Objects.equals(comboBox1.getSelectedItem(), "Yes")) {
-            comment3.setVisible(true);
-            textField3.setVisible(true);
-        } else {
-            comment3.setVisible(false);
-            textField3.setVisible(false);
-        }
+        setVisible(slider1.getValue() <= 3,
+                comment1, scrollPaneComment1, textArea1);
+        setVisible(slider2.getValue() <= 3,
+                comment2, scrollPaneComment2, textArea2);
+        setVisible(Objects.equals(comboBox1.getSelectedItem(), "Yes"),
+                comment3, textField3);
+    }
+
+    private void setVisible(boolean visible, JComponent... components) {
+        Arrays.asList(components)
+                .forEach(component -> component.setVisible(visible));
     }
 
     @Override

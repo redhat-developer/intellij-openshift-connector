@@ -19,9 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OdoCliRegistryTest extends OdoCliTest {
 
-
-    @Test
-    public void checkCreateRegistry() throws IOException {
+    public void testCheckCreateRegistry() throws IOException {
         String registryName = REGISTRY_PREFIX + random.nextInt();
         try {
             odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
@@ -30,8 +28,7 @@ public class OdoCliRegistryTest extends OdoCliTest {
         }
     }
 
-    @Test
-    public void checkListRegistries() throws IOException {
+    public void testCheckListRegistries() throws IOException {
         List<DevfileRegistry> registries = odo.listDevfileRegistries();
         assertTrue(registries.size() > 0);
     }

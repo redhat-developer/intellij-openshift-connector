@@ -60,20 +60,17 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
         try {
             Component component = componentNode.getComponent();
             NamespaceNode namespaceNode = componentNode.getParent();
-            Optional<Boolean> isRunningInBothDevAndDeploy = isRunningInBothDevAndDeploy(componentNode);
-            Optional<Boolean> logsForDeployed = Optional.empty();
-            if (isRunningInBothDevAndDeploy.isEmpty()) {
-                int choice = Messages.showDialog(componentNode.getRoot().getProject(),
-                        "Component is running in both dev and deploy mode, which container do you want to get logs from ?",
-                        getActionName(), new String[]{"Dev", "Deploy"}, 0, null);
+            Optional<Boolean> isDeploy = isRunningInBothDevAndDeploy(componentNode);
+            if (isDeploy.isEmpty()) {
+                int choice = Messages.showDialog(componentNode.getRoot().getProject(), "Component is running in both dev and deploy mode, which container do you want to get logs from ?", getActionName(), new String[]{"Dev", "Deploy"}, 0, null);
                 if (choice == 0) {
-                    logsForDeployed = Optional.of(Boolean.FALSE);
+                    isDeploy = Optional.of(Boolean.FALSE);
                 } else if (choice == 1) {
-                    logsForDeployed = Optional.of(Boolean.TRUE);
+                    isDeploy = Optional.of(Boolean.TRUE);
                 }
             }
-            if (logsForDeployed.isPresent()) {
-                boolean deploy = logsForDeployed.get();
+            if (isDeploy.isPresent()) {
+                boolean deploy = isDeploy.get();
                 CompletableFuture.runAsync(() -> {
                     String platform = getPlatform(component);
                     try {

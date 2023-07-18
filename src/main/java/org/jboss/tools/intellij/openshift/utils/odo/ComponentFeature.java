@@ -15,20 +15,20 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ComponentFeature {
-    DEV("dev", "dev on Cluster", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Collections.singletonList("dev")) {
+    DEV(Kind.DEV_KIND, "dev on Cluster", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Collections.singletonList("dev")) {
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
-    DEV_ON_PODMAN("dev", "dev on Podman", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--platform", "podman", "--forward-localhost")),
-    DEBUG("debug", "debug", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--debug")) {
+    DEV_ON_PODMAN(Kind.DEV_KIND, "dev on Podman", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--platform", Constants.PODMAN, "--forward-localhost")),
+    DEBUG(Kind.DEBUG_KIND, "debug", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--debug")) {
         public ComponentFeature getPeer() {
             return DEV;
         }
     },
-    DEPLOY("deploy", "deploy", Constants.YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED, Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
+    DEPLOY(Kind.DEPLOY_KIND, "deploy", Constants.YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED, Collections.singletonList("deploy"), Arrays.asList("delete", "component", "-f"));
 
-    private final String kind;
+    private final Kind kind;
     private final String label;
 
     private final String output;
@@ -37,7 +37,7 @@ public enum ComponentFeature {
 
     private final List<String> stopArgs;
 
-    ComponentFeature(String kind, String label, String output, List<String> startArgs, List<String> stopArgs) {
+    ComponentFeature(Kind kind, String label, String output, List<String> startArgs, List<String> stopArgs) {
         this.kind = kind;
         this.label = label;
         this.output = output;
@@ -45,7 +45,7 @@ public enum ComponentFeature {
         this.stopArgs = stopArgs;
     }
 
-    ComponentFeature(String kind, String label, String output, List<String> startArgs) {
+    ComponentFeature(Kind kind, String label, String output, List<String> startArgs) {
         this(kind, label, output, startArgs, Collections.emptyList());
     }
 
@@ -53,7 +53,7 @@ public enum ComponentFeature {
         return null;
     }
 
-    public String getKind() {
+    public Kind getKind() {
         return kind;
     }
 
@@ -73,8 +73,29 @@ public enum ComponentFeature {
         return output;
     }
 
-    private static class Constants {
-        public static final String WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY = "Watching for changes in the current directory";
-        public static final String YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED = "Your Devfile has been successfully deployed";
+    public static class Constants {
+
+        private Constants() {
+            //hide constructor.
+        }
+        private static final String WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY = "Watching for changes in the current directory";
+        private static final String YOUR_DEVFILE_HAS_BEEN_SUCCESSFULLY_DEPLOYED = "Your Devfile has been successfully deployed";
+        public static final String PODMAN = "podman";
+    }
+
+    public enum Kind {
+        DEV_KIND("dev"),
+        DEBUG_KIND("debug"),
+        DEPLOY_KIND("deploy");
+
+        private final String label;
+
+        Kind(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
     }
 }

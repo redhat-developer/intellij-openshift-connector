@@ -140,11 +140,18 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
                         addContextToSettings(descriptor.getPath(), descriptor)
                 );
             } catch (IOException ex) {
-                if (!(ex.getMessage().contains("Unauthorized") || ex.getMessage().contains("unable to access the cluster: servicebindings.binding.operators.coreos.com"))) {
+                //filter out some common exception when no logged or no authorizations
+                if (doNotLogFromMessage(ex.getMessage())) {
                     LOGGER.error(ex.getLocalizedMessage(), ex);
                 }
             }
         }
+    }
+
+    private static boolean doNotLogFromMessage(String message) {
+        return !(message.contains("Unauthorized") ||
+                message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
+                message.contains("the server has asked for the client to provide credentials"));
     }
 
     public void addContext(String modulePath) {

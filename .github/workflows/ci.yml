@@ -81,6 +81,7 @@ jobs:
             sleep 1
             nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
           done
+          echo "test"
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Play integration tests

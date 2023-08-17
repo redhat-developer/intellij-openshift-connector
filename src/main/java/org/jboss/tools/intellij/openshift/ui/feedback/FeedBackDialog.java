@@ -19,11 +19,22 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -77,9 +88,9 @@ public class FeedBackDialog extends DialogWrapper {
         setTitle("Share Feedback");
 
         // Top images
-        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 60, 60));
-        octoPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/github-mark.png"), 20, 20));
-        jetBrainsPic.setIcon(createResizedImageIcon("https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png", 30, 30));
+        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 120, 120));
+        octoPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/github-mark.png"), 40, 40));
+        jetBrainsPic.setIcon(createResizedImageIcon("https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png", 60, 60));
 
         // Top labels
         openshiftToolkitText.setText("<html><font color=red size=+1><b>OpenShift</b></font><b>  Toolkit</b></html>");
@@ -224,7 +235,7 @@ public class FeedBackDialog extends DialogWrapper {
         BufferedImage resizedImg = UIUtil.createImage(getRootPane(), w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = resizedImg.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.drawImage(srcImg, 0, 0, (int) (w * g2.getTransform().getScaleX()), (int) (h * g2.getTransform().getScaleY()), null);
         g2.dispose();
         return resizedImg;
     }

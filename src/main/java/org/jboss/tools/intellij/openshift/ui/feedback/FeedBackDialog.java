@@ -13,36 +13,24 @@ package org.jboss.tools.intellij.openshift.ui.feedback;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.DocumentAdapter;
-import com.intellij.util.ui.UIUtil;
+import com.intellij.util.ui.ImageUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class FeedBackDialog extends DialogWrapper {
@@ -264,15 +252,6 @@ public class FeedBackDialog extends DialogWrapper {
         return textFieldContact.getText();
     }
 
-    private ImageIcon createImageIcon(URL resource) {
-        Objects.requireNonNull(resource);
-        return new ImageIcon(resource);
-    }
-
-    private ImageIcon createResizedImageIcon(URL resource, int w, int h) {
-        return new ImageIcon(getScaledImage(createImageIcon(resource).getImage(), w, h));
-    }
-
     private ImageIcon createResizedImageIcon(String resource, int w, int h) {
         try {
             URL url = new URL(resource);
@@ -283,13 +262,15 @@ public class FeedBackDialog extends DialogWrapper {
         }
     }
 
-    private Image getScaledImage(Image srcImg, int w, int h) {
-        BufferedImage resizedImg = UIUtil.createImage(getRootPane(), w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = resizedImg.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.drawImage(srcImg, 0, 0, (int) (w * g2.getTransform().getScaleX()), (int) (h * g2.getTransform().getScaleY()), null);
-        g2.dispose();
-        return resizedImg;
+    private ImageIcon createResizedImageIcon(URL resource, int w, int h) {
+        try {
+            Image image = ImageIO.read(resource);
+            Image scaledImage = ImageUtil.scaleImage(image, w, h);
+            return new ImageIcon(scaledImage);
+        } catch (IOException e) {
+            LOGGER.warn("Could not load image " + resource.toExternalForm(), e);
+            return null;
+        }
     }
 
     private static final class HyperlinkMouseListener implements HyperlinkListener {

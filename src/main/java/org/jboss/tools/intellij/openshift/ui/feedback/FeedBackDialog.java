@@ -20,17 +20,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import java.awt.*;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.regex.Pattern;
 
 public class FeedBackDialog extends DialogWrapper {
@@ -78,9 +86,11 @@ public class FeedBackDialog extends DialogWrapper {
     private JRadioButton radioButton23;
     private JRadioButton radioButton24;
     private JRadioButton radioButton25;
-    private JSlider slider3;
-    private ButtonGroup buttonGroup2;
-    private ButtonGroup buttonGroup1;
+    private JRadioButton radioButtonNo;
+    private JRadioButton radioButtonYes;
+    private ButtonGroup similarExtensionGroup;
+    private ButtonGroup recommandationGroup;
+    private ButtonGroup satisfactionGroup;
 
     public FeedBackDialog() {
         super(null, false, IdeModalityType.IDE);
@@ -135,13 +145,8 @@ public class FeedBackDialog extends DialogWrapper {
         radioButton24.addActionListener(this::refreshComment2);
         radioButton25.addActionListener(this::refreshComment2);
 
-        slider3.addChangeListener(e -> refreshForm());
-
-        // Add labels to the slider
-        Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
-        labelTable.put(0, new JLabel("No"));
-        labelTable.put(1, new JLabel("Yes"));
-        slider3.setLabelTable(labelTable);
+        radioButtonYes.addActionListener(this::refreshComment3);
+        radioButtonNo.addActionListener(this::refreshComment3);
         setVisible(false,
                 comment3, textField3); // will be displayed depending on the similar extension answer
 
@@ -167,8 +172,8 @@ public class FeedBackDialog extends DialogWrapper {
         setOKActionEnabled(true);
     }
 
-    private void refreshForm() {
-        setVisible(slider3.getValue() == 1,
+    private void refreshComment3(ActionEvent e) {
+        setVisible("Yes".equals(e.getActionCommand()),
                 comment3, textField3);
         setOKActionEnabled(true);
     }
@@ -207,8 +212,8 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
     public String getSatisfaction() {
-        if (buttonGroup1.getSelection() != null) {
-            return buttonGroup1.getSelection().getActionCommand();
+        if (satisfactionGroup.getSelection() != null) {
+            return satisfactionGroup.getSelection().getActionCommand();
         }
         return "";
     }
@@ -218,8 +223,8 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
     public String getRecommendation() {
-        if (buttonGroup2.getSelection() != null) {
-            return buttonGroup2.getSelection().getActionCommand();
+        if (recommandationGroup.getSelection() != null) {
+            return recommandationGroup.getSelection().getActionCommand();
         }
         return "";
     }
@@ -229,7 +234,10 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
     public String isUsedSimilarExtension() {
-        return Boolean.toString(slider3.getValue() == 1);
+        if (similarExtensionGroup.getSelection() != null) {
+            return similarExtensionGroup.getSelection().getActionCommand();
+        }
+        return "";
     }
 
     public String getUsedSimilarExtensionName() {

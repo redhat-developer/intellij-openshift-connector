@@ -151,7 +151,8 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private static boolean doNotLogFromMessage(String message) {
         return !(message.contains("Unauthorized") ||
                 message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
-                message.contains("the server has asked for the client to provide credentials"));
+                message.contains("the server has asked for the client to provide credentials") ||
+                message.contains("connect: no route to host"));
     }
 
     public void addContext(String modulePath) {

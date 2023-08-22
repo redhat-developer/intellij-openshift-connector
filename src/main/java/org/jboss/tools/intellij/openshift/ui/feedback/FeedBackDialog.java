@@ -19,11 +19,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
@@ -35,10 +36,12 @@ import javax.swing.event.HyperlinkListener;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -52,10 +55,7 @@ public class FeedBackDialog extends DialogWrapper {
 
     private JTextPane topTextFeedback;
     private JLabel label1;
-    private JSlider slider1;
     private JLabel label2;
-    private JSlider slider2;
-    private JComboBox<String> comboBox1;
     private JLabel label3;
     private JLabel label4;
     private JTextField textField4;
@@ -80,6 +80,19 @@ public class FeedBackDialog extends DialogWrapper {
     private JTextPane gitHubContact;
     private JLabel jetBrainsPic;
     private JTextPane marketplaceRate;
+    private JRadioButton radioButton11;
+    private JRadioButton radioButton12;
+    private JRadioButton radioButton13;
+    private JRadioButton radioButton14;
+    private JRadioButton radioButton15;
+    private JRadioButton radioButton21;
+    private JRadioButton radioButton22;
+    private JRadioButton radioButton23;
+    private JRadioButton radioButton24;
+    private JRadioButton radioButton25;
+    private JSlider slider3;
+    private ButtonGroup buttonGroup2;
+    private ButtonGroup buttonGroup1;
 
     public FeedBackDialog() {
         super(null, false, IdeModalityType.IDE);
@@ -88,7 +101,7 @@ public class FeedBackDialog extends DialogWrapper {
         setTitle("Share Feedback");
 
         // Top images
-        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 120, 120));
+        openshiftPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/openshift_extension.png"), 50, 50));
         octoPic.setIcon(createResizedImageIcon(this.getClass().getResource("/images/github-mark.png"), 40, 40));
         jetBrainsPic.setIcon(createResizedImageIcon("https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png", 60, 60));
 
@@ -97,16 +110,19 @@ public class FeedBackDialog extends DialogWrapper {
         opinionMattersText.setText("<html><font size=+3><b>Your opinion matters to us!</b></font></html>");
         gitHubContact.setText("<a style='font-family:sans-serif' href='https://github.com/redhat-developer/intellij-openshift-connector/issues'>Contact us on GitHub</a>");
         gitHubContact.addHyperlinkListener(new HyperlinkMouseListener());
-        marketplaceRate.setText("<a style='font-family:sans-serif' href='https://plugins.jetbrains.com/plugin/12030-openshift-toolkit-by-red-hat/'>Rate us on Marketplace</a>");
+        marketplaceRate.setText("<a style='font-family:sans-serif' href='https://plugins.jetbrains.com/plugin/12030-openshift-toolkit-by-red-hat/reviews'>Rate us on Marketplace</a>");
         marketplaceRate.addHyperlinkListener(new HyperlinkMouseListener());
-
 
         // Feedback section
         topTextFeedback.setText("\nThe Red Hat OpenShift Toolkit extension team would like to learn from your experience to improve the extension workflow.\nThis survey will take about 2 minutes. Your feedback is extremely valuable and will directly impact the product moving forward.\n");
-        label1.setText("1. Overall, how satisfied are you about the extension?");
+        label1.setText("1. Overall, how satisfied are you about the extension? *");
         comment1.setText("What's the main reason for your score?");
+        setVisible(false,
+                comment1, scrollPaneComment1, textArea1); // will be displayed depending on the satisfaction score
         label2.setText("2. How likely would you recommend the OpenShift Toolkit extension to a friend or colleague?");
         comment2.setText("What's the main reason for your score?");
+        setVisible(false,
+                comment2, scrollPaneComment2, textArea2); // will be displayed depending on the recommendation score
         label3.setText("3. Have you used any similar extension for cloud-native development?");
         comment3.setText("Please mention the similar extension name/URL.");
         label4.setText("4. What, if anything, do you find frustrating or challenging about the extension workflow?");
@@ -119,24 +135,54 @@ public class FeedBackDialog extends DialogWrapper {
                 validate();
             }
         };
-        slider1.addChangeListener(e -> refreshForm());
-        slider2.addChangeListener(e -> refreshForm());
-        comboBox1.addActionListener(e -> refreshForm());
+        radioButton11.addActionListener(this::refreshComment1);
+        radioButton12.addActionListener(this::refreshComment1);
+        radioButton13.addActionListener(this::refreshComment1);
+        radioButton14.addActionListener(this::refreshComment1);
+        radioButton15.addActionListener(this::refreshComment1);
+
+        radioButton21.addActionListener(this::refreshComment2);
+        radioButton22.addActionListener(this::refreshComment2);
+        radioButton23.addActionListener(this::refreshComment2);
+        radioButton24.addActionListener(this::refreshComment2);
+        radioButton25.addActionListener(this::refreshComment2);
+
+        slider3.addChangeListener(e -> refreshForm());
+
+        // Add labels to the slider
+        Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
+        labelTable.put(0, new JLabel("No"));
+        labelTable.put(1, new JLabel("Yes"));
+        slider3.setLabelTable(labelTable);
+        setVisible(false,
+                comment3, textField3); // will be displayed depending on the similar extension answer
 
         textFieldContact.getDocument().addDocumentListener(adapter);
         textArea1.getDocument().addDocumentListener(adapter);
         textArea2.getDocument().addDocumentListener(adapter);
         validate();
+
+        //disable OK button to prevent sending no values
+        setOKActionEnabled(false);
     }
 
 
-    private void refreshForm() {
-        setVisible(slider1.getValue() <= 3,
+    private void refreshComment1(ActionEvent e) {
+        setVisible(Integer.parseInt(e.getActionCommand()) <= 3,
                 comment1, scrollPaneComment1, textArea1);
-        setVisible(slider2.getValue() <= 3,
+        setOKActionEnabled(true);
+    }
+
+    private void refreshComment2(ActionEvent e) {
+        setVisible(Integer.parseInt(e.getActionCommand()) <= 3,
                 comment2, scrollPaneComment2, textArea2);
-        setVisible(Objects.equals(comboBox1.getSelectedItem(), "Yes"),
+        setOKActionEnabled(true);
+    }
+
+    private void refreshForm() {
+        setVisible(slider3.getValue() == 1,
                 comment3, textField3);
+        setOKActionEnabled(true);
     }
 
     private void setVisible(boolean visible, JComponent... components) {
@@ -161,7 +207,6 @@ public class FeedBackDialog extends DialogWrapper {
             setErrorText("The email format should be xxx@xxx.com", textFieldContact);
             setOKActionEnabled(false);
         }
-
         if (textArea1.getDocument().getLength() >= 500) {
             setErrorText("Comments are limited to 500 characters", textArea1);
             setOKActionEnabled(false);
@@ -170,10 +215,14 @@ public class FeedBackDialog extends DialogWrapper {
             setErrorText("Comments are limited to 500 characters", textArea1);
             setOKActionEnabled(false);
         }
+
     }
 
     public String getSatisfaction() {
-        return String.valueOf(slider1.getValue());
+        if (buttonGroup1.getSelection() != null) {
+            return buttonGroup1.getSelection().getActionCommand();
+        }
+        return "";
     }
 
     public String getSatisfactionComment() {
@@ -181,7 +230,10 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
     public String getRecommendation() {
-        return String.valueOf(slider2.getValue());
+        if (buttonGroup2.getSelection() != null) {
+            return buttonGroup2.getSelection().getActionCommand();
+        }
+        return "";
     }
 
     public String getRecommendationComment() {
@@ -189,7 +241,7 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
     public String isUsedSimilarExtension() {
-        return String.valueOf(comboBox1.getSelectedItem());
+        return Boolean.toString(slider3.getValue() == 1);
     }
 
     public String getUsedSimilarExtensionName() {

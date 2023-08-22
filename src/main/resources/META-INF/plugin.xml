@@ -246,7 +246,9 @@
 
   <actions>
     <group id="org.jboss.tools.intellij.toolWindow">
-      <action class="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction" id="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction" text="Share your feedback"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction"
+              id="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction" text="Share your feedback"
+              icon="AllIcons.CodeWithMe.CwmAccess"/>
     </group>
     <group id="org.jboss.tools.intellij.tree" popup="true">
       <!-- Application Explorer -->

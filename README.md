@@ -26,6 +26,14 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 ## New features
 
+### Share your Feedback !
+
+We added a new toolbar action on the view to share your feedback with our team.
+
+![](images/1.5.0/feedback.webm)
+
+## Features
+
 ### Red Hat Developer Sandbox login
 
 Red Hat provides an online OpenShift environment called [Developer Sandbox](https://red.ht/dev-sandbox) that makes it easy for developers to build, test and deploy cloud native applications and microservices.
@@ -96,8 +104,6 @@ For each operator, we can select the type of deployment we want to setup. For ea
 After you’ve entered the name of your service, it will appear in the OpenShift view:
 
 ![](images/0.9.0/openshift12.png)
-
-## Features
 
 ### Application Explorer focused on current namespace/project
 

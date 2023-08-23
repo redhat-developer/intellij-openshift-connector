@@ -153,6 +153,9 @@ public class FeedBackDialog extends DialogWrapper {
         textFieldContact.getDocument().addDocumentListener(adapter);
         textArea1.getDocument().addDocumentListener(adapter);
         textArea2.getDocument().addDocumentListener(adapter);
+        textField4.getDocument().addDocumentListener(adapter);
+        textField5.getDocument().addDocumentListener(adapter);
+        textField6.getDocument().addDocumentListener(adapter);
         validate();
 
         //disable OK button to prevent sending no values

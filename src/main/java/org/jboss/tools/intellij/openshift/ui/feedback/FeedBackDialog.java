@@ -89,7 +89,7 @@ public class FeedBackDialog extends DialogWrapper {
     private JRadioButton radioButtonNo;
     private JRadioButton radioButtonYes;
     private ButtonGroup similarExtensionGroup;
-    private ButtonGroup recommandationGroup;
+    private ButtonGroup recommendationGroup;
     private ButtonGroup satisfactionGroup;
 
     public FeedBackDialog() {
@@ -211,7 +211,21 @@ public class FeedBackDialog extends DialogWrapper {
             setErrorText("Comments are limited to 500 characters", textArea1);
             setOKActionEnabled(false);
         }
+        if (!hasContent()) {
+            setOKActionEnabled(false);
+        }
+    }
 
+    private boolean hasContent() {
+        return similarExtensionGroup.getSelection() != null
+                || recommendationGroup.getSelection() != null
+                || satisfactionGroup.getSelection() != null
+                || !textField3.getText().isEmpty()
+                || !textField4.getText().isEmpty()
+                || !textField5.getText().isEmpty()
+                || !textField6.getText().isEmpty()
+                || !textArea1.getText().isEmpty()
+                || !textArea2.getText().isEmpty();
     }
 
     public String getSatisfaction() {
@@ -226,8 +240,8 @@ public class FeedBackDialog extends DialogWrapper {
     }
 
     public String getRecommendation() {
-        if (recommandationGroup.getSelection() != null) {
-            return recommandationGroup.getSelection().getActionCommand();
+        if (recommendationGroup.getSelection() != null) {
+            return recommendationGroup.getSelection().getActionCommand();
         }
         return "";
     }

@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jboss.tools.intellij.openshift.actions.service.LinkComponentAction;
 
 public class LinkServiceActionTest extends ActionTest {
   @Override
@@ -32,5 +31,10 @@ public class LinkServiceActionTest extends ActionTest {
   @Override
   protected void verifyRemoteOnlyDevComponent(boolean visible) {
     assertTrue(visible);
+  }
+
+  @Override
+  protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
+    assertFalse(visible);
   }
 }

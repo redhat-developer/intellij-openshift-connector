@@ -15,6 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -42,11 +43,8 @@ public class ImportComponentAction extends CreateComponentAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        boolean visible = super.isVisible(selected);
-        if (visible) {
-            visible = !((ComponentNode) selected).getComponent().hasContext();
-        }
-        return visible;
+        return super.isVisible(selected)
+                && NodeUtils.hasContext(selected);
     }
 
     @Override

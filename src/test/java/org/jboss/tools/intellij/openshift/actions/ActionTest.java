@@ -135,11 +135,20 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnRemoteOnlyDevComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), "aPath", mockInfo()));
     verifyRemoteOnlyDevComponent(event.getPresentation().isVisible());
   }
 
+  public void testActionOnRemoteOnlyDevComponentWithoutContext() {
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
+    verifyRemoteOnlyDevComponentWithoutContext(event.getPresentation().isVisible());
+  }
+
   protected void verifyRemoteOnlyDevComponent(boolean visible) {
+    assertFalse(visible);
+  }
+
+  protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
     assertFalse(visible);
   }
 

@@ -2,7 +2,7 @@
   <id>org.jboss.tools.intellij.openshift</id>
   <name>OpenShift Toolkit by Red Hat</name>
   <version>1.0</version>
-  <vendor email="developers@redhat.com" url="http://www.redhat.com">Red-Hat</vendor>
+  <vendor email="developers@redhat.com" url="https://www.redhat.com">Red-Hat</vendor>
 
   <description><![CDATA[
       <img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/openshift_extension.png" width="32" height="32"/>
@@ -119,7 +119,7 @@
   <p><b>0.5.0</b></p>
   <ul>
   <li>Add support for starters for devfile based components</li>
-  <li>devfiles can be editied with syntax checking and content assist</li>
+  <li>devfiles can be edited with syntax checking and content assist</li>
   <li>Switch to odo 2.0.7</li>
   </ul>
   </br>
@@ -245,6 +245,11 @@
 
 
   <actions>
+    <group id="org.jboss.tools.intellij.toolWindow">
+      <action class="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction"
+              id="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction" text="Share your feedback"
+              icon="AllIcons.CodeWithMe.CwmAccess"/>
+    </group>
     <group id="org.jboss.tools.intellij.tree" popup="true">
       <!-- Application Explorer -->
       <!-- Top level: cluster -->

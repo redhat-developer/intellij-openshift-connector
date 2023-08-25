@@ -30,7 +30,8 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 We added a new toolbar action on the view to share your feedback with our team.
 
-![](images/1.5.0/feedback.webm)
+https://github.com/sbouchet/intellij-openshift-connector/assets/600414/fffd633a-5910-4b4a-a4e0-4387c1411e1f
+
 
 ## Features
 

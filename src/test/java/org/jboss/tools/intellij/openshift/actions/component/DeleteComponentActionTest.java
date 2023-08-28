@@ -34,4 +34,9 @@ public class DeleteComponentActionTest extends ActionTest {
         assertTrue(visible);
     }
 
+    @Override
+    protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
+        assertTrue(visible);
+    }
+
 }

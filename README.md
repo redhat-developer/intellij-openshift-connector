@@ -30,7 +30,7 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 We introduced a new toolbar action within the plugin that enables you to share your feedback with our team. Please feel free to provide your valuable feedback for the plugin workflow.
 
-https://github.com/sbouchet/intellij-openshift-connector/assets/600414/fffd633a-5910-4b4a-a4e0-4387c1411e1f
+https://github.com/redhat-developer/intellij-openshift-connector/assets/600414/ca52ddcb-2206-480b-aa62-6d4bea4cdc9b
 
 
 ## Features

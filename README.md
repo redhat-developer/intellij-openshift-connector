@@ -26,6 +26,15 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 ## New features
 
+### Share your Feedback !
+
+We introduced a new toolbar action within the plugin that enables you to share your feedback with our team. Please feel free to provide your valuable feedback for the plugin workflow.
+
+https://github.com/redhat-developer/intellij-openshift-connector/assets/600414/ca52ddcb-2206-480b-aa62-6d4bea4cdc9b
+
+
+## Features
+
 ### Red Hat Developer Sandbox login
 
 Red Hat provides an online OpenShift environment called [Developer Sandbox](https://red.ht/dev-sandbox) that makes it easy for developers to build, test and deploy cloud native applications and microservices.
@@ -96,8 +105,6 @@ For each operator, we can select the type of deployment we want to setup. For ea
 After you’ve entered the name of your service, it will appear in the OpenShift view:
 
 ![](images/0.9.0/openshift12.png)
-
-## Features
 
 ### Application Explorer focused on current namespace/project
 

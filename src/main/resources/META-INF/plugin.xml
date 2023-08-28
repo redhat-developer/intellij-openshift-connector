@@ -17,6 +17,13 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.6.0</b></p>
+  <ul>
+  <li>Switch to odo 3.13.0</li>
+  <li>Added plugin feedback dialog within the IDE</li>
+  <li>Updated dependencies</li>
+  <li>Bug fixes</li>
+  </ul>
   <p><b>1.5.0</b></p>
   <ul>
   <li>Switch to odo 3.11.0</li>

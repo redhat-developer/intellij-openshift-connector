@@ -70,7 +70,7 @@ public class GettingStartedView extends ContainerFixture {
   }
 
   public ComponentFixture findEditorPaneFixture() {
-    return getRemoteRobot().find(GettingStartedView.class, editorPaneLocator);
+    return getRemoteRobot().findAll(GettingStartedView.class, editorPaneLocator).get(0);
   }
 
   public ComponentFixture findBackToMainButton() {

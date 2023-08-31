@@ -14,10 +14,12 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
+import com.intellij.remoterobot.utils.Keyboard;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.event.KeyEvent;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
@@ -75,6 +77,12 @@ public class GettingStartedView extends ContainerFixture {
 
   public ComponentFixture findBackToMainButton() {
     return getRemoteRobot().find(GettingStartedView.class, backToMainViewLocator);
+  }
+
+  public void maximalizeToolWindow(RemoteRobot robot) {
+    Keyboard keyboard = new Keyboard(robot);
+    // Other OS may have different keyboard shortcut for maximizing
+    keyboard.hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_QUOTE);
   }
 
 }

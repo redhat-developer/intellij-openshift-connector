@@ -11,14 +11,10 @@
 package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.tree.TreePath;
@@ -27,7 +23,7 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREF
 
 public abstract class OdoAction extends StructureTreeAction implements TelemetryHandler {
 
-    protected TelemetrySender telemetrySender;
+  protected TelemetrySender telemetrySender;
 
   protected OdoAction(Class... filters) {
     super(filters);
@@ -40,8 +36,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     }
 
     private Odo getOdo(AnActionEvent anActionEvent) {
-        Tree tree = getTree(anActionEvent);
-        return ((ApplicationsRootNode) ((ApplicationsTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getApplicationsRoot()).getOdo();
+        return ActionUtils.getApplicationRootNode(anActionEvent).getOdo();
     }
 
     public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo);
@@ -61,5 +56,4 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     public void sendTelemetryError(Exception exception) {
         telemetrySender.sendTelemetryError(exception);
     }
-
 }

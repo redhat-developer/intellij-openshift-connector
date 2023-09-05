@@ -47,7 +47,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
-public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener {
+public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener, StructureAwareNode, ProcessingNode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
@@ -55,6 +55,8 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private Odo odo;
     private boolean logged;
     private Config config;
+
+    private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
 
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
 
@@ -225,7 +227,34 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         initializeOdo().thenAccept(odo -> structure.fireModified(this));
     }
 
+    @Override
     public ApplicationsTreeStructure getStructure() {
         return structure;
     }
+
+    @Override
+    public void startProcessing(String message) {
+        this.processingNode.startProcessing(message);
+    }
+
+    @Override
+    public void stopProcessing() {
+        this.processingNode.stopProcessing();
+    }
+
+    @Override
+    public boolean isProcessing() {
+        return processingNode.isProcessing();
+    }
+
+    @Override
+    public boolean isProcessingStopped() {
+        return processingNode.isProcessingStopped();
+    }
+
+    @Override
+    public String getProcessingMessage() {
+        return processingNode.getMessage();
+    }
+
 }

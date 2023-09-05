@@ -11,10 +11,11 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -22,10 +23,9 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public abstract class FeatureComponentAction extends ContextAwareComponentAction {
@@ -76,26 +76,35 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+        Project project = getEventProject(anActionEvent);
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
-        CompletableFuture.runAsync(() -> {
-            try {
-                ComponentFeature feat = getComponentFeature(component);
-                process(odo, namespaceNode.getName(), component, feat, b1 -> {
-                    if (component.getLiveFeatures().is(feat)) {
-                        component.getLiveFeatures().removeFeature(feat);
-                    } else {
-                        component.getLiveFeatures().addFeature(feat);
-                    }
-                    ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                }, b2 -> ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode));
-                sendTelemetryResults(TelemetryResult.SUCCESS);
-            } catch (IOException e) {
-                sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
-            }
-        });
+        runWithProgress((ProgressIndicator progress) -> {
+                try {
+                    ComponentFeature feat = getComponentFeature(component);
+                    process(odo,
+                        namespaceNode.getName(),
+                        component,
+                        feat,
+                        b1 -> {
+                            if (component.getLiveFeatures().is(feat)) {
+                                component.getLiveFeatures().removeFeature(feat);
+                            } else {
+                                component.getLiveFeatures().addFeature(feat);
+                            }
+                            NodeUtils.fireModified(componentNode);
+                        },
+                        b2 -> NodeUtils.fireModified(componentNode)
+                    );
+                    sendTelemetryResults(TelemetryResult.SUCCESS);
+                } catch (IOException e) {
+                    sendTelemetryError(e);
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+                }
+            },
+            getActionName() + component.getName() + "...",
+            project);
     }
 
     protected ComponentFeature getComponentFeature(Component component) {

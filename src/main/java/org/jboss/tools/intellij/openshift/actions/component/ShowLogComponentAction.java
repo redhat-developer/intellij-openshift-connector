@@ -11,6 +11,8 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -18,13 +20,14 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class ShowLogComponentAction extends ContextAwareComponentAction {
@@ -57,41 +60,60 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     }
 
     protected void doLog(ComponentNode componentNode, Odo odo, boolean follow) {
-        try {
-            Component component = componentNode.getComponent();
-            NamespaceNode namespaceNode = componentNode.getParent();
-            Optional<Boolean> isDeploy = isRunningInBothDevAndDeploy(componentNode);
-            if (isDeploy.isEmpty()) {
-                int choice = Messages.showDialog(componentNode.getRoot().getProject(), "Component is running in both dev and deploy mode, which container do you want to get logs from ?", getActionName(), new String[]{"Dev", "Deploy"}, 0, null);
-                if (choice == 0) {
-                    isDeploy = Optional.of(Boolean.FALSE);
-                } else if (choice == 1) {
-                    isDeploy = Optional.of(Boolean.TRUE);
-                }
-            }
-            if (isDeploy.isPresent()) {
-                boolean deploy = isDeploy.get();
-                CompletableFuture.runAsync(() -> {
-                    String platform = getPlatform(component);
-                    try {
-                        if (follow) {
-                            odo.follow(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
-                        } else {
-                            odo.log(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
-                        }
-                        sendTelemetryResults(TelemetryResult.SUCCESS);
-                    } catch (IOException e) {
-                        sendTelemetryError(e);
-                        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
-                    }
-                });
-            }
-        } catch (IOException e) {
-            Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName());
+      try {
+        Component component = componentNode.getComponent();
+        NamespaceNode namespaceNode = componentNode.getParent();
+        Project project = componentNode.getRoot().getProject();
+        Optional<Boolean> isDeploy = isDeployMode(componentNode, project);
+        if (isDeploy.isPresent()) {
+          runLogOrFollow(odo, follow, component, namespaceNode, isDeploy.get(), project);
         }
+      } catch (IOException e) {
+        Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName());
+      }
     }
 
-    private Optional<Boolean> isRunningInBothDevAndDeploy(ComponentNode componentNode) throws IOException {
+  private void runLogOrFollow(Odo odo, boolean follow, Component component, NamespaceNode namespaceNode, boolean deploy, Project project) {
+    runWithProgress((ProgressIndicator progress) -> {
+        String platform = getPlatform(component);
+        try {
+          if (follow) {
+            odo.follow(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
+          } else {
+            odo.log(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
+          }
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+        }
+      },
+      (follow ? "Following" : "Showing") + " Logs...",
+      project
+    );
+  }
+
+  @NotNull
+  private Optional<Boolean> isDeployMode(ComponentNode componentNode, Project project) throws IOException {
+    Optional<Boolean> isDeploy = isRunningInBothDevAndDeploy(componentNode);
+    if (isDeploy.isEmpty()) {
+      int choice = Messages.showDialog(
+        project,
+        "Component is running in both dev and deploy mode, which container do you want to get logs from ?",
+        getActionName(),
+        new String[]{"Dev", "Deploy"},
+        0,
+        null);
+      if (choice == 0) {
+        isDeploy = Optional.of(Boolean.FALSE);
+      } else if (choice == 1) {
+        isDeploy = Optional.of(Boolean.TRUE);
+      }
+    }
+    return isDeploy;
+  }
+
+  private Optional<Boolean> isRunningInBothDevAndDeploy(ComponentNode componentNode) throws IOException {
         Component component = componentNode.getComponent();
         if (isDevOrDebugAndLogNotRunning(componentNode) && !isDeploy(component)) {
             return Optional.of(Boolean.FALSE);

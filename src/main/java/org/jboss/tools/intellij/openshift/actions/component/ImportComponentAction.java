@@ -11,16 +11,13 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
@@ -31,7 +28,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
 
 public class ImportComponentAction extends CreateComponentAction {
     public ImportComponentAction() {
@@ -52,21 +52,26 @@ public class ImportComponentAction extends CreateComponentAction {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
-        ApplicationsTreeStructure structure = (ApplicationsTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY);
-        CompletableFuture.runAsync(() -> {
-            try {
-                ApplicationsRootNode root = componentNode.getRoot();
-                Project project = root.getProject();
-                ComponentInfo info = odo.getComponentInfo(namespaceNode.getName(),
-                        component.getName(), null, component.getInfo().getComponentKind());
-                CreateComponentModel model = getModel(project, odo, component.getName(), info);
-                process((ParentableNode) selected, odo, namespaceNode.getName(), root, model, structure);
-
-            } catch (IOException e) {
-                sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
-            }
-        });
+        Project project = getEventProject(anActionEvent);
+        runWithProgress((ProgressIndicator progress) -> {
+              try {
+                  ComponentInfo info = odo.getComponentInfo(
+                    namespaceNode.getName(),
+                    component.getName(),
+                    null,
+                    component.getInfo().getComponentKind());
+                  CreateComponentModel model = getModel(project, odo, component.getName(), info);
+                  setProcessing("Importing component " + component.getName() + "...", namespaceNode);
+                  createComponent(odo, namespaceNode.getName(), model);
+                  clearProcessing(namespaceNode);
+              } catch (IOException e) {
+                  clearProcessing(namespaceNode);
+                  sendTelemetryError(e);
+                  UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
+              }
+          },
+          "Importing Component...",
+          project);
     }
 
     @NotNull

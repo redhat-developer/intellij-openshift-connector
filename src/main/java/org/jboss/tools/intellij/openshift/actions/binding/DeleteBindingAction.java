@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.actions.binding;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.BindingNode;
@@ -36,7 +37,7 @@ public class DeleteBindingAction extends OdoAction {
             }
             odo.deleteBinding(node.getParent().getNamespace(), node.getParent().getComponent().getPath(),
                     node.getParent().getComponent().getName(),node.getBinding().getName());
-            node.getRoot().getStructure().fireModified(node.getParent());
+            NodeUtils.fireModified(node.getParent());
             sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         } catch (IOException e) {
             sendTelemetryError(e);

@@ -83,12 +83,13 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
-
-
         if (component.getLiveFeatures().isDebug()) {
             RunManager runManager = RunManager.getInstance(project);
-            final Optional<Integer> port = createOrUpdateConfiguration(odo, runManager, namespaceNode.getNamespace(),
-                                                                       component);
+            final Optional<Integer> port = createOrUpdateConfiguration(
+              odo,
+              runManager,
+              namespaceNode.getNamespace(),
+              component);
             port.ifPresent(portNumber -> executeDebug());
         }
     }
@@ -123,34 +124,12 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
 
     }
 
-    private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, String namespace,
-                                                          Component component) {
+    private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, String namespace, Component component) {
         ConfigurationType configurationType = getConfigurationType();
         String configurationName = component.getName() + " Remote Debug";
         Optional<Integer> port = Optional.empty();
         try {
-            List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
-            String[] ports = urls.stream().
-                                 map(URL::getContainerPort).toArray(String[]::new);
-            if (ports.length == 1) {
-                port = Optional.of(Integer.parseInt(urls.get(0).getLocalPort()));
-            } else if (ports.length > 1) {
-
-                String selected = UIHelper.executeInUI(() ->
-                                                               Messages.showEditableChooseDialog("The component " +
-                                                                                                         component.getName() +
-                                                                                                         " has several ports to connect to,\nchoose the one the debugger will connect to",
-                                                                                                 "Choose debugger port",
-                                                                                                 Messages.getQuestionIcon(),
-                                                                                                 ports,
-                                                                                                 ports[0],
-                                                                                                 null));
-                //get the local mapped port
-                Optional<String> remotePort = urls.stream().filter(url -> url.getContainerPort().equals(selected)).
-                                                  map(URL::getLocalPort).findFirst();
-                port = Optional.of(Integer.parseInt(remotePort.orElseThrow()));
-            }
-
+            port = getPort(odo, namespace, component, port);
             if (port.isPresent()) {
                 //lookup if existing config already exist, based on name and type
                 runSettings = runManager.findConfigurationByTypeAndName(
@@ -169,6 +148,31 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
             }
         } catch (IOException e) {
             LOG.warn(e.getLocalizedMessage(), e);
+        }
+        return port;
+    }
+
+    private static Optional<Integer> getPort(Odo odo, String namespace, Component component, Optional<Integer> port) throws IOException {
+        List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
+        String[] ports = urls.stream()
+          .map(URL::getContainerPort)
+          .toArray(String[]::new);
+        if (ports.length == 1) {
+            port = Optional.of(Integer.parseInt(urls.get(0).getLocalPort()));
+        } else if (ports.length > 1) {
+            String selected = UIHelper.executeInUI(() ->
+              Messages.showEditableChooseDialog(
+                "The component " + component.getName() + " has several ports to connect to,\nchoose the one the debugger will connect to",
+                "Choose debugger port",
+                Messages.getQuestionIcon(),
+                ports,
+                ports[0],
+                null));
+            //get the local mapped port
+            Optional<String> remotePort = urls.stream()
+              .filter(url -> url.getContainerPort().equals(selected))
+              .map(URL::getLocalPort).findFirst();
+            port = Optional.of(Integer.parseInt(remotePort.orElseThrow()));
         }
         return port;
     }

@@ -17,7 +17,7 @@ import com.intellij.remoterobot.fixtures.DefaultXpath;
 import com.intellij.remoterobot.fixtures.FixtureName;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
-import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -38,14 +38,14 @@ public class OpenshiftView extends ContainerFixture {
   }
 
   public void openView() {
-    final ToolWindowsPane toolWindowsPane = find(ToolWindowsPane.class);
-    waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable(toolWindowsPane, "OpenShift"));
-    toolWindowsPane.stripeButton("OpenShift", false).click();
+    final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
+    waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable(toolWindowPane, "OpenShift"));
+    toolWindowPane.stripeButton("OpenShift", false).click();
   }
 
   public void closeView() {
-    final ToolWindowsPane toolWindowsPane = find(ToolWindowsPane.class);
-    toolWindowsPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
+    final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
+    toolWindowPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
   }
 
   public void expandOpenshiftViewTree(String path) {
@@ -63,9 +63,9 @@ public class OpenshiftView extends ContainerFixture {
     return find(JTreeFixture.class, byXpath("//div[@class='Tree']"), Duration.ofSeconds(30));
   }
 
-  private boolean isStripeButtonAvailable(ToolWindowsPane toolWindowsPane, String label) {
+  private boolean isStripeButtonAvailable(ToolWindowPane toolWindowPane, String label) {
     try {
-      toolWindowsPane.stripeButton(label, false);
+      toolWindowPane.stripeButton(label, false);
     } catch (WaitForConditionTimeoutException e) {
       return false;
     }

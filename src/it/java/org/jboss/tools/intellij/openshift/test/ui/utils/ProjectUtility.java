@@ -45,13 +45,12 @@ public class ProjectUtility {
         flatWelcomeFrame.createNewProject();
         final NewProjectDialogWizard newProjectDialogWizard = flatWelcomeFrame.find(NewProjectDialogWizard.class, Duration.ofSeconds(20));
         selectNewProjectType(robot, "Empty Project");
-        newProjectDialogWizard.next();
         JTextFieldFixture textField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='untitled']"));
         textField.setText(projectName);
         newProjectDialogWizard.finish();
 
         final IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
-        ideStatusBar.waitUntilProjectImportIsComplete();
+        //ideStatusBar.waitUntilProjectImportIsComplete(); TODO fix on IJ ULTIMATE 2023.2
     }
 
     public static void selectNewProjectType(RemoteRobot robot, String projectType) {

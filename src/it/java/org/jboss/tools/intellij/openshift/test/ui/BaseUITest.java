@@ -14,6 +14,7 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -42,6 +43,13 @@ public class BaseUITest extends AbstractBaseTest {
 		view.openView();
 		view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);
 		view.waitForTreeItem("Devfile registries", 10, 1);
+		view.closeView();
+	}
+
+	@Test
+	@BeforeAll
+	public static void gettingStartedShowsOnStartup() {
+		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.closeView();
 	}
 

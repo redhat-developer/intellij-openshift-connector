@@ -53,8 +53,15 @@ public class ProjectUtility {
         //ideStatusBar.waitUntilProjectImportIsComplete(); TODO fix on IJ ULTIMATE 2023.2
     }
 
+
     public static void selectNewProjectType(RemoteRobot robot, String projectType) {
-        ComponentFixture newProjectTypeList = robot.findAll(ComponentFixture.class, byXpath("JBList", "//div[contains(@visible_text, 'FX')]")).get(0);
+        ComponentFixture newProjectTypeList;
+        try {
+            newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@class='JBList']"));
+        } catch (Exception e) {
+            robot.find(ComponentFixture.class, byXpath("//div[contains(@visible_text, 'Empty Project')]")).findText("Empty Project").click();
+            newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']"));
+        }
         newProjectTypeList.findText(projectType).click();
     }
 

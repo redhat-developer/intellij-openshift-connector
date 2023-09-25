@@ -32,18 +32,22 @@ import java.time.Duration;
 abstract public class AbstractBaseTest {
 
     protected static RemoteRobot robot;
+    private static boolean hasConnectedToTestIDE = false;
 
     @BeforeAll
     public static void connect() {
-        robot = IdeaRunner.getInstance().getRemoteRobot();
-        ProjectUtility.createEmptyProject(robot, "test-project");
+        if (!hasConnectedToTestIDE) {
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            ProjectUtility.createEmptyProject(robot, "test-project");
 
-        // TODO fix on IJ Ultimate 2023.2 (it should be possible to set some properties to block Tip Dialogs)
-        ProjectUtility.closeTipDialogIfItAppears(robot);
+            // TODO fix on IJ Ultimate 2023.2 (it should be possible to set some properties to block Tip Dialogs)
+            ProjectUtility.closeTipDialogIfItAppears(robot);
 
-        // TODO fix on IJ Ultimate 2023.2
-        ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-        ProjectUtility.closeGotItPopup(robot);
+            // TODO fix on IJ Ultimate 2023.2
+            ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+            ProjectUtility.closeGotItPopup(robot);
+            hasConnectedToTestIDE = true;
+        }
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
     }

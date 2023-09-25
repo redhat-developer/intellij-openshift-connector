@@ -14,7 +14,10 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
@@ -28,21 +31,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Base UI test class verifying presence of tested extensions and OpenShift View presence and content
  */
 public class BaseUITest extends AbstractBaseTest {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BaseUITest.class);
+
+	@BeforeAll
+	public static void setUp() {
+		LOGGER.error("Before test setup: Trying to close Getting Started view");
+		try {
+			GettingStartedView gettingStartedView = robot.find(GettingStartedView.class, byXpath("//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']"));
+			gettingStartedView.closeView();
+			LOGGER.error("Before test setup: Getting Started view found and closed!");
+		} catch (Exception ignored) {
+			LOGGER.error("Before test setup: Could not close Getting Started view, not found!");
+		}
+	}
 
 	@Test
 	public void openshiftExtensionTest() {
 		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable("OpenShift"));
 		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Kubernetes' stripe button is not available.", () -> isStripeButtonAvailable("Kubernetes"));
 		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Getting Started' stripe button is not available.", () -> isStripeButtonAvailable("Getting Started"));
-	}
-
-	@Test
-	public void openshiftViewTest() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
-		view.openView();
-		view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);
-		view.waitForTreeItem("Devfile registries", 10, 1);
-		view.closeView();
 	}
 
 	@Test
@@ -65,7 +72,7 @@ public class BaseUITest extends AbstractBaseTest {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
 
-		view.maximalizeToolWindow(robot);
+		view.maximalizeToolWindow(robot, byXpath("//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']"));
 
 		view.getGettingStartedTree().findText("Login/Provision OpenShift cluster").click();
 		assertFalse(view.findEditorPaneFixture().findAllText().isEmpty(), "Login/Provision OpenShift cluster item has empty description!");

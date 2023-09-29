@@ -7,6 +7,7 @@
 [![Sonar Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=redhat-developer_intellij-openshift-connector&metric=alert_status)](https://sonarcloud.io/dashboard?id=redhat-developer_intellij-openshift-connector)
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
+[![Project Map](https://sourcespy.com/shield.svg)](https://sourcespy.com/github/redhatdeveloperintellijopenshiftconnector/)
 
 [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector)
 

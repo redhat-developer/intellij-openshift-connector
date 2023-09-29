@@ -8,19 +8,19 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.utils.odo;
+package org.jboss.tools.intellij.openshift.ui.helm;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import org.junit.Test;
+import com.intellij.ui.IconManager;
 
-import java.util.concurrent.ExecutionException;
+import javax.swing.Icon;
 
-import static org.junit.Assert.assertNotNull;
+public class ChartIcons {
 
-public class OdoCliFactoryTest extends BasePlatformTestCase {
- 
-    public void testGetOdo() throws ExecutionException, InterruptedException {
-        Odo odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
-        assertNotNull(odo);
-    }
+  private static final String HELM_ICON = "/images/helm/helm.png";
+
+  public static Icon getIcon(String name) {
+    return IconManager.getInstance().getIcon(HELM_ICON, ChartIcons.class);
+  }
+
+
 }

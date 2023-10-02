@@ -17,6 +17,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
+import com.redhat.devtools.intellij.common.tree.MutableModel.Listener;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.Constants;
@@ -265,7 +266,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         }
         try {
             odo.getComponentTypeInfo(element.getName(),
-                    element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->
+              element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->
               result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
         } catch (IOException e) {
             LOGGER.error(e.getLocalizedMessage(), e);

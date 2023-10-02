@@ -65,7 +65,7 @@ public class CreateComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "create component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     NamespaceNode namespaceNode = ((NamespaceNode) selected);
     ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
     Project project = rootNode.getProject();

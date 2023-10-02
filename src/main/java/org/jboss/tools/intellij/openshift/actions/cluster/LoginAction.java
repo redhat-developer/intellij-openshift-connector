@@ -65,6 +65,7 @@ public class LoginAction extends OdoAction {
         }
       },
       "Logging in...",
-      getEventProject(anActionEvent));
+      getEventProject(anActionEvent)
+    );
   }
 }

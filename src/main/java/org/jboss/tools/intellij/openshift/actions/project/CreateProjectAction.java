@@ -53,7 +53,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
     doActionPerformed(clusterNode, odo, getEventProject(anActionEvent));
   }
 
-  private void doActionPerformed(ApplicationsRootNode clusterNode, @NotNull Odo odo, Project project) {
+  private void doActionPerformed(ApplicationsRootNode clusterNode, Odo odo, Project project) {
     String projectName = Messages.showInputDialog("Project name", "New project", Messages.getQuestionIcon());
     if ((projectName != null) && projectName.trim().length() > 0) {
       runWithProgress((ProgressIndicator progress) -> {

@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
@@ -21,6 +20,7 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +86,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-        Project project = getEventProject(anActionEvent);
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
@@ -115,7 +114,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
                 }
             },
             getActionName() + component.getName() + "...",
-            project);
+            getEventProject(anActionEvent));
     }
 
     protected ComponentFeature getComponentFeature(Component component) {

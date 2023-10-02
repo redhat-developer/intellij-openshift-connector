@@ -18,6 +18,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -35,7 +36,7 @@ public class DeleteServiceAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog(

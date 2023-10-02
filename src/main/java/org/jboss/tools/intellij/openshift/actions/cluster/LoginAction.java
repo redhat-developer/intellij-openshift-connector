@@ -18,6 +18,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.cluster.LoginDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -36,12 +37,12 @@ public class LoginAction extends OdoAction {
     protected String getTelemetryActionName() { return "login to cluster"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     runWithProgress((ProgressIndicator progress) -> {
         try {
           LoginDialog loginDialog = UIHelper.executeInUI(() -> {
-            LoginDialog dialog = new LoginDialog(anActionEvent.getProject(), null, clusterNode.getOdo().getMasterUrl().toString());
+            LoginDialog dialog = new LoginDialog(anActionEvent.getProject(), null, odo.getMasterUrl().toString());
             dialog.show();
             return dialog;
             });

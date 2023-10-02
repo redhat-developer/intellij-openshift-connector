@@ -11,8 +11,6 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
@@ -26,8 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class ShowLogComponentAction extends ContextAwareComponentAction {
@@ -37,7 +35,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
   protected String getTelemetryActionName() { return "show component log"; }
 
     protected String getActionName() {
-        return "Show log";
+        return "Show Log";
     }
 
     @Override
@@ -46,7 +44,11 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
         try {
             if (visible) {
                 ComponentNode componentNode = (ComponentNode) selected;
-                visible = isDevOrDebugAndLogNotRunning(componentNode) || isDeployAndLogNotRunning(componentNode);
+                Odo odo = componentNode.getRoot().getOdo().getNow(null);
+                if (odo == null) {
+                  return false;
+                }
+                visible = isDevOrDebugAndLogNotRunning(componentNode, odo) || isDeployAndLogNotRunning(componentNode, odo);
             }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -55,77 +57,58 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         doLog((ComponentNode) selected, odo, false);
     }
 
     protected void doLog(ComponentNode componentNode, Odo odo, boolean follow) {
-      try {
-        Component component = componentNode.getComponent();
-        NamespaceNode namespaceNode = componentNode.getParent();
-        Project project = componentNode.getRoot().getProject();
-        Optional<Boolean> isDeploy = isDeployMode(componentNode, project);
-        if (isDeploy.isPresent()) {
-          runLogOrFollow(odo, follow, component, namespaceNode, isDeploy.get(), project);
-        }
-      } catch (IOException e) {
-        Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName());
-      }
-    }
-
-  private void runLogOrFollow(Odo odo, boolean follow, Component component, NamespaceNode namespaceNode, boolean deploy, Project project) {
-    runWithProgress((ProgressIndicator progress) -> {
-        String platform = getPlatform(component);
         try {
-          if (follow) {
-            odo.follow(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
-          } else {
-            odo.log(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
-          }
-          sendTelemetryResults(TelemetryResult.SUCCESS);
+            Component component = componentNode.getComponent();
+            NamespaceNode namespaceNode = componentNode.getParent();
+            Optional<Boolean> isDeploy = isRunningInBothDevAndDeploy(componentNode, odo);
+            if (isDeploy.isEmpty()) {
+                int choice = Messages.showDialog(componentNode.getRoot().getProject(), "Component is running in both dev and deploy mode, which container do you want to get logs from ?", getActionName(), new String[]{"Dev", "Deploy"}, 0, null);
+                if (choice == 0) {
+                    isDeploy = Optional.of(Boolean.FALSE);
+                } else if (choice == 1) {
+                    isDeploy = Optional.of(Boolean.TRUE);
+                }
+            }
+            if (isDeploy.isPresent()) {
+                boolean deploy = isDeploy.get();
+                CompletableFuture.runAsync(() -> {
+                    String platform = getPlatform(component);
+                    try {
+                        if (follow) {
+                            odo.follow(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
+                        } else {
+                            odo.log(namespaceNode.getName(), component.getPath(), component.getName(), deploy, platform);
+                        }
+                        sendTelemetryResults(TelemetryResult.SUCCESS);
+                    } catch (IOException e) {
+                        sendTelemetryError(e);
+                        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+                    }
+                });
+            }
         } catch (IOException e) {
-          sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+          Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName());
         }
-      },
-      (follow ? "Following" : "Showing") + " Logs...",
-      project
-    );
-  }
-
-  @NotNull
-  private Optional<Boolean> isDeployMode(ComponentNode componentNode, Project project) throws IOException {
-    Optional<Boolean> isDeploy = isRunningInBothDevAndDeploy(componentNode);
-    if (isDeploy.isEmpty()) {
-      int choice = Messages.showDialog(
-        project,
-        "Component is running in both dev and deploy mode, which container do you want to get logs from ?",
-        getActionName(),
-        new String[]{"Dev", "Deploy"},
-        0,
-        null);
-      if (choice == 0) {
-        isDeploy = Optional.of(Boolean.FALSE);
-      } else if (choice == 1) {
-        isDeploy = Optional.of(Boolean.TRUE);
-      }
     }
-    return isDeploy;
-  }
 
-  private Optional<Boolean> isRunningInBothDevAndDeploy(ComponentNode componentNode) throws IOException {
+    private Optional<Boolean> isRunningInBothDevAndDeploy(ComponentNode componentNode, Odo odo) throws IOException {
         Component component = componentNode.getComponent();
-        if (isDevOrDebugAndLogNotRunning(componentNode) && !isDeploy(component)) {
+        if (isDevOrDebugAndLogNotRunning(componentNode, odo) && !isDeploy(component)) {
             return Optional.of(Boolean.FALSE);
         }
         if (!isDev(component) && !isDebug(component)
-                && isDeployAndLogNotRunning(componentNode)) {
+                && isDeployAndLogNotRunning(componentNode, odo)) {
             return Optional.of(Boolean.TRUE);
         }
         if ((isDev(component) || isDebug(component)) && isDeploy(component)) {
-            if (isLogRunningForDevOrDebug(componentNode)) {
+            if (isLogRunningForDevOrDebug(componentNode, odo)) {
                 return Optional.of(Boolean.TRUE);
-            } else if (isLogRunningForDeploy(componentNode)) {
+            } else if (isLogRunningForDeploy(componentNode, odo)) {
                 return Optional.of(Boolean.FALSE);
             }
         }
@@ -144,22 +127,22 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
         return component.getLiveFeatures().isDebug();
     }
 
-    private  boolean isLogRunningForDevOrDebug(ComponentNode componentNode) throws IOException {
-        return componentNode.getRoot().getOdo().isLogRunning(componentNode.getComponent().getPath(), componentNode.getComponent().getName(), false);
+    private  boolean isLogRunningForDevOrDebug(ComponentNode componentNode, Odo odo) throws IOException {
+        return odo.isLogRunning(componentNode.getComponent().getPath(), componentNode.getComponent().getName(), false);
     }
 
-    private  boolean isLogRunningForDeploy(ComponentNode componentNode) throws IOException {
-        return componentNode.getRoot().getOdo().isLogRunning(componentNode.getComponent().getPath(), componentNode.getComponent().getName(), true);
+    private  boolean isLogRunningForDeploy(ComponentNode componentNode, Odo odo) throws IOException {
+        return odo.isLogRunning(componentNode.getComponent().getPath(), componentNode.getComponent().getName(), true);
     }
 
-    private boolean isDevOrDebugAndLogNotRunning(ComponentNode componentNode) throws IOException {
+    private boolean isDevOrDebugAndLogNotRunning(ComponentNode componentNode, Odo odo) throws IOException {
         return (isDev(componentNode.getComponent()) || isDebug(componentNode.getComponent()))
-                && !isLogRunningForDevOrDebug(componentNode);
+                && !isLogRunningForDevOrDebug(componentNode, odo);
     }
 
-    private boolean isDeployAndLogNotRunning(ComponentNode componentNode) throws IOException {
+    private boolean isDeployAndLogNotRunning(ComponentNode componentNode, Odo odo) throws IOException {
         return (isDeploy(componentNode.getComponent())
-                && !isLogRunningForDeploy(componentNode));
+                && !isLogRunningForDeploy(componentNode, odo));
     }
 
     private String getPlatform(Component component) {

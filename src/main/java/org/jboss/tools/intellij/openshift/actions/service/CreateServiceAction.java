@@ -14,15 +14,19 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
@@ -38,7 +42,7 @@ public class CreateServiceAction extends OdoAction {
     protected String getTelemetryActionName() { return "create service"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         NamespaceNode namespaceNode = (NamespaceNode) selected;
         if (namespaceNode == null) {
             return;

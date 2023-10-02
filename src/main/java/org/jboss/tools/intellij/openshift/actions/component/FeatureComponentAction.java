@@ -21,6 +21,8 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -29,6 +31,8 @@ import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProg
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public abstract class FeatureComponentAction extends ContextAwareComponentAction {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureComponentAction.class);
 
     protected final ComponentFeature feature;
 
@@ -55,11 +59,18 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
                 ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
                 Component component = componentNode.getComponent();
                 ComponentFeature feat = getComponentFeature(component);
-                if (componentNode.getRoot().getOdo().isStarted(componentNode.getNamespace(), component.getPath(),
-                        component.getName(), feat)) {
-                    e.getPresentation().setText("Stop " + getActionName());
-                } else {
-                    e.getPresentation().setText("Start " + getActionName());
+                try {
+                    Odo odo = componentNode.getRoot().getOdo().getNow(null);
+                    if (odo == null) {
+                        return;
+                    }
+                    if (odo.isStarted(componentNode.getNamespace(), component.getPath(), component.getName(), feat)) {
+                        e.getPresentation().setText("Stop " + getActionName());
+                    } else {
+                        e.getPresentation().setText("Start " + getActionName());
+                    }
+                } catch (Exception ex) {
+                    LOGGER.warn("Could not update {}", componentNode.getName(), e);
                 }
             }
         }

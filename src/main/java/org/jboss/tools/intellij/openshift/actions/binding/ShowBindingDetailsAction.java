@@ -16,6 +16,7 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.BindingNode;
 import org.jboss.tools.intellij.openshift.ui.binding.BindingDetailDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 public class ShowBindingDetailsAction extends OdoAction {
     public ShowBindingDetailsAction() {
@@ -23,7 +24,7 @@ public class ShowBindingDetailsAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         BindingNode node = (BindingNode) selected;
         BindingDetailDialog dialog = new BindingDetailDialog(anActionEvent.getProject(), null, node.getBinding());
         dialog.show();

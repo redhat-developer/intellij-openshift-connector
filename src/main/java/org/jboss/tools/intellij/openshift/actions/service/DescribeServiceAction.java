@@ -12,13 +12,13 @@ package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -34,8 +34,7 @@ public class DescribeServiceAction extends OdoAction {
   protected String getTelemetryActionName() { return "describe service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-    Project project = getEventProject(anActionEvent);
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
     runWithProgress((ProgressIndicator progress) -> {
@@ -49,6 +48,6 @@ public class DescribeServiceAction extends OdoAction {
       }
     },
     "Describing Service " + serviceNode.getName(),
-    project);
+    getEventProject(anActionEvent));
   }
 }

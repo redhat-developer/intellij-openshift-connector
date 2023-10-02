@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import java.util.Objects;
+
 public interface Component {
     String getName();
 
@@ -68,6 +70,19 @@ public interface Component {
         @Override
         public void setInfo(ComponentInfo componentInfo) {
             this.info = componentInfo;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ComponentImpl component = (ComponentImpl) o;
+            return Objects.equals(name, component.name) && Objects.equals(state, component.state) && Objects.equals(path, component.path) && Objects.equals(info, component.info);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, state, path, info);
         }
     }
 

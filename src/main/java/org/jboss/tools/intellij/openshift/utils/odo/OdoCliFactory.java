@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class OdoCliFactory {
 
+    public static final String TOOLS_JSON = "/tools.json";
     private static OdoCliFactory INSTANCE;
 
     public static OdoCliFactory getInstance() {
@@ -33,9 +34,15 @@ public class OdoCliFactory {
 
     public CompletableFuture<Odo> getOdo(Project project) {
         if (future == null) {
-            future = DownloadHelper.getInstance().
-                    downloadIfRequiredAsync("odo", OdoCliFactory.class.getResource("/tools.json")).
-                    thenApply(command -> new OdoCli(project, command));
+            future = DownloadHelper.getInstance()
+            .downloadIfRequiredAsync("odo", OdoCliFactory.class.getResource(TOOLS_JSON))
+            .thenApply(command -> {
+                if (command != null) {
+                    return new OdoCli(project, command);
+                } else {
+                    return null;
+                }
+            });
         }
         return future;
     }

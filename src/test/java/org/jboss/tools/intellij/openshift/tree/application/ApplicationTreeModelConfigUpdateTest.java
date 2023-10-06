@@ -11,14 +11,14 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.testFramework.fixtures.*;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import io.fabric8.kubernetes.api.model.AuthInfo;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.util.Arrays;
 
@@ -122,7 +122,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
             }
 
             @Override
-            protected void loadProjectModel(Project project) {
+            protected void loadProjectModel(Odo odo, Project project) {
             }
 
             @Override

@@ -21,6 +21,7 @@ import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode
 import org.jboss.tools.intellij.openshift.ui.registry.CreateRegistryDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileRegistry;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,7 +37,7 @@ public class CreateRegistryAction extends OdoAction {
     protected String getTelemetryActionName() { return "create registry"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         DevfileRegistriesNode registriesNode = (DevfileRegistriesNode) selected;
         try {
             List<DevfileRegistry> registries = ProgressManager.getInstance().

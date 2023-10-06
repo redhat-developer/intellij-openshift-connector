@@ -16,12 +16,17 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 
 public abstract class OdoAction extends StructureTreeAction implements TelemetryHandler {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OdoAction.class);
 
   protected TelemetrySender telemetrySender;
 
@@ -32,14 +37,23 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
         telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-        this.actionPerformed(anActionEvent, (Object) getElement(selected), getOdo(anActionEvent));
+        Odo odo = getOdo(anActionEvent);
+        if (odo == null) {
+          return;
+        }
+        this.actionPerformed(anActionEvent, (Object) getElement(selected), odo);
     }
 
     private Odo getOdo(AnActionEvent anActionEvent) {
-        return ActionUtils.getApplicationRootNode(anActionEvent).getOdo();
+        try {
+          return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
+        } catch(Exception e) {
+          LOGGER.warn("Could not get odo: " + e.getMessage(), e);
+          return null;
+        }
     }
 
-    public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo);
+    public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
 
     protected abstract String getTelemetryActionName();
 

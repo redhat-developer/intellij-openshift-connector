@@ -20,6 +20,7 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +39,7 @@ public class CreateServiceAction extends OdoAction {
     protected String getTelemetryActionName() { return "create service"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         NamespaceNode namespaceNode = (NamespaceNode) selected;
         if (namespaceNode == null) {
             return;

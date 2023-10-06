@@ -16,6 +16,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 public class OpenGettingStartedAction extends OdoAction {
     private static final String GETTING_STARTED_WINDOW_ID = "OpenShiftGettingStarted";
@@ -30,7 +31,7 @@ public class OpenGettingStartedAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         Project project = anActionEvent.getProject();
         if (project == null) {
             return;

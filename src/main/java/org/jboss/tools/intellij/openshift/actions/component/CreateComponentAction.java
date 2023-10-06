@@ -53,15 +53,19 @@ public class CreateComponentAction extends OdoAction {
     CreateComponentAction action = (CreateComponentAction) ActionManager.getInstance().getAction(CreateComponentAction.class.getName());
     NamespaceNode namespaceNode = (NamespaceNode) parentNode;
     action.telemetrySender = new TelemetrySender(PREFIX_ACTION + action.getTelemetryActionName());
-    action.doActionPerformed(namespaceNode, namespaceNode.getRoot().getOdo(), namespaceNode.getName(),
-        namespaceNode.getRoot(), namespaceNode.getRoot().getProject());
+    Odo odo = namespaceNode.getRoot().getOdo().getNow(null);
+    if (odo == null) {
+      return;
+    }
+    action.doActionPerformed(namespaceNode, odo, namespaceNode.getName(),
+              namespaceNode.getRoot(), namespaceNode.getRoot().getProject());
   }
 
   @Override
   protected String getTelemetryActionName() { return "create component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     NamespaceNode namespaceNode = ((NamespaceNode) selected);
     ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
     Project project = rootNode.getProject();

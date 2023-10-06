@@ -17,6 +17,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
+import com.redhat.devtools.intellij.common.tree.MutableModel.Listener;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.Constants;
@@ -37,7 +38,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,8 +50,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
     private final DevfileRegistriesNode registries;
-
-    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private static final String LOGIN = "Please log in to the cluster";
 
@@ -83,12 +81,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     public Object getApplicationsRoot() {
-        if (!initialized.getAndSet(true)) {
-            root.initializeOdo().thenAccept(odo -> {
-                fireModified(root);
-                fireModified(registries);
-            });
-        }
         return root;
     }
 
@@ -98,21 +90,26 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         if (element == this) {
             return new Object[]{getApplicationsRoot(), registries};
         }
-        Odo odo = root.getOdo();
-        if (odo != null) {
-            if (element instanceof ApplicationsRootNode) {
-                return getNamespaces((ApplicationsRootNode) element);
-            } else if (element instanceof NamespaceNode) {
-                return createNamespaceChildren(element);
-            } else if (element instanceof ComponentNode) {
-                return createComponentChildren((ComponentNode) element);
-            } else if (element instanceof DevfileRegistriesNode) {
-                return getRegistries(root, odo);
-            } else if (element instanceof DevfileRegistryNode) {
-                return getRegistryComponentTypes((DevfileRegistryNode) element);
-            } else if (element instanceof DevfileRegistryComponentTypeNode) {
-                return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
+        try {
+            Odo odo = root.getOdo().getNow(null);
+            if (odo != null) {
+                if (element instanceof ApplicationsRootNode) {
+                    return getNamespaces((ApplicationsRootNode) element);
+                } else if (element instanceof NamespaceNode) {
+                    return createNamespaceChildren(element);
+                } else if (element instanceof ComponentNode) {
+                    return createComponentChildren((ComponentNode) element);
+                } else if (element instanceof DevfileRegistriesNode) {
+                    return getRegistries(root, odo);
+                } else if (element instanceof DevfileRegistryNode) {
+                    return getRegistryComponentTypes((DevfileRegistryNode) element);
+                } else if (element instanceof DevfileRegistryComponentTypeNode) {
+                    return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
+                }
             }
+        } catch (Exception e) {
+            // odo errored when loaded, return no children
+            LOGGER.warn("Could not get odo binary to load children.", e);
         }
         return new Object[0];
     }
@@ -136,9 +133,13 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getNamespaces(ApplicationsRootNode element) {
         List<Object> namespaces = new ArrayList<>();
         try {
-            String ns = element.getOdo().getNamespace();
+            Odo odo = element.getOdo().getNow(null);
+            if (odo == null) {
+                return new Object[]{};
+            }
+            String ns = odo.getNamespace();
             if (ns != null) {
-                namespaces.add(new NamespaceNode(element, element.getOdo().getNamespace()));
+                namespaces.add(new NamespaceNode(element, odo.getNamespace()));
             } else {
                 namespaces.add(new CreateNamespaceLinkNode(element));
             }
@@ -165,8 +166,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     private Object[] getComponentsAndServices(NamespaceNode element) {
         List<Object> results = new ArrayList<>();
-
-        Odo odo = element.getRoot().getOdo();
+        Odo odo = element.getRoot().getOdo().getNow(null);
+        if (odo == null) {
+            return new Object[]{};
+        }
         results.addAll(load(
                 () -> odo.getComponents(element.getName()).stream()
                         .map(dc -> new ComponentNode(element, dc))
@@ -179,7 +182,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                         .collect(Collectors.toList()),
                 element,
                 "Failed to load application services"));
-
         if (results.isEmpty()) {
             results.add(new CreateComponentLinkNode(element.getRoot(), element));
         }
@@ -196,7 +198,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
     private List<URLNode> getURLs(ComponentNode element) {
         List<URLNode> results = new ArrayList<>();
-        Odo odo = element.getRoot().getOdo();
+        Odo odo = element.getRoot().getOdo().getNow(null);
+        if (odo == null) {
+            return Collections.emptyList();
+        }
         try {
             odo.listURLs(element.getParent().getName(),
                 element.getComponent().getPath(), element.getName()).forEach(url ->
@@ -210,7 +215,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     private List<BindingNode> getBindings(ComponentNode element) {
         List<BindingNode> results = new ArrayList<>();
-        Odo odo = element.getRoot().getOdo();
+        Odo odo = element.getRoot().getOdo().getNow(null);
+        if (odo == null) {
+            return Collections.emptyList();
+        }
         try {
             odo.listBindings(element.getParent().getName(),
                 element.getComponent().getPath(), element.getName()).forEach(binding ->
@@ -237,10 +245,13 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     private Object[] getRegistryComponentTypes(DevfileRegistryNode element) {
         List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
+        Odo odo = element.getRoot().getOdo().getNow(null);
+        if (odo == null) {
+            return new Object[]{};
+        }
         try {
-            element.getRoot().getOdo().getComponentTypes(element.getName()).forEach(type ->
-                result.add(new DevfileRegistryComponentTypeNode(root, element, type))
-            );
+            odo.getComponentTypes(element.getName()).forEach(type ->
+              result.add(new DevfileRegistryComponentTypeNode(root, element, type)));
         } catch (IOException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
         }
@@ -249,11 +260,14 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode element) {
         List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
+        Odo odo = element.getRoot().getOdo().getNow(null);
+        if (odo == null) {
+            return new Object[]{};
+        }
         try {
-            element.getRoot().getOdo().getComponentTypeInfo(element.getName(),
-                element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->
-                    result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter))
-                );
+            odo.getComponentTypeInfo(element.getName(),
+              element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->
+              result.add(new DevfileRegistryComponentTypeStarterNode(element.getRoot(), element, starter)));
         } catch (IOException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
         }
@@ -285,7 +299,18 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return new ProcessableDescriptor<>(
               project,
               root,
-              () -> root.getOdo() != null ? root.getOdo().getMasterUrl().toString() : "Loading",
+              () -> {
+                  String label = "Loading...";
+                  try {
+                      Odo odo = root.getOdo().getNow(null);
+                      if (odo != null) {
+                          label = odo.getMasterUrl().toString();
+                      }
+                      return label;
+                  } catch (Exception e) {
+                      return "Error: " + e.getCause().getMessage();
+                  }
+              },
               null,
               CLUSTER_ICON,
               parentDescriptor);

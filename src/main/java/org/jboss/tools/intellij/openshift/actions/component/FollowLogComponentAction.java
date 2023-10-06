@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 public class FollowLogComponentAction extends ShowLogComponentAction {
 
@@ -20,7 +21,7 @@ public class FollowLogComponentAction extends ShowLogComponentAction {
   protected String getTelemetryActionName() { return "follow component log"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     doLog((ComponentNode) selected, odo, true);
   }
 }

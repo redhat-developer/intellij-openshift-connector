@@ -8,37 +8,54 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.utils.odo;
+package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.utils.odo.Binding;
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeatures;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentMetadata;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentTypeInfo;
+import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
+import org.jboss.tools.intellij.openshift.utils.odo.DevfileRegistry;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OperatorCRD;
+import org.jboss.tools.intellij.openshift.utils.odo.Service;
+import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
+import org.jboss.tools.intellij.openshift.utils.odo.URL;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
-public class OdoProjectDecorator implements Odo {
+public class ApplicationRootNodeOdo implements Odo {
     private final Odo delegate;
     private final ApplicationsRootNode root;
+    private final FileOperations fileOperations;
 
-    public OdoProjectDecorator(Odo delegate, ApplicationsRootNode root) {
+    ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root) {
+        this(delegate, root, new FileOperations());
+    }
+
+    ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root, FileOperations fileOperations) {
         this.delegate = delegate;
         this.root = root;
+        this.fileOperations = fileOperations;
     }
 
     @Override
@@ -80,20 +97,10 @@ public class OdoProjectDecorator implements Odo {
     @Override
     public void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
         if (StringUtils.isNotBlank(starter)) {
-            File tmpdir;
-            if (SystemInfo.isWindows) {
-                tmpdir = Files.createTempDirectory("odotmp").toFile();
-            } else {
-                FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(
-                        PosixFilePermissions.fromString("rwxr-x---"));
-                tmpdir = Files.createTempDirectory("odotmp", attr).toFile();
-            }
+            File tmpdir = fileOperations.createTempDir("odotmp");
             delegate.createComponent(project, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
-            File sourceDir = new File(source);
-            FileUtils.copyDirectory(tmpdir, sourceDir);
-            FileUtils.deleteQuietly(tmpdir);
-            VirtualFile[] files = new VirtualFile[] {VfsUtil.findFileByIoFile(sourceDir,true)};
-            VfsUtil.markDirtyAndRefresh(false, true, true, files);
+            File directory = fileOperations.copyTo(tmpdir, source);
+            fileOperations.refresh(directory);
         } else {
             delegate.createComponent(project, componentType, registryName, component, source, devfile, starter);
         }
@@ -136,14 +143,12 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public ComponentInfo getComponentInfo(String project, String component, String path,
-                                          ComponentKind kind) throws IOException {
+    public ComponentInfo getComponentInfo(String project, String component, String path, ComponentKind kind) throws IOException {
         return delegate.getComponentInfo(project, component, path, kind);
     }
 
     @Override
-    public void deleteComponent(String project, String context, String component,
-                                ComponentKind kind) throws IOException {
+    public void deleteComponent(String project, String context, String component, ComponentKind kind) throws IOException {
         if (context != null) {
             root.removeContext(new File(context));
         }
@@ -186,16 +191,32 @@ public class OdoProjectDecorator implements Odo {
         for (Map.Entry<String, ComponentDescriptor> entry : root.getComponents().entrySet()) {
             String path = entry.getKey();
             ComponentDescriptor componentDescriptor = entry.getValue();
-                Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(componentDescriptor.getName())).findFirst();
+            Optional<Component> found = components.stream()
+              .filter(comp1 -> comp1.getName().equals(componentDescriptor.getName()))
+              .findFirst();
             if (found.isPresent()) {
-                found.get().setPath(path);
-                found.get().setInfo(getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE));
+                updateComponent(project, path, componentDescriptor, found.get());
             } else {
-                components.add(Component.of(componentDescriptor.getName(), new ComponentFeatures(), path,
-                        getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE)));
+                components.add(createComponent(project, componentDescriptor, path));
             }
         }
         return components;
+    }
+
+    @NotNull
+    private Component createComponent(String project, ComponentDescriptor componentDescriptor, String path) throws IOException {
+        ComponentInfo info = getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE);
+        return Component.of(
+          componentDescriptor.getName(),
+          new ComponentFeatures(),
+          path,
+          info);
+    }
+
+    private void updateComponent(String project, String path, ComponentDescriptor componentDescriptor, Component component) throws IOException {
+        component.setPath(path);
+        ComponentInfo info = getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE);
+        component.setInfo(info);
     }
 
     @Override
@@ -297,4 +318,25 @@ public class OdoProjectDecorator implements Odo {
     public void release() {
         delegate.release();
     }
+
+    /** for testing purposes **/
+    protected static class FileOperations {
+        protected File createTempDir(String prefix) throws IOException {
+            return FileUtil.createTempDirectory(prefix, null);
+        }
+
+        public File copyTo(File source, String destination) throws IOException {
+            File destinationDir = new File(destination);
+            FileUtils.copyDirectory(source, destinationDir);
+            org.apache.commons.io.FileUtils.deleteQuietly(source);
+            return destinationDir;
+        }
+
+
+        public void refresh(File file) {
+            VirtualFile[] files = new VirtualFile[]{VfsUtil.findFileByIoFile(file, true)};
+            VfsUtil.markDirtyAndRefresh(false, true, true, files);
+        }
+    }
+
 }

@@ -19,6 +19,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ public class DeleteComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();

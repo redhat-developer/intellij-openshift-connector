@@ -7,6 +7,7 @@
 [![Sonar Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=redhat-developer_intellij-openshift-connector&metric=alert_status)](https://sonarcloud.io/dashboard?id=redhat-developer_intellij-openshift-connector)
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
+[![Project Map](https://sourcespy.com/shield.svg)](https://sourcespy.com/github/redhatdeveloperintellijopenshiftconnector/)
 
 [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector)
 
@@ -25,6 +26,15 @@ To run the instance of OpenShift cluster locally, developers can use the followi
 The extension also supports OpenShift running on Azure, AWS, and any others supported environments.
 
 ## New features
+
+### Share your Feedback !
+
+We introduced a new toolbar action within the plugin that enables you to share your feedback with our team. Please feel free to provide your valuable feedback for the plugin workflow.
+
+https://github.com/redhat-developer/intellij-openshift-connector/assets/600414/ca52ddcb-2206-480b-aa62-6d4bea4cdc9b
+
+
+## Features
 
 ### Red Hat Developer Sandbox login
 
@@ -96,8 +106,6 @@ For each operator, we can select the type of deployment we want to setup. For ea
 After you’ve entered the name of your service, it will appear in the OpenShift view:
 
 ![](images/0.9.0/openshift12.png)
-
-## Features
 
 ### Application Explorer focused on current namespace/project
 

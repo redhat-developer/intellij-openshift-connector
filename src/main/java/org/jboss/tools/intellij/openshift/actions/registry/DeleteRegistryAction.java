@@ -14,11 +14,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ public class DeleteRegistryAction extends OdoAction {
     protected String getTelemetryActionName() { return "delete registry"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         DevfileRegistryNode registryNode = (DevfileRegistryNode) selected;
         if (Messages.NO == Messages.showYesNoDialog("Delete registry '" + registryNode.getName() + "'.\nAre you sure?", "Delete registry",
                 Messages.getQuestionIcon())) {
@@ -42,7 +42,7 @@ public class DeleteRegistryAction extends OdoAction {
             ExecHelper.submit(() -> {
                 try {
                     odo.deleteDevfileRegistry(registryNode.getName());
-                    ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(registryNode);
+                    NodeUtils.fireRemoved(registryNode);
                     sendTelemetryResults(TelemetryResult.SUCCESS);
                 } catch (IOException e) {
                     sendTelemetryError(e);

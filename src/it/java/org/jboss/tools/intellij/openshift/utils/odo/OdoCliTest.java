@@ -14,8 +14,6 @@ import com.intellij.openapi.ui.TestDialog;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
-import static org.junit.Assert.assertNotNull;
 
 
 public abstract class OdoCliTest extends BasePlatformTestCase {

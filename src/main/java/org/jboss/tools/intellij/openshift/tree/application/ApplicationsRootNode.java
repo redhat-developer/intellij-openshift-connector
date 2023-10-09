@@ -32,7 +32,6 @@ import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoProjectDecorator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +46,16 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
-public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener {
+public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener, StructureAwareNode, ProcessingNode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
     private final ApplicationsTreeStructure structure;
-    private Odo odo;
+    private CompletableFuture<Odo> odoFuture;
     private boolean logged;
     private Config config;
+
+    private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
 
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
 
@@ -74,18 +75,17 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         this.logged = logged;
     }
 
-    public CompletableFuture<Odo> initializeOdo() {
-        return OdoCliFactory.getInstance().getOdo(project).whenComplete((odo, err) -> {
-            if (this.odo != null) {
-                this.odo.release();
-            }
-            this.odo = new OdoProjectDecorator(odo, this);
-            loadProjectModel(project);
-        });
-    }
-
-    public Odo getOdo() {
-        return odo;
+    public CompletableFuture<Odo> getOdo() {
+        if (odoFuture == null) {
+            this.odoFuture = OdoCliFactory.getInstance()
+              .getOdo(project)
+              .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
+              .whenComplete((odo, err) -> {
+                loadProjectModel(odo, project);
+                structure.fireModified(this);
+              });
+        }
+        return odoFuture;
     }
 
     public Project getProject() {
@@ -104,15 +104,18 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         return components;
     }
 
-    protected void loadProjectModel(Project project) {
+    protected void loadProjectModel(Odo odo, Project project) {
+        if (odo == null) {
+            return;
+        }
         for (Module module : ModuleManager.getInstance(project).getModules()) {
-            addContext(ProjectUtils.getModuleRoot(module));
+            addContext(odo, ProjectUtils.getModuleRoot(module));
         }
     }
 
     @Override
     public void moduleAdded(@NotNull Project project, @NotNull Module module) {
-        addContext(ProjectUtils.getModuleRoot(module));
+        addContext(getOdo().getNow(null), ProjectUtils.getModuleRoot(module));
     }
 
     @Override
@@ -123,32 +126,53 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
             if (descriptor.isPreOdo3()) {
-                getOdo().migrateComponent(path, descriptor.getName());
-                Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Component migration",
+                getOdo()
+                  .thenAccept(odo -> {
+                      if (odo != null) {
+                          odo.migrateComponent(path, descriptor.getName());
+                      }
+                  })
+                  .thenRun(() ->
+                    Notifications.Bus.notify(
+                      new Notification(
+                        GROUP_DISPLAY_ID,
+                        "Component migration",
                         "The component " + descriptor.getName() + " has been migrated to odo 3.x",
-                        NotificationType.INFORMATION), project);
+                        NotificationType.INFORMATION),
+                      project));
             }
             components.put(path, descriptor);
         }
     }
 
-    private void addContext(VirtualFile modulePathFile) {
-        if (modulePathFile != null && modulePathFile.isValid() && getOdo() != null) {
+    private void addContext(Odo odo, VirtualFile modulePathFile) {
+        if (odo == null) {
+            return;
+        }
+        if (modulePathFile != null && modulePathFile.isValid()) {
             try {
-                List<ComponentDescriptor> descriptors = getOdo().discover(modulePathFile.toNioPath().toString());
+                List<ComponentDescriptor> descriptors = odo.discover(modulePathFile.toNioPath().toString());
                 descriptors.forEach(descriptor ->
                         addContextToSettings(descriptor.getPath(), descriptor)
                 );
             } catch (IOException ex) {
-                if (!(ex.getMessage().contains("Unauthorized") || ex.getMessage().contains("unable to access the cluster: servicebindings.binding.operators.coreos.com"))) {
+                //filter out some common exception when no logged or no authorizations
+                if (doNotLogFromMessage(ex.getMessage())) {
                     LOGGER.error(ex.getLocalizedMessage(), ex);
                 }
             }
         }
     }
 
+    private static boolean doNotLogFromMessage(String message) {
+        return !(message.contains("Unauthorized") ||
+                message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
+                message.contains("the server has asked for the client to provide credentials") ||
+                message.contains("connect: no route to host"));
+    }
+
     public void addContext(String modulePath) {
-        addContext(LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
+        addContext(getOdo().getNow(null), LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
     }
 
     private void removeContextFromSettings(String modulePath) {
@@ -214,10 +238,37 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
 
     public void refresh() {
         OdoCliFactory.getInstance().resetOdo();
-        initializeOdo().thenAccept(odo -> structure.fireModified(this));
+        getOdo().thenAccept(odo -> structure.fireModified(this));
     }
 
+    @Override
     public ApplicationsTreeStructure getStructure() {
         return structure;
     }
+
+    @Override
+    public void startProcessing(String message) {
+        this.processingNode.startProcessing(message);
+    }
+
+    @Override
+    public void stopProcessing() {
+        this.processingNode.stopProcessing();
+    }
+
+    @Override
+    public boolean isProcessing() {
+        return processingNode.isProcessing();
+    }
+
+    @Override
+    public boolean isProcessingStopped() {
+        return processingNode.isProcessingStopped();
+    }
+
+    @Override
+    public String getProcessingMessage() {
+        return processingNode.getMessage();
+    }
+
 }

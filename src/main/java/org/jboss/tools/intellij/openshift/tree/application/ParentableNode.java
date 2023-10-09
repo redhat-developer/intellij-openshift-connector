@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-public abstract class ParentableNode<T> {
+public abstract class ParentableNode<T> implements ProcessingNode, StructureAwareNode {
     private final T parent;
     private final ApplicationsRootNode root;
     private final String name;
+    private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
 
     protected ParentableNode(ApplicationsRootNode root, T parent, String name) {
         this.root = root;
@@ -34,16 +35,54 @@ public abstract class ParentableNode<T> {
     }
 
     public String getNamespace() {
-        Object element = this;
-        while (!(element instanceof NamespaceNode)) {
-            if (element instanceof ParentableNode) {
-                element = ((ParentableNode) element).getParent();
+        Object node = getNamespaceNode(this);
+        if (node instanceof NamespaceNode) {
+            return ((NamespaceNode)node).getName();
+        } else {
+            return "";
+        }
+    }
+
+    private static Object getNamespaceNode(Object node) {
+        while (!(node instanceof NamespaceNode)) {
+            if (node instanceof ParentableNode) {
+                node = ((ParentableNode) node).getParent();
             }
-            if (element == null){
-                return "";
+            if (node == null){
+                return null;
             }
         }
-        return ((NamespaceNode)element).getName();
+        return node;
+    }
+
+    @Override
+    public ApplicationsTreeStructure getStructure() {
+        return getRoot().getStructure();
+    }
+
+    @Override
+    public void startProcessing(String message) {
+        this.processingNode.startProcessing(message);
+    }
+
+    @Override
+    public void stopProcessing() {
+        this.processingNode.stopProcessing();
+    }
+
+    @Override
+    public boolean isProcessing() {
+        return processingNode.isProcessing();
+    }
+
+    @Override
+    public boolean isProcessingStopped() {
+        return processingNode.isProcessingStopped();
+    }
+
+    @Override
+    public String getProcessingMessage() {
+        return processingNode.getMessage();
     }
 
 }

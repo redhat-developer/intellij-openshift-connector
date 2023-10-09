@@ -14,6 +14,7 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
@@ -21,14 +22,17 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class LinkComponentAction extends OdoAction {
@@ -40,39 +44,54 @@ public class LinkComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "link service to component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
-    CompletableFuture.runAsync(() -> {
-      try {
-        List<Component> components = getTargetComponents(odo, namespaceNode.getName());
-        if (!components.isEmpty()) {
-          Component component;
-          if (components.size() == 1) {
-            component = components.get(0);
-          } else {
-            String[] componentNames = components.stream().map(Component::getName).toArray(String[]::new);
-            String componentName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link component", "Select component", Messages.getQuestionIcon(), componentNames, componentNames[0], null));
-            component = components.get(Arrays.asList(componentNames).indexOf(componentName));
+    runWithProgress((ProgressIndicator progress) -> {
+          try {
+            setProcessing("Linking Component...", namespaceNode);
+            List<Component> components = getTargetComponents(odo, namespaceNode.getName());
+            if (!components.isEmpty()) {
+              Component component = getComponent(components);
+              if (component != null) {
+                odo.link(namespaceNode.getName(), component.getPath(), component.getName(), serviceNode.getName());
+                Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link component", "Service linked to " + component.getName(),
+                    NotificationType.INFORMATION));
+                sendTelemetryResults(TelemetryResult.SUCCESS);
+              } else {
+                sendTelemetryResults(TelemetryResult.ABORTED);
+              }
+            } else {
+              String message = "No components to link to";
+              sendTelemetryError(message);
+              UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
+            }
+          } catch (IOException e) {
+            sendTelemetryError(e);
+            UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
+          } finally {
+            clearProcessing(namespaceNode);
           }
-          if (component != null) {
-            odo.link(namespaceNode.getName(), component.getPath(), component.getName(), serviceNode.getName());
-            Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link component", "Service linked to " + component.getName(),
-            NotificationType.INFORMATION));
-            sendTelemetryResults(TelemetryResult.SUCCESS);
-          } else {
-            sendTelemetryResults(TelemetryResult.ABORTED);
-          }
-       } else {
-          String message = "No components to link to";
-          sendTelemetryError(message);
-          UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
-        }
-      } catch (IOException e) {
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
-      }
-    });
+        },
+        "Link Component...",
+        getEventProject(anActionEvent)
+    );
+  }
+
+  private Component getComponent(List<Component> components) {
+    if (components.size() == 1) {
+      return components.get(0);
+    } else {
+      String[] componentNames = components.stream().map(Component::getName).toArray(String[]::new);
+      String componentName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog(
+          "Link component",
+          "Select component",
+          Messages.getQuestionIcon(),
+          componentNames,
+          componentNames[0],
+          null));
+      return components.get(Arrays.asList(componentNames).indexOf(componentName));
+    }
   }
 
   private List<Component> getTargetComponents(Odo odo, String project) throws IOException {

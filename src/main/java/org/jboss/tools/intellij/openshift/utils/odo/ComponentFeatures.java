@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class ComponentFeatures {
@@ -52,13 +53,13 @@ public class ComponentFeatures {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         if (isDev()) {
-            first = append(builder, true, ComponentFeature.DEV.getKind());
+            first = append(builder, true, ComponentFeature.DEV.getKind().getLabel());
         }
         if (isDebug()) {
-            first = append(builder, first, ComponentFeature.DEBUG.getKind());
+            first = append(builder, first, ComponentFeature.DEBUG.getKind().getLabel());
         }
         if (isDeploy()) {
-            append(builder, first, ComponentFeature.DEPLOY.getKind());
+            append(builder, first, ComponentFeature.DEPLOY.getKind().getLabel());
         }
         return builder.toString();
     }
@@ -73,5 +74,18 @@ public class ComponentFeatures {
 
     public boolean isOnCluster() {
         return isDev() || isDebug() || isDeploy();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ComponentFeatures that = (ComponentFeatures) o;
+        return Objects.equals(features, that.features);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(features);
     }
 }

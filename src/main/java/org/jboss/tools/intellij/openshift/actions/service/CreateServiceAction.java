@@ -11,21 +11,23 @@
 package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
 
 public class CreateServiceAction extends OdoAction {
 
@@ -37,36 +39,42 @@ public class CreateServiceAction extends OdoAction {
     protected String getTelemetryActionName() { return "create service"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
-        String projectName;
-        projectName = ((NamespaceNode)selected).getName();
-        CompletableFuture.runAsync(() -> {
-            try {
-                List<ServiceTemplate> templates = odo.getServiceTemplates();
-                if (!templates.isEmpty()) {
-                    CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates));
-                    if (dialog.isOK()) {
-                        createService(odo, projectName, dialog);
-                        ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(selected);
-                        sendTelemetryResults(TelemetryResult.SUCCESS);
-                    } else {
-                        sendTelemetryResults(TelemetryResult.ABORTED);
-                    }
-                } else {
-                    String message = "No templates available";
-                    sendTelemetryError(message);
-                    UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Create service"));
-                }
-            } catch (IOException e) {
-                sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create service"));
-            }
-        });
-    }
-
-    private void createService(Odo odo, String project, CreateServiceDialog dialog) throws IOException {
-        odo.createService(project, dialog.getServiceTemplate(), dialog.getServiceTemplateCRD(),
-                dialog.getName(), dialog.getSpec(), false);
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        NamespaceNode namespaceNode = (NamespaceNode) selected;
+        if (namespaceNode == null) {
+            return;
+        }
+        runWithProgress((ProgressIndicator progress) -> {
+              try {
+                  List<ServiceTemplate> templates = odo.getServiceTemplates();
+                  if (templates.isEmpty()) {
+                      String message = "No templates available";
+                      sendTelemetryError(message);
+                      UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Create Service"));
+                      return;
+                  }
+                  CreateServiceDialog dialog = UIHelper.executeInUI(() -> showDialog(templates));
+                  if (!dialog.isOK()) {
+                      sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
+                      return;
+                  }
+                  setProcessing("Creating Service...", namespaceNode);
+                  odo.createService(namespaceNode.getName(),
+                    dialog.getServiceTemplate(),
+                    dialog.getServiceTemplateCRD(),
+                    dialog.getName(),
+                    dialog.getSpec(),
+                    false);
+                  clearProcessing(namespaceNode);
+                  sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
+              } catch (IOException e) {
+                  clearProcessing(namespaceNode);
+                  sendTelemetryError(e);
+                  UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Service"));
+              }
+          },
+          "Create Service...",
+          getEventProject(anActionEvent));
     }
 
     protected CreateServiceDialog showDialog(List<ServiceTemplate> templates) {

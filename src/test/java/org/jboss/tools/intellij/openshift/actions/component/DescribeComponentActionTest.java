@@ -33,4 +33,10 @@ public class DescribeComponentActionTest extends ActionTest {
   protected void verifyRemoteOnlyDevComponent(boolean visible) {
     assertTrue(visible);
   }
+
+  @Override
+  protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
+    assertTrue(visible);
+  }
+
 }

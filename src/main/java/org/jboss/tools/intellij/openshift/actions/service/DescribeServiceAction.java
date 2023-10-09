@@ -11,16 +11,18 @@
 package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class DescribeServiceAction extends OdoAction {
@@ -32,10 +34,10 @@ public class DescribeServiceAction extends OdoAction {
   protected String getTelemetryActionName() { return "describe service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
-    CompletableFuture.runAsync(() -> {
+    runWithProgress((ProgressIndicator progress) -> {
       try {
         String template = odo.getServiceTemplate(namespaceNode.getName(), serviceNode.getName());
         odo.describeServiceTemplate(template);
@@ -44,6 +46,8 @@ public class DescribeServiceAction extends OdoAction {
         sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe service"));
       }
-    });
+    },
+    "Describing Service " + serviceNode.getName(),
+    getEventProject(anActionEvent));
   }
 }

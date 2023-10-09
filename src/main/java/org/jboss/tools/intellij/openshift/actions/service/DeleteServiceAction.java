@@ -11,18 +11,20 @@
 package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class DeleteServiceAction extends OdoAction {
@@ -34,23 +36,28 @@ public class DeleteServiceAction extends OdoAction {
   protected String getTelemetryActionName() { return "delete service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
-    if (Messages.NO == Messages.showYesNoDialog("Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
-      Messages.getQuestionIcon())) {
+    if (Messages.NO == Messages.showYesNoDialog(
+        "Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
+        Messages.getQuestionIcon())) {
       sendTelemetryResults(TelemetryResult.ABORTED);
       return;
     }
-    CompletableFuture.runAsync(() -> {
+    runWithProgress((ProgressIndicator progress) -> {
+      setProcessing("Deleted", serviceNode);
       try {
         odo.deleteService(namespaceNode.getName(), serviceNode.getService());
-        ((ApplicationsTreeStructure)getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireRemoved(serviceNode);
+        clearProcessing(serviceNode.getParent());
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        clearProcessing(serviceNode);
         sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete service"));
       }
-    });
+    },
+    "Delete Service " + serviceNode.getName() + "...",
+    getEventProject(anActionEvent));
   }
 }

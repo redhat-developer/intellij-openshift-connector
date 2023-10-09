@@ -16,6 +16,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
+import org.jetbrains.annotations.NotNull;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
@@ -28,7 +29,7 @@ public class OpenInBrowserAction extends OdoAction {
   protected String getTelemetryActionName() { return "open URL"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, Odo odo) {
+  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
       BrowserUtil.open(getURL(((URLNode)selected).getUrl()));
       sendTelemetryResults(TelemetryResult.SUCCESS);
   }

@@ -35,13 +35,13 @@ public class BaseUITest extends AbstractBaseTest {
 
 	@BeforeAll
 	public static void setUp() {
-		LOGGER.error("Before test setup: Trying to close Getting Started view");
+		LOGGER.info("Before test setup: Trying to close Getting Started view");
 		try {
 			GettingStartedView gettingStartedView = robot.find(GettingStartedView.class, byXpath("//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']"));
 			gettingStartedView.closeView();
-			LOGGER.error("Before test setup: Getting Started view found and closed!");
+			LOGGER.info("Before test setup: Getting Started view found and closed!");
 		} catch (Exception ignored) {
-			LOGGER.error("Before test setup: Could not close Getting Started view, not found!");
+			LOGGER.info("Before test setup: Could not close Getting Started view, not found!");
 		}
 	}
 

@@ -19,7 +19,7 @@ pipeline {
         stage('Clone and Build Common UI Test Library') {
             steps {
                 dir('common-ui-test-library') {
-                    git url: 'https://github.com/richard0202/intellij-common-ui-test-library.git', branch: '174'
+                    git url: 'https://github.com/martinszuc/intellij-common-ui-test-library.git', branch: 'issue-184'
                     sh './gradlew publishToMavenLocal'
                 }
                 dir('..') {
@@ -33,7 +33,7 @@ pipeline {
             }
         }
 
-        stage('Copy and decode idea.key') {
+        stage('Copy idea.key') {
             steps {
                 sh 'mkdir -p idea_license_token'
                 sh 'cp $IDEA_KEY_FILE idea_license_token/idea.key'
@@ -47,10 +47,6 @@ pipeline {
                     env.JAVA_HOME = "${jdkHome}"
                     env.PATH = "${jdkHome}/bin:${env.PATH}"
                 }
-                sh '''
-                    echo "JAVA_HOME: $JAVA_HOME"
-                    java -version
-                    '''
             }
         }
 
@@ -58,7 +54,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     wrap([$class: 'Xvnc']) {
-                        sh "./gradlew integrationUITest"
+                        sh "./gradlew integrationUITest -PtestProjectLocation=${env.HOME}/IdeaProjects/intellij-ui-test-projects2/"
                     }
                 }
             }

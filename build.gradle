@@ -93,6 +93,7 @@ tasks.register('integrationUITest', Test) {
     useJUnitPlatform {
         includeTags 'ui-test'
     }
+    systemProperties['testProjectLocation'] = project.hasProperty('testProjectLocation') ? project.property('testProjectLocation') : null
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
     description = 'Runs the integration UI tests.'
     group = 'verification'

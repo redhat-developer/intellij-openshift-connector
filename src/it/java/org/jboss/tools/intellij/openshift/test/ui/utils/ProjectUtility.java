@@ -18,6 +18,8 @@ import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFra
 import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.information.TipDialog;
 import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.project.NewProjectDialogWizard;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
+import com.redhat.devtools.intellij.commonuitest.utils.constants.XPathDefinitions;
+import com.redhat.devtools.intellij.commonuitest.utils.project.CreateCloseUtils;
 import org.jboss.tools.intellij.openshift.test.ui.common.ImportProjectFromVersionControlFixture;
 import org.jboss.tools.intellij.openshift.test.ui.common.ProjectTreeFixture;
 
@@ -46,6 +48,8 @@ public class ProjectUtility {
         final NewProjectDialogWizard newProjectDialogWizard = flatWelcomeFrame.find(NewProjectDialogWizard.class, Duration.ofSeconds(20));
         selectNewProjectType(robot, "Empty Project");
         JTextFieldFixture textField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='untitled']"));
+        JTextFieldFixture locationTextField = robot.find(JTextFieldFixture.class, byXpath(XPathDefinitions.EXTENDABLE_TEXT_FIELD));
+        locationTextField.setText(CreateCloseUtils.PROJECT_LOCATION);
         textField.setText(projectName);
         newProjectDialogWizard.finish();
 

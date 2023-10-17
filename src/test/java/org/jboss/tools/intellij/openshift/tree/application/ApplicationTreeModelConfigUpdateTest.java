@@ -11,13 +11,13 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import io.fabric8.kubernetes.api.model.AuthInfo;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.util.Arrays;
@@ -173,10 +173,10 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
 
     private Context createContext(String user, String cluster) {
         Context context = mock(Context.class);
-        if (StringUtils.isNotBlank(user)) {
+        if (!StringUtil.isEmptyOrSpaces(user)) {
             doReturn(user).when(context).getUser();
         }
-        if (StringUtils.isNotBlank(cluster)) {
+        if (!StringUtil.isEmptyOrSpaces(cluster)) {
             doReturn(cluster).when(context).getCluster();
         }
         return context;

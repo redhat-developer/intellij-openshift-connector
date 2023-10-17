@@ -12,7 +12,7 @@ on:
 jobs:
   configure_sonar:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request_target'
     
     steps:
       - name: Save Sonar config on PR

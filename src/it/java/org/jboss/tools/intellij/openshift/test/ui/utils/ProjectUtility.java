@@ -18,6 +18,8 @@ import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFra
 import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.information.TipDialog;
 import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.project.NewProjectDialogWizard;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
+import com.redhat.devtools.intellij.commonuitest.utils.constants.XPathDefinitions;
+import com.redhat.devtools.intellij.commonuitest.utils.project.CreateCloseUtils;
 import org.jboss.tools.intellij.openshift.test.ui.common.ImportProjectFromVersionControlFixture;
 import org.jboss.tools.intellij.openshift.test.ui.common.ProjectTreeFixture;
 
@@ -45,17 +47,25 @@ public class ProjectUtility {
         flatWelcomeFrame.createNewProject();
         final NewProjectDialogWizard newProjectDialogWizard = flatWelcomeFrame.find(NewProjectDialogWizard.class, Duration.ofSeconds(20));
         selectNewProjectType(robot, "Empty Project");
-        newProjectDialogWizard.next();
         JTextFieldFixture textField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='untitled']"));
+        JTextFieldFixture locationTextField = robot.find(JTextFieldFixture.class, byXpath(XPathDefinitions.EXTENDABLE_TEXT_FIELD));
+        locationTextField.setText(CreateCloseUtils.PROJECT_LOCATION);
         textField.setText(projectName);
         newProjectDialogWizard.finish();
 
         final IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
-        ideStatusBar.waitUntilProjectImportIsComplete();
+        //ideStatusBar.waitUntilProjectImportIsComplete(); TODO fix on IJ ULTIMATE 2023.2
     }
 
+
     public static void selectNewProjectType(RemoteRobot robot, String projectType) {
-        ComponentFixture newProjectTypeList = robot.findAll(ComponentFixture.class, byXpath("JBList", "//div[@class='JBList']")).get(0);
+        ComponentFixture newProjectTypeList;
+        try {
+            newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@class='JBList']"));
+        } catch (Exception e) {
+            robot.find(ComponentFixture.class, byXpath("//div[contains(@visible_text, 'Empty Project')]")).findText("Empty Project").click();
+            newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']"));
+        }
         newProjectTypeList.findText(projectType).click();
     }
 

@@ -113,9 +113,11 @@ tasks.register('integrationTest', Test) {
 }
 
 tasks.register('integrationUITest', Test) {
+    dependsOn copyKey
     useJUnitPlatform {
         includeTags 'ui-test'
     }
+    systemProperties['testProjectLocation'] = project.hasProperty('testProjectLocation') ? project.property('testProjectLocation') : null
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
     description = 'Runs the integration UI tests.'
     group = 'verification'
@@ -129,6 +131,11 @@ tasks.register('integrationUITest', Test) {
         showFailedStandardStreams true
         showFullStackTraces true
     }
+}
+
+tasks.register('copyKey', Copy) {
+    from "idea_license_token/idea.key"
+    into "build/idea-sandbox/config-uiTest"
 }
 
 dependencies {
@@ -150,10 +157,11 @@ dependencies {
             'org.awaitility:awaitility:4.1.0',
             'org.mock-server:mockserver-client-java:5.15.0',
             'org.mock-server:mockserver-netty:5.15.0',
-            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
+            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.1-SNAPSHOT',
             'org.junit.jupiter:junit-jupiter-engine:5.8.2',
             'org.junit.jupiter:junit-jupiter-api:5.8.2',
-            'org.junit.jupiter:junit-jupiter:5.8.2')
+            'org.junit.jupiter:junit-jupiter:5.8.2',
+            'org.junit.platform:junit-platform-launcher:1.9.3')
     constraints {
         implementation('io.undertow:undertow-core:2.2.24.Final') {
             because 'https://app.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3339519'

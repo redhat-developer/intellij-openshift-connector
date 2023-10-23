@@ -106,7 +106,7 @@ jobs:
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
-          ./gradlew integrationUITest --info --continue
+          ./gradlew integrationUITest --info --continue --stacktrace
       - uses: actions/upload-artifact@v3
         if: always()
         with:

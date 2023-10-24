@@ -151,13 +151,13 @@ dependencies {
             'org.awaitility:awaitility:4.1.0',
             'org.mock-server:mockserver-client-java:5.15.0',
             'org.mock-server:mockserver-netty:5.15.0',
-            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0')
+            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
+            platform("org.junit:junit-bom:5.9.1"),
+            testImplementation 'org.junit.jupiter:junit-jupiter')
     testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine:5.8.2',
-            'org.junit.jupiter:junit-jupiter-api:5.8.2',
-            'org.junit.jupiter:junit-jupiter:5.8.2',
-            'org.junit.vintage:junit-vintage-engine:5.8.2',
-            'org.junit.platform:junit-platform-launcher:1.8.2')
+            'org.junit.jupiter:junit-jupiter-engine',
+            'org.junit.vintage:junit-vintage-engine',
+            'org.junit.platform:junit-platform-launcher')
     constraints {
         implementation('io.undertow:undertow-core:2.2.24.Final') {
             because 'https://app.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3339519'

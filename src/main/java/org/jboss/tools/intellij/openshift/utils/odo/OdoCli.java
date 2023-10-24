@@ -185,7 +185,7 @@ public class OdoCli implements Odo {
 
     private void setSslContext(HttpClient.Builder builder, Config config) {
         try {
-            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).toList();
+            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
             X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
             builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
@@ -236,9 +236,9 @@ public class OdoCli implements Odo {
     public List<String> getNamespaces() throws IOException {
         try {
             if (isOpenShift()) {
-                return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().map(p -> p.getMetadata().getName()).toList();
+                return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().map(p -> p.getMetadata().getName()).collect(Collectors.toList());
             } else {
-                return client.namespaces().list().getItems().stream().map(p -> p.getMetadata().getName()).toList();
+                return client.namespaces().list().getItems().stream().map(p -> p.getMetadata().getName()).collect(Collectors.toList());
             }
         } catch (KubernetesClientException e) {
             throw new IOException(e);

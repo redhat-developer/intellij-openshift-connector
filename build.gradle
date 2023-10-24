@@ -18,7 +18,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.15.0'
+    id 'org.jetbrains.intellij' version '1.16.0'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'idea'
     id 'java'
@@ -153,7 +153,7 @@ dependencies {
             'org.mock-server:mockserver-netty:5.15.0',
             'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
             platform("org.junit:junit-bom:5.9.1"),
-            testImplementation 'org.junit.jupiter:junit-jupiter')
+            'org.junit.jupiter:junit-jupiter')
     testRuntimeOnly(
             'org.junit.jupiter:junit-jupiter-engine',
             'org.junit.vintage:junit-vintage-engine',

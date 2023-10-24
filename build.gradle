@@ -154,7 +154,9 @@ dependencies {
             'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
             'org.junit.jupiter:junit-jupiter-engine:5.8.2',
             'org.junit.jupiter:junit-jupiter-api:5.8.2',
-            'org.junit.jupiter:junit-jupiter:5.8.2')
+            'org.junit.jupiter:junit-jupiter:5.8.2',
+            'org.junit.vintage:junit-vintage-engine:5.8.2',
+            'org.junit.platform:junit-platform-launcher:1.8.2')
     constraints {
         implementation('io.undertow:undertow-core:2.2.24.Final') {
             because 'https://app.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3339519'

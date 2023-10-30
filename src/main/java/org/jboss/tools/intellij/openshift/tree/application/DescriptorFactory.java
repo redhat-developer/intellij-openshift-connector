@@ -35,6 +35,8 @@ public class DescriptorFactory {
   private static final Icon STARTER_ICON = IconLoader.findIcon("/images/start-project-light.png", ApplicationsTreeStructure.class);
   private static final Icon REGISTRY_ICON = IconLoader.findIcon("/images/registry.svg", ApplicationsTreeStructure.class);
 
+  private static final Icon CHART_RELEASE_ICON = IconLoader.findIcon("/images/helm/helm.svg", ApplicationsTreeStructure.class);
+
   public static @NotNull NodeDescriptor<?> create(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor, @NotNull ApplicationsTreeStructure structure, @NotNull Project project) {
     if (element == structure) {
       return new LabelAndIconDescriptor<>(
@@ -144,6 +146,15 @@ public class DescriptorFactory {
         starterNode.getName(),
         starterNode.getStarter().getDescription(),
         STARTER_ICON,
+        parentDescriptor);
+    } else if (element instanceof ChartReleaseNode) {
+      ChartReleaseNode releaseNode = (ChartReleaseNode) element;
+      return new LabelAndIconDescriptor<>(
+        project,
+        releaseNode,
+        releaseNode.getName(),
+        "Helm Release",
+        CHART_RELEASE_ICON,
         parentDescriptor);
     }
 

@@ -28,6 +28,8 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
+import org.jboss.tools.intellij.openshift.actions.NodeUtils;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
@@ -64,11 +66,14 @@ public class ChartPanels extends MultiPanel implements Disposable {
 
   public static final int DETAILS_PANEL = 0;
   public static final int INSTALL_PANEL = 1;
+
+  private final ApplicationsRootNode rootNode;
   private final Project project;
   private ChartVersions chart;
   private Disposable disposable = Disposer.newDisposable();
 
-  public ChartPanels(Disposable parentDisposable, Project project) {
+  public ChartPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Project project) {
+    this.rootNode = rootNode;
     this.project = project;
     Disposer.register(parentDisposable, disposable);
   }
@@ -316,6 +321,7 @@ public class ChartPanels extends MultiPanel implements Disposable {
           if (result.isError()) {
             setState(PanelState.ERROR);
           } else {
+            NodeUtils.fireModified(rootNode);
             setState(PanelState.INSTALLED);
           }
         }, EXECUTOR_UI);

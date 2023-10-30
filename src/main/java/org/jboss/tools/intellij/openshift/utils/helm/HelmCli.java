@@ -41,7 +41,7 @@ public class HelmCli implements Helm {
     }
 
     @Override
-    public List<Chart> listAll() throws IOException {
+    public List<Chart> search() throws IOException {
         String charts = execute(command, Collections.emptyMap(), "search", "repo", "-l", "-o=json");
         return Serialization.json().readValue(charts, new TypeReference<>(){});
     }
@@ -64,6 +64,12 @@ public class HelmCli implements Helm {
             arguments.addAll(Arrays.stream(additionalArguments.split(" ")).toList());
         }
         return execute(command, Collections.emptyMap(), arguments.toArray(new String[arguments.size()]));
+    }
+
+    @Override
+    public List<ChartRelease> list() throws IOException {
+        String charts = execute(command, Collections.emptyMap(), "list", "-o=json");
+        return Serialization.json().readValue(charts, new TypeReference<>(){});
     }
 
     private static String execute(String command, Map<String, String> envs, String... args) throws IOException {

@@ -19,6 +19,7 @@ import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,26 +70,18 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         if (element == this) {
             return new Object[]{getApplicationsRoot(), registries};
         }
-        try {
-            Odo odo = root.getOdo().getNow(null);
-            if (odo != null) {
-                if (element instanceof ApplicationsRootNode) {
-                    return getNamespaces((ApplicationsRootNode) element);
-                } else if (element instanceof NamespaceNode) {
-                    return createNamespaceChildren(element);
-                } else if (element instanceof ComponentNode) {
-                    return createComponentChildren((ComponentNode) element);
-                } else if (element instanceof DevfileRegistriesNode) {
-                    return getRegistries(root, odo);
-                } else if (element instanceof DevfileRegistryNode) {
-                    return getRegistryComponentTypes((DevfileRegistryNode) element);
-                } else if (element instanceof DevfileRegistryComponentTypeNode) {
-                    return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
-                }
-            }
-        } catch (Exception e) {
-            // odo errored when loaded, return no children
-            LOGGER.warn("Could not get odo binary to load children.", e);
+        if (element instanceof ApplicationsRootNode) {
+            return getNamespaces((ApplicationsRootNode) element);
+        } else if (element instanceof NamespaceNode) {
+            return createNamespaceChildren((NamespaceNode) element);
+        } else if (element instanceof ComponentNode) {
+            return createComponentChildren((ComponentNode) element);
+        } else if (element instanceof DevfileRegistriesNode) {
+            return getRegistries(root);
+        } else if (element instanceof DevfileRegistryNode) {
+            return getRegistryComponentTypes((DevfileRegistryNode) element);
+        } else if (element instanceof DevfileRegistryComponentTypeNode) {
+            return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
         }
         return new Object[0];
     }
@@ -104,9 +97,17 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     @NotNull
-    private Object[] createNamespaceChildren(@NotNull Object element) {
-        NamespaceNode namespaceNode = (NamespaceNode) element;
-        return getComponentsAndServices(namespaceNode);
+    private Object[] createNamespaceChildren(@NotNull NamespaceNode namespaceNode) {
+        List<Object> nodes = new ArrayList<>();
+
+        Odo odo = namespaceNode.getRoot().getOdo().getNow(null);
+        nodes.addAll(getComponents(namespaceNode, odo));
+        nodes.addAll(getServices(namespaceNode, odo));
+
+        Helm helm = namespaceNode.getRoot().getHelm(true).getNow(null);
+        nodes.addAll(getHelmReleases(namespaceNode, helm));
+
+        return nodes.toArray();
     }
 
     private Object[] getNamespaces(ApplicationsRootNode element) {
@@ -143,28 +144,50 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return namespaces.toArray();
     }
 
-    private Object[] getComponentsAndServices(NamespaceNode element) {
-        List<Object> results = new ArrayList<>();
-        Odo odo = element.getRoot().getOdo().getNow(null);
+    private List<Object> getComponents(NamespaceNode element, Odo odo) {
         if (odo == null) {
-            return new Object[]{};
+            return Collections.emptyList();
         }
-        results.addAll(load(
-                () -> odo.getComponents(element.getName()).stream()
-                        .map(dc -> new ComponentNode(element, dc))
-                        .collect(Collectors.toList()),
-                element,
-                "Failed to load application deployment configs"));
-        results.addAll(load(
-                () -> odo.getServices(element.getName()).stream()
-                        .map(si -> new ServiceNode(element, si))
-                        .collect(Collectors.toList()),
-                element,
-                "Failed to load application services"));
-        if (results.isEmpty()) {
-            results.add(new CreateComponentLinkNode(element.getRoot(), element));
+        List<Object> components = new ArrayList<>();
+        components.addAll(load(
+          () -> odo.getComponents(element.getName()).stream()
+            .filter(component -> !component.isManagedByHelm()) // dont display helm components
+            .map(component -> new ComponentNode(element, component))
+            .collect(Collectors.toList()),
+          element,
+          "Failed to load components"));
+        if (components.isEmpty()) {
+            components.add(new CreateComponentLinkNode(element.getRoot(), element));
         }
-        return results.toArray();
+        return components;
+    }
+
+    private List<Object> getServices(NamespaceNode element, Odo odo) {
+        if (odo == null) {
+            return Collections.emptyList();
+        }
+        List<Object> services = new ArrayList<>();
+        services.addAll(load(
+          () -> odo.getServices(element.getName()).stream()
+            .map(si -> new ServiceNode(element, si))
+            .collect(Collectors.toList()),
+          element,
+          "Failed to load application services"));
+        return services;
+    }
+
+    private List<Object> getHelmReleases(NamespaceNode element, Helm helm) {
+        List<Object> helmReleases = new ArrayList<>();
+        if (helm == null) {
+            return Collections.emptyList();
+        }
+        helmReleases.addAll(load(
+          () -> helm.list().stream()
+            .map(release -> new ChartReleaseNode(element, release))
+            .collect(Collectors.toList()),
+          element,
+          "Failed to load chart releases"));
+        return helmReleases;
     }
 
     private Collection<ParentableNode<?>> load(Callable<Collection<ParentableNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
@@ -209,9 +232,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results;
     }
 
-    private Object[] getRegistries(ApplicationsRootNode root, Odo odo) {
+    private Object[] getRegistries(ApplicationsRootNode root) {
         List<DevfileRegistryNode> result = new ArrayList<>();
-
+        Odo odo = root.getOdo().getNow(null);
         try {
             odo.listDevfileRegistries().forEach(registry ->
                 result.add(new DevfileRegistryNode(root, registries, registry))

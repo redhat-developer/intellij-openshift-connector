@@ -8,18 +8,19 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.utils.helm;
+package org.jboss.tools.intellij.openshift.tree.application;
 
-import java.io.IOException;
-import java.util.List;
+import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
 
-public interface Helm {
+public class ChartReleaseNode extends ParentableNode<NamespaceNode> {
+  private final ChartRelease release;
 
-  List<Chart> search() throws IOException;
+  public ChartReleaseNode(NamespaceNode parent, ChartRelease release) {
+    super(parent.getRoot(), parent, release.getName());
+    this.release = release;
+  }
 
-  List<Chart> search(String regex) throws IOException;
-
-  String install(String name, String chart, String version, String parameters) throws IOException;
-
-  List<ChartRelease> list() throws IOException;
+  public ChartRelease getChartRelease() {
+    return release;
+  }
 }

@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 public class HelmCliCatalogTest extends HelmCliTest {
 
     public void testCheckGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
-        List<Chart> charts = helm.listAll();
+        List<Chart> charts = helm.search();
         assertTrue(charts.size() > 0);
     }
 }

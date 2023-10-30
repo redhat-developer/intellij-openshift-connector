@@ -23,7 +23,10 @@ public class OpenHelmChartsAction extends HelmAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
         Project project = getEventProject(anActionEvent);
-        ChartsDialog dialog = new ChartsDialog(project);
+        if (!(selected instanceof ApplicationsRootNode)) {
+            return;
+        }
+        ChartsDialog dialog = new ChartsDialog((ApplicationsRootNode) selected, project);
         dialog.show();
     }
 

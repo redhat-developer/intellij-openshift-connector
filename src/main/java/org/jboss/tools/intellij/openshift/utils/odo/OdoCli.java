@@ -701,8 +701,7 @@ public class OdoCli implements Odo {
     public List<Component> getComponents(String project) throws IOException {
         return configureObjectMapper(new ComponentDeserializer()).readValue(
                 execute(command, envVars, "list", "--namespace", project, "-o", "json"),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
     }
 
     @Override
@@ -710,8 +709,7 @@ public class OdoCli implements Odo {
         try {
             return configureObjectMapper(new ServiceDeserializer()).readValue(
                     execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
-                    new TypeReference<>() {
-                    });
+                    new TypeReference<>() {});
         } catch (IOException e) {
             //https://github.com/openshift/odo/issues/5010
             if (e.getMessage().contains("\"no operator backed services found in namespace:") ||

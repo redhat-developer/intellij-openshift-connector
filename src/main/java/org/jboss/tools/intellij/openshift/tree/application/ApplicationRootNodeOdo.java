@@ -208,6 +208,7 @@ public class ApplicationRootNodeOdo implements Odo {
         ComponentInfo info = getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE);
         return Component.of(
           componentDescriptor.getName(),
+          componentDescriptor.getManagedBy(),
           new ComponentFeatures(),
           path,
           info);

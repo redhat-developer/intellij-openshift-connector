@@ -39,12 +39,14 @@ public class ApplicationRootNodeOdoTest {
   private static final File destinationDir = FileUtils.getUserDirectory();
   public static final Component COMPONENT1 = Component.of(
     "name1",
+    "managedBy1",
     new ComponentFeatures(),
     "path1",
     null);
 
   public static final Component COMPONENT2 = Component.of(
     "name2",
+    "managedBy2",
     new ComponentFeatures(),
     "path2",
     null);
@@ -133,7 +135,7 @@ public class ApplicationRootNodeOdoTest {
     // given
     String project = "project";
 
-    doReturn(new ArrayList(Arrays.asList(COMPONENT1)))
+    doReturn(new ArrayList<>(Arrays.asList(COMPONENT1)))
       .when(odo).getComponents(project);
 
     mockGetComponents(toDescriptor(COMPONENT2), rootNode);
@@ -168,6 +170,7 @@ public class ApplicationRootNodeOdoTest {
     assertThat(components).hasSize(2);
     Component updatedComponent2 = Component.of(
       COMPONENT2.getName(),
+      COMPONENT2.getManagedBy(),
       new ComponentFeatures(),
       "updatedPath",
       COMPONENT2.getInfo());

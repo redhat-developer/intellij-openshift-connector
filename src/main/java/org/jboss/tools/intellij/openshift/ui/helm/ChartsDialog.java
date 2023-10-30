@@ -31,6 +31,7 @@ import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import net.miginfocom.swing.MigLayout;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.TableRowFilterFactory;
@@ -72,6 +73,7 @@ public class ChartsDialog extends DialogWrapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartsDialog.class);
 
+  private final ApplicationsRootNode rootNode;
   private final Project project;
 
   private ChartsTableModel chartsTableModel;
@@ -80,8 +82,9 @@ public class ChartsDialog extends DialogWrapper {
   private StatusIcon statusIcon;
   private JBLabel closeIcon;
 
-  public ChartsDialog(Project project) {
+  public ChartsDialog(ApplicationsRootNode rootNode, Project project) {
     super(project, null, false, IdeModalityType.MODELESS, false);
+    this.rootNode = rootNode;
     this.project = project;
     init();
   }
@@ -163,7 +166,7 @@ public class ChartsDialog extends DialogWrapper {
       .usingInput(filterTextArea.getDocument());
     splitter.setFirstComponent(tableScrolledPane);
 
-    ChartPanels chartPanels = new ChartPanels(getDisposable(), project);
+    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), project);
     chartPanels.select(ChartPanels.DETAILS_PANEL,true);
     chartsTable.getSelectionModel().addListSelectionListener(
       onTableItemSelected(chartPanels, chartsTable, chartsTableModel));
@@ -213,7 +216,7 @@ public class ChartsDialog extends DialogWrapper {
         , EXECUTOR_UI)
       .thenApplyAsync((Function<Void, List<Chart>>) (Void) -> {
         try {
-          return helm.listAll();
+          return helm.search();
         } catch (IOException e) {
           LOGGER.warn("Could not load all helm charts.", e);
           return Collections.emptyList();

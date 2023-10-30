@@ -78,19 +78,25 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public CompletableFuture<Odo> getOdo() {
+        return getOdo(true);
+    };
+
+    public CompletableFuture<Odo> getOdo(boolean notify) {
         if (odoFuture == null) {
             this.odoFuture = ToolFactory.getInstance()
               .getOdo(project)
               .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
               .whenComplete((odo, err) -> {
                 loadProjectModel(odo, project);
-                structure.fireModified(this);
+                if (notify) {
+                    structure.fireModified(this);
+                }
               });
         }
         return odoFuture;
     }
 
-    public CompletableFuture<Helm> getHelm() {
+    public CompletableFuture<Helm> getHelm(boolean notify) {
         if (helmFuture == null) {
             this.helmFuture = ToolFactory.getInstance()
               .getHelm(project)

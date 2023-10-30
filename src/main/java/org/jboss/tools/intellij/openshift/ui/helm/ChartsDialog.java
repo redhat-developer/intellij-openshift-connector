@@ -310,7 +310,7 @@ public class ChartsDialog extends DialogWrapper {
         return null;
       }
       ChartVersions chart = charts.get(rowIndex);
-      switch(columnIndex) {
+      switch (columnIndex) {
         case 0:
           return ChartIcons.getIcon(chart.getName());
         case 1:

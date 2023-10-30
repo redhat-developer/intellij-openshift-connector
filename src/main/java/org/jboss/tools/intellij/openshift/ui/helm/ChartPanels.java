@@ -11,11 +11,13 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ide.plugins.MultiPanel;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -56,7 +58,7 @@ import java.util.regex.Pattern;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_BACKGROUND;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_UI;
 
-public class ChartPanels extends MultiPanel {
+public class ChartPanels extends MultiPanel implements Disposable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartPanels.class);
 
@@ -64,9 +66,11 @@ public class ChartPanels extends MultiPanel {
   public static final int INSTALL_PANEL = 1;
   private final Project project;
   private ChartVersions chart;
+  private Disposable disposable = Disposer.newDisposable();
 
-  public ChartPanels(Project project) {
+  public ChartPanels(Disposable parentDisposable, Project project) {
     this.project = project;
+    Disposer.register(parentDisposable, disposable);
   }
 
   @Override
@@ -89,6 +93,11 @@ public class ChartPanels extends MultiPanel {
   protected Integer prepare(Integer key) {
     setChartToPanel(key);
     return key;
+  }
+
+  @Override
+  public void dispose() {
+    disposable.dispose();
   }
 
   private void setChartToPanel(Integer key) {

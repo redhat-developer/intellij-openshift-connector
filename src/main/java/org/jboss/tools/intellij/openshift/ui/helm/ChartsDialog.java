@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.find.SearchTextArea;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CommonShortcuts;
@@ -75,8 +74,8 @@ public class ChartsDialog extends DialogWrapper {
   private ChartsTableModel chartsTableModel;
   private JBTable chartsTable;
 
-  private Disposable disposable;
   private StatusIcon statusIcon;
+  private JBLabel closeIcon;
 
   public ChartsDialog(Project project) {
     super(project, null, false, IdeModalityType.MODELESS, false);
@@ -89,7 +88,7 @@ public class ChartsDialog extends DialogWrapper {
     super.init();
     setUndecorated(true);
     Window dialogWindow = getPeer().getWindow();
-    setDialogSizes(dialogWindow);
+    setDialogSize(dialogWindow);
     JRootPane rootPane = ((RootPaneContainer) dialogWindow).getRootPane();
     registerShortcuts(rootPane);
     setBorders(rootPane);
@@ -156,7 +155,7 @@ public class ChartsDialog extends DialogWrapper {
       .usingInput(filterTextArea.getDocument());
     splitter.setFirstComponent(tableScrolledPane);
 
-    ChartPanels chartPanels = new ChartPanels(project);
+    ChartPanels chartPanels = new ChartPanels(getDisposable(), project);
     chartPanels.select(ChartPanels.DETAILS_PANEL,true);
     chartsTable.getSelectionModel().addListSelectionListener(
       onTableItemSelected(chartPanels, chartsTable, chartsTableModel));
@@ -218,7 +217,7 @@ public class ChartsDialog extends DialogWrapper {
     }
   }
 
-  private void setDialogSizes(Window dialogWindow) {
+  private void setDialogSize(Window dialogWindow) {
     Dimension panelSize = getPreferredSize();
     panelSize.width += JBUIScale.scale(24);//hidden 'loading' icon
     panelSize.height *= 2;

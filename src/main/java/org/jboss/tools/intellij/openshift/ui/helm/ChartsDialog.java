@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.find.SearchTextArea;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CommonShortcuts;
@@ -52,6 +53,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -123,14 +126,19 @@ public class ChartsDialog extends DialogWrapper {
   protected @Nullable JComponent createCenterPanel() {
     JBPanel<?> panel = new JBPanel<>(new MigLayout(
       "flowx, ins 0, gap 0, fillx, filly, hidemode 3",
-      "[100:100:100][left]"));
+      "[100:100:100][left][left][right]"));
 
     JLabel title = new JBLabel("Helm charts");
     setBold(title);
     panel.add(title, "gap 0 0 0 10");
 
     this.statusIcon = new StatusIcon();
-    panel.add(statusIcon.get(), "alignx left, aligny top, pushx, wrap");
+    panel.add(statusIcon.get(), "alignx left, aligny top, pushx");
+
+    this.closeIcon = new JBLabel();
+    closeIcon.setIcon(AllIcons.Windows.CloseSmall);
+    closeIcon.addMouseListener(onClose());
+    panel.add(closeIcon, "aligny top, wrap");
 
     JTextArea filterTextArea = new JBTextArea(1, 60);
     SearchTextArea searchTextArea = new SearchTextArea(filterTextArea, true);
@@ -164,6 +172,15 @@ public class ChartsDialog extends DialogWrapper {
     IdeFocusManager.getInstance(null).requestFocus(searchTextArea, true);
 
     return panel;
+  }
+
+  private MouseAdapter onClose() {
+    return new MouseAdapter() {
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        close(0);
+      }
+    };
   }
 
   private ListSelectionListener onTableItemSelected(final ChartPanels chartDetailsPane, final JTable table, final ChartsTableModel model) {

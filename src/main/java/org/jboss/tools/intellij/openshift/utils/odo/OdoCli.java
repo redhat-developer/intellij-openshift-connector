@@ -140,15 +140,20 @@ public class OdoCli implements Odo {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
             computeTelemetrySettings();
             this.connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
-                    (String key, String value) -> {
-                        if (TelemetryConfiguration.KEY_MODE.equals(key)) {
-                            computeTelemetrySettings();
-                        }
-                    });
+              onTelemetryConfigurationChanged());
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
         reportTelemetry();
+    }
+
+    @NotNull
+    private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged() {
+        return (String key, String value) -> {
+            if (TelemetryConfiguration.KEY_MODE.equals(key)) {
+                computeTelemetrySettings();
+            }
+        };
     }
 
     private void computeTelemetrySettings() {

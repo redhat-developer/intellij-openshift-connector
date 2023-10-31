@@ -24,8 +24,10 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import net.miginfocom.swing.MigLayout;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
@@ -62,6 +64,9 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private final ApplicationsRootNode rootNode;
   private final MultiPanel multiPanel;
   private final Helm helm;
+
+  private TelemetryMessageBuilder.ActionMessage telemetry =
+    TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "install helm chart");
 
   private JLabel icon;
   private JTextField releaseNameText;
@@ -173,6 +178,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
         , EXECUTOR_UI)
       .thenApplyAsync((Void) -> {
         try {
+          telemetry.property("chart", chart.getName());
           String result = helm.install(
             releaseNameText.getText(),
             chart.getName(),
@@ -189,9 +195,11 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
         this.installResult = result;
         if (result.isError()) {
           setState(PanelState.ERROR);
+          telemetry.error(result.message).send();
         } else {
           NodeUtils.fireModified(rootNode);
           setState(PanelState.INSTALLED);
+          telemetry.success().send();
         }
       }, EXECUTOR_UI);
   }

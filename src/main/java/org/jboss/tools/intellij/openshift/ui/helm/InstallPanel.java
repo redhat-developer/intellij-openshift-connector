@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ide.plugins.MultiPanel;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -30,7 +29,6 @@ import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
-import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -63,7 +61,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private final ChartVersions chart;
   private final ApplicationsRootNode rootNode;
   private final MultiPanel multiPanel;
-  private final Project project;
+  private final Helm helm;
 
   private JLabel icon;
   private JTextField releaseNameText;
@@ -79,7 +77,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private PanelState state = PanelState.INSTALLABLE;
   private InstallResult installResult;
 
-  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, MultiPanel multiPanel, Project project) {
+  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, MultiPanel multiPanel, Helm helm) {
     super(new MigLayout(
         "flowx, fillx, hidemode 3",
         "[50:50:50] [left, 100:100:100] [left] [left, fill] [right]"),
@@ -87,7 +85,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     this.chart = chart;
     this.rootNode = rootNode;
     this.multiPanel = multiPanel;
-    this.project = project;
+    this.helm = helm;
     initComponents();
   }
 
@@ -169,10 +167,6 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   }
 
   private void onInstall(ActionEvent actionEvent) {
-    Helm helm = ToolFactory.getInstance().getHelm(project).getNow(null);
-    if (helm == null) {
-      return;
-    }
     CompletableFuture
       .runAsync(() ->
           setState(PanelState.INSTALLING)

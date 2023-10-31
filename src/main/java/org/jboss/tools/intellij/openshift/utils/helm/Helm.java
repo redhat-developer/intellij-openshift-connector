@@ -22,4 +22,6 @@ public interface Helm {
   String install(String name, String chart, String version, String parameters) throws IOException;
 
   List<ChartRelease> list() throws IOException;
+
+  String uninstall(String name) throws IOException;
 }

@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.helm;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import org.jboss.tools.intellij.openshift.actions.HelmAction;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartsDialog;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
@@ -23,16 +24,14 @@ public class OpenHelmChartsAction extends HelmAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
         Project project = getEventProject(anActionEvent);
-        if (!(selected instanceof ApplicationsRootNode)) {
-            return;
-        }
-        ChartsDialog dialog = new ChartsDialog((ApplicationsRootNode) selected, project);
+        ChartsDialog dialog = new ChartsDialog((ApplicationsRootNode) selected, helm, project);
+        sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         dialog.show();
     }
 
     @Override
     protected String getTelemetryActionName() {
-        return "helm-charts";
+        return "helm-open charts";
     }
 
     @Override

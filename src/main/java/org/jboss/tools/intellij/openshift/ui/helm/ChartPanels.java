@@ -12,9 +12,9 @@ package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ide.plugins.MultiPanel;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +29,13 @@ public class ChartPanels extends MultiPanel {
   public static final int INSTALL_PANEL = 1;
 
   private final ApplicationsRootNode rootNode;
-  private final Project project;
+  private final Helm helm;
   private ChartVersions chart;
   private final Disposable disposable = Disposer.newDisposable();
 
-  public ChartPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Project project) {
+  public ChartPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm) {
     this.rootNode = rootNode;
-    this.project = project;
+    this.helm = helm;
     Disposer.register(parentDisposable, disposable);
   }
 
@@ -44,7 +44,7 @@ public class ChartPanels extends MultiPanel {
     if (key == DETAILS_PANEL) {
       return new DetailsPanel(chart, this);
     } else if (key == INSTALL_PANEL) {
-      return new InstallPanel(chart, rootNode, this, project);
+      return new InstallPanel(chart, rootNode, this, helm);
     } else {
       return null;
     }

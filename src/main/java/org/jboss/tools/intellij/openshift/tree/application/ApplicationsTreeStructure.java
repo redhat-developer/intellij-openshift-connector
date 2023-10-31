@@ -144,11 +144,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return namespaces.toArray();
     }
 
-    private List<Object> getComponents(NamespaceNode element, Odo odo) {
+    private List<ParentableNode<?>> getComponents(NamespaceNode element, Odo odo) {
         if (odo == null) {
             return Collections.emptyList();
         }
-        List<Object> components = new ArrayList<>();
+        List<ParentableNode<?>> components = new ArrayList<>();
         components.addAll(load(
           () -> odo.getComponents(element.getName()).stream()
             .filter(component -> !component.isManagedByHelm()) // dont display helm components
@@ -162,35 +162,29 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return components;
     }
 
-    private List<Object> getServices(NamespaceNode element, Odo odo) {
+    private List<ParentableNode<?>> getServices(NamespaceNode element, Odo odo) {
         if (odo == null) {
             return Collections.emptyList();
         }
-        List<Object> services = new ArrayList<>();
-        services.addAll(load(
-          () -> odo.getServices(element.getName()).stream()
+        return load(() -> odo.getServices(element.getName()).stream()
             .map(si -> new ServiceNode(element, si))
             .collect(Collectors.toList()),
           element,
-          "Failed to load application services"));
-        return services;
+          "Failed to load application services");
     }
 
-    private List<Object> getHelmReleases(NamespaceNode element, Helm helm) {
-        List<Object> helmReleases = new ArrayList<>();
+    private List<ParentableNode<?>> getHelmReleases(NamespaceNode element, Helm helm) {
         if (helm == null) {
             return Collections.emptyList();
         }
-        helmReleases.addAll(load(
-          () -> helm.list().stream()
+        return load(() -> helm.list().stream()
             .map(release -> new ChartReleaseNode(element, release))
             .collect(Collectors.toList()),
           element,
-          "Failed to load chart releases"));
-        return helmReleases;
+          "Failed to load chart releases");
     }
 
-    private Collection<ParentableNode<?>> load(Callable<Collection<ParentableNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
+    private List<ParentableNode<?>> load(Callable<List<ParentableNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
         try {
             return callable.call();
         } catch (Exception e) {

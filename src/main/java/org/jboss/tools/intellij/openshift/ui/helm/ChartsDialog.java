@@ -35,7 +35,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.TableRowFilterFactory;
-import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Chart;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jetbrains.annotations.Nullable;
@@ -74,7 +73,7 @@ public class ChartsDialog extends DialogWrapper {
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartsDialog.class);
 
   private final ApplicationsRootNode rootNode;
-  private final Project project;
+  private final Helm helm;
 
   private ChartsTableModel chartsTableModel;
   private JBTable chartsTable;
@@ -82,10 +81,10 @@ public class ChartsDialog extends DialogWrapper {
   private StatusIcon statusIcon;
   private JBLabel closeIcon;
 
-  public ChartsDialog(ApplicationsRootNode rootNode, Project project) {
+  public ChartsDialog(ApplicationsRootNode rootNode, Helm helm, Project project) {
     super(project, null, false, IdeModalityType.MODELESS, false);
     this.rootNode = rootNode;
-    this.project = project;
+    this.helm = helm;
     init();
   }
 
@@ -166,7 +165,7 @@ public class ChartsDialog extends DialogWrapper {
       .usingInput(filterTextArea.getDocument());
     splitter.setFirstComponent(tableScrolledPane);
 
-    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), project);
+    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), helm);
     chartPanels.select(ChartPanels.DETAILS_PANEL,true);
     chartsTable.getSelectionModel().addListSelectionListener(
       onTableItemSelected(chartPanels, chartsTable, chartsTableModel));
@@ -203,11 +202,6 @@ public class ChartsDialog extends DialogWrapper {
   }
 
   private void load(final JTable table, final ChartsTableModel tableModel) {
-    Helm helm = ToolFactory.getInstance().getHelm(project).getNow(null);
-    if (helm == null
-      || tableModel == null) {
-      return;
-    }
     CompletableFuture
       .runAsync(() -> {
           statusIcon.setLoading();

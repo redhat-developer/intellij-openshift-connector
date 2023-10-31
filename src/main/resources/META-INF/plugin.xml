@@ -310,6 +310,7 @@
       <!-- registry management -->
       <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New registry"/>
       <action class="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" id="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" text="Uninstall"/>
     </group>
   </actions>
 

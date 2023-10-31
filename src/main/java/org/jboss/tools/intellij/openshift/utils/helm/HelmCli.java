@@ -54,7 +54,7 @@ public class HelmCli implements Helm {
 
     @Override
     public String install(String name, String chart, String version, String additionalArguments) throws IOException {
-        List<String> arguments = new ArrayList();
+        List<String> arguments = new ArrayList<>();
         arguments.add("install");
         arguments.add(name);
         arguments.add(chart);
@@ -70,6 +70,11 @@ public class HelmCli implements Helm {
     public List<ChartRelease> list() throws IOException {
         String charts = execute(command, Collections.emptyMap(), "list", "-o=json");
         return Serialization.json().readValue(charts, new TypeReference<>(){});
+    }
+
+    @Override
+    public String uninstall(String name) throws IOException {
+        return execute(command, Collections.emptyMap(), "uninstall", name);
     }
 
     private static String execute(String command, Map<String, String> envs, String... args) throws IOException {

@@ -47,19 +47,19 @@ class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel {
     add(new JBLabel("Name:"), "");
     this.name = new JBLabel();
     SwingUtils.setBold(name);
-    add(name, "pushx");
+    add(name, "");
 
     this.installButton = new JButton("Install");
     installButton.setEnabled(false); // disabled until chart is set
     installButton.addActionListener(this::onInstall);
-    add(installButton, "spany 2, alignx right,wrap");
+    add(installButton, "spany 2, alignx right, wrap");
 
     add(new JBLabel("Versions:"), "");
     this.versionsLabel = new JBLabel();
-    add(versionsLabel, "width 600:600, wrap");
+    add(versionsLabel, "growy, wrap");
 
     this.descriptionLabel = new JBLabel();
-    add(descriptionLabel, "skip, spanx, pushx, pushy, aligny top, gap 0 0 10 0, wrap");
+    add(descriptionLabel, "skip, spanx, pushy, aligny top, gap 0 0 10 0, wrap");
 
     setChart(chart);
   }

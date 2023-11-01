@@ -41,6 +41,11 @@ public class HelmCli implements Helm {
     }
 
     @Override
+    public String addRepo(String name, String url) throws IOException {
+        return execute(command, Collections.emptyMap(), "repo", "add", name, url);
+    }
+
+    @Override
     public List<Chart> search() throws IOException {
         String charts = execute(command, Collections.emptyMap(), "search", "repo", "-l", "-o=json");
         return Serialization.json().readValue(charts, new TypeReference<>(){});

@@ -65,7 +65,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private final MultiPanel multiPanel;
   private final Helm helm;
 
-  private TelemetryMessageBuilder.ActionMessage telemetry =
+  private final TelemetryMessageBuilder.ActionMessage telemetry =
     TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "install helm chart");
 
   private JLabel icon;
@@ -80,7 +80,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private JButton installButton;
 
   private PanelState state = PanelState.INSTALLABLE;
-  private InstallResult installResult;
+  private Result installResult;
 
   InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, MultiPanel multiPanel, Helm helm) {
     super(new MigLayout(
@@ -185,17 +185,17 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
             (String) versionsCombo.getSelectedItem(),
             parameters.getText().trim()
           );
-          return new InstallResult(result);
+          return new Success(result);
         } catch (IOException e) {
           LOGGER.warn("Could not install helm chart " + chart.getName() + " version " + versionsCombo.getSelectedItem() + ".", e);
-          return new ErrorResult(e);
+          return new Error(e);
         }
       }, EXECUTOR_BACKGROUND)
-      .thenAcceptAsync((InstallResult result) -> {
+      .thenAcceptAsync((Result result) -> {
         this.installResult = result;
         if (result.isError()) {
           setState(PanelState.ERROR);
-          telemetry.error(result.message).send();
+          telemetry.error(result.getMessage()).send();
         } else {
           NodeUtils.fireModified(rootNode);
           setState(PanelState.INSTALLED);
@@ -342,24 +342,31 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     INSTALLABLE, INSTALLING, INSTALLED, ERROR
   }
 
-  private static class InstallResult {
+  interface Result {
+    String getMessage();
+    boolean isError();
+  }
+
+  static class Success implements Result {
     private final String message;
 
-    protected InstallResult(String message) {
+    protected Success(String message) {
       this.message = message;
     }
 
+    @Override
     public String getMessage() {
       return message;
     }
 
+    @Override
     public boolean isError() {
       return false;
     }
   }
 
-  private static class ErrorResult extends InstallPanel.InstallResult {
-    private ErrorResult(Exception e) {
+  static class Error extends Success {
+    Error(Exception e) {
       super(e.getMessage());
     }
 

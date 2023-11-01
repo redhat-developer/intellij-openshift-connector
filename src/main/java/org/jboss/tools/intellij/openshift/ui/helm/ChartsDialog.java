@@ -20,14 +20,16 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.OnePixelDivider;
 import com.intellij.openapi.wm.IdeFocusManager;
+import com.intellij.openapi.wm.impl.IdeGlassPaneEx;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.PopupBorder;
+import com.intellij.ui.WindowMoveListener;
+import com.intellij.ui.WindowResizeListener;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.render.RenderingUtil;
-import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import net.miginfocom.swing.MigLayout;
@@ -51,19 +53,17 @@ import javax.swing.RootPaneContainer;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
+import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_BACKGROUND;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_UI;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.setBold;
 import static org.jboss.tools.intellij.openshift.ui.helm.ChartVersions.toChartVersions;
@@ -71,6 +71,9 @@ import static org.jboss.tools.intellij.openshift.ui.helm.ChartVersions.toChartVe
 public class ChartsDialog extends DialogWrapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartsDialog.class);
+
+  private static final String OPENSHIFT_REPO_NAME = "openshift";
+  private static final String OPENSHIFT_REPO_URL = "https://charts.openshift.io/";
 
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
@@ -93,22 +96,16 @@ public class ChartsDialog extends DialogWrapper {
     super.init();
     setUndecorated(true);
     Window dialogWindow = getPeer().getWindow();
-    setDialogSize(dialogWindow);
     JRootPane rootPane = ((RootPaneContainer) dialogWindow).getRootPane();
     registerShortcuts(rootPane);
     setBorders(rootPane);
-    load(chartsTable, chartsTableModel);
-    getPeer().getWindow().addWindowListener(onDialogFocusLost());
-  }
-
-  private WindowAdapter onDialogFocusLost() {
-    return new WindowAdapter() {
-
-      @Override
-      public void windowDeactivated(WindowEvent e) {
-        //closeImmediately();
-      }
-    };
+    setupTable(chartsTable, chartsTableModel, statusIcon)
+      .thenCompose((Void) -> addDefaultRepo(helm))
+      .whenComplete((Void, throwable) -> {
+        if (throwable == null) {
+          load(chartsTable, chartsTableModel, statusIcon, helm);
+        }
+      });
   }
 
   private static void setBorders(JRootPane rootPane) {
@@ -131,11 +128,21 @@ public class ChartsDialog extends DialogWrapper {
       "[100:100:100][left][left][right]"));
 
     JLabel title = new JBLabel("Helm charts");
+    JRootPane rootPane = getPeer().getRootPane();
+    WindowResizeListener resizeListener = new WindowResizeListener(rootPane, JBUI.insets(10), null);
+    IdeGlassPaneEx glassPane = (IdeGlassPaneEx)getPeer().getRootPane().getGlassPane();
+    glassPane.addMousePreprocessor(resizeListener, myDisposable);
+    glassPane.addMouseMotionPreprocessor(resizeListener, myDisposable);
+
     setBold(title);
     panel.add(title, "gap 0 0 0 10");
 
     this.statusIcon = new StatusIcon();
-    panel.add(statusIcon.get(), "alignx left, aligny top, pushx");
+    panel.add(statusIcon.get(), "alignx left, aligny top, pushx, growx");
+
+    WindowMoveListener windowMoveListener = new WindowMoveListener(getPeer().getRootPane());
+    title.addMouseListener(windowMoveListener);
+    statusIcon.get().addMouseListener(windowMoveListener);
 
     this.closeIcon = new JBLabel();
     closeIcon.setIcon(AllIcons.Windows.CloseSmall);
@@ -152,10 +159,10 @@ public class ChartsDialog extends DialogWrapper {
     panel.add(splitter, "spanx, pushx, growx, growy, pushy, wrap");
 
     this.chartsTableModel = new ChartsTableModel();
-    this.chartsTable = SwingUtils.createTable(chartsTableModel);
+    this.chartsTable = SwingUtils.createTable(10, chartsTableModel);
     chartsTable.setShowGrid(false);
     chartsTable.setFocusable(false);
-    chartsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+    chartsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     chartsTable.putClientProperty(RenderingUtil.ALWAYS_PAINT_SELECTION_AS_FOCUSED, true);
     chartsTable.setBorder(JBUI.Borders.empty(2, 2, 2, 0));
     JBScrollPane tableScrolledPane = SwingUtils.createScrollPane(chartsTable);
@@ -201,44 +208,55 @@ public class ChartsDialog extends DialogWrapper {
     };
   }
 
-  private void load(final JTable table, final ChartsTableModel tableModel) {
-    CompletableFuture
+  private CompletableFuture<Void> setupTable(JTable table, ChartsTableModel tableModel, StatusIcon statusIcon) {
+    return CompletableFuture
       .runAsync(() -> {
           statusIcon.setLoading();
           tableModel.setupColumns();
+          table.getColumn(ChartsTableModel.ICON_COLUMN).setMaxWidth(50);
+          table.getColumn(ChartsTableModel.NAME_COLUMN).setPreferredWidth(250);
+          table.getColumn(ChartsTableModel.DESCRIPTION_COLUMN).setPreferredWidth(500);
         }
-        , EXECUTOR_UI)
-      .thenApplyAsync((Function<Void, List<Chart>>) (Void) -> {
+        , EXECUTOR_UI);
+  }
+
+  private CompletableFuture<Void> addDefaultRepo(Helm helm) {
+    return CompletableFuture
+      .runAsync(() -> {
         try {
-          return helm.search();
+          helm.addRepo(OPENSHIFT_REPO_NAME, OPENSHIFT_REPO_URL);
         } catch (IOException e) {
-          LOGGER.warn("Could not load all helm charts.", e);
-          return Collections.emptyList();
+          throw new RuntimeException(e.getMessage(), e);
         }
-      }, SwingUtils.EXECUTOR_BACKGROUND)
-      .thenAcceptAsync((charts) -> {
-        List<ChartVersions> chartVersions = toChartVersions(charts);
-        tableModel.setCharts(chartVersions);
-        table.getColumn(ChartsTableModel.ICON_COLUMN).setMaxWidth(50);
-        table.setRowSelectionInterval(0, 0);
-        statusIcon.setEmpty();
-      }, EXECUTOR_UI);
+      }, EXECUTOR_BACKGROUND);
+  }
+
+  private CompletableFuture<Void> load(
+    final JTable table,
+    final ChartsTableModel tableModel,
+    final StatusIcon statusIcon,
+    final Helm helm) {
+      return CompletableFuture
+        .supplyAsync((Supplier<List<Chart>>) () -> {
+          try {
+            return helm.search();
+          } catch (IOException e) {
+            LOGGER.warn("Could not load all helm charts.", e);
+            return Collections.emptyList();
+          }
+        }, SwingUtils.EXECUTOR_BACKGROUND)
+        .thenAcceptAsync((charts) -> {
+          List<ChartVersions> chartVersions = toChartVersions(charts);
+          tableModel.setCharts(chartVersions);
+          table.setRowSelectionInterval(0, 0);
+          statusIcon.setEmpty();
+        }, EXECUTOR_UI);
   }
 
   private void closeImmediately() {
     if (isVisible()) {
       doCancelAction();
     }
-  }
-
-  private void setDialogSize(Window dialogWindow) {
-    Dimension panelSize = getPreferredSize();
-    panelSize.width += JBUIScale.scale(24);//hidden 'loading' icon
-    panelSize.height *= 2;
-    dialogWindow.setMinimumSize(panelSize);
-    panelSize.height *= 1.5;
-    panelSize.width *= 1.15;
-    dialogWindow.setSize(panelSize);
   }
 
   private static Border createSearchTextBorders() {
@@ -250,6 +268,8 @@ public class ChartsDialog extends DialogWrapper {
   private static class ChartsTableModel extends DefaultTableModel {
 
     public static final String ICON_COLUMN = "Icon";
+    public static final String NAME_COLUMN = "Name";
+    public static final String DESCRIPTION_COLUMN = "Description";
     private List<ChartVersions> charts;
 
     public void setCharts(List<ChartVersions> newCharts) {
@@ -274,9 +294,9 @@ public class ChartsDialog extends DialogWrapper {
 
     public void setupColumns() {
       setColumnCount(0);
-      addColumn("Icon");
-      addColumn("Name");
-      addColumn("Description");
+      addColumn(ICON_COLUMN);
+      addColumn(NAME_COLUMN);
+      addColumn(DESCRIPTION_COLUMN);
     }
 
     @Override

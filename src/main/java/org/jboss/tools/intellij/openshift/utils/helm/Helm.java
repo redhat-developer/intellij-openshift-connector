@@ -15,6 +15,8 @@ import java.util.List;
 
 public interface Helm {
 
+  String addRepo(String name, String url) throws IOException;
+
   List<Chart> search() throws IOException;
 
   List<Chart> search(String regex) throws IOException;

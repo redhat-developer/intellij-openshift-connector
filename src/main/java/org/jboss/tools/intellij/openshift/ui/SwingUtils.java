@@ -73,11 +73,11 @@ public class SwingUtils {
     return builder.toString();
   }
 
-  public static JBTable createTable(AbstractTableModel resultsTableModel) {
+  public static JBTable createTable(int visibleRows, AbstractTableModel resultsTableModel) {
     return new JBTable(resultsTableModel) {
       @Override
       public Dimension getPreferredScrollableViewportSize() {
-        return new Dimension(getWidth(), 1 + getRowHeight() * 4);
+        return new Dimension(getWidth(), 1 + getRowHeight() * visibleRows);
       }
     };
   }

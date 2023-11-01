@@ -164,6 +164,7 @@ public class ChartsDialog extends DialogWrapper {
     chartsTable.setFocusable(false);
     chartsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     chartsTable.putClientProperty(RenderingUtil.ALWAYS_PAINT_SELECTION_AS_FOCUSED, true);
+    SwingUtils.disableCellEditors(chartsTable, String.class);
     chartsTable.setBorder(JBUI.Borders.empty(2, 2, 2, 0));
     JBScrollPane tableScrolledPane = SwingUtils.createScrollPane(chartsTable);
     tableScrolledPane.setBorder(JBUI.Borders.empty());

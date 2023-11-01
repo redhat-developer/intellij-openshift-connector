@@ -20,10 +20,12 @@ import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.AbstractButton;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.awt.Component;
@@ -32,6 +34,7 @@ import java.awt.Font;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class SwingUtils {
 
@@ -80,6 +83,18 @@ public class SwingUtils {
         return new Dimension(getWidth(), 1 + getRowHeight() * visibleRows);
       }
     };
+  }
+
+  public static void disableCellEditors(JTable table, Class...editorTypes) {
+    if (editorTypes == null) {
+      return;
+    }
+    Stream.of(editorTypes).forEach(editorType -> {
+      TableCellEditor cellEditor = table.getDefaultEditor(editorType);
+      if (cellEditor instanceof DefaultCellEditor) {
+        ((DefaultCellEditor) cellEditor).setClickCountToStart(Integer.MAX_VALUE);
+      }
+    });
   }
 
   public static JBScrollPane createScrollPane(final JTable table) {

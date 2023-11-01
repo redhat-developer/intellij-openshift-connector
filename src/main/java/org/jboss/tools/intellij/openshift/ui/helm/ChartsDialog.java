@@ -20,11 +20,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.OnePixelDivider;
 import com.intellij.openapi.wm.IdeFocusManager;
-import com.intellij.openapi.wm.impl.IdeGlassPaneEx;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.PopupBorder;
-import com.intellij.ui.WindowMoveListener;
-import com.intellij.ui.WindowResizeListener;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -45,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JRootPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -78,11 +74,10 @@ public class ChartsDialog extends DialogWrapper {
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
 
+  private JBLabel title;
   private ChartsTableModel chartsTableModel;
   private JBTable chartsTable;
-
   private StatusIcon statusIcon;
-  private JBLabel closeIcon;
 
   public ChartsDialog(ApplicationsRootNode rootNode, Helm helm, Project project) {
     super(project, null, false, IdeModalityType.MODELESS, false);
@@ -99,6 +94,9 @@ public class ChartsDialog extends DialogWrapper {
     JRootPane rootPane = ((RootPaneContainer) dialogWindow).getRootPane();
     registerShortcuts(rootPane);
     setBorders(rootPane);
+    SwingUtils.setGlassPaneResizable(getPeer().getRootPane(), getDisposable());
+    SwingUtils.setMovable(getRootPane(), title, statusIcon.get());
+
     setupTable(chartsTable, chartsTableModel, statusIcon)
       .thenCompose((Void) -> addDefaultRepo(helm))
       .whenComplete((Void, throwable) -> {
@@ -127,24 +125,14 @@ public class ChartsDialog extends DialogWrapper {
       "flowx, ins 0, gap 0, fillx, filly, hidemode 3",
       "[100:100:100][left][left][right]"));
 
-    JLabel title = new JBLabel("Helm charts");
-    JRootPane rootPane = getPeer().getRootPane();
-    WindowResizeListener resizeListener = new WindowResizeListener(rootPane, JBUI.insets(10), null);
-    IdeGlassPaneEx glassPane = (IdeGlassPaneEx)getPeer().getRootPane().getGlassPane();
-    glassPane.addMousePreprocessor(resizeListener, myDisposable);
-    glassPane.addMouseMotionPreprocessor(resizeListener, myDisposable);
-
+    this.title = new JBLabel("Helm charts");
     setBold(title);
     panel.add(title, "gap 0 0 0 10");
 
     this.statusIcon = new StatusIcon();
     panel.add(statusIcon.get(), "alignx left, aligny top, pushx, growx");
 
-    WindowMoveListener windowMoveListener = new WindowMoveListener(getPeer().getRootPane());
-    title.addMouseListener(windowMoveListener);
-    statusIcon.get().addMouseListener(windowMoveListener);
-
-    this.closeIcon = new JBLabel();
+    JBLabel closeIcon = new JBLabel();
     closeIcon.setIcon(AllIcons.Windows.CloseSmall);
     closeIcon.addMouseListener(onClose());
     panel.add(closeIcon, "aligny top, wrap");

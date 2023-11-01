@@ -20,7 +20,11 @@ public class ChartIcons {
   private static final String BASE_PATH = "/images/helm/";
   private static final String HELM_ICON = "helm.png";
 
-  public static javax.swing.Icon getIcon(String name) {
+  public static javax.swing.Icon getIcon(ChartVersions chart) {
+    return getIcon(chart.getName() + chart.getDescription());
+  }
+
+  private static javax.swing.Icon getIcon(String name) {
     Optional<IconExpression> found = Stream.of(IconExpression.values())
       .filter((IconExpression available) -> available.isMatching(name))
       .findFirst();

@@ -224,7 +224,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     if (chart == null) {
       return;
     }
-    icon.setIcon(ChartIcons.getIcon(chart.getName()));
+    icon.setIcon(ChartIcons.getIcon(chart));
     chartNameLabel.setText(chart.getName());
     releaseNameText.setText(null);
     setComboVersions(chart);

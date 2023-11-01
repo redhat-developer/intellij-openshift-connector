@@ -74,7 +74,7 @@ class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel {
       return;
     }
     if (iconLabel != null) {
-      this.iconLabel.setIcon(ChartIcons.getIcon(chart.getName() + chart.getDescription()));
+      this.iconLabel.setIcon(ChartIcons.getIcon(chart));
     }
     if (name != null) {
       this.name.setText(chart.getName());

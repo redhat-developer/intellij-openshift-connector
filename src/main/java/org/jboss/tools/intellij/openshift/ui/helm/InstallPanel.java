@@ -116,7 +116,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
       .withValidator(new ReleaseNameValidator(releaseNameText))
       .installOn(releaseNameText)
       .andRegisterOnDocumentListener(releaseNameText);
-    releaseNameText.addKeyListener(onKeyPressed());
+    releaseNameText.addKeyListener(onKeyPressed(installButton));
     add(releaseNameText, "spanx 2, width 200:200:200, pushx, growx, wrap");
 
     add(new JBLabel("Version:"), "skip");
@@ -126,7 +126,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
 
     add(new JBLabel("Parameters:"), "skip");
     this.parameters = new JBTextField();
-    parameters.addKeyListener(onKeyPressed());
+    parameters.addKeyListener(onKeyPressed(installButton));
     add(parameters, "spanx 2, pushx, growx, wrap");
 
     JLabel paramExplanation = new JBLabel("E.g.: --set build.uri=https://example.com");
@@ -152,11 +152,14 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     };
   }
 
-  private KeyListener onKeyPressed() {
+  private KeyListener onKeyPressed(JButton installButton) {
     return new KeyAdapter() {
       @Override
       public void keyReleased(KeyEvent e) {
         setState(PanelState.INSTALLABLE);
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          installButton.doClick();
+        }
       }
     };
   }

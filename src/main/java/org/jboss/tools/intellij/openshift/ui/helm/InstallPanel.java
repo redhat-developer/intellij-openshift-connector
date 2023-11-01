@@ -32,7 +32,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +142,6 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     setChart(chart);
   }
 
-  @NotNull
   private ItemListener onVersionSelected() {
     return e -> {
       if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -217,7 +215,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
      */
     ApplicationManager.getApplication().invokeLater(() -> {
         updateComponents(chart);
-        setState(PanelState.INSTALLABLE);
+        setState(PanelState.INSTALLABLE, true);
       }
     );
   }
@@ -252,9 +250,17 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     }
   }
 
+  private void setStateAsync(PanelState panelState) {
+    ApplicationManager.getApplication().invokeLater(() ->
+      setState(panelState));
+  }
+
   private void setState(PanelState panelState) {
-    if (this.state != null
-      && this.state == panelState) {
+    setState(panelState, false);
+  }
+
+  private void setState(PanelState panelState, boolean force) {
+    if (!force && state == panelState) {
       return;
     }
     this.state = panelState;

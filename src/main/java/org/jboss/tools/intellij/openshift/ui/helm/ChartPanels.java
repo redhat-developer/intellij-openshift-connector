@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.JComponent;
 import java.awt.Component;
+import java.util.stream.Stream;
 
 public class ChartPanels extends MultiPanel {
 
@@ -52,13 +53,8 @@ public class ChartPanels extends MultiPanel {
 
   public void setChart(ChartVersions chart) {
     this.chart = chart;
+    setCharts(getComponents());
     select(DETAILS_PANEL, false);
-  }
-
-  @Override
-  protected Integer prepare(Integer key) {
-    setChartToPanel(key);
-    return key;
   }
 
   @Override
@@ -66,12 +62,11 @@ public class ChartPanels extends MultiPanel {
     disposable.dispose();
   }
 
-  private void setChartToPanel(Integer key) {
-    if (getComponents().length > key) {
-      Component component = getComponent(key);
+  private void setCharts(Component[] components) {
+    Stream.of(components).forEach(component -> {
       if (component instanceof ChartPanel) {
         ((ChartPanel) component).setChart(chart);
       }
-    }
+    });
   }
 }

@@ -149,12 +149,12 @@ public class DescriptorFactory {
         parentDescriptor);
     } else if (element instanceof ChartReleaseNode) {
       ChartReleaseNode releaseNode = (ChartReleaseNode) element;
-      return new LabelAndIconDescriptor<>(
+      return new ApplicationsTreeStructure.ProcessableDescriptor<>(
         project,
         releaseNode,
-        releaseNode.getName(),
-        "Helm Release",
-        CHART_RELEASE_ICON,
+        releaseNode::getName,
+        () -> "Helm Release",
+        () -> CHART_RELEASE_ICON,
         parentDescriptor);
     }
 

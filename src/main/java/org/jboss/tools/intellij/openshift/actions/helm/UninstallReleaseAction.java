@@ -33,6 +33,13 @@ public class UninstallReleaseAction extends HelmAction {
   public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
     Project project = getEventProject(anActionEvent);
     ChartReleaseNode releaseNode = (ChartReleaseNode) selected;
+    if (Messages.NO == Messages.showYesNoDialog(
+      "Delete Release '" + releaseNode.getName() + "'.\nAre you sure?",
+      "Delete Release",
+      Messages.getQuestionIcon())) {
+      sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
+      return;
+    }
     runWithProgress((ProgressIndicator progress) -> {
         try {
           setProcessing("uninstalling...", releaseNode);

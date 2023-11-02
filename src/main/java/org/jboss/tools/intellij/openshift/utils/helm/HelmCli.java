@@ -43,17 +43,20 @@ public class HelmCli implements Helm {
 
     @Override
     public String addRepo(String name, String url) throws IOException {
+        LOGGER.info("Adding repo " + name + " at " + url + ".");
         return execute(command, Collections.emptyMap(), "repo", "add", name, url);
     }
 
     @Override
     public List<Chart> search() throws IOException {
+        LOGGER.info("Listing all charts.");
         String charts = execute(command, Collections.emptyMap(), "search", "repo", "-l", "-o=json");
         return Serialization.json().readValue(charts, new TypeReference<>(){});
     }
 
     @Override
     public List<Chart> search(String regex) throws IOException {
+        LOGGER.info("Searching all charts that match " + regex + ".");
         String charts = execute(command, Collections.emptyMap(), "search", "repo", "-r", regex, "-o=json");
         return Serialization.json().readValue(charts, new TypeReference<>(){});
     }
@@ -69,11 +72,13 @@ public class HelmCli implements Helm {
         if (!StringUtil.isEmptyOrSpaces(additionalArguments)) {
             arguments.addAll(Arrays.stream(additionalArguments.split(" ")).collect(Collectors.toList()));
         }
+        LOGGER.info("Installing chart " + chart + " in version " + version + ".");
         return execute(command, Collections.emptyMap(), arguments.toArray(new String[arguments.size()]));
     }
 
     @Override
     public List<ChartRelease> list() throws IOException {
+        LOGGER.info("listing all releases.");
         String charts = execute(command, Collections.emptyMap(), "list", "-o=json");
         return Serialization.json().readValue(charts, new TypeReference<>(){});
     }

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 
@@ -66,7 +67,7 @@ public class HelmCli implements Helm {
         arguments.add("--version");
         arguments.add(version);
         if (!StringUtil.isEmptyOrSpaces(additionalArguments)) {
-            arguments.addAll(Arrays.stream(additionalArguments.split(" ")).toList());
+            arguments.addAll(Arrays.stream(additionalArguments.split(" ")).collect(Collectors.toList()));
         }
         return execute(command, Collections.emptyMap(), arguments.toArray(new String[arguments.size()]));
     }

@@ -35,9 +35,9 @@ public class UninstallReleaseAction extends HelmAction {
     ChartReleaseNode releaseNode = (ChartReleaseNode) selected;
     runWithProgress((ProgressIndicator progress) -> {
         try {
-          setProcessing("Creating component...", releaseNode);
+          setProcessing("uninstalling...", releaseNode);
           helm.uninstall(releaseNode.getName());
-          clearProcessing(releaseNode);
+          clearProcessing(releaseNode.getRoot());
           sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         } catch (IOException e) {
           clearProcessing(releaseNode);

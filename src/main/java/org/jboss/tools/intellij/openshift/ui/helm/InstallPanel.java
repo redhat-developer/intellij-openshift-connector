@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.helm;
 
-import com.intellij.ide.plugins.MultiPanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
@@ -61,14 +60,14 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartPanels.class);
 
-  private final ChartVersions chart;
   private final ApplicationsRootNode rootNode;
-  private final MultiPanel multiPanel;
   private final Helm helm;
   private final Disposable disposable = Disposer.newDisposable();
 
   private final TelemetryMessageBuilder.ActionMessage telemetry =
     TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "install helm chart");
+
+  private ChartVersions chart;
 
   private PanelState state = PanelState.INSTALLABLE;
   private Result installResult;
@@ -84,14 +83,13 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
   private JPanel installResultPanel;
   private JButton installButton;
 
-  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, Disposable parentDisposable, MultiPanel multiPanel, Helm helm) {
+  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm) {
     super(new MigLayout(
         "flowx, fillx, hidemode 3",
         "[50:50:50] [left, 100:100:100] [left] [left, fill] [right]"),
       true);
     this.chart = chart;
     this.rootNode = rootNode;
-    this.multiPanel = multiPanel;
     this.helm = helm;
     initComponents();
     Disposer.register(parentDisposable, disposable);
@@ -120,7 +118,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
       .installOn(releaseNameText)
       .andRegisterOnDocumentListener(releaseNameText);
     releaseNameText.addKeyListener(onKeyPressed(installButton));
-    add(releaseNameText, "spanx 2, width 200:200:200, pushx, growx, wrap");
+    add(releaseNameText, "spanx 2, pushx, growx, wrap");
 
     add(new JBLabel("Version:"), "skip");
     this.versionsCombo = new ComboBox<>(new String[]{});
@@ -217,6 +215,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
      * Culprit is {@link com.intellij.ui.CardLayoutPanel#select(ActionCallback, Object, Object)}
      * which sets the focus to components and may set invalid ones.
      */
+    this.chart = chart;
     ApplicationManager.getApplication().invokeLater(() -> {
         updateComponents(chart);
         setState(PanelState.INSTALLABLE, true);

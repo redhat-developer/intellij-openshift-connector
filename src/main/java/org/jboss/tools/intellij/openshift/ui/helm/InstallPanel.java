@@ -11,10 +11,12 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ide.plugins.MultiPanel;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -55,7 +57,7 @@ import java.util.regex.Pattern;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_BACKGROUND;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_UI;
 
-class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
+class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartPanels.class);
 
@@ -63,9 +65,13 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private final ApplicationsRootNode rootNode;
   private final MultiPanel multiPanel;
   private final Helm helm;
+  private final Disposable disposable = Disposer.newDisposable();
 
   private final TelemetryMessageBuilder.ActionMessage telemetry =
     TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "install helm chart");
+
+  private PanelState state = PanelState.INSTALLABLE;
+  private Result installResult;
 
   private JLabel icon;
   private JTextField releaseNameText;
@@ -78,10 +84,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
   private JPanel installResultPanel;
   private JButton installButton;
 
-  private PanelState state = PanelState.INSTALLABLE;
-  private Result installResult;
-
-  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, MultiPanel multiPanel, Helm helm) {
+  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, Disposable parentDisposable, MultiPanel multiPanel, Helm helm) {
     super(new MigLayout(
         "flowx, fillx, hidemode 3",
         "[50:50:50] [left, 100:100:100] [left] [left, fill] [right]"),
@@ -91,6 +94,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     this.multiPanel = multiPanel;
     this.helm = helm;
     initComponents();
+    Disposer.register(parentDisposable, disposable);
   }
 
   private void initComponents() {
@@ -100,7 +104,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     add(new JBLabel("Chart name:"), "");
     this.chartNameLabel = new JBLabel();
     SwingUtils.setBold(chartNameLabel);
-    add(chartNameLabel, "gapleft 4");
+    add(chartNameLabel, "gapleft 4, growx, pushx");
 
     this.statusIcon = new StatusIcon();
     add(statusIcon.get(), "pushx, growx");
@@ -111,7 +115,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
 
     add(new JBLabel("Release name:"), "");
     this.releaseNameText = new JBTextField();
-    this.releaseNameValidator = new ComponentValidator(multiPanel)
+    this.releaseNameValidator = new ComponentValidator(disposable)
       .withValidator(new ReleaseNameValidator(releaseNameText))
       .installOn(releaseNameText)
       .andRegisterOnDocumentListener(releaseNameText);
@@ -309,6 +313,11 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
         installButton.setEnabled(false);
         break;
     }
+  }
+
+  @Override
+  public void dispose() {
+    disposable.dispose();
   }
 
   private class ReleaseNameValidator implements Supplier<ValidationInfo> {

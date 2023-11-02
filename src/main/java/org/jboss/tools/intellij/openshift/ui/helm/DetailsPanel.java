@@ -11,6 +11,8 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ide.plugins.MultiPanel;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import net.miginfocom.swing.MigLayout;
@@ -20,9 +22,11 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 
-class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel {
+class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel, Disposable {
 
   private final ChartVersions chart;
+
+  private final Disposable disposable = Disposer.newDisposable();
   private final MultiPanel multiPanel;
   private JLabel iconLabel;
   private JLabel name;
@@ -30,13 +34,14 @@ class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel {
   private JLabel descriptionLabel;
   private JButton installButton;
 
-  public DetailsPanel(ChartVersions chart, MultiPanel multiPanel) {
+  public DetailsPanel(ChartVersions chart, Disposable parentDisposable, MultiPanel multiPanel) {
     super(new MigLayout(
         "flowx, fillx, hidemode 3",
         "[50:50:50][100:100:100][fill][right]"),
       true);
     this.chart = chart;
     this.multiPanel = multiPanel;
+    Disposer.register(parentDisposable, disposable);
     initComponents();
   }
 
@@ -99,5 +104,10 @@ class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel {
 
   private void onInstall(ActionEvent actionEvent) {
     multiPanel.select(ChartPanels.INSTALL_PANEL, false);
+  }
+
+  @Override
+  public void dispose() {
+    disposable.dispose();
   }
 }

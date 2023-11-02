@@ -43,9 +43,9 @@ public class ChartPanels extends MultiPanel {
   @Override
   protected JComponent create(Integer key) {
     if (key == DETAILS_PANEL) {
-      return new DetailsPanel(chart, this);
+      return new DetailsPanel(chart, disposable, this);
     } else if (key == INSTALL_PANEL) {
-      return new InstallPanel(chart, rootNode, this, helm);
+      return new InstallPanel(chart, rootNode, disposable, this, helm);
     } else {
       return null;
     }

@@ -63,6 +63,8 @@ public class UninstallReleaseAction extends HelmAction {
 
   @Override
   public boolean isVisible(Object selected) {
-    return selected.getClass() == ChartReleaseNode.class;
+    return selected instanceof ChartReleaseNode
+      && !((ChartReleaseNode) selected).isProcessing();
+
   }
 }

@@ -79,7 +79,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
 
     public CompletableFuture<Odo> getOdo() {
         return getOdo(true);
-    };
+    }
 
     public CompletableFuture<Odo> getOdo(boolean notify) {
         if (odoFuture == null) {

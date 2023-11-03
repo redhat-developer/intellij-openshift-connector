@@ -229,12 +229,14 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getRegistries(ApplicationsRootNode root) {
         List<DevfileRegistryNode> result = new ArrayList<>();
         Odo odo = root.getOdo().getNow(null);
-        try {
-            odo.listDevfileRegistries().forEach(registry ->
-                result.add(new DevfileRegistryNode(root, registries, registry))
-            );
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
+        if (odo != null) {
+            try {
+                odo.listDevfileRegistries().forEach(registry ->
+                  result.add(new DevfileRegistryNode(root, registries, registry))
+                );
+            } catch (IOException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            }
         }
         return result.toArray();
     }

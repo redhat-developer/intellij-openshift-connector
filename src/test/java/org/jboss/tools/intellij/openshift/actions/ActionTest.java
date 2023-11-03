@@ -116,7 +116,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnLocalDevComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV),
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV),
             ".", mockInfo()));
     verifyLocalDevComponent(event.getPresentation().isVisible());
   }
@@ -126,7 +126,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnLocalOnlyComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(), ".", mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null,  new ComponentFeatures(), ".", mockInfo()));
     verifyLocalOnlyComponent(event.getPresentation().isVisible());
   }
 
@@ -135,12 +135,12 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnRemoteOnlyDevComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), "aPath", mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV), "aPath", mockInfo()));
     verifyRemoteOnlyDevComponent(event.getPresentation().isVisible());
   }
 
   public void testActionOnRemoteOnlyDevComponentWithoutContext() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
     verifyRemoteOnlyDevComponentWithoutContext(event.getPresentation().isVisible());
   }
 

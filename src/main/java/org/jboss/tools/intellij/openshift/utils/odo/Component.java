@@ -15,6 +15,10 @@ import java.util.Objects;
 public interface Component {
     String getName();
 
+    String getManagedBy();
+
+    boolean isManagedByHelm();
+
     ComponentFeatures getLiveFeatures();
 
     String getPath();
@@ -31,12 +35,14 @@ public interface Component {
 
     class ComponentImpl implements Component {
         private final String name;
+        private final String managedBy;
         private ComponentFeatures state;
         private String path;
         private ComponentInfo info;
 
-        private ComponentImpl(String name, ComponentFeatures state, String path, ComponentInfo info) {
+        private ComponentImpl(String name, String managedBy, ComponentFeatures state, String path, ComponentInfo info) {
             this.name = name;
+            this.managedBy = managedBy;
             this.state = state;
             this.path = path;
             this.info = info;
@@ -45,6 +51,16 @@ public interface Component {
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public String getManagedBy() {
+            return managedBy;
+        }
+
+        @Override
+        public boolean isManagedByHelm() {
+            return "Helm".equals(managedBy);
         }
 
         @Override
@@ -86,11 +102,11 @@ public interface Component {
         }
     }
 
-    static Component of(String name, ComponentFeatures state, ComponentInfo info) {
-        return of(name, state, null, info);
+    static Component of(String name, String managedBy, ComponentFeatures state, ComponentInfo info) {
+        return of(name, managedBy, state, null, info);
     }
 
-    static Component of(String name, ComponentFeatures state, String path, ComponentInfo info) {
-        return new ComponentImpl(name, state, path, info);
+    static Component of(String name, String managedBy, ComponentFeatures state, String path, ComponentInfo info) {
+        return new ComponentImpl(name, managedBy, state, path, info);
     }
 }

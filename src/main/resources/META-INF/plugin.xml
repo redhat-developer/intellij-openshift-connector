@@ -265,6 +265,9 @@
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
       <separator/>
+      <!-- helm -->
+      <action class="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" id="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" text="Open Helm Charts"/>
+      <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
       <separator/>
       <action id="org.jboss.tools.intellij.openshift.actions.OpenGettingStartedAction"
@@ -307,6 +310,7 @@
       <!-- registry management -->
       <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New registry"/>
       <action class="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" id="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" text="Uninstall"/>
     </group>
   </actions>
 

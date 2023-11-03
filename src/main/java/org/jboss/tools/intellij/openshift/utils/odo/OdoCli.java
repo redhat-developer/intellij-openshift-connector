@@ -50,6 +50,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -94,8 +95,6 @@ public class OdoCli implements Odo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
-
     private static final String WINDOW_TITLE = "OpenShift";
 
     private static final String METADATA_FIELD = "metadata";
@@ -132,7 +131,7 @@ public class OdoCli implements Odo {
      */
     private final Map<String, List<ProcessHandler>> componentLogProcesses = new HashMap<>();
 
-    OdoCli(com.intellij.openapi.project.Project project, String command) {
+    public OdoCli(com.intellij.openapi.project.Project project, String command) {
         this.command = command;
         this.project = project;
         this.connection = ApplicationManager.getApplication().getMessageBus().connect();
@@ -141,15 +140,20 @@ public class OdoCli implements Odo {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
             computeTelemetrySettings();
             this.connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
-                    (String key, String value) -> {
-                        if (TelemetryConfiguration.KEY_MODE.equals(key)) {
-                            computeTelemetrySettings();
-                        }
-                    });
+              onTelemetryConfigurationChanged());
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
         reportTelemetry();
+    }
+
+    @NotNull
+    private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged() {
+        return (String key, String value) -> {
+            if (TelemetryConfiguration.KEY_MODE.equals(key)) {
+                computeTelemetrySettings();
+            }
+        };
     }
 
     private void computeTelemetrySettings() {
@@ -402,17 +406,19 @@ public class OdoCli implements Odo {
         try {
             ObjectNode payload = serviceCRD.getSample().deepCopy();
             updatePayload(payload, spec, project, service);
-            client.resource(JSON_MAPPER.writeValueAsString(payload)).create();
+            client.resource(Serialization.json().writeValueAsString(payload)).create();
         } catch (KubernetesClientException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
     private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
-        ((ObjectNode) node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
-        ((ObjectNode) node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
+        ObjectNode objectNode = (ObjectNode) node;
+        ObjectNode metadataField = (ObjectNode) objectNode.get(METADATA_FIELD);
+        metadataField.set(NAME_FIELD, Serialization.json().getNodeFactory().textNode(service));
+        metadataField.set(NAMESPACE_FIELD, Serialization.json().getNodeFactory().textNode(project));
         if (spec != null) {
-            ((ObjectNode) node).set(SPEC_FIELD, spec);
+            objectNode.set(SPEC_FIELD, spec);
         }
     }
 
@@ -435,9 +441,7 @@ public class OdoCli implements Odo {
     public List<DevfileComponentType> getComponentTypes() throws IOException {
         return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
                 execute(command, envVars, "registry", "list", "-o", "json"),
-                new TypeReference<>() {
-                }
-        );
+                new TypeReference<>() {});
     }
 
 
@@ -516,7 +520,7 @@ public class OdoCli implements Odo {
     }
 
     private List<URL> parseURLs(String json) throws IOException {
-        JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+        JSonParser parser = new JSonParser(Serialization.json().readTree(json));
         return parser.parseURLS();
     }
 
@@ -540,7 +544,7 @@ public class OdoCli implements Odo {
     }
 
     private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
-        JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+        JSonParser parser = new JSonParser(Serialization.json().readTree(json));
         return parser.parseDescribeComponentInfo(kind);
     }
 
@@ -702,8 +706,7 @@ public class OdoCli implements Odo {
     public List<Component> getComponents(String project) throws IOException {
         return configureObjectMapper(new ComponentDeserializer()).readValue(
                 execute(command, envVars, "list", "--namespace", project, "-o", "json"),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
     }
 
     @Override
@@ -711,8 +714,7 @@ public class OdoCli implements Odo {
         try {
             return configureObjectMapper(new ServiceDeserializer()).readValue(
                     execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
-                    new TypeReference<>() {
-                    });
+                    new TypeReference<>() {});
         } catch (IOException e) {
             //https://github.com/openshift/odo/issues/5010
             if (e.getMessage().contains("\"no operator backed services found in namespace:") ||
@@ -791,7 +793,7 @@ public class OdoCli implements Odo {
     public DebugStatus debugStatus(String project, String context, String component) throws IOException {
         try {
             String json = execute(new File(context), command, envVars, "debug", "info", "-o", "json");
-            JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+            JSonParser parser = new JSonParser(Serialization.json().readTree(json));
             return parser.parseDebugStatus();
         } catch (IOException e) {
             if (e.getMessage().contains("debug is not running")) {
@@ -822,7 +824,7 @@ public class OdoCli implements Odo {
                 } else {
                     ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
                     String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
-                    return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
+                    return Serialization.json().readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
                 }
             }
             //https://<master-ip>:<apiserver-port>/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
@@ -858,7 +860,7 @@ public class OdoCli implements Odo {
     @Override
     public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
         String json = execute(command, envVars, "registry", "list", "--devfile-registry", registryName, "--devfile", componentType, "-o", "json");
-        JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+        JSonParser parser = new JSonParser(Serialization.json().readTree(json));
         return parser.parseComponentTypeInfo();
     }
 

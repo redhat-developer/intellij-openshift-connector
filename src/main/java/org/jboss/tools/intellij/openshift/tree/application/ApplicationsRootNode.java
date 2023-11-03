@@ -29,9 +29,10 @@ import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
+import org.jboss.tools.intellij.openshift.utils.ToolFactory;
+import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private final Project project;
     private final ApplicationsTreeStructure structure;
     private CompletableFuture<Odo> odoFuture;
+    private CompletableFuture<Helm> helmFuture;
     private boolean logged;
     private Config config;
 
@@ -76,16 +78,33 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public CompletableFuture<Odo> getOdo() {
+        return getOdo(true);
+    }
+
+    public CompletableFuture<Odo> getOdo(boolean notify) {
         if (odoFuture == null) {
-            this.odoFuture = OdoCliFactory.getInstance()
+            this.odoFuture = ToolFactory.getInstance()
               .getOdo(project)
               .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
               .whenComplete((odo, err) -> {
                 loadProjectModel(odo, project);
-                structure.fireModified(this);
+                if (notify) {
+                    structure.fireModified(this);
+                }
               });
         }
         return odoFuture;
+    }
+
+    public CompletableFuture<Helm> getHelm(boolean notify) {
+        if (helmFuture == null) {
+            this.helmFuture = ToolFactory.getInstance()
+              .getHelm(project)
+              .whenComplete((odo, err) ->
+                  structure.fireModified(this)
+              );
+        }
+        return helmFuture;
     }
 
     public Project getProject() {
@@ -126,23 +145,27 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
             if (descriptor.isPreOdo3()) {
-                getOdo()
-                  .thenAccept(odo -> {
-                      if (odo != null) {
-                          odo.migrateComponent(path, descriptor.getName());
-                      }
-                  })
-                  .thenRun(() ->
-                    Notifications.Bus.notify(
-                      new Notification(
-                        GROUP_DISPLAY_ID,
-                        "Component migration",
-                        "The component " + descriptor.getName() + " has been migrated to odo 3.x",
-                        NotificationType.INFORMATION),
-                      project));
+                migrateOdo(path, descriptor);
             }
             components.put(path, descriptor);
         }
+    }
+
+    private void migrateOdo(String path, ComponentDescriptor descriptor) {
+        getOdo()
+          .thenAccept(odo -> {
+              if (odo != null) {
+                  odo.migrateComponent(path, descriptor.getName());
+              }
+          })
+          .thenRun(() ->
+            Notifications.Bus.notify(
+              new Notification(
+                GROUP_DISPLAY_ID,
+                "Component migration",
+                "The component " + descriptor.getName() + " has been migrated to odo 3.x",
+                NotificationType.INFORMATION),
+              project));
     }
 
     private void addContext(Odo odo, VirtualFile modulePathFile) {
@@ -237,7 +260,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public void refresh() {
-        OdoCliFactory.getInstance().resetOdo();
+        ToolFactory.getInstance().resetOdo();
         getOdo().thenAccept(odo -> structure.fireModified(this));
     }
 

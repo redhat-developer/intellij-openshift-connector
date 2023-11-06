@@ -21,9 +21,9 @@ public interface Helm {
 
   List<Chart> search(String regex) throws IOException;
 
-  String install(String name, String chart, String version, String parameters) throws IOException;
-
   List<ChartRelease> list() throws IOException;
+
+  String install(String name, String chart, String version, String parameters) throws IOException;
 
   String uninstall(String name) throws IOException;
 }

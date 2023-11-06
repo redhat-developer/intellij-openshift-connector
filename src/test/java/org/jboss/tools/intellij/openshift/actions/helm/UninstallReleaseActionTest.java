@@ -8,13 +8,24 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.tree.application;
+package org.jboss.tools.intellij.openshift.actions.helm;
 
-import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
+import com.intellij.openapi.actionSystem.AnAction;
+import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
-public class ChartReleaseNode extends ParentableNode<NamespaceNode> {
+public class UninstallReleaseActionTest extends ActionTest {
+  @Override
+  public AnAction getAction() {
+    return new UninstallReleaseAction();
+  }
 
-  public ChartReleaseNode(NamespaceNode parent, ChartRelease release) {
-    super(parent.getRoot(), parent, release.getName());
+  @Override
+  protected void verifyProject(boolean visible) {
+    assertFalse(visible);
+  }
+
+  @Override
+  protected void verifyChartRelease(boolean visible) {
+    assertTrue(visible);
   }
 }

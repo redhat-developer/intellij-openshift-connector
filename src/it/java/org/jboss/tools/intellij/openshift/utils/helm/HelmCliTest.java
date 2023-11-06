@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,40 +10,36 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.helm;
 
-import com.intellij.openapi.ui.TestDialog;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import com.redhat.devtools.intellij.common.utils.MessagesHelper;
+import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
-
-import java.util.Random;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
-    protected static final String PROJECT_PREFIX = "prj";
-
     protected Helm helm;
-
-    protected Random random = new Random();
-
-    protected static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
-
-    protected static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
-
-    protected static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
-
-    private TestDialog previousTestDialog;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        this.previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
+        Odo odo = ToolFactory.getInstance().getOdo(getProject()).get();
+        OdoCluster.INSTANCE.login(odo);
         this.helm = ToolFactory.getInstance().getHelm(getProject()).get();
+        Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        MessagesHelper.setTestDialog(previousTestDialog);
         super.tearDown();
     }
+
+    protected void safeUninstall(String releaseName) {
+        try {
+            helm.uninstall(releaseName);
+        } catch (Exception e) {
+            LOG.info("Could not uninstall release " + releaseName, e);
+        }
+    }
+
 }

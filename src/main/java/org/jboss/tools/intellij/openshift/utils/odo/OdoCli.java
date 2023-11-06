@@ -32,6 +32,7 @@ import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.kubernetes.model.client.ssl.IDEATrustManager;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -179,13 +180,14 @@ public class OdoCli implements Odo {
     }
 
     private void setSslContext(HttpClient.Builder builder, Config config) {
-      try {
-          List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
-          X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
-          builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
-      } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
-               UnrecoverableKeyException | InvalidKeySpecException e) {
-          throw new RuntimeException(e);
+        try {
+            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
+            X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
+            builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
+                 UnrecoverableKeyException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
   
 
@@ -396,7 +398,7 @@ public class OdoCli implements Odo {
     private CustomResourceDefinitionContext toCustomResourceDefinitionContext(org.jboss.tools.intellij.openshift.utils.odo.Service service) {
         String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
         String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
-        return new CustomResourceDefinitionContext.Builder().withName(service.getKind().toLowerCase() + "s." + group).withGroup(group).withScope(Scope.NAMESPACED.value()).withKind(service.getKind()).withPlural(service.getKind().toLowerCase() + "s").withVersion(version).build();
+        return new CustomResourceDefinitionContext.Builder().withName(service.getKind().toLowerCase() + "s." + group).withGroup(group).withScope(Scope.NAMESPACED.value()).withKind(service.getKind()).withPlural(Pluralize.toPlural(service.getKind().toLowerCase())).withVersion(version).build();
     }
 
     @Override
@@ -655,12 +657,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void createProject(String project) throws IOException {
-        execute(command, envVars, "create", "namespace", project, "-w");
+        execute(command, envVars, "create", NAMESPACE_FIELD, project, "-w");
     }
 
     @Override
     public void deleteProject(String project) throws IOException {
-        execute(command, envVars, "delete", "namespace", project, "-f", "-w");
+        execute(command, envVars, "delete", NAMESPACE_FIELD, project, "-f", "-w");
         if (project.equals(namespace)) {
             namespace = null;
         }

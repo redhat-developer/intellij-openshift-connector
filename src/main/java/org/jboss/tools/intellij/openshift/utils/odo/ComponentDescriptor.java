@@ -27,7 +27,9 @@ public class ComponentDescriptor {
     public String getName() {
         return name;
     }
-
+    public String getManagedBy() {
+        return managedBy;
+    }
     public String getPath() {
         return path;
     }

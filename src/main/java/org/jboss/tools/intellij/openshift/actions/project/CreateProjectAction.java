@@ -67,7 +67,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException | CompletionException e) {
           sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create project"));
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Project"));
         }
       },
       "Create Project...",

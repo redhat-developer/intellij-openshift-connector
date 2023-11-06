@@ -17,6 +17,7 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ChartReleaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
@@ -199,6 +200,18 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   protected void verifyRegistry(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnChartRelease() {
+    ChartReleaseNode chartRelease = mock(ChartReleaseNode.class);
+    AnActionEvent event = createEvent(chartRelease);
+    AnAction action = getAction();
+    action.update(event);
+    verifyChartRelease(event.getPresentation().isVisible());
+  }
+
+  protected void verifyChartRelease(boolean visible) {
     assertFalse(visible);
   }
 }

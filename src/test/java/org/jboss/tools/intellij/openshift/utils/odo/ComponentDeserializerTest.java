@@ -58,6 +58,7 @@ public class ComponentDeserializerTest {
     Component component = components.get(0);
     Assert.assertNotNull(component);
     Assert.assertEquals("nodejs", component.getName());
+    Assert.assertEquals("odo", component.getManagedBy());
     ComponentFeatures liveFeatures = component.getLiveFeatures();
     Assert.assertNotNull(liveFeatures);
     Assert.assertFalse(liveFeatures.isDebug());

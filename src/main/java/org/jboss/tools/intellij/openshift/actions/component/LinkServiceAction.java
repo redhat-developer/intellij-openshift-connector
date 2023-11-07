@@ -21,9 +21,9 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import org.jboss.tools.intellij.openshift.tree.application.BaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.binding.BindingDetailDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -99,7 +99,7 @@ public class LinkServiceAction extends OdoAction {
           null));
     }
 
-    private void linkService(Service service, Component component, ParentableNode<?> namespaceNode, Odo odo, Project project) throws IOException {
+    private void linkService(Service service, Component component, BaseNode<?> namespaceNode, Odo odo, Project project) throws IOException {
         Notification notification = notify("Linking component to service " + service.getName());
         String target = service.getName() + '/' + service.getKind() + "." + service.getApiVersion();
         Binding binding = odo.link(namespaceNode.getName(), component.getPath(), component.getName(), target);

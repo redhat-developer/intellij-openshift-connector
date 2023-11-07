@@ -19,12 +19,12 @@ import java.util.concurrent.ExecutionException;
 public class ToolFactoryTest extends BasePlatformTestCase {
  
     public void testGetOdo() throws ExecutionException, InterruptedException {
-        Odo odo = ToolFactory.getInstance().getOdo(getProject()).get();
+        Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
         assertNotNull(odo);
     }
 
     public void testGetHelm() throws ExecutionException, InterruptedException {
-        Helm helm = ToolFactory.getInstance().getHelm(getProject()).get();
+        Helm helm = ToolFactory.getInstance().createHelm(getProject()).get();
         assertNotNull(helm);
     }
 

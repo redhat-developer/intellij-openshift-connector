@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
-public class URLNode extends ParentableNode<ComponentNode> {
+public class URLNode extends BaseNode<ComponentNode> {
   private final URL url;
 
   public URLNode(ComponentNode parent, URL url) {

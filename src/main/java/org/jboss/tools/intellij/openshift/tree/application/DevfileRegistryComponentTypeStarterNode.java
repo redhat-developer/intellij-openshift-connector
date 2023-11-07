@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.Starter;
 
-public class DevfileRegistryComponentTypeStarterNode extends ParentableNode<DevfileRegistryComponentTypeNode> {
+public class DevfileRegistryComponentTypeStarterNode extends BaseNode<DevfileRegistryComponentTypeNode> {
   private final Starter starter;
 
   public DevfileRegistryComponentTypeStarterNode(ApplicationsRootNode root, DevfileRegistryComponentTypeNode parent, Starter starter) {

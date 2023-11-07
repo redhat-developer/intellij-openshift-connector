@@ -14,6 +14,7 @@ import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.tree.LeafState;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
@@ -69,9 +70,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     public Object @NotNull [] getChildElements(@NotNull Object element) {
         if (element == this) {
             return new Object[]{getApplicationsRoot(), registries};
-        }
-        if (element instanceof ApplicationsRootNode) {
-            return getNamespaces((ApplicationsRootNode) element);
+        } else if (element instanceof ApplicationsRootNode) {
+            return getCurrentNamespace((ApplicationsRootNode) element);
         } else if (element instanceof NamespaceNode) {
             return createNamespaceChildren((NamespaceNode) element);
         } else if (element instanceof ComponentNode) {
@@ -84,6 +84,19 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
         }
         return new Object[0];
+    }
+
+    @Override
+    public @NotNull LeafState getLeafState(@NotNull Object element) {
+        if (element instanceof ComponentNode) {
+            return LeafState.ALWAYS;
+        } else if (element instanceof ChartReleaseNode) {
+            return LeafState.ALWAYS;
+        } else if (element instanceof MessageNode<?>) {
+            return LeafState.ALWAYS;
+        } else {
+            return LeafState.ASYNC;
+        }
     }
 
     @NotNull
@@ -110,45 +123,45 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return nodes.toArray();
     }
 
-    private Object[] getNamespaces(ApplicationsRootNode element) {
+    private Object[] getCurrentNamespace(ApplicationsRootNode element) {
         List<Object> namespaces = new ArrayList<>();
         try {
             Odo odo = element.getOdo().getNow(null);
-            if (odo == null) {
-                return new Object[]{};
-            }
-            String ns = odo.getNamespace();
-            if (ns != null) {
-                namespaces.add(new NamespaceNode(element, odo.getNamespace()));
-            } else {
-                namespaces.add(new CreateNamespaceLinkNode(element));
-            }
-            element.setLogged(true);
-        } catch (Exception e) {
-            if (e instanceof KubernetesClientException) {
-                KubernetesClientException kce = (KubernetesClientException) e;
-                if (kce.getCode() == 401) {
-                    namespaces.add(new MessageNode<>(element, element, LOGIN));
-                } else if (kce.getCause() instanceof NoRouteToHostException) {
-                    namespaces.add(new MessageNode<>(element, element, kce.getCause().getMessage()));
-                } else if (kce.getCause().getMessage().contains(Constants.DEFAULT_KUBE_URL)) {
-                    namespaces.add(new MessageNode<>(element, element, LOGIN));
+            if (odo != null) {
+                String ns = odo.getNamespace();
+                if (ns != null) {
+                    namespaces.add(new NamespaceNode(element, odo.getNamespace()));
                 } else {
-                    namespaces.add(new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage()));
+                    namespaces.add(new CreateNamespaceLinkNode(element));
                 }
-            } else {
-                namespaces.add(new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage()));
+                element.setLogged(true);
             }
+        } catch (Exception e) {
+            namespaces.add(createErrorNode(element, e));
             element.setLogged(false);
         }
         return namespaces.toArray();
     }
 
-    private List<ParentableNode<?>> getComponents(NamespaceNode element, Odo odo) {
+    private static MessageNode<?> createErrorNode(ApplicationsRootNode element, Exception e) {
+        if (e instanceof KubernetesClientException) {
+            KubernetesClientException kce = (KubernetesClientException) e;
+            if (kce.getCode() == 401) {
+                return new MessageNode<>(element, element, LOGIN);
+            } else if (kce.getCause() instanceof NoRouteToHostException) {
+                return new MessageNode<>(element, element, kce.getCause().getMessage());
+            } else if (kce.getCause().getMessage().contains(Constants.DEFAULT_KUBE_URL)) {
+                return new MessageNode<>(element, element, LOGIN);
+            }
+        }
+        return new MessageNode<>(element, element, "Unable to get namespaces: " + e.getMessage());
+    }
+
+    private List<BaseNode<?>> getComponents(NamespaceNode element, Odo odo) {
         if (odo == null) {
             return Collections.emptyList();
         }
-        List<ParentableNode<?>> components = new ArrayList<>();
+        List<BaseNode<?>> components = new ArrayList<>();
         components.addAll(load(
           () -> odo.getComponents(element.getName()).stream()
             .filter(component -> !component.isManagedByHelm()) // dont display helm components
@@ -162,7 +175,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return components;
     }
 
-    private List<ParentableNode<?>> getServices(NamespaceNode element, Odo odo) {
+    private List<BaseNode<?>> getServices(NamespaceNode element, Odo odo) {
         if (odo == null) {
             return Collections.emptyList();
         }
@@ -173,7 +186,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
           "Failed to load application services");
     }
 
-    private List<ParentableNode<?>> getHelmReleases(NamespaceNode element, Helm helm) {
+    private List<BaseNode<?>> getHelmReleases(NamespaceNode element, Helm helm) {
         if (helm == null) {
             return Collections.emptyList();
         }
@@ -184,7 +197,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
           "Failed to load chart releases");
     }
 
-    private List<ParentableNode<?>> load(Callable<List<ParentableNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
+    private List<BaseNode<?>> load(Callable<List<BaseNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
         try {
             return callable.call();
         } catch (Exception e) {
@@ -274,11 +287,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @Override
     public Object getParentElement(@NotNull Object element) {
-        if (element instanceof ParentableNode) {
-            return ((ParentableNode<?>) element).getParent();
-        }
         if (element instanceof ApplicationsRootNode) {
             return this;
+        }
+        if (element instanceof ParentableNode) {
+            return ((ParentableNode<?>) element).getParent();
         }
         return null;
     }
@@ -330,34 +343,34 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
         @Override
         protected void update(@NotNull PresentationData presentation) {
-            super.update(presentation);
             if (isProcessing()) {
                 String processingLabel = getProcessingMessage();
                 if (processingLabel != null) {
                     presentation.setLocationString(processingLabel);
                 }
             }
+            super.update(presentation);
         }
 
         private String getProcessingMessage() {
-            ParentableNode<T> modelNode = getParentableNode();
-            if (modelNode != null) {
-                return modelNode.getProcessingMessage();
+            ProcessingNode node = getProcessingNode();
+            if (node != null) {
+                return node.getMessage();
             } else {
                 return null;
             }
         }
 
         private boolean isProcessing() {
-            ParentableNode<?> node = getParentableNode();
+            ProcessingNode node = getProcessingNode();
             return node != null
                 && node.isProcessing();
         }
 
-        private ParentableNode<T> getParentableNode() {
+        private ProcessingNode getProcessingNode() {
             Object element = getElement();
-            if (element instanceof ParentableNode) {
-                return (ParentableNode<T>) element;
+            if (element instanceof ProcessingNode) {
+                return (ProcessingNode) element;
             } else {
                 return null;
             }

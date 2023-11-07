@@ -61,13 +61,13 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-        odo = ToolFactory.getInstance().getOdo(getProject()).get();
+        odo = ToolFactory.getInstance().createOdo(getProject()).get();
         if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
             odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
 
         if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
             odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
-            odo = ToolFactory.getInstance().getOdo(getProject()).get();
+            odo = ToolFactory.getInstance().createOdo(getProject()).get();
         }
     }
 
@@ -81,8 +81,8 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
         odo.createProject(project);
         // need to refresh kubernetes client with the correct namespace
-        ToolFactory.getInstance().resetOdo();
-        odo = ToolFactory.getInstance().getOdo(getProject()).get();
+        //resetOdo();
+        odo = ToolFactory.getInstance().createOdo(getProject()).get();
     }
 
     protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {

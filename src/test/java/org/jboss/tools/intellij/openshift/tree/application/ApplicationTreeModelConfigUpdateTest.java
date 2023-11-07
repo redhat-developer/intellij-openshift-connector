@@ -66,7 +66,8 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
     public void testShouldRefreshIfContextClusterChanges() {
         // given
         Context context = createContext();
-        doReturn("localhost","www.openshift.com").when(context).getCluster();
+        doReturn("localhost","www.openshift.com")
+          .when(context).getCluster();
         Config config = createConfig(context);
         ApplicationsRootNode model = createApplicationsRootNode(getProject(), config);
         // when
@@ -95,7 +96,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
         verify(model).refresh();
     }
 
-    public void testShouldNotRefreshIfContextUserLogout() {
+    public void testShouldRefreshIfContextUserLogout() {
         // given
         String user = "papa-smurf";
         String cluster = "localhost";
@@ -112,7 +113,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
         // when
         model.onUpdate(null, cfg2);
         // then
-        verify(model, never()).refresh();
+        verify(model).refresh();
     }
 
     protected ApplicationsRootNode createApplicationsRootNode(Project project, Config config) {
@@ -135,8 +136,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
             }
 
             @Override
-            public synchronized void refresh() {
-            }
+            public synchronized void refresh() {}
         });
     }
 

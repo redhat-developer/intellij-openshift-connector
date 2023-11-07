@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
 
-public class ChartReleaseNode extends ParentableNode<NamespaceNode> {
+public class ChartReleaseNode extends BaseNode<NamespaceNode> {
 
   public ChartReleaseNode(NamespaceNode parent, ChartRelease release) {
     super(parent.getRoot(), parent, release.getName());

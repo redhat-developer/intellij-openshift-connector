@@ -36,19 +36,21 @@ import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
-import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.kubernetes.client.internal.SSLUtils;
 import io.fabric8.kubernetes.model.Scope;
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
@@ -240,27 +242,32 @@ public class OdoCli implements Odo {
         if (Strings.isNullOrEmpty(ns)) {
             ns = "default";
         }
+        boolean isOpenShift = isOpenShift();
         try {
-            if (isOpenShift()) {
+            if (isOpenShift) {
                 client.adapt(OpenShiftClient.class).projects().withName(ns).get();
             } else {
                 client.namespaces().withName(ns).get();
             }
         } catch (KubernetesClientException e) {
-            ns = "";
-            if (isOpenShift()) {
-                List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
-                if (!projects.isEmpty()) {
-                    ns = projects.get(0).getMetadata().getName();
-                }
+            // namespace with name ns not found
+            if (isOpenShift) {
+                ns = getFirst(client.adapt(OpenShiftClient.class).projects());
             } else {
-                List<Namespace> namespaces = client.namespaces().list().getItems();
-                if (!namespaces.isEmpty()) {
-                    ns = namespaces.get(0).getMetadata().getName();
-                }
+                ns = getFirst(client.adapt(OpenShiftClient.class).namespaces());
             }
         }
+
         return ns;
+    }
+
+    private String getFirst(NonNamespaceOperation<? extends HasMetadata, ? extends KubernetesResourceList<? extends HasMetadata>, ? extends Resource<? extends HasMetadata>> operation) {
+        String name = "";
+        List<? extends HasMetadata> resources = operation.list().getItems();
+        if (!resources.isEmpty()) {
+            name = resources.get(0).getMetadata().getName();
+        }
+        return name;
     }
 
     @Override

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-public class MessageNode<T> extends ParentableNode<T> {
+public class MessageNode<T> extends BaseNode<T> {
     protected MessageNode(ApplicationsRootNode root, T parent, String name) {
         super(root, parent, name);
     }

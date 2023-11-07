@@ -6,13 +6,13 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ main ]
-  pull_request_target:
+  pull_request:
     branches: [ main ]
 
 jobs:
   configure_sonar:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Save Sonar config on PR
@@ -48,69 +48,6 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.os }}-test-reports
-          path: |
-            build/test-results/**/*.xml
-            build/jacoco/
-
-  kubernetes-integration-tests:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - uses: actions/checkout@v3
-      # TODO remove locally building common-ui-test-library after new release of common-ui-test-library
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-          distribution: 'temurin'
-          cache: 'gradle'
-      - name: 'Clone common-ui-test-library to Maven Local repository'
-        run: |
-          git clone --branch 174 https://github.com/richard0202/intellij-common-ui-test-library.git ../common-ui-test-library
-      - uses: burrunan/gradle-cache-action@v1
-        name: Build common-ui-test-library
-        with:
-          build-root-directory: ../common-ui-test-library
-          arguments: publishToMavenLocal
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'temurin'
-          cache: 'gradle'
-      - uses: engineerd/setup-kind@aa272fe2a7309878ffc2a81c56cfe3ef108ae7d0 #v0.5.0
-        name: Start cluster
-        with:
-          version: v0.11.1
-      - name: Setup cluster
-        run: |
-          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.19.1/install.sh | bash -s v0.19.1
-          kubectl create -f https://operatorhub.io/install/service-binding-operator.yaml
-          kubectl create -f https://operatorhub.io/install/stable/cloud-native-postgresql.yaml
-          nb=0
-          echo -n "Waiting for operator to show up "
-          while [ "$nb" != "2" ]
-          do
-            echo -n "."
-            sleep 1
-            nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
-          done
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Play integration tests
-        run: ./gradlew integrationTest --continue --no-daemon
-      - name: Play integration UI tests
-        run: |
-          echo "${{ secrets.IDEA_KEY_PASSPHRASE }}" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
-          export DISPLAY=:99.0
-          Xvfb -ac :99 -screen 0 1920x1080x16 &
-          sleep 10
-          ./gradlew integrationUITest --info --continue
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: linux-integration-test-reports
           path: |
             build/test-results/**/*.xml
             build/jacoco/

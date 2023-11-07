@@ -15,22 +15,11 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 
-import java.util.Random;
-
-
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
-    protected static final String PROJECT_PREFIX = "prj";
-
+    private static final String OPENSHIFT_REPO_NAME = "openshift";
+    private static final String OPENSHIFT_REPO_URL = "https://charts.openshift.io/";
     protected Helm helm;
-
-    protected Random random = new Random();
-
-    protected static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
-
-    protected static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
-
-    protected static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
 
     private TestDialog previousTestDialog;
 
@@ -39,6 +28,7 @@ public abstract class HelmCliTest extends BasePlatformTestCase {
         super.setUp();
         this.previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
         this.helm = ToolFactory.getInstance().getHelm(getProject()).get();
+        this.helm.addRepo(OPENSHIFT_REPO_NAME, OPENSHIFT_REPO_URL);
     }
 
     @Override

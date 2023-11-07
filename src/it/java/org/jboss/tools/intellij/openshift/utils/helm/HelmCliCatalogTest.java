@@ -12,12 +12,11 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class HelmCliCatalogTest extends HelmCliTest {
 
-    public void testCheckGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
+    public void testCheckGetComponentTypes() throws IOException {
         List<Chart> charts = helm.search();
-        assertTrue(charts.size() > 0);
+        assertFalse(charts.isEmpty());
     }
 }

@@ -32,6 +32,8 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'gradle'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - uses: engineerd/setup-kind@aa272fe2a7309878ffc2a81c56cfe3ef108ae7d0 #v0.5.0
         name: Start cluster
         with:
@@ -60,10 +62,9 @@ jobs:
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
           ./gradlew integrationUITest --info --continue
-      - uses: actions/upload-artifact@v3
-        if: always()
+      - name: Publish tests reports
+        uses: scacap/action-surefire-report@4cbb611f23a9b5a030c73c2b32190a80983956ed #v1
         with:
-          name: linux-integration-test-reports
-          path: |
-            build/test-results/**/*.xml
-            build/jacoco/
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          report_paths: '${{github.workspace}}/*test-reports/**/TEST-*.xml'
+          commit: ${{github.event.workflow_run.head_sha}}

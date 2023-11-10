@@ -35,7 +35,7 @@ public class ToolFactory {
     }
 
     private final Tool<Odo> odo = new Tool<>("odo", OdoCli::new);
-    private final Tool<Helm> helm = new Tool<>("helm", HelmCli::new);
+    private final Tool<Helm> helm = new Tool<>("helm", (project, command) -> new HelmCli(command));
 
     private ToolFactory() {
     }

@@ -35,13 +35,7 @@ public class DescribeComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "describe component"; }
 
   @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    return visible;
-  }
-
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();

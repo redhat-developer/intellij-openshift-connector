@@ -32,13 +32,10 @@ public class HelmCli implements Helm {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HelmCli.class);
 
-    private final com.intellij.openapi.project.Project project;
-
     private final String command;
 
-    public HelmCli(com.intellij.openapi.project.Project project, String command) {
+    public HelmCli(String command) {
         this.command = command;
-        this.project = project;
     }
 
     @Override

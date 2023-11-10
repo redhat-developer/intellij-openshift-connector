@@ -23,7 +23,7 @@ public class CountryCodeValidator implements Supplier<ValidationInfo> {
      * see https://github.com/codeready-toolchain/registration-service/blob/master/pkg/assets/landingpage.js
      */
     private static final Pattern pattern = Pattern
-            .compile("^[\\+]?[0-9]+$");
+            .compile("^[+]?\\d+$");
 
     public CountryCodeValidator(JTextComponent component) {
         this.component = component;

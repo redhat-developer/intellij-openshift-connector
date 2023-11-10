@@ -41,7 +41,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
         if (odo == null) {
           return;
         }
-        this.actionPerformed(anActionEvent, (Object) getElement(selected), odo);
+        this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
     }
 
     private Odo getOdo(AnActionEvent anActionEvent) {
@@ -53,7 +53,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
         }
     }
 
-    public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
+    public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
 
     protected abstract String getTelemetryActionName();
 

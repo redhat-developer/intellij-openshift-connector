@@ -144,7 +144,7 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
                 gifStartDeployLesson
         );
 
-        GettingStartedGroupLessons groupLessons = new GettingStartedGroupLessons(
+        return new GettingStartedGroupLessons(
                 "Getting Started with OpenShift Toolkit",
                 "Start your application development on OpenShift or Kubernetes",
                 loginLesson,
@@ -153,7 +153,6 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
                 startDevLesson,
                 startDebugLesson,
                 startDeployLesson);
-        return groupLessons;
     }
 
     private URL getLessonGif(String name) {

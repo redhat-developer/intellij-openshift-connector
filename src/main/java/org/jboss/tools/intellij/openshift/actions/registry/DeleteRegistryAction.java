@@ -33,7 +33,7 @@ public class DeleteRegistryAction extends OdoAction {
     protected String getTelemetryActionName() { return "delete registry"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         DevfileRegistryNode registryNode = (DevfileRegistryNode) selected;
         if (Messages.NO == Messages.showYesNoDialog("Delete registry '" + registryNode.getName() + "'.\nAre you sure?", "Delete registry",
                 Messages.getQuestionIcon())) {

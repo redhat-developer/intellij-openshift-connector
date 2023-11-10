@@ -33,7 +33,7 @@ public class AboutAction extends OdoAction {
   protected String getTelemetryActionName() { return "about"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     runWithProgress((ProgressIndicator progress) -> {
       try {
         odo.about();

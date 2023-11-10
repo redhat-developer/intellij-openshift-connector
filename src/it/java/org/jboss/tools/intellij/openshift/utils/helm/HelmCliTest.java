@@ -15,7 +15,6 @@ import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
     protected Helm helm;

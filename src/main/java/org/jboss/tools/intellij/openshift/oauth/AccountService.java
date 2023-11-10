@@ -39,7 +39,7 @@ public class AccountService {
 		return INSTANCE;
 	}
 
-	public IAccountModel getModel() {
+	private IAccountModel getModel() {
 		if (null == model) {
 			model = new AccountModel();
 		}

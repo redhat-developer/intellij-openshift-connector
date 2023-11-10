@@ -57,7 +57,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         doLog((ComponentNode) selected, odo, false);
     }
 

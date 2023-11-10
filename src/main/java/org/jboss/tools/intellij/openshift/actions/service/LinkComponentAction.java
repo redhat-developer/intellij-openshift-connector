@@ -44,7 +44,7 @@ public class LinkComponentAction extends OdoAction {
   protected String getTelemetryActionName() { return "link service to component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
     runWithProgress((ProgressIndicator progress) -> {

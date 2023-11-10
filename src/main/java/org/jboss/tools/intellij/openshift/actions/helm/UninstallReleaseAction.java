@@ -30,7 +30,7 @@ import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing
 public class UninstallReleaseAction extends HelmAction {
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
     Project project = getEventProject(anActionEvent);
     ChartReleaseNode releaseNode = (ChartReleaseNode) selected;
     if (Messages.NO == Messages.showYesNoDialog(

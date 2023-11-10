@@ -13,11 +13,9 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 public class ChartRelease {
   private String name;
   private String namespace;
-  private String revision;
   private String updated;
   private String status;
   private String chart;
-  private String app_version;
 
   public void setName(String name) {
     this.name = name;
@@ -33,14 +31,6 @@ public class ChartRelease {
 
   public String getNamespace() {
     return namespace;
-  }
-
-  public void setRevision(String revision) {
-    this.revision = revision;
-  }
-
-  public String getRevision() {
-    return revision;
   }
 
   public void setUpdated(String updated) {
@@ -67,11 +57,4 @@ public class ChartRelease {
     return chart;
   }
 
-  public void setApp_version(String app_version) {
-    this.app_version = app_version;
-  }
-
-  public String getApp_version() {
-    return app_version;
-  }
 }

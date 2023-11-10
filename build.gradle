@@ -24,7 +24,6 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'org.sonarqube' version '4.4.1.3373'
-    //id 'org.jetbrains.kotlin.jvm' version '1.9.10'
 }
 
 repositories {

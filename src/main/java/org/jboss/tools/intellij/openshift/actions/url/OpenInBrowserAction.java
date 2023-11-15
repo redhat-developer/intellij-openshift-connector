@@ -26,7 +26,7 @@ public class OpenInBrowserAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "open URL"; }
+  public String getTelemetryActionName() { return "open URL"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

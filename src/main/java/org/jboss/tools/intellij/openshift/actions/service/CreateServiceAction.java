@@ -36,7 +36,7 @@ public class CreateServiceAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "create service"; }
+    public String getTelemetryActionName() { return "create service"; }
 
     @Override
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

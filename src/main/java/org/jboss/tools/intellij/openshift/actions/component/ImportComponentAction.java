@@ -39,7 +39,7 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "import component"; }
+    public String getTelemetryActionName() { return "import component"; }
 
     @Override
     public boolean isVisible(Object selected) {

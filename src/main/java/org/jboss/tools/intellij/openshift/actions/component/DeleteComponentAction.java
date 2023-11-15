@@ -34,7 +34,7 @@ public class DeleteComponentAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "delete component"; }
+  public String getTelemetryActionName() { return "delete component"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

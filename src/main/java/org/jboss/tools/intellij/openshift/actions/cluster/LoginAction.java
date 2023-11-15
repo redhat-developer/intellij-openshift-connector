@@ -34,7 +34,7 @@ public class LoginAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "login to cluster"; }
+    public String getTelemetryActionName() { return "login to cluster"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

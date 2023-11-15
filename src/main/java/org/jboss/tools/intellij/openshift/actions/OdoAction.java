@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySenderAware;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,7 @@ import javax.swing.tree.TreePath;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 
-public abstract class OdoAction extends StructureTreeAction implements TelemetryHandler {
+public abstract class OdoAction extends StructureTreeAction implements TelemetryHandler, TelemetrySenderAware {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OdoAction.class);
 
@@ -36,7 +37,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
+        this.telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
         Odo odo = getOdo(anActionEvent);
         if (odo == null) {
           return;
@@ -55,7 +56,12 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
 
     public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
 
-    protected abstract String getTelemetryActionName();
+    @Override
+    public void setTelemetrySender(TelemetrySender telemetrySender) {
+      this.telemetrySender = telemetrySender;
+    }
+
+    public abstract String getTelemetryActionName();
 
     public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
         telemetrySender.sendTelemetryResults(result);

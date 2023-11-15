@@ -31,7 +31,7 @@ public class DescribeServiceAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "describe service"; }
+  public String getTelemetryActionName() { return "describe service"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

@@ -26,7 +26,7 @@ public class OpenGettingStartedAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "open getting started";
     }
 

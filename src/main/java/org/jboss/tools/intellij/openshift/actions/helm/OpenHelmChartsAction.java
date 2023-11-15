@@ -33,7 +33,7 @@ public class OpenHelmChartsAction extends HelmAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "helm-open charts";
     }
 

@@ -13,23 +13,13 @@ package org.jboss.tools.intellij.openshift.ui.widgets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.*;
-import com.redhat.devtools.intellij.common.utils.MessagesHelper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 
 public class JsonSchemaWidgetTest extends BasePlatformTestCase {

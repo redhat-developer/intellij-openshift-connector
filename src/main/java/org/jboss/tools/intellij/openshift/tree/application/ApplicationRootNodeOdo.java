@@ -181,6 +181,11 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
+    public void setProject(String project) throws IOException {
+        delegate.setProject(project);
+    }
+
+    @Override
     public void login(String url, String userName, char[] password, char[] token) throws IOException {
         delegate.login(url, userName, password, token);
     }

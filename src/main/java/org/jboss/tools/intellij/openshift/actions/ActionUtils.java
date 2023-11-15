@@ -23,6 +23,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStruc
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 public class ActionUtils {
@@ -65,6 +66,14 @@ public class ActionUtils {
           consumer.accept(progress);
         }
       });
+  }
+
+  public static Point getLocation(AnActionEvent actionEvent) {
+    MouseEvent event = ((MouseEvent) actionEvent.getInputEvent());
+    if (event == null) {
+      return null;
+    }
+    return event.getLocationOnScreen();
   }
 
 }

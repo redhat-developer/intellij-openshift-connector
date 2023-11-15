@@ -713,6 +713,11 @@ public class OdoCli implements Odo {
     }
 
     @Override
+    public void setProject(String project) throws IOException {
+        execute(command, envVars, "set", NAMESPACE_FIELD, project);
+    }
+
+    @Override
     public void login(String url, String userName, char[] password, char[] token) throws IOException {
         if (userName != null && !userName.isEmpty()) {
             execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), "--insecure-skip-tls-verify");

@@ -279,6 +279,7 @@
       <!-- Top level: cluster -->
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.namespace.ChangeActiveProjectAction" id="org.jboss.tools.intellij.openshift.actions.namespace.ChangeActiveProjectAction" text="Change Project"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
       <separator/>

@@ -70,6 +70,8 @@ public interface Odo {
 
     void deleteProject(String project) throws IOException;
 
+    void setProject(String project) throws IOException;
+
     void login(String url, String userName, char[] password, char[] token) throws IOException;
 
     List<Component> getComponents(String project) throws IOException;

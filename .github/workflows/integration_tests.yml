@@ -72,3 +72,4 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           report_paths: '${{github.workspace}}/*reports/tests/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
+          check_name: Integration Test Report

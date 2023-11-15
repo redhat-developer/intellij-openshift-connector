@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Strings;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
@@ -33,7 +32,6 @@ import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuild
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
-import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -42,7 +40,6 @@ import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import io.fabric8.kubernetes.model.Scope;
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
@@ -210,39 +207,15 @@ public class OdoCli implements Odo {
         }
     }
 
-    protected String validateNamespace(String ns) {
-        if (Strings.isNullOrEmpty(ns)) {
-            ns = "default";
-        }
-        try {
-            if (isOpenShift()) {
-                client.adapt(OpenShiftClient.class).projects().withName(ns).get();
-            } else {
-                client.namespaces().withName(ns).get();
-            }
-        } catch (KubernetesClientException e) {
-            ns = "";
-            if (isOpenShift()) {
-                List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
-                if (!projects.isEmpty()) {
-                    ns = projects.get(0).getMetadata().getName();
-                }
-            } else {
-                List<Namespace> namespaces = client.namespaces().list().getItems();
-                if (!namespaces.isEmpty()) {
-                    ns = namespaces.get(0).getMetadata().getName();
-                }
-            }
-        }
-        return ns;
-    }
-
     @Override
     public String getNamespace() {
         if (namespace == null) {
-            namespace = validateNamespace(client.getNamespace());
+            namespace = client.getNamespace();
         }
-        return "".equals(namespace) ? null : namespace;
+        if ("".equals(namespace)) {
+            namespace = null;
+        }
+        return namespace;
     }
 
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {

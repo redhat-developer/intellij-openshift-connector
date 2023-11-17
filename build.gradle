@@ -113,6 +113,7 @@ tasks.register('integrationTest', Test) {
         showFailedStandardStreams true
         showFullStackTraces true
     }
+    jvmArgs "-Djava.awt.headless=true"
 }
 
 tasks.register('integrationUITest', Test) {
@@ -132,6 +133,7 @@ tasks.register('integrationUITest', Test) {
         showFailedStandardStreams true
         showFullStackTraces true
     }
+    jvmArgs "-Djava.awt.headless=true"
 }
 
 dependencies {
@@ -146,7 +148,7 @@ dependencies {
             'com.squareup.retrofit2:converter-jackson:2.9.0',
             'com.google.code.gson:gson:2.9.0')
     testImplementation(
-            'org.junit.platform:junit-platform-launcher:1.8.2',
+            'org.junit.platform:junit-platform-launcher:1.10.0',
             'org.mockito:mockito-core:4.11.0',
             'org.easytesting:fest-assert:1.4',
             'com.redhat.devtools.intellij:intellij-common:1.9.3-SNAPSHOT:test',

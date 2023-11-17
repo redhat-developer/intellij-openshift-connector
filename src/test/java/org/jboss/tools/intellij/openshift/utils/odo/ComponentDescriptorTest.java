@@ -57,5 +57,6 @@ public class ComponentDescriptorTest {
     ComponentDescriptor devfileDescriptor = descriptors.get(0);
     Assert.assertNotNull(devfileDescriptor);
     Assert.assertEquals("devcomp", devfileDescriptor.getName());
+    Assert.assertEquals("odo", devfileDescriptor.getManagedBy());
   }
 }

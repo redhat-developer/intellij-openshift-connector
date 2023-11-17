@@ -36,6 +36,7 @@ public class OpenHelmChartsAction extends HelmAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        return selected.getClass() == ApplicationsRootNode.class;
+        return (selected instanceof ApplicationsRootNode)
+          && ((ApplicationsRootNode) selected).isLogged();
     }
 }

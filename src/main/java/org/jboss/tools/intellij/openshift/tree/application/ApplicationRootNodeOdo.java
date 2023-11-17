@@ -12,10 +12,10 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
@@ -96,7 +96,7 @@ public class ApplicationRootNodeOdo implements Odo {
 
     @Override
     public void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
-        if (StringUtils.isNotBlank(starter)) {
+        if (!StringUtil.isEmptyOrSpaces(starter)) {
             File tmpdir = fileOperations.createTempDir("odotmp");
             delegate.createComponent(project, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
             File directory = fileOperations.copyTo(tmpdir, source);

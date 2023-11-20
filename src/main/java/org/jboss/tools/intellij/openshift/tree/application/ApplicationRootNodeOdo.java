@@ -64,8 +64,8 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public String getNamespace() throws IOException {
-        return delegate.getNamespace();
+    public String getCurrentNamespace() throws IOException {
+        return delegate.getCurrentNamespace();
     }
 
     @Override

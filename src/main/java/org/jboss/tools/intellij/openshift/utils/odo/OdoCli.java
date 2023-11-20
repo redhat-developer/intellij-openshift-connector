@@ -37,14 +37,11 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
@@ -71,6 +68,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,6 +85,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -127,7 +126,7 @@ public class OdoCli implements Odo {
 
     private Map<String, String> envVars;
 
-    private String namespace;
+    private String currentNamespace;
 
     private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
 
@@ -226,56 +225,55 @@ public class OdoCli implements Odo {
     @Override
     public List<String> getNamespaces() throws IOException {
         try {
-            if (isOpenShift()) {
-                return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().
-                        map(p -> p.getMetadata().getName()).collect(Collectors.toList());
-            } else {
-                return client.namespaces().list().getItems().stream().
-                        map(p -> p.getMetadata().getName()).collect(Collectors.toList());
-            }
+            return getNamespaces(client).stream()
+              .map(resource -> resource.getMetadata().getName())
+              .collect(Collectors.toList());
         } catch (KubernetesClientException e) {
             throw new IOException(e);
         }
     }
 
-    protected String validateNamespace(String ns) {
-        if (Strings.isNullOrEmpty(ns)) {
-            ns = "default";
-        }
-        boolean isOpenShift = isOpenShift();
-        try {
-            if (isOpenShift) {
-                client.adapt(OpenShiftClient.class).projects().withName(ns).get();
-            } else {
-                client.namespaces().withName(ns).get();
-            }
-        } catch (KubernetesClientException e) {
-            // namespace with name ns not found
-            if (isOpenShift) {
-                ns = getFirst(client.adapt(OpenShiftClient.class).projects());
-            } else {
-                ns = getFirst(client.adapt(OpenShiftClient.class).namespaces());
+    private List<? extends HasMetadata> getNamespaces(KubernetesClient client) {
+        if (isOpenShift()) {
+            try (OpenShiftClient osClient = toOpenShiftClient()) {
+                if (osClient != null) {
+                    return osClient.projects().list().getItems();
+                }
             }
         }
-
-        return ns;
-    }
-
-    private String getFirst(NonNamespaceOperation<? extends HasMetadata, ? extends KubernetesResourceList<? extends HasMetadata>, ? extends Resource<? extends HasMetadata>> operation) {
-        String name = "";
-        List<? extends HasMetadata> resources = operation.list().getItems();
-        if (!resources.isEmpty()) {
-            name = resources.get(0).getMetadata().getName();
-        }
-        return name;
+        return client.namespaces().list().getItems();
     }
 
     @Override
-    public String getNamespace() {
-        if (namespace == null) {
-            namespace = validateNamespace(client.getNamespace());
+    public String getCurrentNamespace() {
+        if (currentNamespace == null) {
+            currentNamespace = validateNamespace(client.getNamespace());
         }
-        return "".equals(namespace) ? null : namespace;
+        return currentNamespace;
+    }
+
+    protected String validateNamespace(String namespace) {
+        if (Strings.isNullOrEmpty(namespace)) {
+            namespace = "default";
+        }
+        List<? extends HasMetadata> namespaces = getNamespaces(client);
+        return getByNameOrFirst(namespace, namespaces);
+    }
+
+    private String getByNameOrFirst(String name, List<? extends HasMetadata> namespaces) {
+        if (namespaces.isEmpty()) {
+            return null;
+        }
+        Optional<? extends HasMetadata> matching = namespaces.stream()
+          .filter(namespace -> name.equals(namespace.getMetadata().getName()))
+          .findFirst();
+        HasMetadata namespace = null;
+        if (matching.isPresent()) {
+            namespace = matching.get();
+        } else {
+            namespace = namespaces.get(0);
+        }
+        return namespace.getMetadata().getName();
     }
 
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
@@ -721,8 +719,8 @@ public class OdoCli implements Odo {
     @Override
     public void deleteProject(String project) throws IOException {
         execute(command, envVars, "delete", NAMESPACE_FIELD, project, "-f", "-w");
-        if (project.equals(namespace)) {
-            namespace = null;
+        if (project.equals(currentNamespace)) {
+            currentNamespace = null;
         }
     }
 
@@ -869,7 +867,12 @@ public class OdoCli implements Odo {
 
     @Override
     public boolean isOpenShift() {
-        return ClusterHelper.getClusterInfo(client).isOpenshift();
+        OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
+        try {
+            return osClient.isSupported();
+        } catch (KubernetesClientException e) {
+            return e.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED;
+        }
     }
 
     @Override

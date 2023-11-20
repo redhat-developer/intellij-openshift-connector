@@ -68,20 +68,23 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     @NotNull
     @Override
     public Object @NotNull [] getChildElements(@NotNull Object element) {
-        if (element == this) {
-            return new Object[]{getApplicationsRoot(), registries};
-        } else if (element instanceof ApplicationsRootNode) {
-            return getCurrentNamespace((ApplicationsRootNode) element);
-        } else if (element instanceof NamespaceNode) {
-            return createNamespaceChildren((NamespaceNode) element);
-        } else if (element instanceof ComponentNode) {
-            return createComponentChildren((ComponentNode) element);
-        } else if (element instanceof DevfileRegistriesNode) {
-            return getRegistries(root);
-        } else if (element instanceof DevfileRegistryNode) {
-            return getRegistryComponentTypes((DevfileRegistryNode) element);
-        } else if (element instanceof DevfileRegistryComponentTypeNode) {
-            return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element);
+        Odo odo = root.getOdo().getNow(null);
+        if (odo != null) {
+            if (element == this) {
+                return new Object[]{getApplicationsRoot(), registries};
+            } else if (element instanceof ApplicationsRootNode) {
+                return getCurrentNamespace((ApplicationsRootNode) element, odo);
+            } else if (element instanceof NamespaceNode) {
+                return createNamespaceChildren((NamespaceNode) element, odo);
+            } else if (element instanceof ComponentNode) {
+                return createComponentChildren((ComponentNode) element, odo);
+            } else if (element instanceof DevfileRegistriesNode) {
+                return getRegistries(root, odo);
+            } else if (element instanceof DevfileRegistryNode) {
+                return getRegistryComponentTypes((DevfileRegistryNode) element, odo);
+            } else if (element instanceof DevfileRegistryComponentTypeNode) {
+                return getRegistryComponentTypeStarters((DevfileRegistryComponentTypeNode) element, odo);
+            }
         }
         return new Object[0];
     }
@@ -100,9 +103,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     @NotNull
-    private Object[] createComponentChildren(ComponentNode element) {
+    private Object[] createComponentChildren(ComponentNode element, @NotNull Odo odo) {
         List<URLNode> urls = getURLs(element);
-        List<BindingNode> bindings = getBindings(element);
+        List<BindingNode> bindings = getBindings(element, odo);
         return Stream.of(urls, bindings)
           .filter(item -> !item.isEmpty())
           .flatMap(Collection::stream)
@@ -110,10 +113,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     @NotNull
-    private Object[] createNamespaceChildren(@NotNull NamespaceNode namespaceNode) {
+    private Object[] createNamespaceChildren(@NotNull NamespaceNode namespaceNode, @NotNull Odo odo) {
         List<Object> nodes = new ArrayList<>();
 
-        Odo odo = namespaceNode.getRoot().getOdo().getNow(null);
         nodes.addAll(getComponents(namespaceNode, odo));
         nodes.addAll(getServices(namespaceNode, odo));
 
@@ -123,19 +125,16 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return nodes.toArray();
     }
 
-    private Object[] getCurrentNamespace(ApplicationsRootNode element) {
+    private Object[] getCurrentNamespace(ApplicationsRootNode element, @NotNull Odo odo) {
         List<Object> namespaces = new ArrayList<>();
         try {
-            Odo odo = element.getOdo().getNow(null);
-            if (odo != null) {
-                String ns = odo.getNamespace();
-                if (ns != null) {
-                    namespaces.add(new NamespaceNode(element, odo.getNamespace()));
-                } else {
-                    namespaces.add(new CreateNamespaceLinkNode(element));
-                }
-                element.setLogged(true);
+            String ns = odo.getCurrentNamespace();
+            if (ns != null) {
+                namespaces.add(new NamespaceNode(element, ns));
+            } else {
+                namespaces.add(new CreateNamespaceLinkNode(element));
             }
+            element.setLogged(true);
         } catch (Exception e) {
             namespaces.add(createErrorNode(element, e));
             element.setLogged(false);
@@ -222,12 +221,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results;
     }
 
-    private List<BindingNode> getBindings(ComponentNode element) {
+    private List<BindingNode> getBindings(ComponentNode element, @NotNull Odo odo) {
         List<BindingNode> results = new ArrayList<>();
-        Odo odo = element.getRoot().getOdo().getNow(null);
-        if (odo == null) {
-            return Collections.emptyList();
-        }
         try {
             odo.listBindings(element.getParent().getName(),
                 element.getComponent().getPath(), element.getName()).forEach(binding ->
@@ -239,27 +234,20 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return results;
     }
 
-    private Object[] getRegistries(ApplicationsRootNode root) {
+    private Object[] getRegistries(ApplicationsRootNode root, @NotNull Odo odo) {
         List<DevfileRegistryNode> result = new ArrayList<>();
-        Odo odo = root.getOdo().getNow(null);
-        if (odo != null) {
-            try {
-                odo.listDevfileRegistries().forEach(registry ->
-                  result.add(new DevfileRegistryNode(root, registries, registry))
-                );
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
+        try {
+            odo.listDevfileRegistries().forEach(registry ->
+              result.add(new DevfileRegistryNode(root, registries, registry))
+            );
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return result.toArray();
     }
 
-    private Object[] getRegistryComponentTypes(DevfileRegistryNode element) {
+    private Object[] getRegistryComponentTypes(DevfileRegistryNode element, @NotNull Odo odo) {
         List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
-        Odo odo = element.getRoot().getOdo().getNow(null);
-        if (odo == null) {
-            return new Object[]{};
-        }
         try {
             odo.getComponentTypes(element.getName()).forEach(type ->
               result.add(new DevfileRegistryComponentTypeNode(root, element, type)));
@@ -269,12 +257,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return result.toArray();
     }
 
-    private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode element) {
+    private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode element, @NotNull Odo odo) {
         List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
-        Odo odo = element.getRoot().getOdo().getNow(null);
-        if (odo == null) {
-            return new Object[]{};
-        }
         try {
             odo.getComponentTypeInfo(element.getName(),
               element.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->

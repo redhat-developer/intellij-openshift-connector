@@ -421,7 +421,7 @@ public class OdoCli implements Odo {
                 .withGroup(group)
                 .withScope(Scope.NAMESPACED.value())
                 .withKind(service.getKind())
-                .withPlural(Pluralize.toPlural(service.getKind()))
+                .withPlural(Pluralize.toPlural(service.getKind().toLowerCase()))
                 .withVersion(version)
                 .build();
     }

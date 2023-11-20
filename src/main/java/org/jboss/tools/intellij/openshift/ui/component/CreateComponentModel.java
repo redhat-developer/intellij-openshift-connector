@@ -11,9 +11,9 @@
 package org.jboss.tools.intellij.openshift.ui.component;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardModel;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentMetadata;
@@ -97,7 +97,7 @@ public class CreateComponentModel extends WizardModel {
         }else {
             projectIsEmpty = false;
         }
-        if (StringUtils.isEmpty(name)) {
+        if (StringUtil.isEmpty(name)) {
             setName(devfile.getParentFile().getName());
         }
         setSelectedComponentStarter(null);
@@ -107,9 +107,7 @@ public class CreateComponentModel extends WizardModel {
                 if (!types.isEmpty()) {
                     ComponentMetadata metadata = types.get(0);
                     Optional<DevfileComponentType> type = devfileTypes.stream().filter(t -> t.getDevfileRegistry().getName().equals(metadata.getRegistry()) && t.getName().equals(metadata.getComponentType())).findFirst();
-                    if (type.isPresent()) {
-                        setSelectedComponentType(type.get());
-                    }
+                    type.ifPresent(this::setSelectedComponentType);
                 }
             } catch (IOException e) {
                 if (!e.getLocalizedMessage().contains("No valid devfile found")) {
@@ -148,8 +146,8 @@ public class CreateComponentModel extends WizardModel {
     }
 
     public boolean isValid() {
-        return StringUtils.isNotBlank(getName()) &&
-                StringUtils.isNotBlank(getContext()) &&
+        return !StringUtil.isEmptyOrSpaces(getName()) &&
+                !StringUtil.isEmptyOrSpaces(getContext()) &&
                 (isProjectHasDevfile() || getSelectedComponentType() != null);
     }
 

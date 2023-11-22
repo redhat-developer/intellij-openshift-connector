@@ -26,21 +26,27 @@ import com.intellij.openapi.util.Key;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
+import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.kubernetes.model.client.ssl.IDEATrustManager;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
+import io.fabric8.kubernetes.client.internal.SSLUtils;
 import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -56,6 +62,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +73,11 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,7 +130,6 @@ public class OdoCli implements Odo {
     private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
 
     private JSonParser swagger;
-
     /*
      Map of process launched for feature (dev, debug,...) related.
      Key is component name
@@ -135,7 +148,10 @@ public class OdoCli implements Odo {
         this.command = command;
         this.project = project;
         this.connection = ApplicationManager.getApplication().getMessageBus().connect();
-        this.client = new KubernetesClientBuilder().build();
+        String context = ConfigHelper.getCurrentContext().getName();
+        Config config = Config.autoConfigure(context);
+
+        this.client = new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
             computeTelemetrySettings();
@@ -154,6 +170,17 @@ public class OdoCli implements Odo {
                 computeTelemetrySettings();
             }
         };
+    }
+
+    private void setSslContext(HttpClient.Builder builder, Config config) {
+        try {
+            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
+            X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
+            builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
+                 UnrecoverableKeyException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void computeTelemetrySettings() {
@@ -187,7 +214,6 @@ public class OdoCli implements Odo {
             }
         }
     }
-
 
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
         final SimpleModule module = new SimpleModule();
@@ -395,7 +421,7 @@ public class OdoCli implements Odo {
                 .withGroup(group)
                 .withScope(Scope.NAMESPACED.value())
                 .withKind(service.getKind())
-                .withPlural(service.getKind().toLowerCase() + "s")
+                .withPlural(Pluralize.toPlural(service.getKind().toLowerCase()))
                 .withVersion(version)
                 .build();
     }
@@ -631,7 +657,7 @@ public class OdoCli implements Odo {
             if (follow) {
                 args.add("--follow");
             }
-            if (StringUtils.isNotBlank(platform)){
+            if (StringUtils.isNotBlank(platform)) {
                 args.add("--platform");
                 args.add(platform);
             }
@@ -682,12 +708,12 @@ public class OdoCli implements Odo {
 
     @Override
     public void createProject(String project) throws IOException {
-        execute(command, envVars, "create", "namespace", project, "-w");
+        execute(command, envVars, "create", NAMESPACE_FIELD, project, "-w");
     }
 
     @Override
     public void deleteProject(String project) throws IOException {
-        execute(command, envVars, "delete", "namespace", project, "-f", "-w");
+        execute(command, envVars, "delete", NAMESPACE_FIELD, project, "-f", "-w");
         if (project.equals(namespace)) {
             namespace = null;
         }

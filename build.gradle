@@ -54,7 +54,7 @@ intellij {
             'com.intellij.css',
             'yaml',
             'com.redhat.devtools.intellij.telemetry:1.0.0.44',
-            'com.redhat.devtools.intellij.kubernetes:0.8.0.220'
+            'com.redhat.devtools.intellij.kubernetes:1.2.0.271'
     ]
 	updateSinceUntilBuild = false
 }
@@ -106,6 +106,7 @@ tasks.register('integrationTest', Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
+    jvmArgs "-Djava.awt.headless=true"
     testlogger {
         showStandardStreams true
         showPassedStandardStreams false

@@ -25,7 +25,6 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
-import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
@@ -183,14 +182,14 @@ public class ApplicationsRootNode
                 );
             } catch (IOException ex) {
                 //filter out some common exception when no logged or no authorizations
-                if (doNotLogFromMessage(ex.getMessage())) {
-                    LOGGER.error(ex.getLocalizedMessage(), ex);
+                if (shouldLogMessage(ex.getMessage())) {
+                    LOGGER.warn(ex.getLocalizedMessage(), ex);
                 }
             }
         }
     }
 
-    private static boolean doNotLogFromMessage(String message) {
+    private static boolean shouldLogMessage(String message) {
         return !(message.contains("Unauthorized") ||
                 message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
                 message.contains("the server has asked for the client to provide credentials") ||
@@ -198,7 +197,9 @@ public class ApplicationsRootNode
     }
 
     public void addContext(String modulePath) {
-        addContext(getOdo().getNow(null), LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
+        addContext(
+          getOdo().getNow(null),
+          LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
     }
 
     private void removeContextFromSettings(String modulePath) {
@@ -233,10 +234,7 @@ public class ApplicationsRootNode
 
     public synchronized void refresh() {
         resetOdo();
-        CompletableFuture
-          .runAsync(() ->
-            getOdo((odo, err) -> structure.fireModified(ApplicationsRootNode.this)),
-            SwingUtils.EXECUTOR_BACKGROUND);
+        getOdo((odo, err) -> structure.fireModified(ApplicationsRootNode.this));
     }
 
     @Override

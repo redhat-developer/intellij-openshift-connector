@@ -80,8 +80,6 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
 
     protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
         odo.createProject(project);
-        // need to refresh kubernetes client with the correct namespace
-        //resetOdo();
         odo = ToolFactory.getInstance().createOdo(getProject()).get();
     }
 

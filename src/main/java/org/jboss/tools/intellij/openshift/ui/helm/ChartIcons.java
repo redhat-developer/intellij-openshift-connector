@@ -46,11 +46,11 @@ public class ChartIcons {
     IBM_SPECTRUM_PROTECT("ibm-spectrum-protect.png", "IBM Spectrum Protect"),
     IBM_CLOUD_OBJECT_STORAGE("ibm-cloud-object-storage.png", "IBM Cloud Object Storage"),
     INFINISPAN("infinispan.png", "Infinispan"),
-    EAP("eap.png", "JBoss EAP"),
+    EAP("eap.png", " EAP "),
     KYVERNO("kyverno.png", "Kubernetes Native Policy Management"),
-    NEARBY_ONE("nearby-one.png", "NearbyOne Controller"),
+    NEARBY_ONE("nearby-one.png", "Nearby"),
     NODE_RED("node-red.png", "NodeRed"),
-    FIWARE("fiware.png", "FIWARE FOUNDATION"),
+    FIWARE("fiware.png", "Fiware"),
     SOLACE_PUBSUB("solace-pubsub.png", "Solace PubSub+"),
     RAFAY("rafay.png", "Rafay"),
     CRYOSTAT("cryostat.png", "Cryostat"),
@@ -68,7 +68,7 @@ public class ChartIcons {
 
     public boolean isMatching(String chartText) {
       /* using regex was too slow, using simple substring matching */
-      return chartText.contains(substring);
+      return chartText.toLowerCase().contains(substring.toLowerCase());
     }
   }
 

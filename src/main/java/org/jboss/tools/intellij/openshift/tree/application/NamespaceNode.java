@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-public class NamespaceNode extends ParentableNode<ApplicationsRootNode>  {
+public class NamespaceNode extends BaseNode<ApplicationsRootNode> {
     public NamespaceNode(ApplicationsRootNode parent, String name) {
         super(parent, parent, name);
     }

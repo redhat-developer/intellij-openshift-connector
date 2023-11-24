@@ -54,7 +54,7 @@ intellij {
             'com.intellij.css',
             'yaml',
             'com.redhat.devtools.intellij.telemetry:1.0.0.44',
-            'com.redhat.devtools.intellij.kubernetes:1.2.0.271'
+            'com.redhat.devtools.intellij.kubernetes:1.2.1.277'
     ]
 	updateSinceUntilBuild = false
 }

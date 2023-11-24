@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 
-public class BindingNode extends ParentableNode<ComponentNode> {
+public class BindingNode extends BaseNode<ComponentNode> {
   private final Binding binding;
 
   public BindingNode(ComponentNode parent, Binding binding) {

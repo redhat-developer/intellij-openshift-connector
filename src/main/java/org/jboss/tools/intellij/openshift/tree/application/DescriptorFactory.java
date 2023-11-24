@@ -51,13 +51,12 @@ public class DescriptorFactory {
         project,
         root,
         () -> {
-          String label = "Loading...";
           try {
             Odo odo = root.getOdo().getNow(null);
-            if (odo != null) {
-              label = odo.getMasterUrl().toString();
+            if (odo == null) {
+              return "Loading...";
             }
-            return label;
+            return odo.getMasterUrl().toString();
           } catch (Exception e) {
             return "Error: " + e.getCause().getMessage();
           }

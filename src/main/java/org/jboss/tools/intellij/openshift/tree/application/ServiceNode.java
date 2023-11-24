@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 
-public class ServiceNode extends ParentableNode<NamespaceNode> {
+public class ServiceNode extends BaseNode<NamespaceNode> {
 
     private final Service service;
 

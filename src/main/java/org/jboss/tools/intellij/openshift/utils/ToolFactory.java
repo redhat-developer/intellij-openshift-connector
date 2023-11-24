@@ -40,20 +40,12 @@ public class ToolFactory {
     private ToolFactory() {
     }
 
-    public CompletableFuture<Odo> getOdo(Project project) {
-        return odo.get(project);
+    public CompletableFuture<Odo> createOdo(Project project) {
+        return odo.create(project);
     }
 
-    public void resetOdo() {
-        this.odo.reset();
-    }
-
-    public CompletableFuture<Helm> getHelm(Project project) {
-        return helm.get(project);
-    }
-
-    public void resetHelm() {
-        this.helm.reset();
+    public CompletableFuture<Helm> createHelm(Project project) {
+        return helm.create(project);
     }
 
     private static class Tool<T> {
@@ -62,18 +54,13 @@ public class ToolFactory {
 
         private final BiFunction<Project, String, T> toolFactory;
 
-        private CompletableFuture<T> factory = null;
-
         private Tool(String name, BiFunction<Project, String, T> toolFactory) {
             this.name = name;
             this.toolFactory = toolFactory;
         }
 
-        private CompletableFuture<T> get(Project project) {
-            if (factory == null) {
-                this.factory = create(name, toolFactory, project);
-            }
-            return factory;
+        private CompletableFuture<T> create(Project project) {
+            return create(name, toolFactory, project);
         }
 
         private CompletableFuture<T> create(String name, BiFunction<Project, String, T> toolFactory, Project project) {
@@ -86,10 +73,6 @@ public class ToolFactory {
                       return null;
                   }
               });
-        }
-
-        private void reset() {
-            this.factory = null;
         }
     }
 }

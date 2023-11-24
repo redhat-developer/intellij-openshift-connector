@@ -27,7 +27,7 @@ public interface Odo {
      * @return the active namespace name
      * @throws IOException if communication errored
      */
-    String getNamespace() throws IOException;
+    String getCurrentNamespace() throws IOException;
 
     void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
 

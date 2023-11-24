@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-public interface ProcessingNode extends StructureAwareNode {
+public interface ProcessingNode {
 
   void startProcessing(String message);
 
@@ -20,7 +20,7 @@ public interface ProcessingNode extends StructureAwareNode {
 
   boolean isProcessingStopped();
 
-  String getProcessingMessage();
+  String getMessage();
 
   class ProcessingNodeImpl {
 

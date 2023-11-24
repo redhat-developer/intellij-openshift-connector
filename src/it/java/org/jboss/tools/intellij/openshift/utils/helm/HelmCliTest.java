@@ -23,9 +23,9 @@ public abstract class HelmCliTest extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        Odo odo = ToolFactory.getInstance().getOdo(getProject()).get();
+        Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
         OdoCluster.INSTANCE.login(odo);
-        this.helm = ToolFactory.getInstance().getHelm(getProject()).get();
+        this.helm = ToolFactory.getInstance().createHelm(getProject()).get();
         Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
     }
 

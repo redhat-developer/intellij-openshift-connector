@@ -14,6 +14,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
+import org.jboss.tools.intellij.openshift.ui.helm.ChartIcons;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -34,8 +35,6 @@ public class DescriptorFactory {
   private static final Icon COMPONENT_TYPE_ICON = IconLoader.findIcon("/images/component-type-light.png", ApplicationsTreeStructure.class);
   private static final Icon STARTER_ICON = IconLoader.findIcon("/images/start-project-light.png", ApplicationsTreeStructure.class);
   private static final Icon REGISTRY_ICON = IconLoader.findIcon("/images/registry.svg", ApplicationsTreeStructure.class);
-
-  private static final Icon CHART_RELEASE_ICON = IconLoader.findIcon("/images/helm/helm.svg", ApplicationsTreeStructure.class);
 
   public static @NotNull NodeDescriptor<?> create(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor, @NotNull ApplicationsTreeStructure structure, @NotNull Project project) {
     if (element == structure) {
@@ -153,7 +152,7 @@ public class DescriptorFactory {
         releaseNode,
         releaseNode::getName,
         () -> "Helm Release",
-        () -> CHART_RELEASE_ICON,
+        () -> ChartIcons.getIcon15x15(releaseNode.getRelease()),
         parentDescriptor);
     }
 

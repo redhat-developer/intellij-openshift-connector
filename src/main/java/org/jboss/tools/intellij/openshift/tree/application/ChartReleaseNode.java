@@ -14,7 +14,14 @@ import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
 
 public class ChartReleaseNode extends BaseNode<NamespaceNode> {
 
+  private final ChartRelease release;
+
   public ChartReleaseNode(NamespaceNode parent, ChartRelease release) {
     super(parent.getRoot(), parent, release.getName());
+    this.release = release;
+  }
+
+  public ChartRelease getRelease() {
+    return release;
   }
 }

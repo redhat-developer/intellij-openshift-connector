@@ -68,7 +68,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -867,12 +866,7 @@ public class OdoCli implements Odo {
 
     @Override
     public boolean isOpenShift() {
-        OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
-        try {
-            return osClient.isSupported();
-        } catch (KubernetesClientException e) {
-            return e.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED;
-        }
+        return ClusterHelper.isOpenShift(client);
     }
 
     @Override

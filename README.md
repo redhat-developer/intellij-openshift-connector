@@ -32,7 +32,7 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 We're Happy to announce that we've implemented a new action that provide the capability to install
 a [Helm](https://helm.sh/) chart into the current cluster.
 
-Below a small demo using Heml stable repo (https://charts.helm.sh/stable) and installing kuberos chart.
+Below is a small demo of the workflow: installing `kuberos` chart from the Helm stable repo (https://charts.helm.sh/stable) 
 
 ![](images/1.7.0/helm.gif)
 

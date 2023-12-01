@@ -37,7 +37,7 @@ Below is a small demo of the workflow: installing `kuberos` chart from the Helm 
 ![](images/1.7.0/helm.gif)
 
 There is no need to install anything prior to use Helm. By default if there is no repository configured, the OpenShift
-helm repository will be use (https://charts.openshift.io/).
+Helm repository will be used (https://charts.openshift.io/).
 
 For more information about using Helm on Openshift, please
 see [here](https://docs.openshift.com/container-platform/latest/applications/working_with_helm_charts/understanding-helm.html)

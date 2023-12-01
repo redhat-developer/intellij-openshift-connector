@@ -20,7 +20,7 @@
   <p><b>1.7.0</b></p>
   <ul>
   <li>Switch to odo 3.15.0</li>
-  <li>Added an action to install Helms Charts in cluster</li>
+  <li>Added an action to install Helm Charts in the connected cluster</li>
   <li>Improved tree refresh performance and feedback</li>
   <li>Bug fixes</li>
   </ul>

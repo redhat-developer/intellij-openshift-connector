@@ -148,9 +148,8 @@ public class OdoCli implements Odo {
         this.command = command;
         this.project = project;
         this.connection = ApplicationManager.getApplication().getMessageBus().connect();
-        String context = ConfigHelper.getCurrentContext().getName();
-        Config config = Config.autoConfigure(context);
-
+        String current = ConfigHelper.getCurrentContextName();
+        Config config = Config.autoConfigure(current);
         this.client = new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());

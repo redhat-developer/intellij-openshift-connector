@@ -55,7 +55,12 @@ public class DescriptorFactory {
             if (odo == null) {
               return "Loading...";
             }
-            return odo.getMasterUrl().toString();
+            java.net.URL masterUrl = odo.getMasterUrl();
+            if ("kubernetes.default.svc".equals(masterUrl.getHost())) {
+              return "no (current) context/cluster set";
+            } else {
+              return masterUrl.toString();
+            }
           } catch (Exception e) {
             return "Error: " + e.getCause().getMessage();
           }

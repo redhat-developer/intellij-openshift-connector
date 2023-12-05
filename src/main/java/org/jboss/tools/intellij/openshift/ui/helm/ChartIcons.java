@@ -11,17 +11,34 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ui.IconManager;
+import com.intellij.ui.SizedIcon;
+import com.intellij.ui.scale.JBUIScale;
+import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
 
+import javax.swing.Icon;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ChartIcons {
 
-  private static final String BASE_PATH = "/images/helm/";
+  private static final Path BASE_PATH = Paths.get("images", "helm");
   private static final String HELM_ICON = "helm.png";
 
   public static javax.swing.Icon getIcon(ChartVersions chart) {
     return getIcon(chart.getName() + chart.getDescription());
+  }
+
+  public static javax.swing.Icon getIcon(ChartRelease chart) {
+    return getIcon(chart.getChart());
+  }
+
+  public static javax.swing.Icon getIcon15x15(ChartRelease chart) {
+    Icon icon = getIcon(chart);
+    float scale = 15f / icon.getIconWidth();
+    SizedIcon sized = JBUIScale.scaleIcon(new SizedIcon(icon, icon.getIconHeight(), icon.getIconHeight()));
+    return sized.scale(scale);
   }
 
   private static javax.swing.Icon getIcon(String name) {
@@ -30,39 +47,39 @@ public class ChartIcons {
       .findFirst();
     return found
       .map(iconExpression -> IconManager.getInstance().getIcon(iconExpression.filename, ChartIcons.class))
-      .orElseGet(() -> IconManager.getInstance().getIcon(BASE_PATH + HELM_ICON, ChartIcons.class));
+      .orElseGet(() -> IconManager.getInstance().getIcon(BASE_PATH.resolve(HELM_ICON).toString(), ChartIcons.class));
   }
 
   private enum IconExpression {
-    A10_THUNDER("a10-thunder.png", "A10 Thunder"),
-    BACKSTAGE("backstage.png", "Backstage"),
-    BROADPEAK("broadpeak.png", "Broadpeak"),
-    DATA_GRID("data-grid.png", "Red Hat Data Grid"),
+    A10_THUNDER("a10-thunder.png", "A10network"),
+    BACKSTAGE("backstage.png", "backstage"),
+    BROADPEAK("broadpeak.png", "broadpeak"),
+    DATA_GRID("data-grid.png", "data-grid-"),
     FLOMESH("flomesh.png", "Flomesh"),
     JENKINS("jenkins.png", "Jenkins"),
-    HASHICORP_VAULT("vault.png", "HashiCorp Vault"),
-    IBM_OPERATOR_CATALOG("ibm-operator-catalog.png", "IBM Operator Catalog"),
-    IBM_ORDER_MANAGEMENT("ibm-order-management.png", "IBM Order Management"),
-    IBM_SPECTRUM_PROTECT("ibm-spectrum-protect.png", "IBM Spectrum Protect"),
-    IBM_CLOUD_OBJECT_STORAGE("ibm-cloud-object-storage.png", "IBM Cloud Object Storage"),
+    HASHICORP_VAULT("vault.png", "hashiCorp-vault"),
+    IBM_OPERATOR_CATALOG("ibm-operator-catalog.png", "ibm-operator-catalog"),
+    IBM_ORDER_MANAGEMENT("ibm-order-management.png", "ibm-oms-"),
+    IBM_SPECTRUM_PROTECT("ibm-spectrum-protect.png", "ibm-spectrum-protect"),
+    IBM_CLOUD_OBJECT_STORAGE("ibm-cloud-object-storage.png", "ibm-object-storage"),
     INFINISPAN("infinispan.png", "Infinispan"),
-    EAP("eap.png", " EAP "),
-    KYVERNO("kyverno.png", "Kubernetes Native Policy Management"),
+    EAP("eap.png", "-eap"),
+    KYVERNO("kyverno.png", "-kyverno"),
     NEARBY_ONE("nearby-one.png", "Nearby"),
     NODE_RED("node-red.png", "NodeRed"),
-    FIWARE("fiware.png", "Fiware"),
-    SOLACE_PUBSUB("solace-pubsub.png", "Solace PubSub+"),
-    RAFAY("rafay.png", "Rafay"),
-    CRYOSTAT("cryostat.png", "Cryostat"),
-    REDHAT("redhat.png", "Red Hat Developer Hub"),
-    WILDFLY("wildfly.png", "WildFly"),
-    YUGAWARE("yugaware.png", "YugabyteDB");
+    FIWARE("fiware.png", "orion-ld"),
+    SOLACE_PUBSUB("solace-pubsub.png", "pubsubplus-"),
+    RAFAY("rafay.png", "rafay"),
+    CRYOSTAT("cryostat.png", "cryostat"),
+    REDHAT("redhat.png", "developer-hub"),
+    WILDFLY("wildfly.png", "wildFly"),
+    YUGAWARE("yugaware.png", "yugaware");
 
     private final String filename;
     private final String substring;
 
     IconExpression(String filename, String substring) {
-      this.filename = BASE_PATH + filename;
+      this.filename = BASE_PATH.resolve(filename).toString();
       this.substring = substring;
     }
 

@@ -27,14 +27,29 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 ## New features
 
+### Install Helm Charts on the current cluster within the IDE
+
+We're Happy to announce that we've implemented a new action that provides the capability to install
+a [Helm](https://helm.sh/) chart into the current cluster.
+
+Below is a small demo of the workflow: installing `kuberos` chart from the Helm stable repo (https://charts.helm.sh/stable) 
+
+![](images/1.7.0/helm.gif)
+
+There is no need to install anything prior to use Helm. By default if there is no repository configured, the OpenShift
+Helm repository will be used (https://charts.openshift.io/).
+
+For more information about using Helm on OpenShift, please
+see [here](https://docs.openshift.com/container-platform/latest/applications/working_with_helm_charts/understanding-helm.html)
+
+## Features
+
 ### Share your Feedback !
 
 We introduced a new toolbar action within the plugin that enables you to share your feedback with our team. Please feel free to provide your valuable feedback for the plugin workflow.
 
 https://github.com/redhat-developer/intellij-openshift-connector/assets/600414/ca52ddcb-2206-480b-aa62-6d4bea4cdc9b
 
-
-## Features
 
 ### Red Hat Developer Sandbox login
 

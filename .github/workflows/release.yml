@@ -46,16 +46,18 @@ jobs:
         id: release_version
         shell: bash
         run: |
-          PLUGIN_VERSION=$(./set_release_version.sh)
-          echo "Release version: $PLUGIN_VERSION"
-          echo "PLUGIN_VERSION=${PLUGIN_VERSION}" >> $GITHUB_ENV
+          CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
+          NEW_VERSION=${CURRENT_VERSION%-SNAPSHOT}
+          awk -v current="$CURRENT_VERSION" -v new="$NEW_VERSION" 'BEGIN {FS=OFS="="} $1 == "projectVersion" { $2 = new }1' gradle.properties > tmpfile && mv tmpfile gradle.properties
+          echo "Release version: $NEW_VERSION"
+          echo "PLUGIN_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin to JetBrains Marketplace
         env:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
         run: |
-          ./gradlew publishPlugin -PprojectVersion=$PLUGIN_VERSION -Pchannel=stable
+          ./gradlew publishPlugin -PprojectVersion=$PLUGIN_VERSION -Pchannel=stable -PjetBrainsToken=$PUBLISH_TOKEN
           echo "Published $PLUGIN_VERSION to the Jetbrains Marketplace"
 
       - name: Tag Release
@@ -77,7 +79,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          NEW_VERSION=$(./increment_version.sh)
+          CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
+          IFS="-" read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          IFS="." read -ra VERSION_NUM <<< "${VERSION_PARTS[0]}"
+          ((VERSION_NUM[2]++))
+          NEW_VERSION="${VERSION_NUM[0]}.${VERSION_NUM[1]}.${VERSION_NUM[2]}-SNAPSHOT"
+          awk -v new_version="$NEW_VERSION" '/projectVersion=/{sub(/=.*/, "=" new_version)}1' gradle.properties > tmpfile && mv tmpfile gradle.properties
           echo "Set $NEW_VERSION in gradle.properties"
           git commit -sam "chore(skip-release): set version to $NEW_VERSION"
           git push origin main

@@ -115,7 +115,7 @@ public class CreateServiceDialog extends DialogWrapper {
     @Override
     protected List<ValidationInfo> doValidateAll() {
         List<ValidationInfo> validations = new ArrayList<>();
-        if (nameField.getText().length() == 0) {
+        if (nameField.getText().isEmpty()) {
             validations.add(new ValidationInfo("Name must be provided", nameField));
         }
         return validations;

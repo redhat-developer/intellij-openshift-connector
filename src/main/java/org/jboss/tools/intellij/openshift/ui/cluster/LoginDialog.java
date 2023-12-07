@@ -14,7 +14,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.util.ui.JBHtmlEditorKit;
+import com.intellij.util.ui.HTMLEditorKitBuilder;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
@@ -62,7 +62,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         passwordField.getDocument().addDocumentListener(this);
         tokenField.getDocument().addDocumentListener(this);
         pasteLoginCommandButton.addActionListener(e -> parseLoginCommandFromClipboard());
-        labelEditorPane.setEditorKit(new JBHtmlEditorKit());
+        labelEditorPane.setEditorKit(new HTMLEditorKitBuilder().build());
         labelEditorPane.setText("Enter the cluster URL and the required credentials. You can also bootstrap a <a href=''>Red Hat Developer Sandbox</a> cluster using your Red Hat account");
         labelEditorPane.addHyperlinkListener(this::loginToSandbox);
     }

@@ -46,6 +46,7 @@ public class BrowserBasedLoginDialog extends JDialog {
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
@@ -56,7 +57,7 @@ public class BrowserBasedLoginDialog extends JDialog {
 
         browser.getRedirectFuture().handle((response, t) -> {
            info = response;
-           ApplicationManager.getApplication().invokeLater(() -> dispose(), ModalityState.any());
+            ApplicationManager.getApplication().invokeLater(this::dispose, ModalityState.any());
             return null;
         });
         browser.setDeployment(deployment);

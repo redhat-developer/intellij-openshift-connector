@@ -48,7 +48,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
     action.doActionPerformed(rootNode, odo, rootNode.getProject());
   }
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     doActionPerformed(clusterNode, odo, getEventProject(anActionEvent));
   }

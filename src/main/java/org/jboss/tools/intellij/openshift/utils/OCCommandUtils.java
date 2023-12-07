@@ -18,12 +18,16 @@ import java.util.regex.Pattern;
  *
  * @author Josef Kopriva
  */
-public class OCCommandUtils {
+public final class OCCommandUtils {
+
+    private OCCommandUtils() {
+        //hide constructor
+    }
 
     /**
      * Validates is oc command is in correct format with required fields.
      *
-     * @param ocCommand
+     * @param ocCommand the oc command
      * @return false command has not correct format
      */
     public static boolean isValidCommand(String ocCommand) {
@@ -35,7 +39,7 @@ public class OCCommandUtils {
     /**
      * Returns true if authorization schema of oc command is valid (basic/OAuth).
      *
-     * @param ocCommand
+     * @param ocCommand the oc command
      * @return false command has not correct authorization schema
      */
     public static boolean isValidAuthMethod(String ocCommand) {
@@ -46,7 +50,7 @@ public class OCCommandUtils {
     /**
      * Parses server address from oc command.
      *
-     * @param ocCommand
+     * @param ocCommand the oc command
      * @return server address
      */
     public static String getServer(String ocCommand) {
@@ -61,7 +65,7 @@ public class OCCommandUtils {
     /**
      * Parses token from oc command.
      *
-     * @param ocCommand
+     * @param ocCommand the oc command
      * @return token
      */
     public static String getToken(String ocCommand) {
@@ -71,7 +75,7 @@ public class OCCommandUtils {
     /**
      * Parses username from oc command.
      *
-     * @param ocCommand
+     * @param ocCommand the oc command
      * @return username
      */
     public static String getUsername(String ocCommand) {
@@ -86,7 +90,7 @@ public class OCCommandUtils {
     /**
      * Parses password from oc command.
      *
-     * @param ocCommand
+     * @param ocCommand the oc command
      * @return password
      */
     public static String getPassword(String ocCommand) {

@@ -43,12 +43,6 @@ public class LinkComponentAction extends OdoAction {
   @Override
   protected String getTelemetryActionName() { return "link component to component"; }
   
-  @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    return visible;
-  }
-
   protected String getSelectedTargetComponent(Odo odo, String project, String component) throws IOException {
     String targetComponent = null;
 
@@ -73,7 +67,7 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component sourceComponent = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();

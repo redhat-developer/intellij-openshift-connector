@@ -74,7 +74,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if (project == null) {
             sendTelemetryResults(TelemetryResult.ABORTED);

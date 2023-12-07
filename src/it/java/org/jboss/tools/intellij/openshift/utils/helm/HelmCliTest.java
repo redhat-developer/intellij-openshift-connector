@@ -15,22 +15,28 @@ import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
+import java.util.Random;
 
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
     protected Helm helm;
+
+    private String projectName = "prj-" + new Random().nextInt();
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
         OdoCluster.INSTANCE.login(odo);
+        odo.createProject(projectName);
         this.helm = ToolFactory.getInstance().createHelm(getProject()).get();
         Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
     }
 
     @Override
     protected void tearDown() throws Exception {
+        Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
+        odo.deleteProject(projectName);
         super.tearDown();
     }
 

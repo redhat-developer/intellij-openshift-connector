@@ -46,9 +46,7 @@ public final class DefaultLoginProvider implements LoginProvider {
 
 	LoginResponse runInJob(IAuthorizationServer server, Object context) {
 		CompletableFuture<LoginResponse> result = new CompletableFuture<>();
-		ApplicationManager.getApplication().invokeLater(() -> {
-			result.complete(loginInUI(server, context));
-		}, ModalityState.any());
+        ApplicationManager.getApplication().invokeLater(() -> result.complete(loginInUI(server, context)), ModalityState.any());
 		try {
 			return result.get(TIMEOUT_JOB_ON_UI_THREAD, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {

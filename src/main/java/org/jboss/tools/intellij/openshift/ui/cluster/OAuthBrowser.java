@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.ui.cluster;
 
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
+import com.intellij.ui.jcef.JBCefBrowserBuilder;
 import com.intellij.ui.jcef.JBCefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -56,7 +57,7 @@ public class OAuthBrowser extends JPanel implements CefLoadHandler {
     private List<TokenListener> listeners = new ArrayList<>();
 
     public OAuthBrowser() {
-        browser = new JBCefBrowser(client, "https://www.redhat.com");
+        browser = new JBCefBrowserBuilder().setClient(client).setUrl("https://www.redhat.com").build();
         add(browser.getComponent());
         client.addLoadHandler(this, browser.getCefBrowser());
     }

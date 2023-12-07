@@ -37,7 +37,7 @@ public class CreateRegistryAction extends OdoAction {
     protected String getTelemetryActionName() { return "create registry"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         DevfileRegistriesNode registriesNode = (DevfileRegistriesNode) selected;
         try {
             List<DevfileRegistry> registries = ProgressManager.getInstance().

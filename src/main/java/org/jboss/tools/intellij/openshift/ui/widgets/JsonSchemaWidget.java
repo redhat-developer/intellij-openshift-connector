@@ -214,9 +214,7 @@ public class JsonSchemaWidget extends JPanel {
                     JPanel panel = new JPanel(new MigLayout(LAYOUT_CONSTRAINTS));
                     JButton button = new JButton("Add " + getDisplayName(name, node));
                     panel.add(button, getConstraints());
-                    button.addActionListener(e -> {
-                        createArrayItemWidget(name, node, null, panel);
-                    });
+                    button.addActionListener(e -> createArrayItemWidget(name, node, null, panel));
                     if (name != null) {
                         JPanel header = getHeaderPanel(getDisplayName(name, node), panel);
                         parent.add(header, getConstraints());

@@ -102,10 +102,8 @@ public class JSonParser {
                         String host = rule.has(HOST_FIELD) ?
                                 rule.get(HOST_FIELD).asText() : "localhost";
                         if (rule.has(JSonParser.PATHS_FIELD)) {
-                            rule.get(PATHS_FIELD).forEach(path -> {
-                                result.add(URL.of(name, host, "80", "80",
-                                                  path.asText()));
-                            });
+                            rule.get(PATHS_FIELD).forEach(path -> result.add(URL.of(name, host, "80", "80",
+                                    path.asText())));
                         }
                     });
                 }

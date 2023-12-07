@@ -41,19 +41,19 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
         if (helm == null) {
           return;
         }
-        this.actionPerformed(anActionEvent, (Object) getElement(selected), helm);
+        this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), helm);
     }
 
     private Helm getHelm(AnActionEvent anActionEvent) {
         try {
-          return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true).getNow(null);
+            return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true).getNow(null);
         } catch(Exception e) {
           LOGGER.warn("Could not get helm: " + e.getMessage(), e);
           return null;
         }
     }
 
-    public abstract void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm);
+    public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm);
 
     protected abstract String getTelemetryActionName();
 

@@ -58,7 +58,7 @@ import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_UI;
 
 class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposable {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ChartPanels.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(InstallPanel.class);
 
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
@@ -253,11 +253,6 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
     }
   }
 
-  private void setStateAsync(PanelState panelState) {
-    ApplicationManager.getApplication().invokeLater(() ->
-      setState(panelState));
-  }
-
   private void setState(PanelState panelState) {
     setState(panelState, false);
   }
@@ -322,7 +317,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
   private class ReleaseNameValidator implements Supplier<ValidationInfo> {
 
     private final Pattern nameRegex = Pattern.compile(
-      "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$");
+            "^[a-z0-9]+(([.-])?[a-z0-9]){0,54}$");
     private final JTextField field;
 
     public ReleaseNameValidator(JTextField field) {

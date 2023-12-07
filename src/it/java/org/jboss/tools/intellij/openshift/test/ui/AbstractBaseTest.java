@@ -14,10 +14,10 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
+import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
-import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +29,7 @@ import java.time.Duration;
  */
 @ExtendWith(TestRunnerExtension.class)
 @UITest
-abstract public class AbstractBaseTest {
+public abstract class AbstractBaseTest {
 
     protected static RemoteRobot robot;
 

@@ -39,7 +39,7 @@ public class CreateServiceAction extends OdoAction {
     protected String getTelemetryActionName() { return "create service"; }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         NamespaceNode namespaceNode = (NamespaceNode) selected;
         if (namespaceNode == null) {
             return;

@@ -15,16 +15,12 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.Disposer;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.JComponent;
 import java.awt.Component;
 import java.util.stream.Stream;
 
 public class ChartPanels extends MultiPanel {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ChartPanels.class);
 
   public static final int DETAILS_PANEL = 0;
   public static final int INSTALL_PANEL = 1;

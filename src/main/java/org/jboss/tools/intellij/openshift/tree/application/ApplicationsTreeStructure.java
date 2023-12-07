@@ -125,7 +125,6 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
         nodes.addAll(getComponents(namespaceNode));
         nodes.addAll(getServices(namespaceNode));
-
         nodes.addAll(getHelmReleases(namespaceNode));
 
         return nodes.toArray();

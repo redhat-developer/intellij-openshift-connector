@@ -100,8 +100,9 @@ public class Account implements IAccount {
 	    return getAccessToken();
 	  case TokenProvider.REFRESH_TOKEN:
 	    return getRefreshToken();
+          default:
+              throw new IllegalStateException("Unexpected value: " + tokenType);
 	  }
-    return null;
   }
 
   @Override

@@ -27,7 +27,7 @@ public class DeleteBindingAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         try {
             BindingNode node = (BindingNode) selected;
             if (Messages.NO == Messages.showYesNoDialog("Delete binding '" + node.getName() + "'.\nAre you sure?",

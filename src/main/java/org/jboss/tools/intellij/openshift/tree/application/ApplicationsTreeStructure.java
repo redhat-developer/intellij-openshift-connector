@@ -21,6 +21,7 @@ import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.ExceptionUtils;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
@@ -153,7 +154,8 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private MessageNode<?> createErrorNode(ParentableNode<?> parent, Exception e) {
         if (e instanceof KubernetesClientException) {
             KubernetesClientException kce = (KubernetesClientException) e;
-            if (kce.getCode() == 401) {
+            if (KubernetesClientExceptionUtils.isForbidden(kce)
+              || KubernetesClientExceptionUtils.isUnauthorized(kce)) {
                 return new MessageNode<>(root, parent, LOGIN);
             } else if (kce.getCause() instanceof NoRouteToHostException) {
                 return new MessageNode<>(root, parent, kce.getCause().getMessage());

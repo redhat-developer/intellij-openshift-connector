@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v4
+      - name: validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4 #v1.1.0
       - run: |
           git rev-parse HEAD >> lastCommit
       - name: Check New Changes

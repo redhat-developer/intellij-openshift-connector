@@ -10,13 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertTrue;
 
 public class OdoCliProjectTest extends OdoCliTest {
 
@@ -34,7 +30,7 @@ public class OdoCliProjectTest extends OdoCliTest {
         try {
             createProject(project);
             List<String> projects = odo.getNamespaces();
-            assertTrue(projects.size() > 0);
+            assertFalse(projects.isEmpty());
         } finally {
             odo.deleteProject(project);
         }

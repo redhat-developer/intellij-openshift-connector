@@ -10,15 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.with;
-import static org.junit.Assert.assertTrue;
 
 public class OdoCliCatalogTest extends OdoCliTest {
 
@@ -27,7 +24,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
         try {
             createProject(project);
             List<DevfileComponentType> components = odo.getComponentTypes();
-            assertTrue(components.size() > 0);
+            assertFalse(components.isEmpty());
         } finally {
             odo.deleteProject(project);
         }

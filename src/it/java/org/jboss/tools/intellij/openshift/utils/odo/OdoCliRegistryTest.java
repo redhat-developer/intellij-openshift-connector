@@ -10,12 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 public class OdoCliRegistryTest extends OdoCliTest {
 
@@ -30,6 +26,6 @@ public class OdoCliRegistryTest extends OdoCliTest {
 
     public void testCheckListRegistries() throws IOException {
         List<DevfileRegistry> registries = odo.listDevfileRegistries();
-        assertTrue(registries.size() > 0);
+        assertFalse(registries.isEmpty());
     }
 }

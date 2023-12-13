@@ -10,7 +10,7 @@ buildscript {
         ext.sinceIdeaBuild = 0
     }
 
-    if (ext.sinceIdeaBuild >= 223) {
+    if (ext.sinceIdeaBuild.toInteger() >= 223) {
         ext.java_version = "17"
     } else {
         ext.java_version = "11"
@@ -18,7 +18,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.16.0'
+    id 'org.jetbrains.intellij' version '1.16.1'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'idea'
     id 'java'
@@ -115,6 +115,10 @@ tasks.register('integrationTest', Test) {
         showFullStackTraces true
     }
     jvmArgs "-Djava.awt.headless=true"
+    jacoco {
+        includeNoLocationClasses = true
+        excludes = ["jdk.internal.*"]
+    }
 }
 
 tasks.register('integrationUITest', Test) {
@@ -135,6 +139,10 @@ tasks.register('integrationUITest', Test) {
         showFullStackTraces true
     }
     jvmArgs "-Djava.awt.headless=true"
+    jacoco {
+        includeNoLocationClasses = true
+        excludes = ["jdk.internal.*"]
+    }
 }
 
 dependencies {
@@ -176,18 +184,18 @@ dependencies {
     }
 }
 
-sonarqube {
+sonar {
     properties {
         property "sonar.projectKey", "redhat-developer_intellij-openshift-connector"
         property "sonar.organization", "redhat-developer"
         property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.junit.reportsPath", "$buildDir/test-results/"
+        property "sonar.junit.reportsPath", layout.buildDirectory.dir("test-results").get().asFile.absolutePath
         property "sonar.gradle.skipCompile", "true"
     }
 }
 
 jacocoTestReport {
-    getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+    getExecutionData().setFrom(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
     reports {
         xml.required = true
     }

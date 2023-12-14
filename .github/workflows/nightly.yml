@@ -67,4 +67,4 @@ jobs:
           BASE_VERSION=${CURRENT_VERSION%-SNAPSHOT}
           TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
           PLUGIN_VERSION="${BASE_VERSION}-$TIMESTAMP"
-          ./gradlew publishPlugin -PprojectVersion=${PLUGIN_VERSION} -Pchannel=nightly -PpluginVersion=${PLUGIN_VERSION}
+          ./gradlew publishPlugin -PprojectVersion=${PLUGIN_VERSION} -Pchannel=nightly

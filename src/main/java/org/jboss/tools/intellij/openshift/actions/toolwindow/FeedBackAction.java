@@ -12,34 +12,34 @@ package org.jboss.tools.intellij.openshift.actions.toolwindow;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackMessage;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.ui.feedback.FeedBackDialog;
 import org.jetbrains.annotations.NotNull;
 
 public class FeedBackAction extends AnAction {
 
-    protected TelemetrySender telemetrySender;
-
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        telemetrySender = new TelemetrySender("feedback");
+        FeedbackMessage feedback = TelemetryService.instance().getBuilder().feedback("feedback");
         FeedBackDialog dialog = new FeedBackDialog();
         dialog.show();
         if (dialog.isOK()) {
-            telemetrySender.addProperty("satisfaction", dialog.getSatisfaction());
-            telemetrySender.addProperty("satisfaction_comment", dialog.getSatisfactionComment());
-            telemetrySender.addProperty("recommendation", dialog.getRecommendation());
-            telemetrySender.addProperty("recommendation_comment", dialog.getRecommendationComment());
-            telemetrySender.addProperty("used_similar_extension", dialog.isUsedSimilarExtension());
-            telemetrySender.addProperty("used_similar_extension_name", dialog.getUsedSimilarExtensionName());
-            telemetrySender.addProperty("frustrating", dialog.getFrustratingFeature());
-            telemetrySender.addProperty("missing", dialog.getMissingFeature());
-            telemetrySender.addProperty("best", dialog.getBestFeature());
-            telemetrySender.addProperty("contact", dialog.getContact());
-            telemetrySender.sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
+            feedback.property("satisfaction", dialog.getSatisfaction())
+              .property("satisfaction_comment", dialog.getSatisfactionComment())
+              .property("recommendation", dialog.getRecommendation())
+              .property("recommendation_comment", dialog.getRecommendationComment())
+              .property("used_similar_extension", dialog.isUsedSimilarExtension())
+              .property("used_similar_extension_name", dialog.getUsedSimilarExtensionName())
+              .property("frustrating", dialog.getFrustratingFeature())
+              .property("missing", dialog.getMissingFeature())
+              .property("best", dialog.getBestFeature())
+              .property("contact", dialog.getContact())
+              .success()
+              .send();
         } else {
-            telemetrySender.sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
+            feedback.aborted()
+              .send();
         }
     }
 }

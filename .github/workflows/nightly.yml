@@ -61,7 +61,7 @@ jobs:
 
       - name: Publish Plugin
         env:
-          PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+          PUBLISH_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
         run: |
           CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
           BASE_VERSION=${CURRENT_VERSION%-SNAPSHOT}

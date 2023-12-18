@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface ComponentInfo {
 
     String getComponentTypeName();
@@ -18,14 +21,14 @@ public interface ComponentInfo {
 
     ComponentKind getComponentKind();
 
-    ComponentFeatures getFeatures();
+    List<ComponentFeature.Mode> getSupportedFeatures();
 
     class Builder {
         private String componentTypeName;
 
         private ComponentKind kind;
 
-        private ComponentFeatures features = new ComponentFeatures();
+        private List<ComponentFeature.Mode> supportedFeatures = new ArrayList<>();
 
         private String language;
 
@@ -39,8 +42,8 @@ public interface ComponentInfo {
             return this;
         }
 
-        public Builder withFeatures(ComponentFeatures features) {
-            this.features = features;
+        public Builder withSupportedFeatures(List<ComponentFeature.Mode> features) {
+            this.supportedFeatures = features;
             return this;
         }
 
@@ -68,8 +71,8 @@ public interface ComponentInfo {
                 }
 
                 @Override
-                public ComponentFeatures getFeatures() {
-                    return features;
+                public List<ComponentFeature.Mode> getSupportedFeatures() {
+                    return supportedFeatures;
                 }
             };
         }

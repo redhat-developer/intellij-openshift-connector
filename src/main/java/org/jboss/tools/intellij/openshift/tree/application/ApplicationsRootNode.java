@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -27,6 +28,7 @@ import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
+import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 public class ApplicationsRootNode
@@ -55,6 +58,8 @@ public class ApplicationsRootNode
     private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
 
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
+
+    private Map<String, Map<ComponentFeature, ProcessHandler>> processes = new HashMap<>();
 
     public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure) {
         this.project = project;
@@ -78,6 +83,7 @@ public class ApplicationsRootNode
               .createOdo(project)
               .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
               .whenComplete((odo, err) -> loadProjectModel(odo, project))
+                    .whenComplete((odo, err) -> restoreComponentFeatureProcesses(odo))
               .whenComplete(whenComplete);
         }
         return odoFuture;
@@ -88,6 +94,18 @@ public class ApplicationsRootNode
     }
 
     public void resetOdo() {
+        if (odoFuture != null) {
+            //save current running processes
+            try {
+                this.processes = this.odoFuture.get().getComponentFeatureProcesses();
+            } catch (InterruptedException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+                /* Clean up whatever needs to be handled before interrupting  */
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            }
+        }
         this.odoFuture = null;
     }
 
@@ -127,6 +145,16 @@ public class ApplicationsRootNode
         }
         for (Module module : ModuleManager.getInstance(project).getModules()) {
             addContext(odo, ProjectUtils.getModuleRoot(module));
+        }
+    }
+
+    private void restoreComponentFeatureProcesses(Odo odo) {
+        if (odo == null) {
+            return;
+        }
+        if (!this.processes.isEmpty()) {
+            // restore running processes
+            odo.setComponentFeatureProcesses(processes);
         }
     }
 

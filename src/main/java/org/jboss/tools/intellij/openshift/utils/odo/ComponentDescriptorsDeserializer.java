@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.jboss.tools.intellij.openshift.utils.odo.ComponentDeserializer.COMPONENTS_FIELD;
 import static org.jboss.tools.intellij.openshift.utils.odo.ComponentDeserializer.NAME_FIELD;
-import static org.jboss.tools.intellij.openshift.utils.odo.JSonParser.get;
+import static org.jboss.tools.intellij.openshift.utils.odo.JSonParser.getAsText;
 
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
 
@@ -38,12 +38,12 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
     public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext context) {
         List<ComponentDescriptor> result = new ArrayList<>();
         if (root.has(COMPONENT_IN_DEVFILE_FIELD)) {
-            String devFileName = root.get(COMPONENT_IN_DEVFILE_FIELD).asText();
-            if (root.has(COMPONENTS_FIELD)) {
+            String devFileName = getAsText(root, COMPONENT_IN_DEVFILE_FIELD);
+            if (root.has(COMPONENTS_FIELD) && devFileName != null) {
                 for(JsonNode node : root.get(COMPONENTS_FIELD)) {
-                    String name = get(node, NAME_FIELD);
-                    String managedBy = get(node, MANAGED_BY_FIELD);
-                    String managedByVersion = get(node, MANAGED_BY_VERSION_FIELD);
+                    String name = getAsText(node, NAME_FIELD);
+                    String managedBy = getAsText(node, MANAGED_BY_FIELD);
+                    String managedByVersion = getAsText(node, MANAGED_BY_VERSION_FIELD);
                     if (devFileName.equals(name)) {
                         result.add(new ComponentDescriptor(devFileName, path, managedBy, managedByVersion));
                     }

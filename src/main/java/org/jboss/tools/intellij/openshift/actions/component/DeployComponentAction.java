@@ -10,10 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
 public class DeployComponentAction extends FeatureComponentAction {
   public DeployComponentAction() {
     super(ComponentFeature.DEPLOY);
   }
+
+  @Override
+  protected String getCustomizedPresentation(Component component) {
+    return "";
+  }
+
 }

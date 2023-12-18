@@ -14,17 +14,20 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.actions.NodeUtils;
+import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
+import org.jboss.tools.intellij.openshift.utils.odo.DebugComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
@@ -36,7 +39,9 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
 
     protected final ComponentFeature feature;
 
-    public FeatureComponentAction(ComponentFeature feature) {
+    protected DebugComponentFeature debugFeature;
+
+    protected FeatureComponentAction(ComponentFeature feature) {
         this.feature = feature;
     }
 
@@ -45,7 +50,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         boolean visible = super.isVisible(selected);
         if (visible && selected instanceof ComponentNode) {
             Component component = ((ComponentNode) selected).getComponent();
-            visible = component.getInfo().getFeatures().is(feature);
+            visible = component.getInfo().getSupportedFeatures().contains(feature.getMode());
         }
         return visible;
     }
@@ -53,28 +58,30 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
-        if (e.getPresentation().isVisible()) {
+        if (e.getPresentation().isVisible() && needCustomizedPresentation()) {
             Object node = adjust(getSelected(getTree(e)));
             if (!(node instanceof ComponentNode)) {
                 return;
+                //e.getPresentation().setText(StringUtils.capitalize(getActionName()));
             }
-            ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
+            ComponentNode componentNode = (ComponentNode) node;
             Component component = componentNode.getComponent();
-            ComponentFeature feat = getComponentFeature(component);
             try {
                 Odo odo = componentNode.getRoot().getOdo().getNow(null);
                 if (odo == null) {
                     return;
                 }
-                if (odo.isStarted(componentNode.getNamespace(), component.getPath(), component.getName(), feat)) {
-                    e.getPresentation().setText("Stop " + getActionName());
-                } else {
-                    e.getPresentation().setText("Start " + getActionName());
-                }
+                e.getPresentation().setText(getCustomizedPresentation(component));
             } catch (Exception ex) {
                 LOGGER.warn("Could not update {}", componentNode.getName(), e);
             }
         }
+    }
+
+    protected abstract String getCustomizedPresentation(Component component);
+
+    protected boolean needCustomizedPresentation() {
+        return false;
     }
 
     protected String getActionName() {
@@ -92,35 +99,40 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
         runWithProgress((ProgressIndicator progress) -> {
-                try {
-                    ComponentFeature feat = getComponentFeature(component);
-                    process(odo,
-                        namespaceNode.getName(),
-                        component,
-                        feat,
-                        b1 -> {
-                            if (component.getLiveFeatures().is(feat)) {
-                                component.getLiveFeatures().removeFeature(feat);
-                            } else {
-                                component.getLiveFeatures().addFeature(feat);
-                            }
-                            NodeUtils.fireModified(componentNode);
-                        },
-                        b2 -> NodeUtils.fireModified(componentNode)
-                    );
-                    sendTelemetryResults(TelemetryResult.SUCCESS);
-                } catch (IOException e) {
-                    sendTelemetryError(e);
-                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
-                }
-            },
-            getActionName() + component.getName() + "...",
-            getEventProject(anActionEvent));
+                    try {
+                        ComponentFeature feat = getComponentFeature();
+                        process(odo,
+                                namespaceNode.getName(),
+                                component,
+                                feat,
+                                b1 -> {
+                                    component.getLiveFeatures().addFeature(feature);
+                                    if (feat.getMode().equals(ComponentFeature.Mode.DEBUG_MODE)) {
+                                        component.getLiveFeatures().addFeature(debugFeature);
+                                    }
+                                    ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                                }, b2 -> {
+                                    component.getLiveFeatures().removeFeature(feature);
+                                    if (feat.getMode().equals(ComponentFeature.Mode.DEBUG_MODE)) {
+                                        component.getLiveFeatures().removeFeature(debugFeature);
+                                    }
+                                    ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
+                                });
+                        sendTelemetryResults(TelemetryResult.SUCCESS);
+                    } catch (IOException e) {
+                        sendTelemetryError(e);
+                        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+                    }
+                },
+                getActionName() + component.getName() + "...",
+                getEventProject(anActionEvent));
     }
 
-    protected ComponentFeature getComponentFeature(Component component) {
-        return ((feature.getPeer() != null) && component.getInfo().getFeatures().is(feature.getPeer())) ?
-                feature.getPeer() : feature;
+    private ComponentFeature getComponentFeature() {
+        // for now, always start dev in debug mode. see #571 for use of a preference
+        if (debugFeature == null)
+            debugFeature = new DebugComponentFeature(feature);
+        return debugFeature;
     }
 
     protected void process(Odo odo, String project, Component component,

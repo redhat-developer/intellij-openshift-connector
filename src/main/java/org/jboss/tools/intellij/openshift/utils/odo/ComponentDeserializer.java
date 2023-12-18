@@ -31,14 +31,14 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
 
     @Override
     public List<Component> convert(JsonNode root, DeserializationContext context) {
-        return new ArrayList<>(parseComponents(root.get(COMPONENTS_FIELD), ComponentKind.DEVFILE));
+        return new ArrayList<>(parseComponents(root.get(COMPONENTS_FIELD)));
     }
 
-    private Collection<Component> parseComponents(JsonNode tree, ComponentKind kind) {
+    private Collection<Component> parseComponents(JsonNode tree) {
         List<Component> result = new ArrayList<>();
         if (tree != null) {
             for (JsonNode item : tree) {
-                result.add(Component.of(getName(item), getManagedBy(item), getComponentState(item), getComponentInfo(item, kind)));
+                result.add(Component.of(getName(item), getManagedBy(item), getComponentState(item), getComponentInfo(item)));
             }
         }
         return result;
@@ -47,28 +47,19 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     private ComponentFeatures getComponentState(JsonNode item) {
         JSonParser parser = new JSonParser(item);
         return parser.parseComponentState();
-
     }
 
-    private ComponentInfo getComponentInfo(JsonNode item, ComponentKind kind) {
+    private ComponentInfo getComponentInfo(JsonNode item) {
         JSonParser parser = new JSonParser(item);
-        return parser.parseComponentInfo(kind);
+        return parser.parseComponentInfo();
     }
 
     private String getName(JsonNode item) {
-        if (item.has(NAME_FIELD)) {
-            return item.get(NAME_FIELD).asText();
-        } else {
-            return "";
-        }
+        return JSonParser.getAsText(item, NAME_FIELD, "");
     }
 
     private String getManagedBy(JsonNode item) {
-        if (item.has(MANAGED_BY_FIELD)) {
-            return item.get(MANAGED_BY_FIELD).asText();
-        } else {
-            return "";
-        }
+        return JSonParser.getAsText(item, MANAGED_BY_FIELD, "");
     }
 
 }

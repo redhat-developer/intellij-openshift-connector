@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -336,8 +337,13 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public void release() {
-        delegate.release();
+    public Map<String, Map<ComponentFeature, ProcessHandler>> getComponentFeatureProcesses() {
+        return delegate.getComponentFeatureProcesses();
+    }
+
+    @Override
+    public void setComponentFeatureProcesses(Map<String, Map<ComponentFeature, ProcessHandler>> processes) {
+        delegate.setComponentFeatureProcesses(processes);
     }
 
     /** for testing purposes **/

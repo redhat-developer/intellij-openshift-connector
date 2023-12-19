@@ -65,7 +65,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
   private final Disposable disposable = Disposer.newDisposable();
 
   private final TelemetryMessageBuilder.ActionMessage telemetry =
-    TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "install helm chart");
+    TelemetryService.instance().getBuilder().action(TelemetryService.PREFIX_ACTION + "install helm chart");
 
   private ChartVersions chart;
 

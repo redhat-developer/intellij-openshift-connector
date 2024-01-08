@@ -17,6 +17,11 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.7.1</b></p>
+  <ul>
+  <li>fixed binary incompatibility with telemetry 1.1.0</li>
+  <li>Bug fixes</li>
+  </ul>
   <p><b>1.7.0</b></p>
   <ul>
   <li>Switch to odo 3.15.0</li>

@@ -54,7 +54,6 @@ import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,7 +102,10 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.IS_OPENSHIFT;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.KUBERNETES_VERSION;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.NAME_PREFIX_MISC;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPENSHIFT_VERSION;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
 
 public class OdoCli implements Odo {
 
@@ -192,25 +194,16 @@ public class OdoCli implements Odo {
     }
 
     private void reportTelemetry() {
-        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().getBuilder().action(TelemetryService.NAME_PREFIX_MISC + "login");
+        TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
         try {
             ClusterInfo info = ClusterHelper.getClusterInfo(client);
             telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
             telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
             telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
-            telemetry.send();
+            asyncSend(telemetry);
         } catch (RuntimeException e) {
             // do not send telemetry when there is no context ( ie default kube URL as master URL )
-            try {
-                //workaround to not send null values
-                if (e.getMessage() != null) {
-                    telemetry.error(e).send();
-                } else {
-                    telemetry.error(e.toString()).send();
-                }
-            } catch (RuntimeException ex) {
-                LOGGER.warn(ex.getLocalizedMessage(), ex);
-            }
+            asyncSend(telemetry.error(e));
         }
     }
 

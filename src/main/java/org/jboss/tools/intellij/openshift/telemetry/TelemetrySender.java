@@ -15,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
 
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult.ERROR;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.VALUE_ABORTED;
 
@@ -29,11 +32,11 @@ public class TelemetrySender implements TelemetryHandler {
     private final TelemetryMessageBuilder.ActionMessage telemetry;
 
     public TelemetrySender(String actionName) {
-        telemetry = TelemetryService.instance().getBuilder().action(actionName);
+        telemetry = instance().getBuilder().action(actionName);
     }
 
     @Override
-    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+    public void sendTelemetryResults(TelemetryResult result) {
         switch (result) {
             case SUCCESS:
                 telemetry.success();
@@ -45,7 +48,7 @@ public class TelemetrySender implements TelemetryHandler {
             default:
                 break;
         }
-        telemetry.send();
+        asyncSend(telemetry);
     }
 
     public void sendTelemetryError(String message) {

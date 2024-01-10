@@ -110,10 +110,10 @@ public class HelmCli implements Helm {
         try {
             LOGGER.info("listing all releases.");
             String charts = execute(command, Collections.emptyMap(), "list", "-o=json");
-            telemetry.success().send();
+            asyncSend(telemetry.success());
             return Serialization.json().readValue(charts, new TypeReference<>() {});
         } catch (IOException e) {
-            telemetry.error(e).send();
+            asyncSend(telemetry.error(e));
             throw e;
         }
     }

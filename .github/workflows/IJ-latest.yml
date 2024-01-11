@@ -31,3 +31,6 @@ jobs:
           path: |
             build/test-results/**/*.xml
             build/jacoco/
+      - name: create issue on fail
+        if: failure()
+        run: gh issue create --title "Next EAP SNAPSHOT build failure" --body "See ${{ env.LATEST_TOOL_URL }}"

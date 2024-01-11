@@ -23,6 +23,7 @@ import javax.swing.tree.TreePath;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 
 public class RefreshAction extends StructureTreeAction {
     public RefreshAction() {
@@ -45,10 +46,11 @@ public class RefreshAction extends StructureTreeAction {
         }
         runWithProgress((ProgressIndicator progress) -> {
               root.refresh();
-              TelemetryService.instance().getBuilder()
-                .action(PREFIX_ACTION + "refresh cluster")
-                .success()
-                .send();
+              asyncSend(
+                TelemetryService.instance().getBuilder()
+                  .action(PREFIX_ACTION + "refresh cluster")
+                  .success()
+              );
           },
           "Refreshing...",
           root.getProject());

@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.intellij.openapi.util.text.StringUtil;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 
 public class HelmCli implements Helm {
 
@@ -40,26 +43,53 @@ public class HelmCli implements Helm {
 
     @Override
     public String addRepo(String name, String url) throws IOException {
-        LOGGER.info("Adding repo " + name + " at " + url + ".");
-        return execute(command, Collections.emptyMap(), "repo", "add", name, url);
+        ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
+          TelemetryService.NAME_PREFIX_MISC + "helm-add repo");
+        try {
+            LOGGER.info("Adding repo {} at {}.", name, url);
+            String result = execute(command, Collections.emptyMap(), "repo", "add", name, url);
+            asyncSend(telemetry.success());
+            return result;
+        } catch (IOException e) {
+            asyncSend(telemetry.error(e));
+            throw e;
+        }
     }
 
     @Override
     public List<Chart> search() throws IOException {
-        LOGGER.info("Listing all charts.");
-        String charts = execute(command, Collections.emptyMap(), "search", "repo", "-l", "-o=json");
-        return Serialization.json().readValue(charts, new TypeReference<>(){});
+        ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
+          TelemetryService.NAME_PREFIX_MISC + "helm-list charts");
+        try {
+            LOGGER.info("Listing all charts.");
+            String charts = execute(command, Collections.emptyMap(), "search", "repo", "-l", "-o=json");
+            asyncSend(telemetry.success());
+            return Serialization.json().readValue(charts, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            asyncSend(telemetry.error(e));
+            throw e;
+        }
     }
 
     @Override
     public List<Chart> search(String regex) throws IOException {
-        LOGGER.info("Searching all charts that match " + regex + ".");
-        String charts = execute(command, Collections.emptyMap(), "search", "repo", "-r", regex, "-o=json");
-        return Serialization.json().readValue(charts, new TypeReference<>(){});
+        ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
+          TelemetryService.NAME_PREFIX_MISC + "helm-search charts");
+        try {
+            LOGGER.info("Searching all charts that match {}.", regex);
+            String charts = execute(command, Collections.emptyMap(), "search", "repo", "-r", regex, "-o=json");
+            asyncSend(telemetry.success());
+            return Serialization.json().readValue(charts, new TypeReference<>() {});
+        } catch (IOException e) {
+            asyncSend(telemetry.error(e));
+            throw e;
+        }
     }
 
     @Override
     public String install(String name, String chart, String version, String additionalArguments) throws IOException {
+        // telemetry sent in ChartsDialog
         List<String> arguments = new ArrayList<>();
         arguments.add("install");
         arguments.add(name);
@@ -69,19 +99,28 @@ public class HelmCli implements Helm {
         if (!StringUtil.isEmptyOrSpaces(additionalArguments)) {
             arguments.addAll(Arrays.stream(additionalArguments.split(" ")).collect(Collectors.toList()));
         }
-        LOGGER.info("Installing chart " + chart + " in version " + version + ".");
+        LOGGER.info("Installing chart {} in version {}.", chart, version);
         return execute(command, Collections.emptyMap(), arguments.toArray(new String[arguments.size()]));
     }
 
     @Override
     public List<ChartRelease> list() throws IOException {
-        LOGGER.info("listing all releases.");
-        String charts = execute(command, Collections.emptyMap(), "list", "-o=json");
-        return Serialization.json().readValue(charts, new TypeReference<>(){});
+        ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
+          TelemetryService.NAME_PREFIX_MISC + "helm-list releases");
+        try {
+            LOGGER.info("listing all releases.");
+            String charts = execute(command, Collections.emptyMap(), "list", "-o=json");
+            asyncSend(telemetry.success());
+            return Serialization.json().readValue(charts, new TypeReference<>() {});
+        } catch (IOException e) {
+            asyncSend(telemetry.error(e));
+            throw e;
+        }
     }
 
     @Override
     public String uninstall(String name) throws IOException {
+        // telemetry sent in UninstallReleaseAction
         return execute(command, Collections.emptyMap(), "uninstall", name);
     }
 

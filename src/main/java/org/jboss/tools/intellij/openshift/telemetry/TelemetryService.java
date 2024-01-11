@@ -10,8 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.telemetry;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
+
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackMessage;
 
 public class TelemetryService {
 
@@ -59,6 +63,14 @@ public class TelemetryService {
 
     public TelemetryMessageBuilder getBuilder(){
         return instance.builder.get();
+    }
+
+    public static void asyncSend(ActionMessage message) {
+        ApplicationManager.getApplication().executeOnPooledThread(message::send);
+    }
+
+    public static void asyncSend(FeedbackMessage message) {
+        ApplicationManager.getApplication().executeOnPooledThread(message::send);
     }
 
 }

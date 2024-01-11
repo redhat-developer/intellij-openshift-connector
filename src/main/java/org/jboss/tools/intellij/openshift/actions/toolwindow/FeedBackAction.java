@@ -13,15 +13,17 @@ package org.jboss.tools.intellij.openshift.actions.toolwindow;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackMessage;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.ui.feedback.FeedBackDialog;
 import org.jetbrains.annotations.NotNull;
+
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
 
 public class FeedBackAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        FeedbackMessage feedback = TelemetryService.instance().getBuilder().feedback("feedback");
+        FeedbackMessage feedback = instance().getBuilder().feedback("feedback");
         FeedBackDialog dialog = new FeedBackDialog();
         dialog.show();
         if (dialog.isOK()) {
@@ -35,11 +37,10 @@ public class FeedBackAction extends AnAction {
               .property("missing", dialog.getMissingFeature())
               .property("best", dialog.getBestFeature())
               .property("contact", dialog.getContact())
-              .success()
-              .send();
+              .success();
+            asyncSend(feedback);
         } else {
-            feedback.aborted()
-              .send();
+            asyncSend(feedback.aborted());
         }
     }
 }

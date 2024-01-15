@@ -18,7 +18,7 @@
                     "cmdFileName": "odo-darwin-amd64",
                     "dlFileName": "odo-darwin-amd64.tar.gz"
                 },
-                "osx-arm64": {
+                "osx-aarch64": {
                     "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.15.0/odo-darwin-arm64.tar.gz",
                     "cmdFileName": "odo-darwin-arm64",
                     "dlFileName": "odo-darwin-arm64.tar.gz"

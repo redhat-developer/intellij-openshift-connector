@@ -55,7 +55,7 @@
                     "dlFileName": "helm-darwin-amd64.tar.gz",
                     "cmdFileName": "helm-darwin-amd64"
                 },
-                "osx-arm64": {
+                "osx-aarch64": {
                     "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-darwin-arm64.tar.gz",
                     "sha256sum": "7edbba9ab680eaf6ce4b02693909c944dcde2ac60d22b26363852fee736579ef",
                     "dlFileName": "helm-darwin-arm64.tar.gz",

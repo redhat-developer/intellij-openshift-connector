@@ -49,7 +49,7 @@
                     "dlFileName": "helm-windows-amd64.exe.zip",
                     "cmdFileName": "helm-windows-amd64.exe"
                 },
-                "osx-x86": {
+                "osx": {
                     "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-darwin-amd64.tar.gz",
                     "sha256sum": "0930908a9a43a32c9a7dc859bc82b2d0d822d99b53d75979a6da64a824d80837",
                     "dlFileName": "helm-darwin-amd64.tar.gz",

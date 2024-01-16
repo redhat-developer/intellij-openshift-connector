@@ -17,6 +17,11 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.7.2</b></p>
+  <ul>
+  <li>Fixed CLI clients downloads for Mac Mx family</li>
+  <li>Added missing telemetry on Helm actions</li>
+  </ul>
   <p><b>1.7.1</b></p>
   <ul>
   <li>Fixed binary incompatibility with telemetry plugin 1.1.0</li>

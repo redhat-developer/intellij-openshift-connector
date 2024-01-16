@@ -25,5 +25,5 @@ public interface Helm {
 
   String install(String name, String chart, String version, String parameters) throws IOException;
 
-  String uninstall(String name) throws IOException;
+  String uninstall(String... names) throws IOException;
 }

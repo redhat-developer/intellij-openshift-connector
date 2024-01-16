@@ -18,6 +18,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ProcessingNode;
 import org.jboss.tools.intellij.openshift.tree.application.StructureAwareNode;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Arrays;
 
 public class NodeUtils {
 
@@ -32,12 +33,30 @@ public class NodeUtils {
         NodeUtils.fireModified(node);
     }
 
+    public static void setProcessing(String message,  StructureAwareNode parent, ProcessingNode... nodes) {
+        if (nodes == null
+          || nodes.length == 0) {
+            return;
+        }
+        Arrays.stream(nodes).forEach(node -> node.startProcessing(message));
+        NodeUtils.fireModified(parent);
+    }
+
     public static void clearProcessing(ProcessingNode node) {
         if (node == null) {
             return;
         }
         node.stopProcessing();
         NodeUtils.fireModified(node);
+    }
+
+    public static void clearProcessing(StructureAwareNode parent, ProcessingNode... nodes) {
+        if (nodes == null
+          || nodes.length == 0) {
+            return;
+        }
+        Arrays.stream(nodes).forEach(ProcessingNode::stopProcessing);
+        NodeUtils.fireModified(parent);
     }
 
     public static boolean hasContext(Object node) {

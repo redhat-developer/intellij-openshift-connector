@@ -28,46 +28,47 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HelmAction.class);
 
-  protected TelemetrySender telemetrySender;
+  protected final TelemetrySender telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
 
   protected HelmAction(Class... filters) {
     super(filters);
   }
 
-    @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-        Helm helm = getHelm(anActionEvent);
-        if (helm == null) {
-          return;
-        }
-        this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), helm);
+  @Override
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+    Helm helm = getHelm(anActionEvent);
+    if (helm == null) {
+      return;
     }
+    this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), helm);
+  }
 
-    private Helm getHelm(AnActionEvent anActionEvent) {
-        try {
-            return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true).getNow(null);
-        } catch(Exception e) {
-          LOGGER.warn("Could not get helm: " + e.getMessage(), e);
-          return null;
-        }
+  protected Helm getHelm(AnActionEvent anActionEvent) {
+    try {
+      return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true).getNow(null);
+    } catch (Exception e) {
+      LOGGER.warn("Could not get helm: " + e.getMessage(), e);
+      return null;
     }
+  }
 
-    public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm);
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
+    // noop implementation
+  }
 
-    protected abstract String getTelemetryActionName();
+  protected abstract String getTelemetryActionName();
 
-    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
-        telemetrySender.sendTelemetryResults(result);
-    }
+  public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+    telemetrySender.sendTelemetryResults(result);
+  }
 
-    @Override
-    public void sendTelemetryError(String message) {
-        telemetrySender.sendTelemetryError(message);
-    }
+  @Override
+  public void sendTelemetryError(String message) {
+      telemetrySender.sendTelemetryError(message);
+  }
 
-    @Override
-    public void sendTelemetryError(Exception exception) {
-        telemetrySender.sendTelemetryError(exception);
-    }
+  @Override
+  public void sendTelemetryError(Exception exception) {
+      telemetrySender.sendTelemetryError(exception);
+  }
 }

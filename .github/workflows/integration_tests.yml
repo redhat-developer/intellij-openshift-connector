@@ -6,6 +6,23 @@ on:
       - completed
 jobs:
 
+  configure_sonar:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Save Sonar config on PR
+        run: |
+          mkdir -p ./prInfo
+          echo ${{ github.event.number }} > ./prInfo/PR
+          echo ${{ github.base_ref }} > ./prInfo/base_ref
+          echo ${{ github.head_ref }} > ./prInfo/head_ref
+      - uses: actions/upload-artifact@v3
+        with:
+          name: prInfo
+          path: prInfo/
+
+
   kubernetes-integration-tests:
     runs-on: ubuntu-latest
 
@@ -73,3 +90,10 @@ jobs:
           report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
           check_name: Integration Test Report
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: kubernetes-integration-tests-reports
+          path: |
+            build/test-results/**/*.xml
+            build/jacoco/

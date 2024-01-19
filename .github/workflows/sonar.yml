@@ -29,7 +29,7 @@ jobs:
                 run_id: ${{github.event.workflow_run.id}},
             });
             for (var artifact of artifacts.data.artifacts) {
-              if (artifact.name == 'linux-integration-test-reports' || artifact.name == 'ubuntu-latest-test-reports' || artifact.name == 'prInfo') {
+              if (artifact.name.equals('kubernetes-integration-tests-reports') || artifact.name.equals('prInfo')) {
                 var zipfile = await github.rest.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -48,7 +48,7 @@ jobs:
             }
       - name: Unzip artifacts
         run: |
-          find . -name '*.zip' -exec sh -c 'unzip -d "${{github.workspace}}/build" "$1"' _ {} \;
+          find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
       - name: Create coverage report
         run: |
           ./gradlew jacocoTestReport

@@ -8,17 +8,20 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.namespace;
+package org.jboss.tools.intellij.openshift.actions.project;
 
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import org.jboss.tools.intellij.openshift.actions.ActionUtils;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
+import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.cluster.ChangeActiveProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -30,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 
 public class ChangeActiveProjectAction extends OdoAction {
 
@@ -37,11 +41,19 @@ public class ChangeActiveProjectAction extends OdoAction {
     super(NamespaceNode.class, ApplicationsRootNode.class);
   }
 
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    if (selected == null) {
+  public static void execute(ParentableNode<?> parentNode) {
+    ChangeActiveProjectAction action = (ChangeActiveProjectAction) ActionManager.getInstance().getAction(ChangeActiveProjectAction.class.getName());
+    NamespaceNode namespaceNode = (NamespaceNode) parentNode;
+    action.telemetrySender = new TelemetrySender(PREFIX_ACTION + action.getTelemetryActionName());
+    Odo odo = namespaceNode.getRoot().getOdo().getNow(null);
+    if (odo == null) {
       return;
     }
+    action.actionPerformedOnSelectedObject(null, null, odo);
+  }
+
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     Project project = getEventProject(anActionEvent);
     runWithProgress((ProgressIndicator progress) -> {
         CompletableFuture

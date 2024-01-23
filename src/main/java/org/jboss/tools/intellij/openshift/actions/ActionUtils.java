@@ -69,6 +69,9 @@ public class ActionUtils {
   }
 
   public static Point getLocation(AnActionEvent actionEvent) {
+    if (actionEvent == null) {
+      return null;
+    }
     MouseEvent event = ((MouseEvent) actionEvent.getInputEvent());
     if (event == null) {
       return null;

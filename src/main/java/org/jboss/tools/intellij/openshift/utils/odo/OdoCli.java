@@ -83,7 +83,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -111,6 +110,7 @@ public class OdoCli implements Odo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
+    private static final String DEFAULT_NAMESPACE = "default";
     private static final String WINDOW_TITLE = "OpenShift";
 
     private static final String METADATA_FIELD = "metadata";
@@ -177,7 +177,10 @@ public class OdoCli implements Odo {
 
     private void setSslContext(HttpClient.Builder builder, Config config) {
         try {
-            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
+            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config))
+              .filter(X509ExtendedTrustManager.class::isInstance)
+              .map(X509ExtendedTrustManager.class::cast)
+              .collect(Collectors.toList());
             X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
             builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
@@ -237,32 +240,30 @@ public class OdoCli implements Odo {
     @Override
     public String getCurrentNamespace() {
         if (currentNamespace == null) {
-            currentNamespace = validateNamespace(client.getNamespace(), getNamespacesOrProjects());
+            currentNamespace = getCurrentNamespace(client.getNamespace());
         }
         return currentNamespace;
     }
 
-    protected String validateNamespace(String namespace, List<? extends HasMetadata> namespaces) {
-        if (Strings.isEmpty(namespace)) {
-            namespace = "default";
+    private String getCurrentNamespace(String name) {
+        String namespace = name;
+        if (Strings.isEmpty(name)) {
+            namespace = DEFAULT_NAMESPACE;
         }
-        return getByNameOrFirst(namespace, namespaces);
+        return namespace;
     }
 
-    private String getByNameOrFirst(String name, List<? extends HasMetadata> namespaces) {
-        if (namespaces.isEmpty()) {
-            return null;
+    @Override
+    public boolean namespaceExists(String name) {
+        try {
+            if (isOpenShift()) {
+                return openshiftClient.projects().withName(name).get() != null;
+            } else {
+                return client.namespaces().withName(name).get() != null;
+            }
+        } catch (KubernetesClientException e) {
+            return false;
         }
-        Optional<? extends HasMetadata> matching = namespaces.stream()
-          .filter(namespace -> name.equals(namespace.getMetadata().getName()))
-          .findFirst();
-        HasMetadata namespace = null;
-        if (matching.isPresent()) {
-            namespace = matching.get();
-        } else {
-            namespace = namespaces.get(0);
-        }
-        return namespace.getMetadata().getName();
     }
 
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {

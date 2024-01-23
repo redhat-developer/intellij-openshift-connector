@@ -121,12 +121,19 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @NotNull
     private Object[] createNamespaceChildren(@NotNull NamespaceNode namespaceNode) {
+        Odo odo = root.getOdo().getNow(null);
+        if (odo == null) {
+            return new MessageNode[] { new MessageNode<>(root, namespaceNode, "Could not get project children") };
+        }
+
+        if (!odo.namespaceExists(namespaceNode.getName())) {
+            return new MessageNode[] { new ChangeActiveProjectLinkNode(root, namespaceNode) };
+        }
+
         List<Object> nodes = new ArrayList<>();
-
-        nodes.addAll(getComponents(namespaceNode));
-        nodes.addAll(getServices(namespaceNode));
+        nodes.addAll(getComponents(namespaceNode, odo));
+        nodes.addAll(getServices(namespaceNode, odo));
         nodes.addAll(getHelmReleases(namespaceNode));
-
         return nodes.toArray();
     }
 
@@ -166,11 +173,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return new MessageNode<>(root, parent, "Could not get namespaces: " + ExceptionUtils.getMessage(e));
     }
 
-    private List<BaseNode<?>> getComponents(NamespaceNode namespaceNode) {
-        Odo odo = root.getOdo().getNow(null);
-        if (odo == null) {
-            return List.of(new MessageNode<>(root, namespaceNode, "Could not get components"));
-        }
+    private List<BaseNode<?>> getComponents(NamespaceNode namespaceNode, Odo odo) {
         List<BaseNode<?>> components = new ArrayList<>();
         components.addAll(load(
           () -> odo.getComponents(namespaceNode.getName()).stream()
@@ -185,11 +188,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return components;
     }
 
-    private List<BaseNode<?>> getServices(NamespaceNode namespaceNode) {
-        Odo odo = root.getOdo().getNow(null);
-        if (odo == null) {
-            return List.of(new MessageNode<>(root, namespaceNode, "Could not get application services"));
-        }
+    private List<BaseNode<?>> getServices(NamespaceNode namespaceNode, Odo odo) {
         return load(() -> odo.getServices(namespaceNode.getName()).stream()
             .map(si -> new ServiceNode(namespaceNode, si))
             .collect(Collectors.toList()),

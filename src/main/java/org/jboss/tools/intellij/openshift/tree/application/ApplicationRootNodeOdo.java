@@ -69,6 +69,11 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
+    public boolean namespaceExists(String name) {
+        return delegate.namespaceExists(name);
+    }
+
+    @Override
     public void start(String project, String context, String component, ComponentFeature feature,
                       Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
         delegate.start(project, context, component, feature, callback, processTerminatedCallback);

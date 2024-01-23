@@ -39,6 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingConstants;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Window;
 import java.util.Collection;
@@ -81,6 +82,14 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
         setBorders(rootPane);
         setLocation(location);
         setTitle("Change Active " + kind);
+    }
+
+    @Override
+    public void setLocation(Point location) {
+        if (location == null) {
+            location = MouseInfo.getPointerInfo().getLocation();
+        }
+        super.setLocation(location);
     }
 
     private void setButtonText(String text, Action action) {

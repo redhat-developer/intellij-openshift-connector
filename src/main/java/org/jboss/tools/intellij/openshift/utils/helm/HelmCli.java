@@ -119,9 +119,15 @@ public class HelmCli implements Helm {
     }
 
     @Override
-    public String uninstall(String name) throws IOException {
+    public String uninstall(String... names) throws IOException {
         // telemetry sent in UninstallReleaseAction
-        return execute(command, Collections.emptyMap(), "uninstall", name);
+        String[] arguments = new String[names.length + 1];
+        arguments[0] = "uninstall";
+        System.arraycopy(names, 0, arguments,  1, names.length);
+
+        return execute(command,
+          Collections.emptyMap(),
+          arguments);
     }
 
     private static String execute(String command, Map<String, String> envs, String... args) throws IOException {

@@ -31,8 +31,6 @@ import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,6 +40,9 @@ import javax.swing.SwingConstants;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Window;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Collection;
 import java.util.function.Supplier;
 
@@ -56,6 +57,8 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
     private TextFieldWithCompletion activeProjectTextField;
 
     private String activeProject;
+
+    private boolean createNewProject;
 
     public ChangeActiveProjectDialog(
       @Nullable Project project,
@@ -78,7 +81,7 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
         Window dialogWindow = getPeer().getWindow();
         JRootPane rootPane = ((RootPaneContainer) dialogWindow).getRootPane();
         registerShortcuts(rootPane);
-        setButtonText("Change", myOKAction); // "OK" -> "Change"
+        setOKButtonText("Change");
         setBorders(rootPane);
         setLocation(location);
         setTitle("Change Active " + kind);
@@ -90,13 +93,6 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
             location = MouseInfo.getPointerInfo().getLocation();
         }
         super.setLocation(location);
-    }
-
-    private void setButtonText(String text, Action action) {
-        JButton button = getButton(action);
-        if (button != null) {
-            button.setText(text);
-        }
     }
 
     private void registerShortcuts(JRootPane rootPane) {
@@ -123,7 +119,7 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
         activeProjectLabel.setBorder(JBUI.Borders.emptyBottom(10));
 
         JLabel newActiveProjectLabel = new JBLabel("To " + kind + ":", SwingConstants.LEFT);
-        newActiveProjectLabel.setBorder(JBUI.Borders.emptyBottom(10));
+        newActiveProjectLabel.setBorder(JBUI.Borders.empty(10, 0));
         panel.add(newActiveProjectLabel, "left, bottom");
         this.activeProjectTextField = new TextFieldWithAutoCompletion<>(
           project, onLookup(allProjects), false, true, null);
@@ -134,7 +130,22 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
           .installOn(activeProjectTextField)
           .andRegisterOnDocumentListener(activeProjectTextField);
         activeProjectValidator.revalidate();
+        JLabel createProjectLabel = new JBLabel("<html>You can <a href=\"\">create a new project</a> instead.</html>");
+        createProjectLabel.setBorder(JBUI.Borders.emptyTop(20));
+        createProjectLabel.addMouseListener(onClicked());
+        panel.add(createProjectLabel, "spanx");
         return panel;
+    }
+
+    private MouseListener onClicked() {
+        return new MouseAdapter() {
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                ChangeActiveProjectDialog.this.createNewProject = true;
+                closeImmediately();
+            }
+        };
     }
 
     private TextFieldWithAutoCompletionListProvider<String> onLookup(Collection<String> projects) {
@@ -159,6 +170,10 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
 
     public String getActiveProject() {
         return activeProject;
+    }
+
+    public boolean isCreateNewProject() {
+        return createNewProject;
     }
 
     private class ActiveProjectValidator implements Supplier<ValidationInfo> {

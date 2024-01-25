@@ -34,7 +34,7 @@ public class CreateRegistryAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "create registry"; }
+    public String getTelemetryActionName() { return "create registry"; }
 
     @Override
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

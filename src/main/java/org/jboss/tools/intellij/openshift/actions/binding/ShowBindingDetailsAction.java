@@ -32,7 +32,7 @@ public class ShowBindingDetailsAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "show binding";
     }
 }

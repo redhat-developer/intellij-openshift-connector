@@ -69,7 +69,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "debug component";
     }
 

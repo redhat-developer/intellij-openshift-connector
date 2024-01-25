@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions;
 
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -17,14 +18,20 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.treeStructure.Tree;
+import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetrySenderAware;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTree;
+import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
+
+import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 
 public class ActionUtils {
 
@@ -79,4 +86,12 @@ public class ActionUtils {
     return event.getLocationOnScreen();
   }
 
+  public static <T extends StructureTreeAction> T createAction(String id) {
+    T action = (T) ActionManager.getInstance().getAction(id);
+    if (action instanceof TelemetrySenderAware) {
+      TelemetrySenderAware sender = (TelemetrySenderAware) action;
+      sender.setTelemetrySender(new TelemetrySender(PREFIX_ACTION + sender.getTelemetryActionName()));
+    }
+    return action;
+  }
 }

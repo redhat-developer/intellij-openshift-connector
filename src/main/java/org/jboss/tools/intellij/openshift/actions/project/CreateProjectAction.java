@@ -56,14 +56,15 @@ public class CreateProjectAction extends LoggedInClusterAction {
       return;
     }
     runWithProgress((ProgressIndicator progress) -> {
+    Notification notification = NotificationUtils.notifyInformation("Create Project", "Creating project " + projectName);
       try {
-        Notification notif = NotificationUtils.notifyInformation("Create Project", "Creating project " + projectName);
         odo.createProject(projectName);
-        notif.expire();
-        NotificationUtils.notifyInformation("Create Project", "Project " + projectName + " successfully created");
+        notification.expire();
+        notification = NotificationUtils.notifyInformation("Create Project", "Project " + projectName + " successfully created");
         clusterNode.getStructure().fireModified(clusterNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException | CompletionException e) {
+        notification.expire();
         sendTelemetryError(e);
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Project"));
       }

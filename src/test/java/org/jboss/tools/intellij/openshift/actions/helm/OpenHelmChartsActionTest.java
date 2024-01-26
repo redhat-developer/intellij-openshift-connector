@@ -21,12 +21,6 @@ public class OpenHelmChartsActionTest extends ActionTest {
 
   @Override
   protected void verifyProject(boolean visible) {
-    assertFalse(visible);
-  }
-
-  @Override
-  protected void verifyLoggedInCluster(boolean visible) {
     assertTrue(visible);
   }
-
 }

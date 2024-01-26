@@ -15,6 +15,8 @@ import com.intellij.openapi.project.Project;
 import org.jboss.tools.intellij.openshift.actions.HelmAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
+import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartsDialog;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +26,8 @@ public class OpenHelmChartsAction extends HelmAction {
     @Override
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
         Project project = getEventProject(anActionEvent);
-        ChartsDialog dialog = new ChartsDialog((ApplicationsRootNode) selected, helm, project);
+        ApplicationsRootNode rootNode = ((ParentableNode<?>) selected).getRoot();
+        ChartsDialog dialog = new ChartsDialog(rootNode, helm, project);
         sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         dialog.show();
     }
@@ -36,7 +39,6 @@ public class OpenHelmChartsAction extends HelmAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        return (selected instanceof ApplicationsRootNode)
-          && ((ApplicationsRootNode) selected).isLogged();
+        return selected instanceof NamespaceNode;
     }
 }

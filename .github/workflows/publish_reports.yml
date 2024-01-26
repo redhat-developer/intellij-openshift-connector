@@ -47,4 +47,4 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           report_paths: '${{github.workspace}}/*test-reports/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
-          check_name: Aggregated Unit Test Report
+          check_name: Aggregated Test Report

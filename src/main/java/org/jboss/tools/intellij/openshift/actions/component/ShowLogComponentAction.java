@@ -32,7 +32,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowLogComponentAction.class);
 
   @Override
-  protected String getTelemetryActionName() { return "show component log"; }
+  public String getTelemetryActionName() { return "show component log"; }
 
     protected String getActionName() {
         return "Show Log";

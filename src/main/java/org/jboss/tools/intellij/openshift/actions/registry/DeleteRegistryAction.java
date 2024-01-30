@@ -30,7 +30,7 @@ public class DeleteRegistryAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "delete registry"; }
+    public String getTelemetryActionName() { return "delete registry"; }
 
     @Override
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

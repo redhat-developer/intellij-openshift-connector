@@ -81,7 +81,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return feature.getLabel() + " component";
     }
 

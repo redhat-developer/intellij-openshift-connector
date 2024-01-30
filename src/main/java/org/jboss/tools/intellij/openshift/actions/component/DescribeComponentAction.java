@@ -32,7 +32,7 @@ public class DescribeComponentAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "describe component"; }
+  public String getTelemetryActionName() { return "describe component"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

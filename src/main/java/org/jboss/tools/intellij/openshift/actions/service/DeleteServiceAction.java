@@ -33,7 +33,7 @@ public class DeleteServiceAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "delete service"; }
+  public String getTelemetryActionName() { return "delete service"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

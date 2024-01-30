@@ -11,9 +11,6 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -25,6 +22,7 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
+import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
@@ -42,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
-
-import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 
 public class ApplicationsRootNode
   implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode> {
@@ -161,13 +157,9 @@ public class ApplicationsRootNode
               }
           })
           .thenRun(() ->
-            Notifications.Bus.notify(
-              new Notification(
-                GROUP_DISPLAY_ID,
-                "Component migration",
-                "The component " + descriptor.getName() + " has been migrated to odo 3.x",
-                NotificationType.INFORMATION),
-              project));
+            NotificationUtils.notifyInformation(
+              "Component migration",
+              "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
     }
 
     private void addContext(Odo odo, VirtualFile modulePathFile) {

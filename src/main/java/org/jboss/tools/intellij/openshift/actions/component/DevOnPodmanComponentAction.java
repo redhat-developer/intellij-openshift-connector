@@ -15,7 +15,7 @@ public class DevOnPodmanComponentAction extends FeatureComponentAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return ComponentFeature.DEV_ON_PODMAN.getLabel() + " component";
     }
 

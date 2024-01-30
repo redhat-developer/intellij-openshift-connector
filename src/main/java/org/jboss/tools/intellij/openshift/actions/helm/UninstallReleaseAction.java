@@ -97,7 +97,7 @@ public class UninstallReleaseAction extends HelmAction {
   }
 
   @Override
-  protected String getTelemetryActionName() {
+  public String getTelemetryActionName() {
     return "helm-uninstall release";
   }
 

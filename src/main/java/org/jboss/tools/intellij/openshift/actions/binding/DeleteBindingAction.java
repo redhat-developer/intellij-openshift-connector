@@ -47,7 +47,7 @@ public class DeleteBindingAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "delete binding";
     }
 }

@@ -23,6 +23,7 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.text.Strings;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
@@ -53,6 +54,7 @@ import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
 import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,12 +85,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
@@ -111,12 +114,105 @@ public class OdoCli implements Odo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
+    private static final String DEFAULT_NAMESPACE = "default";
     private static final String WINDOW_TITLE = "OpenShift";
 
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String NAMESPACE_FIELD = "namespace";
     private static final String SPEC_FIELD = "spec";
+
+    private static final class KubernetesClientFactory implements Supplier<KubernetesClient> {
+
+        @Override
+        public KubernetesClient get() {
+            String current = ConfigHelper.getCurrentContextName();
+            Config config = Config.autoConfigure(current);
+            return new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
+        }
+
+        private void setSslContext(HttpClient.Builder builder, Config config) {
+            try {
+                List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config))
+                  .filter(X509ExtendedTrustManager.class::isInstance)
+                  .map(X509ExtendedTrustManager.class::cast)
+                  .collect(Collectors.toList());
+                X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
+                builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
+            } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
+                     UnrecoverableKeyException | InvalidKeySpecException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private static final class OpenShiftClientFactory implements Function<KubernetesClient, OpenShiftClient> {
+        @Override
+        public OpenShiftClient apply(KubernetesClient client) {
+            OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
+            try {
+                if (osClient.isSupported()) {
+                    return osClient;
+                } else {
+                    return null;
+                }
+            } catch (KubernetesClientException e) {
+                if (e.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    // openshift but unauthorized
+                    return osClient;
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
+    protected static final class TelemetryReport {
+
+        public void report(KubernetesClient client) {
+            TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
+            try {
+                ClusterInfo info = ClusterHelper.getClusterInfo(client);
+                telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
+                telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
+                telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
+                asyncSend(telemetry);
+            } catch (RuntimeException e) {
+                // do not send telemetry when there is no context ( ie default kube URL as master URL )
+                asyncSend(telemetry.error(e));
+            }
+        }
+
+        @NotNull
+        private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged(Map<String, String> envVars) {
+            return (String key, String value) -> {
+                if (TelemetryConfiguration.KEY_MODE.equals(key)) {
+                    addOdoTelemetryVars(envVars);
+                }
+            };
+        }
+
+        private void addOdoTelemetryVars(Map<String, String> envVars) {
+            if (TelemetryConfiguration.getInstance().isEnabled()) {
+                envVars.put("ODO_TRACKING_CONSENT", "yes");
+                envVars.put("TELEMETRY_CALLER", "intellij");
+            } else {
+                envVars.put("ODO_TRACKING_CONSENT", "no");
+            }
+        }
+    }
+
+    protected static final class EnvVarFactory implements Function<String, Map<String, String>> {
+
+        @Override
+        public Map<String, String> apply(String url) {
+            try {
+                return NetworkUtils.buildEnvironmentVariables(url);
+            } catch (URISyntaxException e) {
+                return Collections.emptyMap();
+            }
+        }
+    }
 
     private final com.intellij.openapi.project.Project project;
     private final String command;
@@ -148,65 +244,33 @@ public class OdoCli implements Odo {
     private final Map<String, List<ProcessHandler>> componentLogProcesses = new HashMap<>();
 
     public OdoCli(com.intellij.openapi.project.Project project, String command) {
+        this(project,
+          command,
+          ApplicationManager.getApplication().getMessageBus(),
+          new KubernetesClientFactory(),
+          new OpenShiftClientFactory(),
+          new EnvVarFactory(),
+          new TelemetryReport());
+    }
+
+    protected OdoCli(
+      com.intellij.openapi.project.Project project,
+      String command,
+      MessageBus bus,
+      Supplier<KubernetesClient> kubernetesClientFactory,
+      Function<KubernetesClient, OpenShiftClient> openshiftClientFactory,
+      Function<String, Map<String, String>> envVarFactory,
+      TelemetryReport telemetryReport) {
         this.command = command;
         this.project = project;
-        this.connection = ApplicationManager.getApplication().getMessageBus().connect();
-        String current = ConfigHelper.getCurrentContextName();
-        Config config = Config.autoConfigure(current);
-        this.client = new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
-        this.openshiftClient = toOpenShiftClient(client);
-        try {
-            this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
-            computeTelemetrySettings();
-            this.connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
-              onTelemetryConfigurationChanged());
-        } catch (URISyntaxException e) {
-            this.envVars = Collections.emptyMap();
-        }
-        reportTelemetry();
-    }
-
-    @NotNull
-    private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged() {
-        return (String key, String value) -> {
-            if (TelemetryConfiguration.KEY_MODE.equals(key)) {
-                computeTelemetrySettings();
-            }
-        };
-    }
-
-    private void setSslContext(HttpClient.Builder builder, Config config) {
-        try {
-            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
-            X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
-            builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
-        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
-                 UnrecoverableKeyException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void computeTelemetrySettings() {
-        if (TelemetryConfiguration.getInstance().isEnabled()) {
-            this.envVars.put("ODO_TRACKING_CONSENT", "yes");
-            this.envVars.put("TELEMETRY_CALLER", "intellij");
-        } else {
-            this.envVars.put("ODO_TRACKING_CONSENT", "no");
-        }
-    }
-
-    private void reportTelemetry() {
-        TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
-        try {
-            ClusterInfo info = ClusterHelper.getClusterInfo(client);
-            telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
-            telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
-            telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
-            asyncSend(telemetry);
-        } catch (RuntimeException e) {
-            // do not send telemetry when there is no context ( ie default kube URL as master URL )
-            asyncSend(telemetry.error(e));
-        }
+        this.connection = bus.connect();
+        this.client = kubernetesClientFactory.get();
+        this.openshiftClient = openshiftClientFactory.apply(client);
+        this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
+        telemetryReport.addOdoTelemetryVars(envVars);
+        this.connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
+          telemetryReport.onTelemetryConfigurationChanged(this.envVars));
+        telemetryReport.report(client);
     }
 
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
@@ -227,7 +291,7 @@ public class OdoCli implements Odo {
     }
 
     private List<? extends HasMetadata> getNamespacesOrProjects() {
-        if (openshiftClient != null) {
+        if (isOpenShift()) {
             return openshiftClient.projects().list().getItems();
         } else {
             return client.namespaces().list().getItems();
@@ -237,32 +301,30 @@ public class OdoCli implements Odo {
     @Override
     public String getCurrentNamespace() {
         if (currentNamespace == null) {
-            currentNamespace = validateNamespace(client.getNamespace(), getNamespacesOrProjects());
+            currentNamespace = getCurrentNamespace(client.getNamespace());
         }
         return currentNamespace;
     }
 
-    protected String validateNamespace(String namespace, List<? extends HasMetadata> namespaces) {
-        if (Strings.isEmpty(namespace)) {
-            namespace = "default";
+    private String getCurrentNamespace(String name) {
+        String namespace = name;
+        if (Strings.isEmpty(name)) {
+            namespace = DEFAULT_NAMESPACE;
         }
-        return getByNameOrFirst(namespace, namespaces);
+        return namespace;
     }
 
-    private String getByNameOrFirst(String name, List<? extends HasMetadata> namespaces) {
-        if (namespaces.isEmpty()) {
-            return null;
+    @Override
+    public boolean namespaceExists(String name) {
+        try {
+            if (isOpenShift()) {
+                return openshiftClient.projects().withName(name).get() != null;
+            } else {
+                return client.namespaces().withName(name).get() != null;
+            }
+        } catch (KubernetesClientException e) {
+            return false;
         }
-        Optional<? extends HasMetadata> matching = namespaces.stream()
-          .filter(namespace -> name.equals(namespace.getMetadata().getName()))
-          .findFirst();
-        HasMetadata namespace = null;
-        if (matching.isPresent()) {
-            namespace = matching.get();
-        } else {
-            namespace = namespaces.get(0);
-        }
-        return namespace.getMetadata().getName();
     }
 
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
@@ -713,11 +775,33 @@ public class OdoCli implements Odo {
     }
 
     @Override
+    public void setProject(String project) throws IOException {
+        execute(command, envVars, "set", NAMESPACE_FIELD, project);
+    }
+
+    @Override
     public void login(String url, String userName, char[] password, char[] token) throws IOException {
         if (userName != null && !userName.isEmpty()) {
             execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), "--insecure-skip-tls-verify");
         } else {
             execute(command, envVars, "login", url, "-t", String.valueOf(token), "--insecure-skip-tls-verify");
+        }
+    }
+
+    @Override
+    public boolean isAuthorized() {
+        try {
+            client.secrets().list();
+            // retrieving secrets worked, we're authorized
+            return true;
+        } catch (KubernetesClientException e) {
+            if (KubernetesClientExceptionUtils.isForbidden(e)
+              || KubernetesClientExceptionUtils.isUnauthorized(e)) {
+                // retrieving secrets didn't work, we're NOT authorized
+                return false;
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -824,6 +908,10 @@ public class OdoCli implements Odo {
 
     @Override
     public java.net.URL getMasterUrl() {
+        return getMasterUrl(client);
+    }
+
+    private java.net.URL getMasterUrl(KubernetesClient client) {
         return client.getMasterUrl();
     }
 
@@ -907,24 +995,6 @@ public class OdoCli implements Odo {
         return getComponentTypes().stream().
                 filter(type -> name.equals(type.getDevfileRegistry().getName())).
                 collect(Collectors.toList());
-    }
-
-    private OpenShiftClient toOpenShiftClient(KubernetesClient client) {
-        OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
-        try {
-            if (osClient.isSupported()) {
-                return osClient;
-            } else {
-                return null;
-            }
-        } catch (KubernetesClientException e) {
-            if (e.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                // openshift but unauthorized
-                return osClient;
-            } else {
-                return null;
-            }
-        }
     }
 
     /**

@@ -30,7 +30,7 @@ public class AboutAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "about"; }
+  public String getTelemetryActionName() { return "about"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {

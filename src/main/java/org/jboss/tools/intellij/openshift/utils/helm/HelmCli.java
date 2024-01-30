@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
@@ -130,9 +131,67 @@ public class HelmCli implements Helm {
           arguments);
     }
 
+    @Override
+    public HelmEnv env() throws IOException {
+        String result = execute(command, Collections.emptyMap(), "env");
+        /*
+         * HELM_NAMESPACE="default"
+         * HELM_KUBECONTEXT=""
+         */
+        Map<String, String> env = Stream.of(result.split("\n"))
+          .collect(Collectors.toMap(
+            (String line) -> line.split("=", 2)[0],
+            (String line) -> {
+                String[] keyValue = line.split("=", 2);
+                if (keyValue.length > 2) {
+                    return "";
+                } else {
+                    return keyValue[1].replaceAll("\"", "");
+                }
+            }
+          ));
+        return new HelmEnv(env);
+    }
+
     private static String execute(String command, Map<String, String> envs, String... args) throws IOException {
         File workingDirectory = new File(HOME_FOLDER);
         ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
         return output.getStdOut();
     }
+
+    public static class HelmEnv {
+
+        public static final String HELM_BIN = "HELM_BIN";
+        public static final String HELM_BURST_LIMIT = "HELM_BURST_LIMIT";
+        public static final String HELM_CACHE_HOME = "HELM_CACHE_HOME";
+        public static final String HELM_CONFIG_HOME = "HELM_CONFIG_HOME";
+        public static final String HELM_DATA_HOME = "HELM_DATA_HOME";
+        public static final String HELM_DEBUG = "HELM_DEBUG";
+        public static final String HELM_KUBEAPISERVER = "HELM_KUBEAPISERVER";
+        public static final String HELM_KUBEASGROUPS = "HELM_KUBEASGROUPS";
+        public static final String HELM_KUBEASUSER = "HELM_KUBEASUSER";
+        public static final String HELM_KUBECAFILE = "HELM_KUBECAFILE";
+        public static final String HELM_KUBECONTEXT = "HELM_KUBECONTEXT";
+        public static final String HELM_KUBEINSECURE_SKIP_TLS_VERIFY = "HELM_KUBEINSECURE_SKIP_TLS_VERIFY";
+        public static final String HELM_KUBETLS_SERVER_NAME = "HELM_KUBETLS_SERVER_NAME";
+        public static final String HELM_KUBETOKEN = "HELM_KUBETOKEN";
+        public static final String HELM_MAX_HISTORY = "HELM_MAX_HISTORY";
+        public static final String HELM_NAMESPACE = "HELM_NAMESPACE";
+        public static final String HELM_PLUGINS = "HELM_PLUGINS";
+        public static final String HELM_QPS = "HELM_QPS";
+        public static final String HELM_REGISTRY_CONFIG = "HELM_REGISTRY_CONFIG";
+        public static final String HELM_REPOSITORY_CACHE = "HELM_REPOSITORY_CACHE";
+        public static final String HELM_REPOSITORY_CONFIG = "HELM_REPOSITORY_CONFIG";
+
+        private final Map<String, String> env;
+
+        public HelmEnv(Map<String, String> env) {
+            this.env = env;
+        }
+
+        public String get(final String key) {
+            return env.get(key);
+        }
+    }
+
 }

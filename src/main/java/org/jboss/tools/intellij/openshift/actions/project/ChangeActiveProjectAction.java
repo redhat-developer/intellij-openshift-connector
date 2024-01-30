@@ -76,11 +76,11 @@ public class ChangeActiveProjectAction extends OdoAction {
               throw new RuntimeException(e);
             }
           }, SwingUtils.EXECUTOR_BACKGROUND)
-          .handleAsync((ClusterProjects, error) -> {
+          .handleAsync((clusterProjects, error) -> {
               if (error != null) {
                 return null;
               }
-              ChangeActiveProjectDialog dialog = openActiveProjectDialog(ClusterProjects.isOpenShift, ClusterProjects.current, ClusterProjects.all, location, project);
+              ChangeActiveProjectDialog dialog = openActiveProjectDialog(clusterProjects.isOpenShift, clusterProjects.current, clusterProjects.all, location, project);
               if (dialog.isOK()) {
                 return new ChangeActiveProjectOperation(dialog.getActiveProject(), odo);
               } else if (dialog.isCreateNewProject()) {

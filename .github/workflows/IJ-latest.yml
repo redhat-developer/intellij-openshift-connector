@@ -35,4 +35,11 @@ jobs:
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh issue create --title "Next EAP SNAPSHOT build failure" --body "See ${{ env.LATEST_TOOL_URL }}"
+        run: |
+          issueNum=$(gh issue --search "Next EAP SNAPSHOT build failure")
+          if [ -z "$issueNum" ]; then
+            gh issue create --title "Next EAP SNAPSHOT build failure" --body "See ${{ github.run_id }}"
+          else
+            echo "issue already exists : $issueNum"
+          fi
+            

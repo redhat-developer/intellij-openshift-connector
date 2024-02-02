@@ -65,7 +65,7 @@ jobs:
       - name: 'Clone common-ui-test-library to Maven Local repository'
         run: |
           git clone --branch 174 https://github.com/richard0202/intellij-common-ui-test-library.git ../common-ui-test-library
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: burrunan/gradle-cache-action@3bf23b8dd95e7d2bacf2470132454fe893a178a1 #v1
         name: Build common-ui-test-library
         with:
           build-root-directory: ../common-ui-test-library
@@ -77,7 +77,7 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@@3b1b3b9a2104c2b47fbae53f3938079c00c9bb87 #v3.0.0
       - uses: helm/kind-action@dda0770415bac9fc20092cacbc54aa298604d140 #v0.5.0
         name: Start cluster
         with:

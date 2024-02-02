@@ -36,7 +36,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          issueNum=$(gh issue --search "Next EAP SNAPSHOT build failure")
+          issueNum=$(gh search issues "Next EAP SNAPSHOT build failure")
           if [ -z "$issueNum" ]; then
             gh issue create --title "Next EAP SNAPSHOT build failure" --body "See ${{ github.run_id }}"
           else

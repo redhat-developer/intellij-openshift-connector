@@ -25,6 +25,8 @@ import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.project.ChangeActiveProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -37,8 +39,28 @@ import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProg
 
 public class ChangeActiveProjectAction extends OdoAction {
 
-  public ChangeActiveProjectAction() {
-    super();
+  private static final Logger LOGGER = LoggerFactory.getLogger(ChangeActiveProjectAction.class);
+
+  @Override
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Object node = adjust(getSelected(getTree(e)));
+      if (node instanceof ApplicationsRootNode) {
+        ApplicationsRootNode rootNode = (ApplicationsRootNode) node;
+        try {
+          Odo odo = rootNode.getOdo().getNow(null);
+          if (odo == null) {
+            return;
+          }
+          if (!odo.isOpenShift()) {
+            e.getPresentation().setText("Change Namespace");
+          }
+        } catch (Exception ex) {
+          LOGGER.warn(String.format("Could not update %s", rootNode.getProject().getName()), e);
+        }
+      }
+    }
   }
 
   public static void execute(ParentableNode<?> node) {
@@ -115,7 +137,7 @@ public class ChangeActiveProjectAction extends OdoAction {
   @Override
   public boolean isVisible(Object selected) {
     return (selected instanceof NamespaceNode)
-      || ((selected instanceof ApplicationsRootNode && ((ApplicationsRootNode) selected).isLogged()));
+            || (selected instanceof ApplicationsRootNode && ((ApplicationsRootNode) selected).isLogged());
   }
 
   private static final class ClusterProjects {

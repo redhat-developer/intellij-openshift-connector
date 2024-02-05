@@ -25,6 +25,8 @@ import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.project.CreateNewProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -37,7 +39,31 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public class CreateProjectAction extends LoggedInClusterAction {
 
-  @Override
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateProjectAction.class);
+
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        if (e.getPresentation().isVisible()) {
+            Object node = adjust(getSelected(getTree(e)));
+            if (node instanceof ApplicationsRootNode) {
+                ApplicationsRootNode rootNode = (ApplicationsRootNode) node;
+                try {
+                    Odo odo = rootNode.getOdo().getNow(null);
+                    if (odo == null) {
+                        return;
+                    }
+                    if (!odo.isOpenShift()) {
+                        e.getPresentation().setText("New Namespace");
+                    }
+                } catch (Exception ex) {
+                    LOGGER.warn(String.format("Could not update %s", rootNode.getProject().getName()), e);
+                }
+            }
+        }
+    }
+
+    @Override
   public String getTelemetryActionName() { return "create project"; }
 
   public static void execute(ApplicationsRootNode rootNode) {

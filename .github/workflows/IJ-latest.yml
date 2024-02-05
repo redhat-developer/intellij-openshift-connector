@@ -36,9 +36,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          issueNum=$(gh search issues "Next EAP SNAPSHOT build failure")
+          issueNum=$(gh search issues --state open "Next EAP SNAPSHOT build failure")
           if [ -z "$issueNum" ]; then
-            gh issue create --title "Next EAP SNAPSHOT build failure" --body "See ${{ github.run_id }}"
+            gh issue create --title "Next EAP SNAPSHOT build failure" --body "See https://github.com/redhat-developer/intellij-openshift-connector/actions/runs/${{ github.run_id }}"
           else
             echo "issue already exists : $issueNum"
           fi

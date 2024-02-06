@@ -24,7 +24,7 @@ jobs:
           echo ${{ github.event.number }} > ./prInfo/PR
           echo ${{ github.base_ref }} > ./prInfo/base_ref
           echo ${{ github.head_ref }} > ./prInfo/head_ref
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: prInfo
           path: prInfo/
@@ -47,7 +47,7 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build --continue --no-daemon
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ matrix.os }}-test-reports
@@ -106,7 +106,7 @@ jobs:
       #    Xvfb -ac :99 -screen 0 1920x1080x16 &
       #    sleep 10
       #    ./gradlew integrationUITest --info --continue
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: kubernetes-integration-tests-reports

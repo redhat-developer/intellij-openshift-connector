@@ -12,32 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: actions/github-script@v7.0.1
+        uses: actions/download-artifact@v4
         with:
-          script: |
-            var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: ${{github.event.workflow_run.id}},
-            });
-            for (var artifact of artifacts.data.artifacts) {
-              if (artifact.name.endsWith('test-reports')) {
-                var zipfile = await github.rest.actions.downloadArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                  archive_format: 'zip',
-                });
-                var fs = require('fs');
-                var path = require('path');
-                var pathFile = path.format({
-                  root: '${{github.workspace}}/',
-                  name: artifact.name,
-                  ext: '.zip'
-                });
-                fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
-              }
-            }
+          path: reports
+          pattern: '*-test-reports'
+          merge-multiple: true
       - name: Unzip artifacts
         run: |
           find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;

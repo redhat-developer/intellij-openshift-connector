@@ -20,7 +20,9 @@ jobs:
           run-id: ${{github.event.workflow_run.id}}
       - name: Unzip artifacts
         run: |
-          find . -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
+          ls
+          ls ${{github.workspace}}/
+          find ${{github.workspace}}/ -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
       - name: Publish aggregated tests reports
         uses: scacap/action-surefire-report@4cbb611f23a9b5a030c73c2b32190a80983956ed #v1
         with:

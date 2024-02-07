@@ -14,14 +14,14 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
+          path: build
           pattern: '*-test-reports'
           merge-multiple: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}
       - name: Unzip artifacts
         run: |
-          ls
-          ls ${{github.workspace}}/
+          ls build/
           find ${{github.workspace}}/ -name '*.zip' -exec sh -c 'unzip -d "${1%.*}" "$1"' _ {} \;
       - name: Publish aggregated tests reports
         uses: scacap/action-surefire-report@4cbb611f23a9b5a030c73c2b32190a80983956ed #v1

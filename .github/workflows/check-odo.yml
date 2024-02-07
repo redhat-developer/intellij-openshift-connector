@@ -12,7 +12,7 @@ jobs:
         GH_TOKEN: ${{ secrets.ODO_CHECK_TOKEN }}
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get latest ODO version
         run: |
           echo "REPO_ODO_VERSION=$(cat src/main/resources/tools.json | jq -r .tools.odo.version)" >> $GITHUB_ENV

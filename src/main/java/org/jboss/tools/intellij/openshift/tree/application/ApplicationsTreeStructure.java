@@ -51,6 +51,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private final DevfileRegistriesNode registries;
 
     private static final String LOGIN = "Please log in to the cluster";
+    private static final String CLUSTER_UNREACHABLE = "Error: Cluster not reachable";
 
     public ApplicationsTreeStructure(Project project) {
         this.project = project;
@@ -173,6 +174,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
                 return new MessageNode<>(root, parent, kce.getCause().getMessage());
             } else if (kce.getCause().getMessage().contains(Constants.DEFAULT_KUBE_URL)) {
                 return new MessageNode<>(root, parent, LOGIN);
+            } else if (KubernetesClientExceptionUtils.isHostDown(kce)
+              || KubernetesClientExceptionUtils.isConnectionReset(kce)
+              || KubernetesClientExceptionUtils.isCouldNotConnect(kce)) {
+                return new MessageNode<>(root, parent, CLUSTER_UNREACHABLE);
             }
         }
         return new MessageNode<>(root, parent, "Could not get namespaces: " + ExceptionUtils.getMessage(e));

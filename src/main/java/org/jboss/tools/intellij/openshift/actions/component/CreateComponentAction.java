@@ -48,6 +48,9 @@ public class CreateComponentAction extends OdoAction {
   }
 
   public static void execute(ParentableNode<?> node) {
+    if (node == null) {
+      return;
+    }
     Odo odo = node.getRoot().getOdo().getNow(null);
     if (odo == null) {
       return;
@@ -67,7 +70,10 @@ public class CreateComponentAction extends OdoAction {
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    NamespaceNode namespaceNode = ((NamespaceNode) selected);
+    if (selected == null) {
+      return;
+    }
+    NamespaceNode namespaceNode = (NamespaceNode) selected;
     ApplicationsRootNode rootNode = namespaceNode.getRoot();
     Project project = rootNode.getProject();
     doActionPerformed((NamespaceNode) selected, odo, namespaceNode.getName(), rootNode, project);

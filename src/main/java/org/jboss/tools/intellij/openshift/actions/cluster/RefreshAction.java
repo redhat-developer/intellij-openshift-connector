@@ -32,7 +32,7 @@ public class RefreshAction extends StructureTreeAction {
 
     public static void execute(ParentableNode<?> node) {
         RefreshAction action = (RefreshAction) ActionManager.getInstance().getAction(RefreshAction.class.getName());
-        action.doActionPerformed(node.getRoot());
+        action.doActionPerformed(NodeUtils.getRoot(node));
     }
 
     @Override

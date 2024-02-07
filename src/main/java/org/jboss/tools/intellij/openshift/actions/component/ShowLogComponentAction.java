@@ -40,6 +40,9 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
 
     @Override
     public boolean isVisible(Object selected) {
+        if (selected == null) {
+          return false;
+        }
         boolean visible = super.isVisible(selected);
         try {
             if (visible) {

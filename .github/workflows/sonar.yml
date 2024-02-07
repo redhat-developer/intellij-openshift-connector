@@ -9,43 +9,31 @@ jobs:
     name: Sonar
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           ref: ${{github.event.workflow_run.head_sha}}
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
           cache: 'gradle'
-      - name: Download artifacts
-        uses: actions/github-script@v6.4.1
+      - name: Download IntegrationTest report
+        uses: actions/download-artifact@v4
         with:
-          script: |
-            var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: ${{github.event.workflow_run.id}},
-            });
-            for (var artifact of artifacts.data.artifacts) {
-              if (artifact.name == 'kubernetes-integration-tests-reports' || artifact.name == 'ubuntu-latest-test-reports' || artifact.name == 'prInfo') {
-                var zipfile = await github.rest.actions.downloadArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                  archive_format: 'zip',
-                });
-                var fs = require('fs');
-                var path = require('path');
-                var pathFile = path.format({
-                  root: '${{github.workspace}}/',
-                  name: artifact.name,
-                  ext: '.zip'
-                });
-                fs.writeFileSync(pathFile, Buffer.from(zipfile.data));
-              }
-            }
+          path: kubernetes-integration-tests-reports
+          pattern: kubernetes-integration-tests-reports
+      - name: Download UnitTest report
+        uses: actions/download-artifact@v4
+        with:
+          path: ubuntu-latest-test-reports
+          pattern: ubuntu-latest-test-reports
+      - name: Download PrInfo
+        uses: actions/download-artifact@v4
+        with:
+          path: prInfo
+          pattern: prInfo
       - name: Unzip artifacts
         run: |
           find . -name '*.zip' -exec sh -c 'unzip -d "${{github.workspace}}/build" "$1"' _ {} \;

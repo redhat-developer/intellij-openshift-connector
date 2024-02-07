@@ -24,7 +24,7 @@ jobs:
           echo ${{ github.event.number }} > ./prInfo/PR
           echo ${{ github.base_ref }} > ./prInfo/base_ref
           echo ${{ github.head_ref }} > ./prInfo/head_ref
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: prInfo
           path: prInfo/
@@ -36,9 +36,9 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
@@ -47,7 +47,7 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build --continue --no-daemon
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ matrix.os }}-test-reports
@@ -60,24 +60,24 @@ jobs:
     needs: ci
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # TODO remove locally building common-ui-test-library after new release of common-ui-test-library
       - name: 'Clone common-ui-test-library to Maven Local repository'
         run: |
           git clone --branch 174 https://github.com/richard0202/intellij-common-ui-test-library.git ../common-ui-test-library
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: burrunan/gradle-cache-action@3bf23b8dd95e7d2bacf2470132454fe893a178a1 #v1
         name: Build common-ui-test-library
         with:
           build-root-directory: ../common-ui-test-library
           arguments: publishToMavenLocal
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
           cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@3b1b3b9a2104c2b47fbae53f3938079c00c9bb87 #v3.0.0
       - uses: helm/kind-action@dda0770415bac9fc20092cacbc54aa298604d140 #v0.5.0
         name: Start cluster
         with:
@@ -106,7 +106,7 @@ jobs:
       #    Xvfb -ac :99 -screen 0 1920x1080x16 &
       #    sleep 10
       #    ./gradlew integrationUITest --info --continue
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: kubernetes-integration-tests-reports

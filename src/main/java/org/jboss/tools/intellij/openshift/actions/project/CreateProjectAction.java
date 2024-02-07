@@ -25,6 +25,8 @@ import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.project.CreateNewProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -33,12 +35,30 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.getRoot;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateProjectAction extends LoggedInClusterAction {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(CreateProjectAction.class);
+
   @Override
-  public String getTelemetryActionName() { return "create project"; }
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Odo odo = getOdo(e);
+      if (odo == null) {
+        return;
+      }
+      // overrides label given in plugin.xml
+      e.getPresentation().setText("New " + getKind(odo));
+    }
+  }
+
+  @Override
+  public String getTelemetryActionName() {
+    return "create project";
+  }
 
   public static void execute(ApplicationsRootNode rootNode) {
     Odo odo = rootNode.getOdo().getNow(null);
@@ -55,14 +75,15 @@ public class CreateProjectAction extends LoggedInClusterAction {
     doActionPerformed(location, odo, getEventProject(anActionEvent));
   }
 
-  private void doActionPerformed(final Point location, final Odo odo, Project project) {
+  private void doActionPerformed(final Point location, @NotNull final Odo odo, Project project) {
+    String kind = getKind(odo);
     runWithProgress((ProgressIndicator progress) ->
         CompletableFuture
           .supplyAsync(() -> {
             try {
               return odo.getNamespaces();
             } catch (IOException e) {
-              NotificationUtils.notifyError("Create New Project", "Could not get projects: " + e.getMessage());
+              NotificationUtils.notifyError("Create New " + kind, "Could not get " + kind.toLowerCase() + "s: " + e.getMessage());
               sendTelemetryError(e.getMessage());
               throw new CompletionException(e);
             }
@@ -71,7 +92,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
               if (error != null) {
                 return null;
               }
-              CreateNewProjectDialog dialog = openCreateProjectDialog(allProjects, location, project);
+              CreateNewProjectDialog dialog = openCreateProjectDialog(allProjects, kind, location, project);
               if (dialog.isOK()) {
                 return dialog.getNewProject();
               } else {
@@ -87,28 +108,54 @@ public class CreateProjectAction extends LoggedInClusterAction {
             }
             createProject(newProject, odo);
           }, SwingUtils.EXECUTOR_BACKGROUND),
-      "Create Active Project...",
-    project);
+      "Create Active " + kind + "...",
+      project);
   }
 
-  private void createProject(String newProject, Odo odo) {
-    Notification notification = NotificationUtils.notifyInformation("Create Project", "Creating project " + newProject);
+  private void createProject(String newProject, @NotNull Odo odo) {
+    String kind = getKind(odo);
+    Notification notification = NotificationUtils.notifyInformation("Create " + kind, "Creating " + kind.toLowerCase() + " newProject");
     try {
-        odo.createProject(newProject);
-        notification.expire();
-        NotificationUtils.notifyInformation("Create Project", "Project " + newProject + " successfully created");
-        sendTelemetryResults(TelemetryResult.SUCCESS);
-      } catch (IOException | CompletionException e) {
-        notification.expire();
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Project"));
-      }
+      odo.createProject(newProject);
+      notification.expire();
+      NotificationUtils.notifyInformation("Create " + kind, kind + newProject + " successfully created");
+      sendTelemetryResults(TelemetryResult.SUCCESS);
+    } catch (IOException | CompletionException e) {
+      notification.expire();
+      sendTelemetryError(e);
+      UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create " + kind));
+    }
   }
 
-  private CreateNewProjectDialog openCreateProjectDialog(List<String> allProjects, Point location, Project project) {
-    CreateNewProjectDialog dialog = new CreateNewProjectDialog(project, allProjects, location);
+  protected CreateNewProjectDialog openCreateProjectDialog(List<String> allProjects, String kind, Point location, Project project) {
+    CreateNewProjectDialog dialog = new CreateNewProjectDialog(project, allProjects, kind, location);
     dialog.show();
     return dialog;
   }
 
+  @Override
+  public boolean isVisible(Object selected) {
+    return isRoot(selected)
+      && isLoggedIn(selected);
+  }
+
+  private boolean isLoggedIn(Object node) {
+    ApplicationsRootNode root = getRoot(node);
+    if (root == null) {
+      return false;
+    }
+    return root.isLogged();
+  }
+
+  private boolean isRoot(Object node) {
+    return node instanceof ApplicationsRootNode;
+  }
+
+  private String getKind(Odo odo) {
+    if (odo.isOpenShift()) {
+      return "Project";
+    } else {
+      return "Namespace";
+    }
+  }
 }

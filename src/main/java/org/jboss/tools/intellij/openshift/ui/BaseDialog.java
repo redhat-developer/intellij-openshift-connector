@@ -34,9 +34,12 @@ public abstract class BaseDialog extends DialogWrapper {
     protected BaseDialog(@Nullable Project project, Point location) {
         super(project, false);
         this.location = location;
-        init();
     }
 
+    /**
+     * Set the borders, location etc.
+     * Has to be called from the extending subclass.
+     */
     @Override
     protected void init() {
         super.init();

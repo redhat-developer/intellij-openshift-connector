@@ -33,14 +33,16 @@ import java.util.regex.Pattern;
 
 public class CreateNewProjectDialog extends BaseDialog {
 
-    private static final int WIDTH = 300;
+    private static final int WIDTH = 200;
+    private final String kind;
     private final Collection<String> allProjects;
     private JBTextField newProjectTextField;
 
     private String newProject;
 
-    public CreateNewProjectDialog(@Nullable Project project, Collection<String> allProjects, Point location) {
+    public CreateNewProjectDialog(@Nullable Project project, Collection<String> allProjects, String kind, Point location) {
         super(project, location);
+        this.kind = kind;
         this.allProjects = allProjects;
         init();
     }
@@ -49,7 +51,7 @@ public class CreateNewProjectDialog extends BaseDialog {
     protected void init() {
         super.init();
         setOKButtonText("Create");
-        setTitle("Create New Project");
+        setTitle("Create New " + kind);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class CreateNewProjectDialog extends BaseDialog {
         JComponent panel = new JPanel(new MigLayout(
           "flowx, ins 0, gap 0, fillx, filly, hidemode 3",
           "[left]10[" + WIDTH +",fill]"));
-        JLabel newActiveProjectLabel = new JBLabel("New project:", SwingConstants.LEFT);
+        JLabel newActiveProjectLabel = new JBLabel("New " + kind.toLowerCase() + ":", SwingConstants.LEFT);
         newActiveProjectLabel.setBorder(JBUI.Borders.empty(10, 0));
         panel.add(newActiveProjectLabel, "left, bottom");
         this.newProjectTextField = new JBTextField();

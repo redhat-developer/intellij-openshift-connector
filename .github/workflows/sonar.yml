@@ -22,21 +22,18 @@ jobs:
       - name: Download IntegrationTest report
         uses: actions/download-artifact@v4
         with:
-          path: kubernetes-integration-tests-reports
           pattern: kubernetes-integration-tests-reports
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}
       - name: Download UnitTest report
         uses: actions/download-artifact@v4
         with:
-          path: ubuntu-latest-test-reports
           pattern: ubuntu-latest-test-reports
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}
       - name: Download PrInfo
         uses: actions/download-artifact@v4
         with:
-          path: prInfo
           pattern: prInfo
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}

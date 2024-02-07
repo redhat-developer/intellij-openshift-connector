@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import static org.jboss.tools.intellij.openshift.actions.ActionUtils.getApplicationRootNode;
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
@@ -45,20 +46,16 @@ public class CreateProjectAction extends LoggedInClusterAction {
     public void update(AnActionEvent e) {
         super.update(e);
         if (e.getPresentation().isVisible()) {
-            Object node = adjust(getSelected(getTree(e)));
-            if (node instanceof ApplicationsRootNode) {
-                ApplicationsRootNode rootNode = (ApplicationsRootNode) node;
-                try {
-                    Odo odo = rootNode.getOdo().getNow(null);
-                    if (odo == null) {
-                        return;
-                    }
-                    if (!odo.isOpenShift()) {
-                        e.getPresentation().setText("New Namespace");
-                    }
-                } catch (Exception ex) {
-                    LOGGER.warn(String.format("Could not update %s", rootNode.getProject().getName()), e);
+            try {
+                Odo odo = getOdo(e);
+                if (odo == null) {
+                    return;
                 }
+                if (!odo.isOpenShift()) {
+                    e.getPresentation().setText("New Namespace");
+                }
+            } catch (Exception ex) {
+                LOGGER.warn(String.format("Could not update %s", getApplicationRootNode(e).getProject().getName()), e);
             }
         }
     }

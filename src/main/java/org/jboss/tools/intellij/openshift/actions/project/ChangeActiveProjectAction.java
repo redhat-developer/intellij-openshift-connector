@@ -45,20 +45,16 @@ public class ChangeActiveProjectAction extends OdoAction {
   public void update(AnActionEvent e) {
     super.update(e);
     if (e.getPresentation().isVisible()) {
-      Object node = adjust(getSelected(getTree(e)));
-      if (node instanceof ApplicationsRootNode) {
-        ApplicationsRootNode rootNode = (ApplicationsRootNode) node;
         try {
-          Odo odo = rootNode.getOdo().getNow(null);
-          if (odo == null) {
-            return;
-          }
-          if (!odo.isOpenShift()) {
-            e.getPresentation().setText("Change Namespace");
-          }
+            Odo odo = getOdo(e);
+            if (odo == null) {
+                return;
+            }
+            if (!odo.isOpenShift()) {
+                e.getPresentation().setText("Change Namespace");
+            }
         } catch (Exception ex) {
-          LOGGER.warn(String.format("Could not update %s", rootNode.getProject().getName()), e);
-        }
+            LOGGER.warn(String.format("Could not update %s", getApplicationRootNode(e).getProject().getName()), e);
       }
     }
   }

@@ -28,11 +28,13 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeatures;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -57,6 +59,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
 
   public void testActionOnLoggedInCluster() {
     ApplicationsRootNode applicationsRootNode = mock(ApplicationsRootNode.class);
+    when(applicationsRootNode.getOdo()).thenReturn(new CompletableFuture<Odo>());
     when(applicationsRootNode.isLogged()).thenReturn(true);
     AnActionEvent event = createEvent(applicationsRootNode);
     AnAction action = getAction();

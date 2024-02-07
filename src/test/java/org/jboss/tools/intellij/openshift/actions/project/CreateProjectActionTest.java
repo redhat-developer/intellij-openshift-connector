@@ -12,11 +12,14 @@ package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
-import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,6 +32,7 @@ public class CreateProjectActionTest extends ActionTest {
 
   public void testActionOnLoggedInCluster() {
     ApplicationsRootNode applicationsRootNode = mock(ApplicationsRootNode.class);
+    when(applicationsRootNode.getOdo()).thenReturn(new CompletableFuture<Odo>());
     when(applicationsRootNode.isLogged()).thenReturn(true);
     AnActionEvent event = createEvent(applicationsRootNode);
     AnAction action = getAction();

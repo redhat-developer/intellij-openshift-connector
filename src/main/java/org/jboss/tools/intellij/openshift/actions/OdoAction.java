@@ -45,7 +45,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
         this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
     }
 
-    private Odo getOdo(AnActionEvent anActionEvent) {
+    protected Odo getOdo(AnActionEvent anActionEvent) {
         try {
           return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
         } catch(Exception e) {
@@ -60,8 +60,6 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     public void setTelemetrySender(TelemetrySender telemetrySender) {
       this.telemetrySender = telemetrySender;
     }
-
-    public abstract String getTelemetryActionName();
 
     public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
         telemetrySender.sendTelemetryResults(result);

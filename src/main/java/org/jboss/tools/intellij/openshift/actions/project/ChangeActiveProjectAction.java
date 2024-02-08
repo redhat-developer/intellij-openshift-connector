@@ -42,6 +42,9 @@ public class ChangeActiveProjectAction extends OdoAction {
   }
 
   public static void execute(ParentableNode<?> node) {
+    if (node == null) {
+      return;
+    }
     ApplicationsRootNode rootNode = node.getRoot();
     Odo odo = rootNode.getOdo().getNow(null);
     if (odo == null) {

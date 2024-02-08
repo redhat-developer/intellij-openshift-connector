@@ -22,35 +22,37 @@ jobs:
       - name: Download IntegrationTest report
         uses: actions/download-artifact@v4
         with:
-          path: kubernetes-integration-tests-reports
+          path: reports
           pattern: kubernetes-integration-tests-reports
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{github.event.workflow_run.id}}
       - name: Download UnitTest report
         uses: actions/download-artifact@v4
         with:
-          path: ubuntu-latest-test-reports
+          path: reports
           pattern: ubuntu-latest-test-reports
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{github.event.workflow_run.id}}
       - name: Download PrInfo
         uses: actions/download-artifact@v4
         with:
-          path: prInfo
           pattern: prInfo
-      - name: Unzip artifacts
-        run: |
-          find . -name '*.zip' -exec sh -c 'unzip -d "${{github.workspace}}/build" "$1"' _ {} \;
-      - name: Create coverage report
-        run: |
-          ./gradlew jacocoTestReport
-      - name: Run Sonar analysis
-        env:        
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{github.event.workflow_run.id}}
+      - name: Create coverage report and run Sonar analysis
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          mkdir build
+          mv reports/*-reports/* build/
+          ls build/
           if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
-            PR_NUMBER=$(<build/PR)
-            BASE_REF=$(<build/base_ref)
-            HEAD_REF=$(<build/head_ref)
-            ./gradlew sonar -Dsonar.pullrequest.base=$BASE_REF -Dsonar.pullrequest.branch=$HEAD_REF -Dsonar.pullrequest.key=$PR_NUMBER -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=${{github.repository}}
+            PR_NUMBER=$(<prInfo/PR)
+            BASE_REF=$(<prInfo/base_ref)
+            HEAD_REF=$(<prInfo/head_ref)
+            ./gradlew jacocoTestReport sonar -Dsonar.pullrequest.base=$BASE_REF -Dsonar.pullrequest.branch=$HEAD_REF -Dsonar.pullrequest.key=$PR_NUMBER -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=${{github.repository}}
           else
-            ./gradlew sonar
+            ./gradlew jacocoTestReport sonar
           fi
         shell: bash

@@ -33,6 +33,8 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jboss.tools.intellij.openshift.utils.helm.HelmCli;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,7 @@ import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -62,6 +65,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
 
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
+  private final Odo odo;
   private final Disposable disposable = Disposer.newDisposable();
 
   private final TelemetryMessageBuilder.ActionMessage telemetry =
@@ -74,6 +78,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
 
   private JLabel icon;
   private JTextField releaseNameText;
+  private JBLabel currentProject;
   private JLabel chartNameLabel;
   private ComboBox<String> versionsCombo;
   private JBTextField parameters;
@@ -83,7 +88,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
   private JPanel installResultPanel;
   private JButton installButton;
 
-  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm) {
+  InstallPanel(ChartVersions chart, ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm, Odo odo) {
     super(new MigLayout(
         "flowx, fillx, hidemode 3",
         "[50:50:50] [left, 100:100:100] [left] [left, fill] [right]"),
@@ -91,6 +96,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
     this.chart = chart;
     this.rootNode = rootNode;
     this.helm = helm;
+    this.odo = odo;
     initComponents();
     Disposer.register(parentDisposable, disposable);
   }
@@ -120,6 +126,11 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
     releaseNameText.addKeyListener(onKeyPressed(installButton));
     add(releaseNameText, "spanx 2, pushx, growx, wrap");
 
+    add(new JBLabel("Active " + (odo.isOpenShift()? "project:" : "namespace:")),"skip");
+    this.currentProject = new JBLabel();
+    // value set in validation
+    add(currentProject, "pushx, wrap");
+
     add(new JBLabel("Version:"), "skip");
     this.versionsCombo = new ComboBox<>(new String[]{});
     versionsCombo.addItemListener(onVersionSelected());
@@ -142,6 +153,18 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
     add(installResultPanel, "skip, spanx, pushx, growx, gap 0 0 0 4, wrap");
 
     setChart(chart);
+  }
+
+  private CompletableFuture<String> loadCurrentNamespace() {
+    return CompletableFuture.supplyAsync(() -> {
+        try {
+          HelmCli.HelmEnv env = helm.env();
+          return env.get(HelmCli.HelmEnv.HELM_NAMESPACE);
+        } catch (IOException e) {
+          throw new CompletionException(e);
+        }
+      },
+      EXECUTOR_BACKGROUND);
   }
 
   private ItemListener onVersionSelected() {
@@ -309,6 +332,12 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
     }
   }
 
+  private void updateCurrentProjectLabel() {
+    loadCurrentNamespace()
+      .thenAcceptAsync(currentProject -> InstallPanel.this.currentProject.setText(currentProject)
+      , EXECUTOR_UI);
+  }
+
   @Override
   public void dispose() {
     disposable.dispose();
@@ -332,6 +361,7 @@ class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel, Disposab
       }
       ValidationInfo validation = validate(field.getText());
       enableInstallButton(validation);
+      updateCurrentProjectLabel(); // update in validation to have most frequent polling
       return validation;
     }
 

@@ -19,6 +19,7 @@ import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartsDialog;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 public class OpenHelmChartsAction extends HelmAction {
@@ -31,7 +32,11 @@ public class OpenHelmChartsAction extends HelmAction {
             return;
         }
         ApplicationsRootNode rootNode = parentableNode.getRoot();
-        ChartsDialog dialog = new ChartsDialog(rootNode, helm, project);
+        Odo odo = rootNode.getOdo().getNow(null);
+        if (odo == null) {
+            return;
+        }
+        ChartsDialog dialog = new ChartsDialog(rootNode, helm, odo, project);
         sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         dialog.show();
     }

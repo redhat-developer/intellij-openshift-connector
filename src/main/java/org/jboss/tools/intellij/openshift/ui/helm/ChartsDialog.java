@@ -36,6 +36,7 @@ import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.TableRowFilterFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Chart;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,16 +74,18 @@ public class ChartsDialog extends DialogWrapper {
 
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
+  private final Odo odo;
 
   private JBLabel title;
   private ChartsTableModel chartsTableModel;
   private JBTable chartsTable;
   private StatusIcon statusIcon;
 
-  public ChartsDialog(ApplicationsRootNode rootNode, Helm helm, Project project) {
+  public ChartsDialog(ApplicationsRootNode rootNode, Helm helm, Odo odo, Project project) {
     super(project, null, false, IdeModalityType.MODELESS, false);
     this.rootNode = rootNode;
     this.helm = helm;
+    this.odo = odo;
     init();
   }
 
@@ -99,11 +102,7 @@ public class ChartsDialog extends DialogWrapper {
 
     setupTable(chartsTable, chartsTableModel, statusIcon)
       .thenCompose((Void) -> addDefaultRepo(helm))
-      .whenComplete((Void, throwable) -> {
-        if (throwable == null) {
-          load(chartsTable, chartsTableModel, statusIcon, helm);
-        }
-      });
+      .thenCompose((Void) -> load(chartsTable, chartsTableModel, statusIcon, helm));
   }
 
   private static void setBorders(JRootPane rootPane) {
@@ -114,9 +113,10 @@ public class ChartsDialog extends DialogWrapper {
   private void registerShortcuts(JRootPane rootPane) {
     AnAction escape = ActionManager.getInstance().getAction("EditorEscape");
     DumbAwareAction.create(e -> closeImmediately())
-      .registerCustomShortcutSet(escape == null ?
-        CommonShortcuts.ESCAPE
-        : escape.getShortcutSet(), rootPane, myDisposable);
+      .registerCustomShortcutSet(
+        escape == null ? CommonShortcuts.ESCAPE : escape.getShortcutSet(),
+        rootPane,
+        myDisposable);
   }
 
   @Override
@@ -161,7 +161,7 @@ public class ChartsDialog extends DialogWrapper {
       .usingInput(filterTextArea.getDocument());
     splitter.setFirstComponent(tableScrolledPane);
 
-    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), helm);
+    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), helm, odo);
     chartPanels.select(ChartPanels.DETAILS_PANEL,true);
     chartsTable.getSelectionModel().addListSelectionListener(
       onTableItemSelected(chartPanels, chartsTable, chartsTableModel));
@@ -233,7 +233,7 @@ public class ChartsDialog extends DialogWrapper {
             LOGGER.warn("Could not load all helm charts.", e);
             return Collections.emptyList();
           }
-        }, SwingUtils.EXECUTOR_BACKGROUND)
+        }, EXECUTOR_BACKGROUND)
         .thenAcceptAsync((charts) -> {
           List<ChartVersions> chartVersions = toChartVersions(charts);
           tableModel.setCharts(chartVersions);

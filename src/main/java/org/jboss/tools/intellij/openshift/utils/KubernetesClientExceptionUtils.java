@@ -25,5 +25,33 @@ public class KubernetesClientExceptionUtils {
   public static boolean isUnauthorized(KubernetesClientException e) {
     return HttpURLConnection.HTTP_UNAUTHORIZED == e.getCode();
   }
+
+  public static boolean isHostDown(KubernetesClientException e) {
+    if (e.getCause() == null) {
+      return false;
+    }
+    return messageContains("host is down", e.getCause());
+  }
+
+  public static boolean isConnectionReset(KubernetesClientException e) {
+    if (e.getCause() == null) {
+      return false;
+    }
+    return messageContains("connection reset", e.getCause());
+  }
+
+  public static boolean isCouldNotConnect(KubernetesClientException e) {
+    if (e.getCause() == null) {
+      return false;
+    }
+    return messageContains("failed to connect", e.getCause());
+  }
+
+  public static boolean messageContains(String message, Throwable e) {
+    return e != null
+      && e.getMessage() != null
+      && e.getMessage().toLowerCase().contains(message);
+  }
+
 }
 

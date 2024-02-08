@@ -26,7 +26,11 @@ public class OpenHelmChartsAction extends HelmAction {
     @Override
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
         Project project = getEventProject(anActionEvent);
-        ApplicationsRootNode rootNode = ((ParentableNode<?>) selected).getRoot();
+        ParentableNode<?> parentableNode = ((ParentableNode<?>) selected);
+        if (parentableNode == null) {
+            return;
+        }
+        ApplicationsRootNode rootNode = parentableNode.getRoot();
         ChartsDialog dialog = new ChartsDialog(rootNode, helm, project);
         sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         dialog.show();

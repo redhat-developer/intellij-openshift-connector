@@ -8,19 +8,8 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.utils.odo;
+package org.jboss.tools.intellij.openshift.ui.helm;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import org.junit.Test;
-
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertNotNull;
-
-public class OdoCliFactoryTest extends BasePlatformTestCase {
- 
-    public void testGetOdo() throws ExecutionException, InterruptedException {
-        Odo odo = OdoCliFactory.getInstance().getOdo(getProject()).get();
-        assertNotNull(odo);
-    }
-}
+interface ChartPanel {
+    void setChart(ChartVersions chart);
+  }

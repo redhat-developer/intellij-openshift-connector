@@ -23,6 +23,7 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
 
     public static final String COMPONENTS_FIELD = "components";
     public static final String NAME_FIELD = "name";
+    private static final String MANAGED_BY_FIELD = "managedBy";
 
     public ComponentDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, Component.class));
@@ -37,7 +38,7 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
         List<Component> result = new ArrayList<>();
         if (tree != null) {
             for (JsonNode item : tree) {
-                result.add(Component.of(getName(item), getComponentState(item), getComponentInfo(item, kind)));
+                result.add(Component.of(getName(item), getManagedBy(item), getComponentState(item), getComponentInfo(item, kind)));
             }
         }
         return result;
@@ -61,4 +62,13 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
             return "";
         }
     }
+
+    private String getManagedBy(JsonNode item) {
+        if (item.has(MANAGED_BY_FIELD)) {
+            return item.get(MANAGED_BY_FIELD).asText();
+        } else {
+            return "";
+        }
+    }
+
 }

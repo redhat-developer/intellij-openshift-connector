@@ -27,7 +27,9 @@ public interface Odo {
      * @return the active namespace name
      * @throws IOException if communication errored
      */
-    String getNamespace() throws IOException;
+    String getCurrentNamespace() throws IOException;
+
+    boolean namespaceExists(String name);
 
     void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
 
@@ -70,7 +72,11 @@ public interface Odo {
 
     void deleteProject(String project) throws IOException;
 
+    void setProject(String project) throws IOException;
+
     void login(String url, String userName, char[] password, char[] token) throws IOException;
+
+    boolean isAuthorized();
 
     List<Component> getComponents(String project) throws IOException;
 

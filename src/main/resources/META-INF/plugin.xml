@@ -17,6 +17,23 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.7.2</b></p>
+  <ul>
+  <li>Fixed CLI clients downloads for Mac Mx family</li>
+  <li>Added missing telemetry on Helm actions</li>
+  </ul>
+  <p><b>1.7.1</b></p>
+  <ul>
+  <li>Fixed binary incompatibility with telemetry plugin 1.1.0</li>
+  <li>Bug fixes</li>
+  </ul>
+  <p><b>1.7.0</b></p>
+  <ul>
+  <li>Switch to odo 3.15.0</li>
+  <li>Added an action to install Helm Charts in the connected cluster</li>
+  <li>Improved tree refresh performance and feedback</li>
+  <li>Bug fixes</li>
+  </ul>
   <p><b>1.6.0</b></p>
   <ul>
   <li>Switch to odo 3.13.0</li>
@@ -219,7 +236,7 @@
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="212"/>
+  <idea-version since-build="221.5080.210"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -262,6 +279,7 @@
       <!-- Top level: cluster -->
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction" text="Change Project"/>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
       <separator/>
@@ -304,9 +322,14 @@
       <action class="org.jboss.tools.intellij.openshift.actions.binding.DeleteBindingAction" id="org.jboss.tools.intellij.openshift.actions.binding.DeleteBindingAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
+      <separator/>
+      <!-- helm -->
+      <action class="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" id="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" text="Open Helm Charts"/>
+      <separator/>
       <!-- registry management -->
       <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New registry"/>
       <action class="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" text="Delete"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" id="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" text="Uninstall"/>
     </group>
   </actions>
 

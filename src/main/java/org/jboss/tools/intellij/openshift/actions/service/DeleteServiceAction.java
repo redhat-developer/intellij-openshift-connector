@@ -33,10 +33,10 @@ public class DeleteServiceAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "delete service"; }
+  public String getTelemetryActionName() { return "delete service"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog(

@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 
-public class DevfileRegistryComponentTypeNode extends ParentableNode<DevfileRegistryNode> {
+public class DevfileRegistryComponentTypeNode extends BaseNode<DevfileRegistryNode> {
   private final DevfileComponentType componentType;
 
   public DevfileRegistryComponentTypeNode(ApplicationsRootNode root, DevfileRegistryNode parent, DevfileComponentType componentType) {

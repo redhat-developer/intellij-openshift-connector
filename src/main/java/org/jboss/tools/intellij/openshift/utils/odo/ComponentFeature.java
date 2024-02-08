@@ -16,12 +16,14 @@ import java.util.List;
 
 public enum ComponentFeature {
     DEV(Kind.DEV_KIND, "dev on Cluster", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Collections.singletonList("dev")) {
+        @Override
         public ComponentFeature getPeer() {
             return DEBUG;
         }
     },
     DEV_ON_PODMAN(Kind.DEV_KIND, "dev on Podman", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--platform", Constants.PODMAN, "--forward-localhost")),
     DEBUG(Kind.DEBUG_KIND, "debug", Constants.WATCHING_FOR_CHANGES_IN_THE_CURRENT_DIRECTORY, Arrays.asList("dev", "--debug")) {
+        @Override
         public ComponentFeature getPeer() {
             return DEV;
         }

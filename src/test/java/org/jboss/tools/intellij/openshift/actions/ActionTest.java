@@ -17,6 +17,7 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.ui.treeStructure.Tree;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ChartReleaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
@@ -116,7 +117,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnLocalDevComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV),
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV),
             ".", mockInfo()));
     verifyLocalDevComponent(event.getPresentation().isVisible());
   }
@@ -126,7 +127,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnLocalOnlyComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(), ".", mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null,  new ComponentFeatures(), ".", mockInfo()));
     verifyLocalOnlyComponent(event.getPresentation().isVisible());
   }
 
@@ -135,12 +136,12 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnRemoteOnlyDevComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), "aPath", mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV), "aPath", mockInfo()));
     verifyRemoteOnlyDevComponent(event.getPresentation().isVisible());
   }
 
   public void testActionOnRemoteOnlyDevComponentWithoutContext() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV), mockInfo()));
     verifyRemoteOnlyDevComponentWithoutContext(event.getPresentation().isVisible());
   }
 
@@ -199,6 +200,18 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   protected void verifyRegistry(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnChartRelease() {
+    ChartReleaseNode chartRelease = mock(ChartReleaseNode.class);
+    AnActionEvent event = createEvent(chartRelease);
+    AnAction action = getAction();
+    action.update(event);
+    verifyChartRelease(event.getPresentation().isVisible());
+  }
+
+  protected void verifyChartRelease(boolean visible) {
     assertFalse(visible);
   }
 }

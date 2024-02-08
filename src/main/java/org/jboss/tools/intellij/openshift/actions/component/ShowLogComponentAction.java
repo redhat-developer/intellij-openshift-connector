@@ -32,7 +32,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowLogComponentAction.class);
 
   @Override
-  protected String getTelemetryActionName() { return "show component log"; }
+  public String getTelemetryActionName() { return "show component log"; }
 
     protected String getActionName() {
         return "Show Log";
@@ -40,6 +40,9 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
 
     @Override
     public boolean isVisible(Object selected) {
+        if (selected == null) {
+          return false;
+        }
         boolean visible = super.isVisible(selected);
         try {
             if (visible) {
@@ -57,7 +60,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         doLog((ComponentNode) selected, odo, false);
     }
 

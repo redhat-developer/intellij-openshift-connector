@@ -11,8 +11,6 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -20,10 +18,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
+import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
+import org.jboss.tools.intellij.openshift.tree.application.BaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.binding.BindingDetailDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
@@ -48,13 +46,13 @@ public class LinkServiceAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "link component to service";
     }
 
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
@@ -99,12 +97,12 @@ public class LinkServiceAction extends OdoAction {
           null));
     }
 
-    private void linkService(Service service, Component component, ParentableNode<?> namespaceNode, Odo odo, Project project) throws IOException {
-        Notification notification = notify("Linking component to service " + service.getName());
+    private void linkService(Service service, Component component, BaseNode<?> namespaceNode, Odo odo, Project project) throws IOException {
+        Notification notification = NotificationUtils.notifyInformation("Link service", "Linking component to service " + service.getName());
         String target = service.getName() + '/' + service.getKind() + "." + service.getApiVersion();
         Binding binding = odo.link(namespaceNode.getName(), component.getPath(), component.getName(), target);
         notification.expire();
-        notify("Component linked to " + service.getName());
+        NotificationUtils.notifyInformation("Link service", "Component linked to " + service.getName());
         NodeUtils.fireModified(namespaceNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
         if (!binding.getEnvironmentVariables().isEmpty()) {
@@ -113,13 +111,6 @@ public class LinkServiceAction extends OdoAction {
                 dialog.show();
             });
         }
-    }
-
-    @NotNull
-    private static Notification notify(String content) {
-        Notification notification = new Notification(GROUP_DISPLAY_ID, "Link service", content, NotificationType.INFORMATION);
-        Notifications.Bus.notify(notification);
-        return notification;
     }
 
     @Override

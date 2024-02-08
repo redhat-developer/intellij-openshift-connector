@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-public class DevfileRegistriesNode extends ParentableNode<Object> {
+public class DevfileRegistriesNode extends BaseNode<Object> {
 
   public DevfileRegistriesNode(ApplicationsRootNode root) {
     super(root, null, "");

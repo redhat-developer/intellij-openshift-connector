@@ -10,13 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.service;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
@@ -29,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
@@ -41,10 +38,10 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "link service to component"; }
+  public String getTelemetryActionName() { return "link service to component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
     runWithProgress((ProgressIndicator progress) -> {
@@ -55,8 +52,7 @@ public class LinkComponentAction extends OdoAction {
               Component component = getComponent(components);
               if (component != null) {
                 odo.link(namespaceNode.getName(), component.getPath(), component.getName(), serviceNode.getName());
-                Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, "Link component", "Service linked to " + component.getName(),
-                    NotificationType.INFORMATION));
+                NotificationUtils.notifyInformation("Link component", "Service linked to " + component.getName());
                 sendTelemetryResults(TelemetryResult.SUCCESS);
               } else {
                 sendTelemetryResults(TelemetryResult.ABORTED);

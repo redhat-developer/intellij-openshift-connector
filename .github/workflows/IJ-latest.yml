@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
@@ -24,10 +24,22 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build --continue -PideaVersion=IU-LATEST-EAP-SNAPSHOT
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-reports
           path: |
             build/test-results/**/*.xml
             build/jacoco/
+      - name: create issue on fail
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          issueNum=$(gh search issues --state open "Next EAP SNAPSHOT build failure")
+          if [ -z "$issueNum" ]; then
+            gh issue create --title "Next EAP SNAPSHOT build failure" --body "See https://github.com/redhat-developer/intellij-openshift-connector/actions/runs/${{ github.run_id }}"
+          else
+            echo "issue already exists : $issueNum"
+          fi
+            

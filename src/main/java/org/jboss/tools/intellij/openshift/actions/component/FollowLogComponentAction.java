@@ -18,10 +18,10 @@ import org.jetbrains.annotations.NotNull;
 public class FollowLogComponentAction extends ShowLogComponentAction {
 
   @Override
-  protected String getTelemetryActionName() { return "follow component log"; }
+  public String getTelemetryActionName() { return "follow component log"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     doLog((ComponentNode) selected, odo, true);
   }
 }

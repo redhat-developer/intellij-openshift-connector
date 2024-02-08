@@ -2,8 +2,8 @@
  * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
- * Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
  *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
@@ -46,9 +46,7 @@ public final class DefaultLoginProvider implements LoginProvider {
 
 	LoginResponse runInJob(IAuthorizationServer server, Object context) {
 		CompletableFuture<LoginResponse> result = new CompletableFuture<>();
-		ApplicationManager.getApplication().invokeLater(() -> {
-			result.complete(loginInUI(server, context));
-		}, ModalityState.any());
+        ApplicationManager.getApplication().invokeLater(() -> result.complete(loginInUI(server, context)), ModalityState.any());
 		try {
 			return result.get(TIMEOUT_JOB_ON_UI_THREAD, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {

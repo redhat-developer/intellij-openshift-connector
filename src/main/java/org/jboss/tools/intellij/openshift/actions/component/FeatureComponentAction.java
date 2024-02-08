@@ -55,23 +55,24 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         super.update(e);
         if (e.getPresentation().isVisible()) {
             Object node = adjust(getSelected(getTree(e)));
-            if (node instanceof ComponentNode) {
-                ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
-                Component component = componentNode.getComponent();
-                ComponentFeature feat = getComponentFeature(component);
-                try {
-                    Odo odo = componentNode.getRoot().getOdo().getNow(null);
-                    if (odo == null) {
-                        return;
-                    }
-                    if (odo.isStarted(componentNode.getNamespace(), component.getPath(), component.getName(), feat)) {
-                        e.getPresentation().setText("Stop " + getActionName());
-                    } else {
-                        e.getPresentation().setText("Start " + getActionName());
-                    }
-                } catch (Exception ex) {
-                    LOGGER.warn("Could not update {}", componentNode.getName(), e);
+            if (!(node instanceof ComponentNode)) {
+                return;
+            }
+            ComponentNode componentNode = ((ComponentNode) adjust(getSelected(getTree(e))));
+            Component component = componentNode.getComponent();
+            ComponentFeature feat = getComponentFeature(component);
+            try {
+                Odo odo = componentNode.getRoot().getOdo().getNow(null);
+                if (odo == null) {
+                    return;
                 }
+                if (odo.isStarted(componentNode.getNamespace(), component.getPath(), component.getName(), feat)) {
+                    e.getPresentation().setText("Stop " + getActionName());
+                } else {
+                    e.getPresentation().setText("Start " + getActionName());
+                }
+            } catch (Exception ex) {
+                LOGGER.warn("Could not update {}", componentNode.getName(), e);
             }
         }
     }
@@ -81,12 +82,12 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return feature.getLabel() + " component";
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();

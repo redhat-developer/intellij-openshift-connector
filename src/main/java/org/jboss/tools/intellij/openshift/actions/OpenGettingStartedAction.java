@@ -26,12 +26,12 @@ public class OpenGettingStartedAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "open getting started";
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         Project project = anActionEvent.getProject();
         if (project == null) {
             return;

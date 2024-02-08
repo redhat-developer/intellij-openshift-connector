@@ -39,7 +39,7 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @Override
-    protected String getTelemetryActionName() { return "import component"; }
+    public String getTelemetryActionName() { return "import component"; }
 
     @Override
     public boolean isVisible(Object selected) {
@@ -48,7 +48,7 @@ public class ImportComponentAction extends CreateComponentAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();

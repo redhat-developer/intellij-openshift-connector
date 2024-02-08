@@ -11,13 +11,13 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import io.fabric8.kubernetes.api.model.AuthInfo;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.util.Arrays;
@@ -66,7 +66,8 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
     public void testShouldRefreshIfContextClusterChanges() {
         // given
         Context context = createContext();
-        doReturn("localhost","www.openshift.com").when(context).getCluster();
+        doReturn("localhost","www.openshift.com")
+          .when(context).getCluster();
         Config config = createConfig(context);
         ApplicationsRootNode model = createApplicationsRootNode(getProject(), config);
         // when
@@ -95,7 +96,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
         verify(model).refresh();
     }
 
-    public void testShouldNotRefreshIfContextUserLogout() {
+    public void testShouldRefreshIfContextUserLogout() {
         // given
         String user = "papa-smurf";
         String cluster = "localhost";
@@ -112,7 +113,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
         // when
         model.onUpdate(null, cfg2);
         // then
-        verify(model, never()).refresh();
+        verify(model).refresh();
     }
 
     protected ApplicationsRootNode createApplicationsRootNode(Project project, Config config) {
@@ -135,8 +136,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
             }
 
             @Override
-            public synchronized void refresh() {
-            }
+            public synchronized void refresh() {}
         });
     }
 
@@ -173,10 +173,10 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
 
     private Context createContext(String user, String cluster) {
         Context context = mock(Context.class);
-        if (StringUtils.isNotBlank(user)) {
+        if (!StringUtil.isEmptyOrSpaces(user)) {
             doReturn(user).when(context).getUser();
         }
-        if (StringUtils.isNotBlank(cluster)) {
+        if (!StringUtil.isEmptyOrSpaces(cluster)) {
             doReturn(cluster).when(context).getCluster();
         }
         return context;

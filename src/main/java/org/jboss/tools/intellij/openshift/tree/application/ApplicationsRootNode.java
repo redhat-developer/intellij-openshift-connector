@@ -11,9 +11,6 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -25,13 +22,12 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
-import io.fabric8.kubernetes.api.model.NamedContext;
-import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
-import org.apache.commons.codec.binary.StringUtils;
+import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
+import org.jboss.tools.intellij.openshift.utils.ToolFactory;
+import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoCliFactory;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +39,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
-import static org.jboss.tools.intellij.openshift.Constants.GROUP_DISPLAY_ID;
-
-public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Listener, StructureAwareNode, ProcessingNode {
+public class ApplicationsRootNode
+  implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
     private final ApplicationsTreeStructure structure;
     private CompletableFuture<Odo> odoFuture;
+    private CompletableFuture<Helm> helmFuture;
     private boolean logged;
     private Config config;
 
@@ -63,7 +60,7 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         this.project = project;
         this.structure = structure;
         initConfigWatcher();
-        config = loadConfig();
+        this.config = loadConfig();
         registerProjectListener(project);
     }
 
@@ -75,17 +72,37 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
         this.logged = logged;
     }
 
-    public CompletableFuture<Odo> getOdo() {
+    private CompletableFuture<Odo> getOdo(BiConsumer<Odo, Throwable> whenComplete) {
         if (odoFuture == null) {
-            this.odoFuture = OdoCliFactory.getInstance()
-              .getOdo(project)
+            this.odoFuture = ToolFactory.getInstance()
+              .createOdo(project)
               .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
-              .whenComplete((odo, err) -> {
-                loadProjectModel(odo, project);
-                structure.fireModified(this);
-              });
+              .whenComplete((odo, err) -> loadProjectModel(odo, project))
+              .whenComplete(whenComplete);
         }
         return odoFuture;
+    }
+
+    public CompletableFuture<Odo> getOdo() {
+        return getOdo((odo, err) -> structure.fireModified(this));
+    }
+
+    public void resetOdo() {
+        this.odoFuture = null;
+    }
+
+    public CompletableFuture<Helm> getHelm(boolean notify) {
+        if (helmFuture == null) {
+            this.helmFuture = ToolFactory.getInstance()
+              .createHelm(project)
+              .whenComplete((odo, err) -> {
+                    if (notify) {
+                        structure.fireModified(this);
+                    }
+                }
+              );
+        }
+        return helmFuture;
     }
 
     public Project getProject() {
@@ -126,23 +143,23 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
             if (descriptor.isPreOdo3()) {
-                getOdo()
-                  .thenAccept(odo -> {
-                      if (odo != null) {
-                          odo.migrateComponent(path, descriptor.getName());
-                      }
-                  })
-                  .thenRun(() ->
-                    Notifications.Bus.notify(
-                      new Notification(
-                        GROUP_DISPLAY_ID,
-                        "Component migration",
-                        "The component " + descriptor.getName() + " has been migrated to odo 3.x",
-                        NotificationType.INFORMATION),
-                      project));
+                migrateOdo(path, descriptor);
             }
             components.put(path, descriptor);
         }
+    }
+
+    private void migrateOdo(String path, ComponentDescriptor descriptor) {
+        getOdo()
+          .thenAccept(odo -> {
+              if (odo != null) {
+                  odo.migrateComponent(path, descriptor.getName());
+              }
+          })
+          .thenRun(() ->
+            NotificationUtils.notifyInformation(
+              "Component migration",
+              "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
     }
 
     private void addContext(Odo odo, VirtualFile modulePathFile) {
@@ -157,14 +174,14 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
                 );
             } catch (IOException ex) {
                 //filter out some common exception when no logged or no authorizations
-                if (doNotLogFromMessage(ex.getMessage())) {
-                    LOGGER.error(ex.getLocalizedMessage(), ex);
+                if (shouldLogMessage(ex.getMessage())) {
+                    LOGGER.warn(ex.getLocalizedMessage(), ex);
                 }
             }
         }
     }
 
-    private static boolean doNotLogFromMessage(String message) {
+    private static boolean shouldLogMessage(String message) {
         return !(message.contains("Unauthorized") ||
                 message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
                 message.contains("the server has asked for the client to provide credentials") ||
@@ -172,7 +189,9 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     public void addContext(String modulePath) {
-        addContext(getOdo().getNow(null), LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
+        addContext(
+          getOdo().getNow(null),
+          LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
     }
 
     private void removeContextFromSettings(String modulePath) {
@@ -199,46 +218,15 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
 
     @Override
     public void onUpdate(ConfigWatcher source, Config config) {
-        if (hasContextChanged(config, this.config)) {
+        if (!ConfigHelper.areEqual(config, this.config)) {
+            this.config = config;
             refresh();
         }
-        this.config = config;
     }
 
-    private boolean hasContextChanged(Config newConfig, Config currentConfig) {
-        NamedContext currentContext = KubeConfigUtils.getCurrentContext(currentConfig);
-        NamedContext newContext = KubeConfigUtils.getCurrentContext(newConfig);
-        return hasServerChanged(newContext, currentContext)
-                || hasNewToken(newContext, newConfig, currentContext, currentConfig);
-    }
-
-    private boolean hasServerChanged(NamedContext newContext, NamedContext currentContext) {
-        return newContext == null
-                || currentContext == null
-                || !StringUtils.equals(currentContext.getContext().getCluster(), newContext.getContext().getCluster())
-                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser())
-                || !StringUtils.equals(currentContext.getContext().getNamespace(), newContext.getContext().getNamespace());
-    }
-
-    private boolean hasNewToken(NamedContext newContext, Config newConfig, NamedContext currentContext, Config currentConfig) {
-        if (newContext == null) {
-            return false;
-        }
-        if (currentContext == null) {
-            return true;
-        }
-        String newToken = KubeConfigUtils.getUserToken(newConfig, newContext.getContext());
-        if (newToken == null) {
-            // logout, do not refresh, LogoutAction already refreshes
-            return false;
-        }
-        String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext.getContext());
-        return !StringUtils.equals(newToken, currentToken);
-    }
-
-    public void refresh() {
-        OdoCliFactory.getInstance().resetOdo();
-        getOdo().thenAccept(odo -> structure.fireModified(this));
+    public synchronized void refresh() {
+        resetOdo();
+        getOdo((odo, err) -> structure.fireModified(ApplicationsRootNode.this));
     }
 
     @Override
@@ -247,28 +235,37 @@ public class ApplicationsRootNode implements ModuleListener, ConfigWatcher.Liste
     }
 
     @Override
-    public void startProcessing(String message) {
+    public synchronized void startProcessing(String message) {
         this.processingNode.startProcessing(message);
     }
 
     @Override
-    public void stopProcessing() {
+    public synchronized void stopProcessing() {
         this.processingNode.stopProcessing();
     }
 
     @Override
-    public boolean isProcessing() {
+    public synchronized boolean isProcessing() {
         return processingNode.isProcessing();
     }
 
     @Override
-    public boolean isProcessingStopped() {
+    public synchronized boolean isProcessingStopped() {
         return processingNode.isProcessingStopped();
     }
 
     @Override
-    public String getProcessingMessage() {
+    public String getMessage() {
         return processingNode.getMessage();
     }
 
+    @Override
+    public ApplicationsRootNode getParent() {
+        return this;
+    }
+
+    @Override
+    public ApplicationsRootNode getRoot() {
+        return this;
+    }
 }

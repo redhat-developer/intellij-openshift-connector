@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
-import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
@@ -18,9 +17,9 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.actions.ActionUtils;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
@@ -37,7 +36,6 @@ import java.util.function.Predicate;
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateComponentAction extends OdoAction {
@@ -49,25 +47,34 @@ public class CreateComponentAction extends OdoAction {
     super(clazz);
   }
 
-  public static void execute(ParentableNode<?> parentNode) {
-    CreateComponentAction action = (CreateComponentAction) ActionManager.getInstance().getAction(CreateComponentAction.class.getName());
-    NamespaceNode namespaceNode = (NamespaceNode) parentNode;
-    action.telemetrySender = new TelemetrySender(PREFIX_ACTION + action.getTelemetryActionName());
-    Odo odo = namespaceNode.getRoot().getOdo().getNow(null);
+  public static void execute(ParentableNode<?> node) {
+    if (node == null) {
+      return;
+    }
+    Odo odo = node.getRoot().getOdo().getNow(null);
     if (odo == null) {
       return;
     }
-    action.doActionPerformed(namespaceNode, odo, namespaceNode.getName(),
-              namespaceNode.getRoot(), namespaceNode.getRoot().getProject());
+    NamespaceNode namespaceNode = (NamespaceNode) node;
+    CreateComponentAction action = ActionUtils.createAction(CreateComponentAction.class.getName());
+    action.doActionPerformed(
+      namespaceNode,
+      odo,
+      namespaceNode.getName(),
+      namespaceNode.getRoot(),
+      namespaceNode.getRoot().getProject());
   }
 
   @Override
-  protected String getTelemetryActionName() { return "create component"; }
+  public String getTelemetryActionName() { return "create component"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    NamespaceNode namespaceNode = ((NamespaceNode) selected);
-    ApplicationsRootNode rootNode = ((ParentableNode<Object>) selected).getRoot();
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    if (selected == null) {
+      return;
+    }
+    NamespaceNode namespaceNode = (NamespaceNode) selected;
+    ApplicationsRootNode rootNode = namespaceNode.getRoot();
     Project project = rootNode.getProject();
     doActionPerformed((NamespaceNode) selected, odo, namespaceNode.getName(), rootNode, project);
   }

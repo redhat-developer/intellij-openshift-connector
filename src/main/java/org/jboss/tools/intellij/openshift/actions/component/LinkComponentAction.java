@@ -11,13 +11,11 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
+import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
@@ -41,14 +39,8 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  protected String getTelemetryActionName() { return "link component to component"; }
+  public String getTelemetryActionName() { return "link component to component"; }
   
-  @Override
-  public boolean isVisible(Object selected) {
-    boolean visible = super.isVisible(selected);
-    return visible;
-  }
-
   protected String getSelectedTargetComponent(Odo odo, String project, String component) throws IOException {
     String targetComponent = null;
 
@@ -73,7 +65,7 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component sourceComponent = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();
@@ -86,7 +78,7 @@ public class LinkComponentAction extends OdoAction {
         } catch (IOException e) {
           clearProcessing(namespaceNode);
           sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link Component"));
         }
       },
       "Link Component...",
@@ -95,26 +87,15 @@ public class LinkComponentAction extends OdoAction {
 
   private void linkComponent(String targetComponent, Component sourceComponent, NamespaceNode namespaceNode, Odo odo) throws IOException {
     if (targetComponent != null) {
-      Notification notification = notify("Linking component to " + targetComponent);
+      Notification notification = NotificationUtils.notifyInformation("Link Component", "Linking component to " + targetComponent);
       odo.link(namespaceNode.getName(), sourceComponent.getPath(), sourceComponent.getName(), targetComponent);
       notification.expire();
-      notify("Component linked to " + targetComponent);
+      NotificationUtils.notifyInformation("Link Component", "Component linked to " + targetComponent);
       sendTelemetryResults(TelemetryResult.SUCCESS);
     } else {
       String message = "No components to link to";
       sendTelemetryError(message);
-      UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
+      UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link Component"));
     }
-  }
-
-  @NotNull
-  private static Notification notify(String content) {
-    Notification notification = new Notification(
-      Constants.GROUP_DISPLAY_ID,
-      "Link component",
-      content,
-      NotificationType.INFORMATION);
-    Notifications.Bus.notify(notification);
-    return notification;
   }
 }

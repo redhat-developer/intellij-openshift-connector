@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileRegistry;
 
-public class DevfileRegistryNode extends ParentableNode<DevfileRegistriesNode> {
+public class DevfileRegistryNode extends BaseNode<DevfileRegistriesNode> {
   private final DevfileRegistry registry;
 
   public DevfileRegistryNode(ApplicationsRootNode root, DevfileRegistriesNode parent, DevfileRegistry registry) {

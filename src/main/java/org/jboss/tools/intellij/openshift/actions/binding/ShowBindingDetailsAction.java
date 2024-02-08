@@ -24,7 +24,7 @@ public class ShowBindingDetailsAction extends OdoAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         BindingNode node = (BindingNode) selected;
         BindingDetailDialog dialog = new BindingDetailDialog(anActionEvent.getProject(), null, node.getBinding());
         dialog.show();
@@ -32,7 +32,7 @@ public class ShowBindingDetailsAction extends OdoAction {
     }
 
     @Override
-    protected String getTelemetryActionName() {
+    public String getTelemetryActionName() {
         return "show binding";
     }
 }

@@ -23,10 +23,10 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 public class OpenConsoleAction extends LoggedInClusterAction {
 
   @Override
-  protected String getTelemetryActionName() { return "open console"; }
+  public String getTelemetryActionName() { return "open console"; }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     try {
       String url = odo.consoleURL();
       BrowserUtil.open(url);

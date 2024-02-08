@@ -1,20 +1,21 @@
 /*************************************************************************************
  * Copyright (c) 2020 Red Hat, Inc. and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
  *
  * Contributors:
  *     JBoss by Red Hat - Initial implementation.
  ************************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 /**
  * Unit tests for OCCommandUtils for testing correct parsing of oc login command
@@ -56,9 +57,11 @@ public class OCCommandUtilsTest {
     @Test
     public void testCommandWithPassword() {
         assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer -p developerPassword"));
-        assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer -p developerPassword"));
         assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer --password developerPassword"));
         assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer --password=developerPassword"));
+        assertNull(OCCommandUtils.getPassword("oc login -u developer "));
+        assertNull(OCCommandUtils.getPassword("oc login -u developer --passwod bad"));
+        assertNull(OCCommandUtils.getPassword("oc login -u developer --passwod=bad"));
     }
 
     @Test

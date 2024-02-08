@@ -19,12 +19,6 @@ jobs:
           merge-multiple: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}
-      - name: Unzip artifacts
-        run: |
-          pwd
-          ls build/
-          ls build/jacoco/
-          ls build/test-results
       - name: Publish aggregated tests reports
         uses: scacap/action-surefire-report@4cbb611f23a9b5a030c73c2b32190a80983956ed #v1
         with:

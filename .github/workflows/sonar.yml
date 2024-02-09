@@ -45,8 +45,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mkdir build
-          mv reports/*-reports/* build/
-          ls build/
+          cp -r reports/*-reports/* build/
           if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
             PR_NUMBER=$(<prInfo/PR)
             BASE_REF=$(<prInfo/base_ref)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat, Inc.
+ * Copyright (c) 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,22 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.helm;
 
-import java.io.IOException;
-import java.util.List;
 
-public interface Helm {
+import org.jboss.tools.intellij.openshift.utils.helm.HelmCli.HelmEnv;
 
-  String addRepo(String name, String url) throws IOException;
+import static org.fest.assertions.Assertions.assertThat;
 
-  List<Chart> search() throws IOException;
+public class HelmCliEnvTest extends HelmCliTest {
 
-  List<Chart> search(String regex) throws IOException;
-
-  List<ChartRelease> list() throws IOException;
-
-  String install(String name, String chart, String version, String parameters) throws IOException;
-
-  String uninstall(String... names) throws IOException;
-
-  HelmCli.HelmEnv env() throws IOException;
+  public void testEnv_should_return_current_namespace() throws Exception {
+      // given
+      // when
+      HelmEnv env = helm.env();
+      // then
+      assertThat(env.get(HelmEnv.HELM_NAMESPACE)).isNotEmpty();
+  }
 }

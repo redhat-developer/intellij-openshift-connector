@@ -12,14 +12,26 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.redhat.devtools.intellij.common.tree.LinkElement;
 import org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 public class ChangeActiveProjectLinkNode extends MessageNode<NamespaceNode> implements LinkElement {
+
     protected ChangeActiveProjectLinkNode(ApplicationsRootNode root, NamespaceNode parent) {
-        super(root, parent, "Missing project, <a>choose or create a different one</a>");
+        super(root, parent, getLabel(root));
     }
 
     @Override
     public void execute() {
         ChangeActiveProjectAction.execute(getParent());
+    }
+
+    private static String getLabel(ApplicationsRootNode root) {
+        Odo odo = root.getOdo().getNow(null);
+        String label = "Missing %s, <a>choose or create a different one</a>";
+        if (odo == null) {
+            return String.format(label, "project/namespace");
+        } else {
+            return String.format(label, odo.getNamespaceKind().toLowerCase());
+        }
     }
 }

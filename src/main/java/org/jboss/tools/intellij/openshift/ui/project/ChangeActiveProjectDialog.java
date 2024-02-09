@@ -92,7 +92,7 @@ public class ChangeActiveProjectDialog extends BaseDialog {
           .installOn(activeProjectTextField)
           .andRegisterOnDocumentListener(activeProjectTextField);
         activeProjectValidator.revalidate();
-        JLabel createProjectLabel = new JBLabel("<html>You can <a href=\"\">create a new project</a> instead.</html>");
+        JLabel createProjectLabel = new JBLabel("<html>You can <a href=\"\">create a new " + kind.toLowerCase() + "</a> instead.</html>");
         createProjectLabel.setBorder(JBUI.Borders.emptyTop(20));
         createProjectLabel.addMouseListener(onClicked());
         panel.add(createProjectLabel, "spanx");
@@ -146,9 +146,9 @@ public class ChangeActiveProjectDialog extends BaseDialog {
         private ValidationInfo getValidationInfo(String project) {
             ValidationInfo validation = new ValidationInfo("").withOKEnabled();
             if (StringUtil.isEmptyOrSpaces(project)) {
-                validation = new ValidationInfo("Provide active Project").forComponent(activeProjectTextField).asWarning();
+                validation = new ValidationInfo("Provide active " + kind).forComponent(activeProjectTextField).asWarning();
             } else if (project.equals(currentProject)) {
-                validation = new ValidationInfo("Choose different Project").forComponent(activeProjectTextField).asWarning();
+                validation = new ValidationInfo("Choose different " + kind).forComponent(activeProjectTextField).asWarning();
             }
             return validation;
         }

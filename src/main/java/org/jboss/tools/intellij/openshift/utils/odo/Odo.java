@@ -31,6 +31,8 @@ public interface Odo {
 
     boolean namespaceExists(String name);
 
+    String getNamespaceKind();
+
     void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
 
     void stop(String project, String context, String component, ComponentFeature feature) throws IOException;

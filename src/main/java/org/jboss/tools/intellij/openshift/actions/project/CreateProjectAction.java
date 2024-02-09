@@ -42,24 +42,6 @@ public class CreateProjectAction extends LoggedInClusterAction {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CreateProjectAction.class);
 
-  @Override
-  public void update(AnActionEvent e) {
-    super.update(e);
-    if (e.getPresentation().isVisible()) {
-      Odo odo = getOdo(e);
-      if (odo == null) {
-        return;
-      }
-      // overrides label given in plugin.xml
-      e.getPresentation().setText("New " + getKind(odo));
-    }
-  }
-
-  @Override
-  public String getTelemetryActionName() {
-    return "create project";
-  }
-
   public static void execute(ApplicationsRootNode rootNode) {
     Odo odo = rootNode.getOdo().getNow(null);
     if (odo == null) {
@@ -70,13 +52,31 @@ public class CreateProjectAction extends LoggedInClusterAction {
   }
 
   @Override
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Odo odo = getOdo(e);
+      if (odo == null) {
+        return;
+      }
+      // overrides label given in plugin.xml
+      e.getPresentation().setText("New " + odo.getNamespaceKind());
+    }
+  }
+
+  @Override
+  public String getTelemetryActionName() {
+    return "create project";
+  }
+
+  @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     Point location = ActionUtils.getLocation(anActionEvent);
     doActionPerformed(location, odo, getEventProject(anActionEvent));
   }
 
   private void doActionPerformed(final Point location, @NotNull final Odo odo, Project project) {
-    String kind = getKind(odo);
+    String kind = odo.getNamespaceKind();
     runWithProgress((ProgressIndicator progress) ->
         CompletableFuture
           .supplyAsync(() -> {
@@ -113,7 +113,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
   }
 
   private void createProject(String newProject, @NotNull Odo odo) {
-    String kind = getKind(odo);
+    String kind = odo.getNamespaceKind();
     Notification notification = NotificationUtils.notifyInformation("Create " + kind, "Creating " + kind.toLowerCase() + " newProject");
     try {
       odo.createProject(newProject);
@@ -149,13 +149,5 @@ public class CreateProjectAction extends LoggedInClusterAction {
 
   private boolean isRoot(Object node) {
     return node instanceof ApplicationsRootNode;
-  }
-
-  private String getKind(Odo odo) {
-    if (odo.isOpenShift()) {
-      return "Project";
-    } else {
-      return "Namespace";
-    }
   }
 }

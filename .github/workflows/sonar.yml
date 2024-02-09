@@ -46,7 +46,6 @@ jobs:
         run: |
           mkdir build
           cp -r reports/*-reports/* build/
-          ls build/
           if [ '${{github.event.workflow_run.event}}' == 'pull_request' ]; then
             PR_NUMBER=$(<prInfo/PR)
             BASE_REF=$(<prInfo/base_ref)

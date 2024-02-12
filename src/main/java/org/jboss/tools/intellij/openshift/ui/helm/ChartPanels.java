@@ -15,6 +15,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.Disposer;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import javax.swing.JComponent;
 import java.awt.Component;
@@ -27,12 +28,14 @@ public class ChartPanels extends MultiPanel {
 
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
+  private final Odo odo;
   private ChartVersions chart;
   private final Disposable disposable = Disposer.newDisposable();
 
-  public ChartPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm) {
+  public ChartPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm, Odo odo) {
     this.rootNode = rootNode;
     this.helm = helm;
+    this.odo = odo;
     Disposer.register(parentDisposable, disposable);
   }
 
@@ -41,7 +44,7 @@ public class ChartPanels extends MultiPanel {
     if (key == DETAILS_PANEL) {
       return new DetailsPanel(chart, disposable, this);
     } else if (key == INSTALL_PANEL) {
-      return new InstallPanel(chart, rootNode, disposable, helm);
+      return new InstallPanel(chart, rootNode, disposable, helm, odo);
     } else {
       return null;
     }

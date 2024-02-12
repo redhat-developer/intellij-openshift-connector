@@ -11,24 +11,21 @@ jobs:
     name: Publish Test Report
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
+      - name: Download Reports
         uses: actions/download-artifact@v4
         with:
-          path: build
-          pattern: '*-test-reports'
+          path: reports
+          pattern: '*-reports'
           merge-multiple: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}
-      - name: Unzip artifacts
+      - name: List test results
         run: |
-          pwd
-          ls build/
-          ls build/jacoco/
-          ls build/test-results
+          ls -r reports/
       - name: Publish aggregated tests reports
-        uses: scacap/action-surefire-report@4cbb611f23a9b5a030c73c2b32190a80983956ed #v1
+        uses: scacap/action-surefire-report@687f107f48aa55aff279cc5ce598fd9860871a81 #v1.7.3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
+          report_paths: '${{github.workspace}}/reports/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
           check_name: Aggregated Test Report

@@ -19,20 +19,28 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.ActionUtils;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.cluster.LoggedInClusterAction;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.ui.SwingUtils;
+import org.jboss.tools.intellij.openshift.ui.project.CreateNewProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.awt.Point;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.getRoot;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateProjectAction extends LoggedInClusterAction {
 
-  @Override
-  public String getTelemetryActionName() { return "create project"; }
+  private static final Logger LOGGER = LoggerFactory.getLogger(CreateProjectAction.class);
 
   public static void execute(ApplicationsRootNode rootNode) {
     Odo odo = rootNode.getOdo().getNow(null);
@@ -40,35 +48,106 @@ public class CreateProjectAction extends LoggedInClusterAction {
       return;
     }
     CreateProjectAction action = ActionUtils.createAction(CreateProjectAction.class.getName());
-    action.doActionPerformed(rootNode, odo, rootNode.getProject());
+    action.doActionPerformed(null, odo, rootNode.getProject());
+  }
+
+  @Override
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Odo odo = getOdo(e);
+      if (odo == null) {
+        return;
+      }
+      // overrides label given in plugin.xml
+      e.getPresentation().setText("New " + odo.getNamespaceKind());
+    }
+  }
+
+  @Override
+  public String getTelemetryActionName() {
+    return "create project";
   }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
-    doActionPerformed(clusterNode, odo, getEventProject(anActionEvent));
+    Point location = ActionUtils.getLocation(anActionEvent);
+    doActionPerformed(location, odo, getEventProject(anActionEvent));
   }
 
-  private void doActionPerformed(ApplicationsRootNode clusterNode, Odo odo, Project project) {
-    String projectName = Messages.showInputDialog("Project name", "New Project", Messages.getQuestionIcon());
-    if ((projectName == null) || projectName.trim().isEmpty()) {
-      sendTelemetryResults(TelemetryResult.ABORTED);
-      return;
+  private void doActionPerformed(final Point location, @NotNull final Odo odo, Project project) {
+    String kind = odo.getNamespaceKind();
+    runWithProgress((ProgressIndicator progress) ->
+        CompletableFuture
+          .supplyAsync(() -> {
+            try {
+              return odo.getNamespaces();
+            } catch (IOException e) {
+              NotificationUtils.notifyError("Create New " + kind, "Could not get " + kind.toLowerCase() + "s: " + e.getMessage());
+              sendTelemetryError(e.getMessage());
+              throw new CompletionException(e);
+            }
+          }, SwingUtils.EXECUTOR_BACKGROUND)
+          .handleAsync((allProjects, error) -> {
+              if (error != null) {
+                return null;
+              }
+              CreateNewProjectDialog dialog = openCreateProjectDialog(allProjects, kind, location, project);
+              if (dialog.isOK()) {
+                return dialog.getNewProject();
+              } else {
+                sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
+                return null;
+              }
+            }
+            , SwingUtils.EXECUTOR_UI)
+          .whenCompleteAsync((newProject, error) -> {
+            if (error != null
+              || newProject == null) {
+              return;
+            }
+            createProject(newProject, odo);
+          }, SwingUtils.EXECUTOR_BACKGROUND),
+      "Create Active " + kind + "...",
+      project);
+  }
+
+  private void createProject(String newProject, @NotNull Odo odo) {
+    String kind = odo.getNamespaceKind();
+    Notification notification = NotificationUtils.notifyInformation("Create " + kind, "Creating " + kind.toLowerCase() + " newProject");
+    try {
+      odo.createProject(newProject);
+      notification.expire();
+      NotificationUtils.notifyInformation("Create " + kind, kind + newProject + " successfully created");
+      sendTelemetryResults(TelemetryResult.SUCCESS);
+    } catch (IOException | CompletionException e) {
+      notification.expire();
+      sendTelemetryError(e);
+      UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create " + kind));
     }
-    runWithProgress((ProgressIndicator progress) -> {
-      try {
-        Notification notif = NotificationUtils.notifyInformation("Create Project", "Creating project " + projectName);
-        odo.createProject(projectName);
-        notif.expire();
-        NotificationUtils.notifyInformation("Create Project", "Project " + projectName + " successfully created");
-        clusterNode.getStructure().fireModified(clusterNode);
-        sendTelemetryResults(TelemetryResult.SUCCESS);
-      } catch (IOException | CompletionException e) {
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Project"));
-      }
-    },
-    "Create Project...",
-    project);
+  }
+
+  protected CreateNewProjectDialog openCreateProjectDialog(List<String> allProjects, String kind, Point location, Project project) {
+    CreateNewProjectDialog dialog = new CreateNewProjectDialog(project, allProjects, kind, location);
+    dialog.show();
+    return dialog;
+  }
+
+  @Override
+  public boolean isVisible(Object selected) {
+    return isRoot(selected)
+      && isLoggedIn(selected);
+  }
+
+  private boolean isLoggedIn(Object node) {
+    ApplicationsRootNode root = getRoot(node);
+    if (root == null) {
+      return false;
+    }
+    return root.isLogged();
+  }
+
+  private boolean isRoot(Object node) {
+    return node instanceof ApplicationsRootNode;
   }
 }

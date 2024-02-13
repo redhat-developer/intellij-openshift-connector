@@ -10,23 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.project;
 
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.CommonShortcuts;
-import com.intellij.openapi.actionSystem.IdeActions;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComponentValidator;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.ui.PopupBorder;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.TextFieldWithAutoCompletionListProvider;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.JBUI;
 import net.miginfocom.swing.MigLayout;
+import org.jboss.tools.intellij.openshift.ui.BaseDialog;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,26 +28,21 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.RootPaneContainer;
 import javax.swing.SwingConstants;
-import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class ChangeActiveProjectDialog extends DialogWrapper {
+public class ChangeActiveProjectDialog extends BaseDialog {
 
     private static final String WIDTH = "300";
     private final Project project;
     private final String kind;
     private final String currentProject;
     private final Collection<String> allProjects;
-    private final Point location;
     private TextFieldWithCompletion activeProjectTextField;
 
     private String activeProject;
@@ -66,46 +55,19 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
       String currentProject,
       Collection<String> allProjects,
       Point location) {
-        super(project, false);
+        super(project, location);
         this.project = project;
         this.kind = kind;
         this.currentProject = currentProject;
         this.allProjects = allProjects;
-        this.location = location;
         init();
     }
 
     @Override
     protected void init() {
         super.init();
-        Window dialogWindow = getPeer().getWindow();
-        JRootPane rootPane = ((RootPaneContainer) dialogWindow).getRootPane();
-        registerShortcuts(rootPane);
         setOKButtonText("Change");
-        setBorders(rootPane);
-        setLocation(location);
         setTitle("Change Active " + kind);
-    }
-
-    @Override
-    public void setLocation(Point location) {
-        if (location == null) {
-            location = MouseInfo.getPointerInfo().getLocation();
-        }
-        super.setLocation(location);
-    }
-
-    private void registerShortcuts(JRootPane rootPane) {
-        AnAction escape = ActionManager.getInstance().getAction(IdeActions.ACTION_EDITOR_ESCAPE);
-        DumbAwareAction.create(e -> closeImmediately())
-          .registerCustomShortcutSet(escape == null ?
-            CommonShortcuts.ESCAPE
-            : escape.getShortcutSet(), rootPane, myDisposable);
-    }
-
-    private void setBorders(JRootPane rootPane) {
-        rootPane.setBorder(PopupBorder.Factory.create(true, true));
-        rootPane.setWindowDecorationStyle(JRootPane.NONE);
     }
 
     @Override
@@ -130,7 +92,7 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
           .installOn(activeProjectTextField)
           .andRegisterOnDocumentListener(activeProjectTextField);
         activeProjectValidator.revalidate();
-        JLabel createProjectLabel = new JBLabel("<html>You can <a href=\"\">create a new project</a> instead.</html>");
+        JLabel createProjectLabel = new JBLabel("<html>You can <a href=\"\">create a new " + kind.toLowerCase() + "</a> instead.</html>");
         createProjectLabel.setBorder(JBUI.Borders.emptyTop(20));
         createProjectLabel.addMouseListener(onClicked());
         panel.add(createProjectLabel, "spanx");
@@ -154,12 +116,6 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
                 return item;
             }
         };
-    }
-
-    private void closeImmediately() {
-        if (isVisible()) {
-            doCancelAction();
-        }
     }
 
     @Override
@@ -190,9 +146,9 @@ public class ChangeActiveProjectDialog extends DialogWrapper {
         private ValidationInfo getValidationInfo(String project) {
             ValidationInfo validation = new ValidationInfo("").withOKEnabled();
             if (StringUtil.isEmptyOrSpaces(project)) {
-                validation = new ValidationInfo("Provide active Project").forComponent(activeProjectTextField).asWarning();
+                validation = new ValidationInfo("Provide active " + kind).forComponent(activeProjectTextField).asWarning();
             } else if (project.equals(currentProject)) {
-                validation = new ValidationInfo("Choose different Project").forComponent(activeProjectTextField).asWarning();
+                validation = new ValidationInfo("Choose different " + kind).forComponent(activeProjectTextField).asWarning();
             }
             return validation;
         }

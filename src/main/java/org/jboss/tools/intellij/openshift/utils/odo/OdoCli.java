@@ -327,6 +327,15 @@ public class OdoCli implements Odo {
         }
     }
 
+    @Override
+    public String getNamespaceKind() {
+        if (isOpenShift()) {
+            return "Project";
+        } else {
+            return "Namespace";
+        }
+    }
+
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
         ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
         try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {

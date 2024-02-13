@@ -31,7 +31,7 @@ jobs:
 
       # Validate Wrapper before running build
       - name: validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@27152f6fa06a6b8062ef7195c795692e51fc2c81 #v2.0.0
+        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2 #v2.1.1
 
       # Set up Java environment for the next steps
       - name: Setup Java

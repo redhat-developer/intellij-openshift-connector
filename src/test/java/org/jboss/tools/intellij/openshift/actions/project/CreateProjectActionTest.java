@@ -12,14 +12,12 @@ package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
-import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class CreateProjectActionTest extends ActionTest {
   @Override
@@ -27,22 +25,9 @@ public class CreateProjectActionTest extends ActionTest {
     return new CreateProjectAction();
   }
 
-  public void testActionOnLoggedInCluster() {
-    ApplicationsRootNode applicationsRootNode = mock(ApplicationsRootNode.class);
-    when(applicationsRootNode.isLogged()).thenReturn(true);
-    AnActionEvent event = createEvent(applicationsRootNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertTrue(event.getPresentation().isVisible());
-  }
-
-  public void testThatActionOnLoggedOutCluster() {
-    ApplicationsRootNode applicationsRootNode = mock(ApplicationsRootNode.class);
-    when(applicationsRootNode.isLogged()).thenReturn(false);
-    AnActionEvent event = createEvent(applicationsRootNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
+  @Override
+  protected void verifyLoggedInCluster(boolean visible) {
+    assertTrue(visible);
   }
 
   public void testActionOnProject() {

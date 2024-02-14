@@ -95,9 +95,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @Override
     public @NotNull LeafState getLeafState(@NotNull Object element) {
-        if (element instanceof ComponentNode) {
-            return LeafState.ALWAYS;
-        } else if (element instanceof ChartReleaseNode) {
+        if (element instanceof ChartReleaseNode) {
             return LeafState.ALWAYS;
         } else if (element instanceof MessageNode<?>) {
             return LeafState.ALWAYS;
@@ -233,10 +231,12 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return Collections.emptyList();
         }
         try {
-            odo.listURLs(element.getParent().getName(),
-                element.getComponent().getPath(), element.getName()).forEach(url ->
-                    results.add(new URLNode(element, url))
-                );
+            odo.listURLs(
+                element.getParent().getName(),
+                element.getComponent().getPath(), element.getName())
+              .forEach(url ->
+                results.add(new URLNode(element, url))
+              );
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -246,10 +246,12 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private List<BindingNode> getBindings(ComponentNode element, @NotNull Odo odo) {
         List<BindingNode> results = new ArrayList<>();
         try {
-            odo.listBindings(element.getParent().getName(),
-                element.getComponent().getPath(), element.getName()).forEach(binding ->
-                    results.add(new BindingNode(element, binding))
-                );
+            odo.listBindings(
+              element.getParent().getName(),
+              element.getComponent().getPath(), element.getName()
+            ).forEach(binding ->
+              results.add(new BindingNode(element, binding))
+            );
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -330,7 +332,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @Override
     public void fireAdded(Object element) {
-       mutableModelSupport.fireAdded(element);
+        mutableModelSupport.fireAdded(element);
     }
 
     @Override
@@ -382,7 +384,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         private boolean isProcessing() {
             ProcessingNode node = getProcessingNode();
             return node != null
-                && node.isProcessing();
+              && node.isProcessing();
         }
 
         private ProcessingNode getProcessingNode() {

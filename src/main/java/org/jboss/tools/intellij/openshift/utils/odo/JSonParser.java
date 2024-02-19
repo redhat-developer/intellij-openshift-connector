@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class JSonParser {
+    public static final String INGRESSES_FIELD = "ingresses";
+
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String SPEC_FIELD = "spec";
@@ -48,7 +50,6 @@ public class JSonParser {
     private static final String PLATFORM = "platform";
     private static final String CONTAINER_NAME_FIELD = "containerName";
     private static final String LANGUAGE_FIELD = "language";
-    public static final String INGRESSES_FIELD = "ingresses";
     private static final String ROUTES_FIELD = "routes";
     private static final String HOST_FIELD = "host";
     private static final String RULES_FIELD = "rules";
@@ -126,11 +127,15 @@ public class JSonParser {
 
     public ComponentInfo parseDescribeComponentInfo(ComponentKind kind) {
         ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
-        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) && root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) && root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(PROJECT_TYPE_FIELD)) {
+        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(PROJECT_TYPE_FIELD)) {
             String componentTypeName = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(PROJECT_TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
         }
-        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) && root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) && root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(LANGUAGE_FIELD)) {
+        if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(LANGUAGE_FIELD)) {
             String language = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(LANGUAGE_FIELD).asText();
             builder.withLanguage(language);
         }

@@ -14,8 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.jboss.tools.intellij.openshift.Constants;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jboss.tools.intellij.openshift.actions.ActionUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -27,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
@@ -62,7 +60,6 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
             Object node = adjust(getSelected(getTree(e)));
             if (!(node instanceof ComponentNode)) {
                 return;
-                //e.getPresentation().setText(StringUtils.capitalize(getActionName()));
             }
             ComponentNode componentNode = (ComponentNode) node;
             Component component = componentNode.getComponent();
@@ -98,34 +95,35 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
         NamespaceNode namespaceNode = componentNode.getParent();
-        runWithProgress((ProgressIndicator progress) -> {
-                    try {
-                        ComponentFeature feat = getComponentFeature();
-                        process(odo,
-                                namespaceNode.getName(),
-                                component,
-                                feat,
-                                b1 -> {
-                                    component.getLiveFeatures().addFeature(feature);
-                                    if (feat.getMode().equals(ComponentFeature.Mode.DEBUG_MODE)) {
-                                        component.getLiveFeatures().addFeature(debugFeature);
-                                    }
-                                    ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                                }, b2 -> {
-                                    component.getLiveFeatures().removeFeature(feature);
-                                    if (feat.getMode().equals(ComponentFeature.Mode.DEBUG_MODE)) {
-                                        component.getLiveFeatures().removeFeature(debugFeature);
-                                    }
-                                    ((ApplicationsTreeStructure) Objects.requireNonNull(getTree(anActionEvent)).getClientProperty(Constants.STRUCTURE_PROPERTY)).fireModified(componentNode);
-                                });
-                        sendTelemetryResults(TelemetryResult.SUCCESS);
-                    } catch (IOException e) {
-                        sendTelemetryError(e);
-                        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
-                    }
-                },
-                getActionName() + component.getName() + "...",
-                getEventProject(anActionEvent));
+        runWithProgress(
+            (ProgressIndicator progress) -> {
+                try {
+                    ComponentFeature feat = getComponentFeature();
+                    process(odo,
+                        namespaceNode.getName(),
+                        component,
+                        feat,
+                        b1 -> {
+                            component.getLiveFeatures().addFeature(feature);
+                            if (feat.getMode().equals(ComponentFeature.Mode.DEBUG_MODE)) {
+                                component.getLiveFeatures().addFeature(debugFeature);
+                            }
+                            ActionUtils.getApplicationTreeStructure(anActionEvent).fireModified(componentNode);
+                        }, b2 -> {
+                            component.getLiveFeatures().removeFeature(feature);
+                            if (feat.getMode().equals(ComponentFeature.Mode.DEBUG_MODE)) {
+                                component.getLiveFeatures().removeFeature(debugFeature);
+                            }
+                            ActionUtils.getApplicationTreeStructure(anActionEvent).fireModified(componentNode);
+                        });
+                    sendTelemetryResults(TelemetryResult.SUCCESS);
+                } catch (IOException e) {
+                    sendTelemetryError(e);
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
+                }
+            },
+            getActionName() + component.getName() + "...",
+            getEventProject(anActionEvent));
     }
 
     private ComponentFeature getComponentFeature() {

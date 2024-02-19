@@ -59,9 +59,16 @@ public abstract class ActionTest extends BasePlatformTestCase {
 
   public abstract AnAction getAction();
 
-  public void testActionOnLoggedInCluster() {
-    CompletableFuture<Odo> odoFuture = createOdoFuture(true);
-    ApplicationsRootNode applicationsRootNode = createApplicationRootNode(true, odoFuture);
+  public void testActionOnLoggedInOpenShiftCluster() {
+    testActionOnLoggedInCluster(createOdoFuture(true));
+  }
+
+  public void testActionOnLoggedInKubeCluster() {
+    testActionOnLoggedInCluster(createOdoFuture(false));
+  }
+
+  private void testActionOnLoggedInCluster(CompletableFuture<Odo> odoFuture) {
+    ApplicationsRootNode applicationsRootNode = createApplicationRootNode(odoFuture);
     AnActionEvent event = createEvent(applicationsRootNode);
     AnAction action = getAction();
     action.update(event);
@@ -86,9 +93,9 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   @NotNull
-  protected static ApplicationsRootNode createApplicationRootNode(boolean loggedIn, CompletableFuture<Odo> odoFuture) {
+  protected static ApplicationsRootNode createApplicationRootNode(CompletableFuture<Odo> odoFuture) {
     ApplicationsRootNode applicationsRootNode = mock(ApplicationsRootNode.class);
-    when(applicationsRootNode.isLogged()).thenReturn(loggedIn);
+    when(applicationsRootNode.isLogged()).thenReturn(true);
     when(applicationsRootNode.getRoot()).thenReturn(applicationsRootNode);
     when(applicationsRootNode.getOdo()).thenReturn(odoFuture);
     return applicationsRootNode;

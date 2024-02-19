@@ -45,20 +45,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 public class ApplicationsRootNode
-  implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode> {
+    implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
     private final ApplicationsTreeStructure structure;
+    private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
+    private final Map<String, ComponentDescriptor> components = new HashMap<>();
     private CompletableFuture<Odo> odoFuture;
     private CompletableFuture<Helm> helmFuture;
     private boolean logged;
     private Config config;
-
-    private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
-
-    private final Map<String, ComponentDescriptor> components = new HashMap<>();
-
     private Map<String, Map<ComponentFeature, ProcessHandler>> processes = new HashMap<>();
 
     public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure) {
@@ -67,6 +64,13 @@ public class ApplicationsRootNode
         initConfigWatcher();
         this.config = loadConfig();
         registerProjectListener(project);
+    }
+
+    private static boolean shouldLogMessage(String message) {
+        return !(message.contains("Unauthorized") ||
+            message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
+            message.contains("the server has asked for the client to provide credentials") ||
+            message.contains("connect: no route to host"));
     }
 
     public boolean isLogged() {
@@ -80,11 +84,11 @@ public class ApplicationsRootNode
     private CompletableFuture<Odo> getOdo(BiConsumer<Odo, Throwable> whenComplete) {
         if (odoFuture == null) {
             this.odoFuture = ToolFactory.getInstance()
-              .createOdo(project)
-              .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
-              .whenComplete((odo, err) -> loadProjectModel(odo, project))
-                    .whenComplete((odo, err) -> restoreComponentFeatureProcesses(odo))
-              .whenComplete(whenComplete);
+                .createOdo(project)
+                .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
+                .whenComplete((odo, err) -> loadProjectModel(odo, project))
+                .whenComplete((odo, err) -> restoreComponentFeatureProcesses(odo))
+                .whenComplete(whenComplete);
         }
         return odoFuture;
     }
@@ -112,13 +116,13 @@ public class ApplicationsRootNode
     public CompletableFuture<Helm> getHelm(boolean notify) {
         if (helmFuture == null) {
             this.helmFuture = ToolFactory.getInstance()
-              .createHelm(project)
-              .whenComplete((odo, err) -> {
-                    if (notify) {
-                        structure.fireModified(this);
+                .createHelm(project)
+                .whenComplete((odo, err) -> {
+                        if (notify) {
+                            structure.fireModified(this);
+                        }
                     }
-                }
-              );
+                );
         }
         return helmFuture;
     }
@@ -179,15 +183,15 @@ public class ApplicationsRootNode
 
     private void migrateOdo(String path, ComponentDescriptor descriptor) {
         getOdo()
-          .thenAccept(odo -> {
-              if (odo != null) {
-                  odo.migrateComponent(path, descriptor.getName());
-              }
-          })
-          .thenRun(() ->
-            NotificationUtils.notifyInformation(
-              "Component migration",
-              "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
+            .thenAccept(odo -> {
+                if (odo != null) {
+                    odo.migrateComponent(path, descriptor.getName());
+                }
+            })
+            .thenRun(() ->
+                NotificationUtils.notifyInformation(
+                    "Component migration",
+                    "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
     }
 
     private void addContext(Odo odo, VirtualFile modulePathFile) {
@@ -198,7 +202,7 @@ public class ApplicationsRootNode
             try {
                 List<ComponentDescriptor> descriptors = odo.discover(modulePathFile.toNioPath().toString());
                 descriptors.forEach(descriptor ->
-                        addContextToSettings(descriptor.getPath(), descriptor)
+                    addContextToSettings(descriptor.getPath(), descriptor)
                 );
             } catch (IOException ex) {
                 //filter out some common exception when no logged or no authorizations
@@ -209,17 +213,10 @@ public class ApplicationsRootNode
         }
     }
 
-    private static boolean shouldLogMessage(String message) {
-        return !(message.contains("Unauthorized") ||
-                message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
-                message.contains("the server has asked for the client to provide credentials") ||
-                message.contains("connect: no route to host"));
-    }
-
     public void addContext(String modulePath) {
         addContext(
-          getOdo().getNow(null),
-          LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
+            getOdo().getNow(null),
+            LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
     }
 
     private void removeContextFromSettings(String modulePath) {

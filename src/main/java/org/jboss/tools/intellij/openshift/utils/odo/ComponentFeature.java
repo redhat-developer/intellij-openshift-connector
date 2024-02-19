@@ -67,9 +67,7 @@ public class ComponentFeature {
 
     public List<String> getStartArgs() {
         List<String> result = new ArrayList<>(startArgs);
-        if (!getExtraArgs().isEmpty()) {
-            result.addAll(getExtraArgs());
-        }
+        result.addAll(getExtraArgs());
         if (!getPlatform().equals(PLATFORM.NONE)) {
             List<String> platformStartArgs = Arrays.asList("--platform", getPlatform().getLabel());
             result.addAll(platformStartArgs);

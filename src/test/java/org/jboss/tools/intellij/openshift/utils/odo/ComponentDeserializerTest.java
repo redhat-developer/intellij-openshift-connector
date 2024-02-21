@@ -12,7 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,10 +28,7 @@ public class ComponentDeserializerTest {
 
   @BeforeClass
   public static void setup() {
-    MAPPER = new ObjectMapper();
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentDeserializer());
-    MAPPER.registerModule(module);
+    MAPPER = Serialization.configure(new ComponentDeserializer());
   }
 
   @Test
@@ -69,11 +66,11 @@ public class ComponentDeserializerTest {
     Assert.assertEquals("nodejs", info.getComponentTypeName());
     Assert.assertEquals(ComponentKind.DEVFILE, info.getComponentKind());
     Assert.assertNull(info.getLanguage());
-    ComponentFeatures features = info.getFeatures();
+    List<ComponentFeature.Mode> features = info.getSupportedFeatures();
     Assert.assertNotNull(features);
-    Assert.assertFalse(features.isDebug());
-    Assert.assertFalse(features.isDeploy());
-    Assert.assertFalse(features.isDev());
+    Assert.assertFalse(features.contains(ComponentFeature.Mode.DEBUG_MODE));
+    Assert.assertFalse(features.contains(ComponentFeature.Mode.DEPLOY_MODE));
+    Assert.assertFalse(features.contains(ComponentFeature.Mode.DEV_MODE));
   }
 
   @Test
@@ -96,10 +93,10 @@ public class ComponentDeserializerTest {
     Assert.assertEquals("Unknown", info.getComponentTypeName());
     Assert.assertEquals(ComponentKind.DEVFILE, info.getComponentKind());
     Assert.assertNull(info.getLanguage());
-    ComponentFeatures features = info.getFeatures();
+    List<ComponentFeature.Mode> features = info.getSupportedFeatures();
     Assert.assertNotNull(features);
-    Assert.assertFalse(features.isDebug());
-    Assert.assertFalse(features.isDeploy());
-    Assert.assertFalse(features.isDev());
+    Assert.assertFalse(features.contains(ComponentFeature.Mode.DEBUG_MODE));
+    Assert.assertFalse(features.contains(ComponentFeature.Mode.DEPLOY_MODE));
+    Assert.assertFalse(features.contains(ComponentFeature.Mode.DEV_MODE));
   }
 }

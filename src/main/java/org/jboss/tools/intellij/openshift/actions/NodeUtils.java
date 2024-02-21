@@ -93,7 +93,7 @@ public class NodeUtils {
             selected = ((DefaultMutableTreeNode)selected).getUserObject();
         }
         if (selected instanceof NodeDescriptor) {
-            selected = ((NodeDescriptor)selected).getElement();
+            selected = ((NodeDescriptor<?>) selected).getElement();
         }
         return (T) selected;
     }

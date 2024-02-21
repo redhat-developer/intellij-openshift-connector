@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ComponentFeatures {
 
@@ -45,31 +46,12 @@ public class ComponentFeatures {
     }
 
     public boolean isDebug() {
-        return is(ComponentFeature.DEBUG);
+        return features.stream().anyMatch(DebugComponentFeature.class::isInstance);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        boolean first = true;
-        if (isDev()) {
-            first = append(builder, true, ComponentFeature.DEV.getKind().getLabel());
-        }
-        if (isDebug()) {
-            first = append(builder, first, ComponentFeature.DEBUG.getKind().getLabel());
-        }
-        if (isDeploy()) {
-            append(builder, first, ComponentFeature.DEPLOY.getKind().getLabel());
-        }
-        return builder.toString();
-    }
-
-    private boolean append(StringBuilder builder, boolean first, String label) {
-        if (!first) {
-            builder.append(',');
-        }
-        builder.append(label);
-        return false;
+        return features.stream().map(f -> f.getMode().getLabel()).collect(Collectors.joining(", "));
     }
 
     public boolean isOnCluster() {

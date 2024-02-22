@@ -27,6 +27,19 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 ## New features
 
+### Debug is now supported when component is running on Podman
+
+This new improvement enables you to debug your component when using Podman, similar to the debug on Cluster.
+![](images/1.8.0/debug_on_podman.gif)
+
+### Added Change/Create namespace/project actions in tree
+
+Along with the usage of `namespace` labels when dealing with kubernetes cluster, we added several actions to create or
+change current project/namespace.
+![](images/1.8.0/project_or_namespace.gif)
+
+## Features
+
 ### Install Helm Charts on the current cluster within the IDE
 
 We're Happy to announce that we've implemented a new action that provides the capability to install
@@ -36,26 +49,26 @@ Below is a small demo of the workflow: installing `kuberos` chart from the Helm 
 
 ![](images/1.7.0/helm.gif)
 
-There is no need to install anything prior to use Helm. By default if there is no repository configured, the OpenShift
+There is no need to install anything prior to use Helm. By default, if there is no repository configured, the OpenShift
 Helm repository will be used (https://charts.openshift.io/).
 
 For more information about using Helm on OpenShift, please
 see [here](https://docs.openshift.com/container-platform/latest/applications/working_with_helm_charts/understanding-helm.html)
 
-## Features
-
 ### Share your Feedback !
 
 We introduced a new toolbar action within the plugin that enables you to share your feedback with our team. Please feel free to provide your valuable feedback for the plugin workflow.
 
-https://github.com/redhat-developer/intellij-openshift-connector/assets/600414/ca52ddcb-2206-480b-aa62-6d4bea4cdc9b
-
+![](images/1.5.0/feedback.gif)
 
 ### Red Hat Developer Sandbox login
 
 Red Hat provides an online OpenShift environment called [Developer Sandbox](https://red.ht/dev-sandbox) that makes it easy for developers to build, test and deploy cloud native applications and microservices.
 
-In order to use Developer Sandbox, you must own a Red Hat SSO account (which can be linked to social accounts like GitHub,…​). Once logged in into Red Hat SSO, you will get an environment provisioned in Developer Sandbox but the first time you will try to login in to Developer Sandbox, your account needs to be verified (in order to prevent crypto miners and robots) thus you need to go through a verification phase where you will be asked to provide:
+In order to use Developer Sandbox, you must own a Red Hat SSO account (which can be linked to social accounts like
+GitHub,…​). Once logged in into Red Hat SSO, you will get an environment provisioned in Developer Sandbox but the first
+time you will try to log in into Developer Sandbox, your account needs to be verified (in order to prevent crypto miners
+and robots) thus you need to go through a verification phase where you will be asked to provide:
 
 - first your phone number and country code
 - then a verification code that you will receive on your smartphone.
@@ -66,11 +79,12 @@ Open the `OpenShift` window (`Window → OpenShift`):
 
 ![](images/0.9.0/openshift1.png)
 
-Right click on the first node and select the `Login in to cluster` context menu:
+Right-click on the first node and select the `Login in to cluster` context menu:
 
 ![](images/0.9.0/openshift2.png)
 
-In order to provision the Developer Sandbox environment, click on the `Red Hat Developer Sandbox` link: a browser window will open and you will be required to login to your Red Hat SSO account:
+In order to provision the Developer Sandbox environment, click on the `Red Hat Developer Sandbox` link: a browser window
+will open, and you will be required to log in to your Red Hat SSO account:
 
 ![](images/0.9.0/openshift3.png)
 
@@ -78,7 +92,7 @@ Login to your account (please note that if you don’t have a Red Hat account, y
 
 ![](images/0.9.0/openshift4.png)
 
-Enter your contry code (+XX) and phone number and click the `Verify` button:
+Enter your country code (+XX) and phone number and click the `Verify` button:
 
 You will be required to provide the verification code that you should have received on your phone:
 
@@ -108,13 +122,16 @@ You’re now ready to work against this environment for free !!!.
 
 ### Operator based services
 
-When developing cloud native applications on OpenShift, developer may need to launch services (databases, messaging system,…) that the application under development may need to connect to. The OpenShift Toolkit allowed to launch such services but it was based on the service catalog which is not available anymore on OpenShift 4.
+When developing cloud native applications on OpenShift, developer may need to launch services (databases, messaging
+system,…) that the application under development may need to connect to. The OpenShift Toolkit allowed to launch such
+services, but it was based on the service catalog which is not available anymore on OpenShift 4.
 
 The new feature is based on operators which is the devops way of installing and managing software on Kubernetes clusters. So when you want to launch a service for your application, you will have to choose from the list of installed operators on your cluster and then select type of deployment you want.
 
 In the following example, a single operator is installed on our cluster: the [Strimzi](https://strimzi.io) operator for setting up Kafka clusters on Kubernetes.
 
-For each operator, we can select the type of deployment we want to setup. For each type of deployment, specific parameters may be specified. In this example, we decided to set the replicas number to 4 for a Kafka cluster.
+For each operator, we can select the type of deployment we want to set up. For each type of deployment, specific
+parameters may be specified. In this example, we decided to set the replicas number to 4 for a Kafka cluster.
 
 ![](images/0.9.0/openshift11.gif)
 
@@ -136,7 +153,12 @@ When a new component is to be created, a wizard was displayed and the user has t
 
 ### Devfile registries management
 
-The preferred way of developing components is now based on devfile, which is a YAML file that describe how to build the component and if required, launch other containers with other containers. When you create a component, you need to specify a devfile that describe your component. So either you component source contains its own devfile or you need to pick a devfile that is related to your component. In the second case, OpenShift Toolkit supports devfile registries that contains a set of different devfiles. There is a default registry (https://registry.devfile.io) but you may want to have your own registries. It is now possible to add and remove registries as you want.
+The preferred way of developing components is now based on devfile, which is a YAML file that describe how to build the
+component and if required, launch other containers with other containers. When you create a component, you need to
+specify a devfile that describe your component. So either your component source contains its own devfile or you need to
+pick a devfile that is related to your component. In the second case, OpenShift Toolkit supports devfile registries that
+contains a set of different devfiles. There is a default registry (https://registry.devfile.io) but you may want to have
+your own registries. It is now possible to add and remove registries as you want.
 
 The registries are displayed in the OpenShift Application Explorer under the Devfile registries node:
 
@@ -150,7 +172,8 @@ Please note that expanding the registry node will list all devfiles from that re
 
 Connection from the plugin to the cluster is managed through the well known kubeconfig file. In previous versions of this plugin, it was possible to switch between contexts inside this file but the features were very limited. In order to offer a better user experience for Kubernetes developers, all kubeconfig related features have been moved out from this plugin and delegated to the [Kubernetes by Red Hat plugin](https://plugins.jetbrains.com/plugin/15921-kubernetes-by-red-hat).
 
-So the Kubernetes by Red Hat plugin is now a required dependency of this plugin and you can access his features through the Kubernetes window:
+So the Kubernetes by Red Hat plugin is now a required dependency of this plugin, and you can access his features through
+the Kubernetes window:
 
 ![](images/0.7.0/openshift3.gif)
 
@@ -190,12 +213,6 @@ For more information about devfiles, see the [devfile docs](https://docs.devfile
 
 ## WARNING
 
-### Known issues
-
-When creating a new project, it is possible that the newly created project will not immediately
-appear in the Application Explorer tree. This is caused by a synchronization [issue](https://github.com/openshift/odo/issues/4426) in the underlying
-CLI tool odo. A workaround is to refresh the tree.
-
 ### Breaking Changes
 
 Post `1.0.0` releases contains breaking changes mentioned below.
@@ -204,10 +221,9 @@ Post `1.0.0` releases contains breaking changes mentioned below.
 
 > **Please follow the [migration](https://github.com/redhat-developer/intellij-openshift-connector/wiki/Migration-to-v0.1.0) guide to resolve any possible issues for older breaking changes.**
 
-In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+In case of any queries, please use the [Feedback & Question](#feedback--questions) section.
 
 ## Commands and features
-
 
 `OpenShift Toolkit` supports a number of commands & actions for interacting with OpenShift/Kubernetes clusters; these are accessible via the context menu.
 
@@ -216,17 +232,24 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 * `Log in to cluster` - Log in to your cluster and save login for subsequent use.
     * Credentials : Log in to the given cluster with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
-* `New Project` - Create new project inside the OpenShift cluster / Create new namespace inside the Kubernetes cluster.
+* `New Project`/`New Namespace` - Create new project inside the OpenShift cluster / Create new namespace inside the
+  Kubernetes cluster.
+* `Change Project`/`Change Namespace` - Select a new project inside the OpenShift cluster / Select a new namespace
+  inside the Kubernetes cluster.
 * `Open Console Dashboard` - Opens the OpenShift webconsole URL.
 * `Refresh`- Refresh the tree with the latest resources from the cluster.
 * `Getting Started` - Open the Getting Started tour.
-* `About` - Provides the information about the OpenShift tools used.
+* `About` - Provides the information about the tools used.
 
-#### Actions available for a Cluster Project
+#### Actions available for a Cluster Project/Namespace
 
+* `Change Project`/`Change Namespace` - Select a new project inside the OpenShift cluster / Select a new namespace
+  inside the Kubernetes cluster.
 * `New Component` - Create locally a new Component.
-* `New Service` - Perform Service Catalog operations when it is enabled in the cluster.the created service can then be linked to a component.
+* `New Service` - Perform Service Catalog operations when it is enabled in the cluster. The created service can then be
+  linked to a component.
 * `Delete` - Delete an existing Project/Namespace.
+* `Open Helm Charts` - Open a dialog to install a Helm Chart inside the current project/namespace.
 
 WARNING: Use the above delete action will perform the same delete action as in the cluster. That means all resources tied to that project/namespace will be also deleted (ie secrets, configMaps,...)  
 
@@ -248,11 +271,13 @@ WARNING: Use the above delete action will perform the same delete action as in t
 
 #### Actions for a locally created component
 
-* `Start dev mode` - Push the local component in the Cluster inside the project/namespace in dev mode.
+* `Start dev on Cluster` - Push the local component in the cluster inside the project/namespace in dev mode.
+* `Start dev on Podman` - Push the local component in local Podman in dev mode.
 
 #### Actions for a pushed component (Dev/Debug)
 
-* `Stop dev mode` - Stop the dev mode and delete the component from the cluster.
+* `Stop dev on Cluster` - Stop the dev mode and delete the component from the cluster.
+* `Stop dev on Podman` - Stop the dev mode and delete the component from Podman.
 * `Debug` - Connect a local debugger to the Component. See the [wiki](https://github.com/redhat-developer/intellij-openshift-connector/wiki/How-to-debug-a-component) page for more details.
 * `Show Log` - Retrieve the log for the given Component.
 * `Follow Log` - Follow logs for the given Component.
@@ -260,24 +285,34 @@ WARNING: Use the above delete action will perform the same delete action as in t
 #### Actions available for a URL in a Component
 
 * `Open in Browser` - Open the exposed URL in a browser.
-** NOTE ** URLs are exposed only when the component is pushed or deployed in the cluster. THe URL definitions are stored in the devfile file.
+  ** NOTE ** URLs are exposed only when the component is in dev mode or deployed in the cluster. The URL definitions are
+  stored in the devfile file.
 
-#### Actions available for a Service in a project
+#### Actions available for a Service in a project/namespace
 
-* `Delete` - Delete the Service from the project. 
+* `Delete` - Delete the Service from the project/namespace.
 
 #### Actions available for a binding in a component
 
 * `Show binding information` - Show the binding information a dialog.
 * `Delete` - Delete the binding from the component.
 
+#### Actions available for a Helm Release in a project/namespace
+
+* `Uninstall` - Uninstall the Helm release from the project/namespace.
+
 #### Icons Representation
+
+##### Cluster tree
 
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/cluster.png" width="15" height="15" alt="Cluster Resource"/><span style="margin: 20px"> Cluster Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/project.png" width="15" height="15" alt="Project Resource"/><span style="margin: 20px"> Project Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px"> Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/helm/helm.png" width="15" height="15" alt="Component Resource"/><span style="margin: 20px"> Helm Release Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/service.png" width="15" height="15" alt="Service Resource"/><span style="margin: 20px"> Service Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/url-node.png" width="15" height="15" alt="URL Resource"/><span style="margin: 20px"> URL Resource</span></div>
+
+##### Devfile registry tree
 
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/registry.svg" width="15" height="15" alt="Registry Resource"/><span style="margin: 20px"> Registry Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/intellij-openshift-connector/master/src/main/resources/images/component-type-light.png" width="15" height="15" alt="Component Type Resource"/><span style="margin: 20px"> Component Type Resource</span></div>
@@ -294,7 +329,6 @@ This extension uses the following CLI tool to interact with OpenShift cluster:
 > If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically.
 > The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
-
 **NOTE:** This plugin is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
 
 ## Release notes
@@ -305,14 +339,11 @@ Data and Telemetry
 ==================
 The OpenShift plugin collects anonymous [usage data](USAGE_DATA.md) and sends it to Red Hat servers to help improve our products and services. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection) to learn more. This extension respects the Red Hat Telemetry setting which you can learn more about at [https://github.com/redhat-developer/intellij-redhat-telemetry#telemetry-reporting](https://github.com/redhat-developer/intellij-redhat-telemetry#telemetry-reporting)
 
-
-
 Contributing
 ============
 This is an open source project open to anyone. This project welcomes contributions and suggestions!
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
-
 
 Feedback & Questions
 ====================

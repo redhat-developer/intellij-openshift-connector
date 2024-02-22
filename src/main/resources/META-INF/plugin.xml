@@ -17,6 +17,13 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.8.0</b></p>
+  <ul>
+  <li>Support debug on Podman</li>
+  <li>Use 'namespace' labels when logged in a kubernetes cluster</li>
+  <li>Added Change/Create namespace/project actions in tree</li>
+  <li>Bug fixes</li>
+  </ul>
   <p><b>1.7.2</b></p>
   <ul>
   <li>Fixed CLI clients downloads for Mac Mx family</li>

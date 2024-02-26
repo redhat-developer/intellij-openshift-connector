@@ -13,15 +13,15 @@ package org.jboss.tools.intellij.openshift.utils.odo;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import io.fabric8.kubernetes.api.model.APIGroupList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.V1AuthorizationAPIGroupDSL;
+import io.fabric8.kubernetes.client.dsl.AuthorizationAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.ProjectList;
@@ -203,7 +203,7 @@ public class OdoKubernetesClientTest {
   @Test
   public void isAuthorized_should_return_true_if_can_list_secrets() {
     // given
-    secrets(kubernetesClient);
+    v1AuthorizationAPIGroup(apiGroupList(), kubernetesClient);
     Odo odo = createOdo(kubernetesClient, openShiftClient);
     // when
     boolean found = odo.isAuthorized();
@@ -214,9 +214,9 @@ public class OdoKubernetesClientTest {
   @Test
   public void isAuthorized_should_return_false_if_listing_secrets_throws_unauthorized() {
     // given
-    MixedOperation<Secret, SecretList, Resource<Secret>> secretsOperation = secrets(kubernetesClient);
+    var authorization = v1AuthorizationAPIGroup(apiGroupList(), kubernetesClient);
     doThrow(new KubernetesClientException("unauthorized", HttpURLConnection.HTTP_UNAUTHORIZED, null))
-      .when(secretsOperation).list();
+      .when(authorization).getApiGroups();
     Odo odo = createOdo(kubernetesClient, openShiftClient);
     // when
     boolean found = odo.isAuthorized();
@@ -225,24 +225,24 @@ public class OdoKubernetesClientTest {
   }
 
   @Test
-  public void isAuthorized_should_return_false_if_listing_secrets_throws_forbidden() {
+  public void isAuthorized_should_return_true_if_listing_secrets_throws_forbidden() {
     // given
-    MixedOperation<Secret, SecretList, Resource<Secret>> secretsOperation = secrets(kubernetesClient);
+    var authorization = v1AuthorizationAPIGroup(apiGroupList(), kubernetesClient);
     doThrow(new KubernetesClientException("forbidden", HttpURLConnection.HTTP_FORBIDDEN, null))
-      .when(secretsOperation).list();
+      .when(authorization).getApiGroups();
     Odo odo = createOdo(kubernetesClient, openShiftClient);
     // when
     boolean found = odo.isAuthorized();
     // then
-    assertThat(found).isFalse();
+    assertThat(found).isTrue();
   }
 
   @Test(expected = KubernetesClientException.class)
   public void isAuthorized_should_throw_if_listing_secrets_throws_other_KubernetesException() {
     // given
-    MixedOperation<Secret, SecretList, Resource<Secret>> secretsOperation = secrets(kubernetesClient);
+    var authorization = v1AuthorizationAPIGroup(apiGroupList(), kubernetesClient);
     doThrow(new KubernetesClientException("not found", HttpURLConnection.HTTP_NOT_FOUND, null))
-      .when(secretsOperation).list();
+      .when(authorization).getApiGroups();
     Odo odo = createOdo(kubernetesClient, openShiftClient);
     // when
     boolean found = odo.isAuthorized();
@@ -305,10 +305,19 @@ public class OdoKubernetesClientTest {
     return hasMetadata;
   }
 
-  private static MixedOperation<Secret, SecretList, Resource<Secret>> secrets(KubernetesClient client) {
-    MixedOperation<Secret, SecretList, Resource<Secret>> secretsOperation = mock(MixedOperation.class);
-    doReturn(secretsOperation)
-      .when(client).secrets();
-    return secretsOperation;
+  private static APIGroupList apiGroupList() {
+    return mock(APIGroupList.class);
+  }
+
+  private static V1AuthorizationAPIGroupDSL v1AuthorizationAPIGroup(APIGroupList apiGroupList, KubernetesClient client) {
+    var v1 = mock(V1AuthorizationAPIGroupDSL.class);
+    doReturn(apiGroupList)
+      .when(v1).getApiGroups();
+    var authorization =  mock(AuthorizationAPIGroupDSL.class);
+    doReturn(v1)
+      .when(authorization).v1();
+    doReturn(authorization)
+      .when(client).authorization();
+    return v1;
   }
 }

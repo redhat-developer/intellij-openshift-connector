@@ -163,11 +163,9 @@ public class ChangeActiveProjectAction extends OdoAction {
       String kind = odo.getNamespaceKind();
       try {
         odo.setProject(activeProject);
-        NotificationUtils.notifyInformation(
-          "Change active " + kind,
-          "Active " + kind.toLowerCase() + " set to '" + activeProject + "'");
         sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
       } catch (IOException e) {
+        sendTelemetryResults(TelemetryService.TelemetryResult.ERROR);
         NotificationUtils.notifyError(
           "Change active " + kind.toLowerCase(),
           "Could not set active " + kind.toLowerCase() + ": " + e.getMessage());

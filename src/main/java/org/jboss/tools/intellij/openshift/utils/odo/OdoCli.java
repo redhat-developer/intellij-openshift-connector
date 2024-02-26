@@ -798,14 +798,16 @@ public class OdoCli implements Odo {
     @Override
     public boolean isAuthorized() {
         try {
-            client.secrets().list();
-            // retrieving secrets worked, we're authorized
+            client.authorization().v1().getApiGroups();
+            // retrieving api groups worked, we're authorized
             return true;
         } catch (KubernetesClientException e) {
-            if (KubernetesClientExceptionUtils.isForbidden(e)
-              || KubernetesClientExceptionUtils.isUnauthorized(e)) {
-                // retrieving secrets didn't work, we're NOT authorized
+            if (KubernetesClientExceptionUtils.isUnauthorized(e)) {
+                // retrieving api groups didn't work, we're NOT authorized
                 return false;
+            } else if (KubernetesClientExceptionUtils.isForbidden(e)) {
+                // retrieving api groups didn't work, but we're authorized
+                return true;
             } else {
                 throw e;
             }

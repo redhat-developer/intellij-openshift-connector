@@ -1,8 +1,8 @@
 ---
 name: Enhancement
 about: Suggest an enhancement for existing IntelliJ OpenShift Toolkit functionality
+labels: enhancement
 ---
-[kind/Enhancement]
 <!--
 
 Welcome! - We kindly ask you to:

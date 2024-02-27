@@ -114,11 +114,11 @@ public class CreateProjectAction extends LoggedInClusterAction {
 
   private void createProject(String newProject, @NotNull Odo odo) {
     String kind = odo.getNamespaceKind();
-    Notification notification = NotificationUtils.notifyInformation("Create " + kind, "Creating " + kind.toLowerCase() + " newProject");
+    Notification notification = NotificationUtils.notifyInformation("Create " + kind, "Creating " + kind.toLowerCase() + " " + newProject);
     try {
       odo.createProject(newProject);
       notification.expire();
-      NotificationUtils.notifyInformation("Create " + kind, kind + newProject + " successfully created");
+      NotificationUtils.notifyInformation("Create " + kind, kind + " "  + newProject + " successfully created");
       sendTelemetryResults(TelemetryResult.SUCCESS);
     } catch (IOException | CompletionException e) {
       notification.expire();

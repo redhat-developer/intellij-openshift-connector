@@ -19,12 +19,6 @@ public class UninstallReleaseActionTest extends ActionTest {
     return new UninstallReleaseAction();
   }
 
-  @Override
-  protected void verifyProject(boolean visible) {
-    assertFalse(visible);
-  }
-
-  @Override
   protected void verifyChartRelease(boolean visible) {
     assertTrue(visible);
   }

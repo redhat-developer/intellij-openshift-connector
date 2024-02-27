@@ -25,7 +25,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class ServiceTemplateTest {
   private static final URL url = ServiceTemplateTest.class.getResource("/service-template-test.json");
@@ -72,10 +71,8 @@ public class ServiceTemplateTest {
     ServiceTemplate serviceTemplate = serviceTemplates.get(0);
     Assert.assertNotNull(serviceTemplate);
     Assert.assertEquals("strimzi-cluster-operator.v0.32.0", serviceTemplate.getName());
-    assertTrue(serviceTemplate instanceof ServiceTemplate);
-    ServiceTemplate operatorServiceTemplate = (ServiceTemplate) serviceTemplate;
-    assertNotNull(operatorServiceTemplate.getCRDs());
-    assertEquals(1, operatorServiceTemplate.getCRDs().size());
+    assertNotNull(serviceTemplate.getCRDs());
+    assertEquals(1, serviceTemplate.getCRDs().size());
   }
 
   @Test
@@ -86,11 +83,9 @@ public class ServiceTemplateTest {
     ServiceTemplate serviceTemplate = serviceTemplates.get(0);
     Assert.assertNotNull(serviceTemplate);
     Assert.assertEquals("strimzi-cluster-operator.v0.32.0", serviceTemplate.getName());
-    assertTrue(serviceTemplate instanceof ServiceTemplate);
-    ServiceTemplate operatorServiceTemplate = (ServiceTemplate) serviceTemplate;
-    assertNotNull(operatorServiceTemplate.getCRDs());
-    assertEquals(1, operatorServiceTemplate.getCRDs().size());
-    OperatorCRD crd = operatorServiceTemplate.getCRDs().get(0);
+    assertNotNull(serviceTemplate.getCRDs());
+    assertEquals(1, serviceTemplate.getCRDs().size());
+    OperatorCRD crd = serviceTemplate.getCRDs().get(0);
     assertEquals("kafkas.kafka.strimzi.io", crd.getName());
     assertEquals("v1beta2", crd.getVersion());
     assertEquals("Kafka", crd.getKind());

@@ -36,8 +36,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     private String component;
     private String service;
 
-    private final boolean projectCreationSkipped = true;
-
     public OdoCliComponentTest(ComponentFeature feature) {
         this.feature = feature;
     }
@@ -56,8 +54,8 @@ public class OdoCliComponentTest extends OdoCliTest {
 
     @After
     public void cleanUp() throws IOException {
-        if (odo.isStarted(project, COMPONENT_PATH, component, ComponentFeature.DEV)) {
-            odo.stop(project, COMPONENT_PATH, component, ComponentFeature.DEV);
+        if (odo.isStarted(COMPONENT_PATH, ComponentFeature.DEV)) {
+            odo.stop(COMPONENT_PATH, component, ComponentFeature.DEV);
         }
         if (project.equals(odo.getCurrentNamespace())) {
             odo.deleteProject(project);
@@ -101,7 +99,7 @@ public class OdoCliComponentTest extends OdoCliTest {
         assertEquals(1, deployedServices.size());
         Service deployedService = deployedServices.get(0);
         assertNotNull(deployedService);
-        Binding binding = odo.link(project, COMPONENT_PATH, component, deployedService.getKind() + "/" + deployedService.getName());
+        Binding binding = odo.link(COMPONENT_PATH, deployedService.getKind() + "/" + deployedService.getName());
         assertNotNull(binding);
     }
 
@@ -109,7 +107,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     public void checkCreateComponentAndListURLs() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         createComponent(project, component, feature);
-        List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
+        List<URL> urls = odo.listURLs(COMPONENT_PATH);
         assertEquals(1, urls.size());
     }
 
@@ -117,8 +115,8 @@ public class OdoCliComponentTest extends OdoCliTest {
     public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
         Assume.assumeTrue(feature != null);
         createComponent(project, component, feature);
-        odo.start(project, COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
-        List<URL> urls = odo.listURLs(project, COMPONENT_PATH, component);
+        odo.start(COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
+        List<URL> urls = odo.listURLs(COMPONENT_PATH);
         assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
         int debugPort;
         try (ServerSocket serverSocket = new ServerSocket(0)) {
@@ -126,8 +124,8 @@ public class OdoCliComponentTest extends OdoCliTest {
         }
         ExecHelper.submit(() -> {
             try {
-                odo.debug(project, COMPONENT_PATH, component, debugPort);
-                DebugStatus status = odo.debugStatus(project, COMPONENT_PATH, component);
+                odo.debug(COMPONENT_PATH, debugPort);
+                DebugStatus status = odo.debugStatus(COMPONENT_PATH);
                 assertEquals(DebugStatus.RUNNING, status);
             } catch (IOException e) {
                 fail("Should not raise Exception");
@@ -138,7 +136,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     @Test
     public void checkCreateComponentStarter() throws IOException, ExecutionException, InterruptedException {
         createProject(project);
-        odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,
+        odo.createComponent("java-springboot", REGISTRY_NAME, component,
                 Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject");
         List<Component> components = odo.getComponents(project);
         assertNotNull(components);

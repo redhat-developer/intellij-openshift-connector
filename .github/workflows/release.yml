@@ -84,12 +84,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
-          echo "current $CURRENT_VERSION"
           IFS="-" read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
           IFS="." read -ra VERSION_NUM <<< "${VERSION_PARTS[0]}"
-          echo "version_num[2] $((VERSION_NUM[2]))"
-          ((VERSION_NUM[2]++))
-          echo "version_num[2]++ $((VERSION_NUM[2]))"
+          ((VERSION_NUM[2]+=1))
           NEW_VERSION="${VERSION_NUM[0]}.${VERSION_NUM[1]}.${VERSION_NUM[2]}-SNAPSHOT"
           echo "new_version $NEW_VERSION"
           awk -v new_version="$NEW_VERSION" '/projectVersion=/{sub(/=.*/, "=" new_version)}1' gradle.properties > tmpfile && mv tmpfile gradle.properties

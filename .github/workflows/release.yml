@@ -83,11 +83,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          touch tmpfile
           CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
+          echo "current $CURRENT_VERSION"
           IFS="-" read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          echo "version_parts $VERSION_PARTS"
           IFS="." read -ra VERSION_NUM <<< "${VERSION_PARTS[0]}"
+          echo "version_num $VERSION_NUM"
           ((VERSION_NUM[2]++))
           NEW_VERSION="${VERSION_NUM[0]}.${VERSION_NUM[1]}.${VERSION_NUM[2]}-SNAPSHOT"
+          echo "new_version $NEW_VERSION"
           awk -v new_version="$NEW_VERSION" '/projectVersion=/{sub(/=.*/, "=" new_version)}1' gradle.properties > tmpfile && mv tmpfile gradle.properties
           echo "Set $NEW_VERSION in gradle.properties"
           git commit -sam "chore(skip-release): set version to $NEW_VERSION"

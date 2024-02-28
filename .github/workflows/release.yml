@@ -47,7 +47,6 @@ jobs:
           gradle-home-cache-cleanup: true
 
       - name: Set Release Version
-        id: release_version
         shell: bash
         run: |
           CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
@@ -80,6 +79,7 @@ jobs:
 
       # Set next SNAPSHOT version
       - name: Increment Plugin Version
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

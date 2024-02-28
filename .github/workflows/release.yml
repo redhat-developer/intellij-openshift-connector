@@ -92,7 +92,7 @@ jobs:
           awk -v new_version="$NEW_VERSION" '/projectVersion=/{sub(/=.*/, "=" new_version)}1' gradle.properties > tmpfile && mv tmpfile gradle.properties
           echo "Set $NEW_VERSION in gradle.properties"
           git commit -sam "chore(skip-release): set version to $NEW_VERSION"
-          git push origin main
+          git push origin $NEW_VERSION
 
       - name: Simple conventional changelog
         uses: lstocchi/simple-conventional-changelog@13071c09073f5deddf03d44d9af6a8b0f81ef227 #0.0.11

@@ -18,7 +18,6 @@ on:
 jobs:
   # Prepare and publish the plugin to JetBrains Marketplace repository
   release:
-    if: ${{ inputs.publishToMarketPlace == 'true'}}
     name: Publish to Marketplace
     runs-on: ubuntu-latest
     permissions:
@@ -57,6 +56,7 @@ jobs:
 
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin to JetBrains Marketplace
+        if: ${{ inputs.publishToMarketPlace == 'true'}}
         env:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
         run: |
@@ -88,11 +88,12 @@ jobs:
           IFS="." read -ra VERSION_NUM <<< "${VERSION_PARTS[0]}"
           ((VERSION_NUM[2]+=1))
           NEW_VERSION="${VERSION_NUM[0]}.${VERSION_NUM[1]}.${VERSION_NUM[2]}-SNAPSHOT"
-          echo "new_version $NEW_VERSION"
           awk -v new_version="$NEW_VERSION" '/projectVersion=/{sub(/=.*/, "=" new_version)}1' gradle.properties > tmpfile && mv tmpfile gradle.properties
           echo "Set $NEW_VERSION in gradle.properties"
+          git checkout -b $NEW_VERSION
           git commit -sam "chore(skip-release): set version to $NEW_VERSION"
-          git push origin main
+          git push -u origin $NEW_VERSION
+          gh pr create -B main -H $NEW_VERSION --title 'chore(skip-release): set version to $NEW_VERSION' --body 'Created by Github action'
 
       - name: Simple conventional changelog
         uses: lstocchi/simple-conventional-changelog@13071c09073f5deddf03d44d9af6a8b0f81ef227 #0.0.11

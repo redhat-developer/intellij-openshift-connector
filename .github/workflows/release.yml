@@ -83,7 +83,7 @@ jobs:
           git checkout -b $NEW_VERSION
           git commit -sam "chore(skip-release): set version to $NEW_VERSION"
           git push -u origin $NEW_VERSION
-          gh pr create -B main -H $NEW_VERSION --title 'chore(skip-release): set version to $NEW_VERSION' --body 'Created by Github action'
+          gh pr create -B main -H $NEW_VERSION --title "chore(skip-release): set version to $NEW_VERSION" --body 'Created by Github action'
 
       - name: Simple conventional changelog
         uses: lstocchi/simple-conventional-changelog@13071c09073f5deddf03d44d9af6a8b0f81ef227 #0.0.11

@@ -79,7 +79,6 @@ jobs:
           git push origin $PLUGIN_VERSION
 
       # Set next SNAPSHOT version
-      # TODO uncomment this when CI ( prow/integration tests ) is stable enough, or bypass github settings
       - name: Increment Plugin Version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

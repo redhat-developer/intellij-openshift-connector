@@ -57,6 +57,19 @@ public class ChangeActiveProjectAction extends OdoAction {
   }
 
   @Override
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Odo odo = getOdo(e);
+      if (odo == null) {
+        return;
+      }
+      // overrides label given in plugin.xml
+      e.getPresentation().setText("Change " + odo.getNamespaceKind());
+    }
+  }
+
+  @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     Project project = getEventProject(anActionEvent);
     Point location = ActionUtils.getLocation(anActionEvent);
@@ -71,16 +84,18 @@ public class ChangeActiveProjectAction extends OdoAction {
             try {
               return new ClusterProjects(odo.isOpenShift(), odo.getCurrentNamespace(), odo.getNamespaces());
             } catch (IOException e) {
-              NotificationUtils.notifyError("Change Active Project", "Could not get projects: " + e.getMessage());
+              NotificationUtils.notifyError(
+                "Change Active " + odo.getNamespaceKind(),
+                "Could not get " + odo.getNamespaceKind().toLowerCase() + ": " + e.getMessage());
               sendTelemetryError(e.getMessage());
               throw new RuntimeException(e);
             }
           }, SwingUtils.EXECUTOR_BACKGROUND)
-          .handleAsync((ClusterProjects, error) -> {
+          .handleAsync((clusterProjects, error) -> {
               if (error != null) {
                 return null;
               }
-              ChangeActiveProjectDialog dialog = openActiveProjectDialog(ClusterProjects.isOpenShift, ClusterProjects.current, ClusterProjects.all, location, project);
+              ChangeActiveProjectDialog dialog = openActiveProjectDialog(clusterProjects.current, clusterProjects.all, location, odo, project);
               if (dialog.isOK()) {
                 return new ChangeActiveProjectOperation(dialog.getActiveProject(), odo);
               } else if (dialog.isCreateNewProject()) {
@@ -103,9 +118,8 @@ public class ChangeActiveProjectAction extends OdoAction {
       project);
   }
 
-  private ChangeActiveProjectDialog openActiveProjectDialog(boolean isOpenShift, String currentProject, List<String> allProjects, Point location, Project project) {
-    String kind = isOpenShift ? "Project" : "Namespace";
-    ChangeActiveProjectDialog dialog = new ChangeActiveProjectDialog(project, kind, currentProject, allProjects, location);
+  private ChangeActiveProjectDialog openActiveProjectDialog(String currentProject, List<String> allProjects, Point location, Odo odo, Project project) {
+    ChangeActiveProjectDialog dialog = new ChangeActiveProjectDialog(project, odo.getNamespaceKind(), currentProject, allProjects, location);
     dialog.show();
     return dialog;
   }
@@ -118,7 +132,7 @@ public class ChangeActiveProjectAction extends OdoAction {
   @Override
   public boolean isVisible(Object selected) {
     return (selected instanceof NamespaceNode)
-      || ((selected instanceof ApplicationsRootNode && ((ApplicationsRootNode) selected).isLogged()));
+            || (selected instanceof ApplicationsRootNode && ((ApplicationsRootNode) selected).isLogged());
   }
 
   private static final class ClusterProjects {
@@ -146,12 +160,15 @@ public class ChangeActiveProjectAction extends OdoAction {
 
     @Override
     public void run() {
+      String kind = odo.getNamespaceKind();
       try {
         odo.setProject(activeProject);
-        NotificationUtils.notifyInformation("Change active project", "Active project set to '" + activeProject + "'");
         sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
       } catch (IOException e) {
-        NotificationUtils.notifyError("Change active project", "Could not set active project: " + e.getMessage());
+        sendTelemetryResults(TelemetryService.TelemetryResult.ERROR);
+        NotificationUtils.notifyError(
+          "Change active " + kind.toLowerCase(),
+          "Could not set active " + kind.toLowerCase() + ": " + e.getMessage());
         throw new RuntimeException(e);
       }
     }

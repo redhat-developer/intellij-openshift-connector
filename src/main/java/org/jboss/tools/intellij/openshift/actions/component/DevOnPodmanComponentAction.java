@@ -20,17 +20,17 @@ public class DevOnPodmanComponentAction extends FeatureComponentAction {
     }
 
     @Override
-    protected String getActionName() {
-        return ComponentFeature.DEV_ON_PODMAN.getLabel();
+    protected boolean needCustomizedPresentation() {
+        return true;
     }
 
     @Override
-    public String getTelemetryActionName() {
-        return ComponentFeature.DEV_ON_PODMAN.getLabel() + " component";
+    protected String getCustomizedPresentation(Component component) {
+        if (component.getLiveFeatures().is(ComponentFeature.DEV_ON_PODMAN)) {
+            return "Stop " + getActionName();
+        } else {
+            return "Start " + getActionName();
+        }
     }
 
-    @Override
-    protected ComponentFeature getComponentFeature(Component component) {
-        return ComponentFeature.DEV_ON_PODMAN;
-    }
 }

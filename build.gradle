@@ -106,7 +106,6 @@ tasks.register('integrationTest', Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
-    jvmArgs "-Djava.awt.headless=true"
     testlogger {
         showStandardStreams true
         showPassedStandardStreams false

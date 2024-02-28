@@ -10,10 +10,25 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
+import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
 public class DevComponentAction extends FeatureComponentAction {
   public DevComponentAction() {
     super(ComponentFeature.DEV);
+  }
+
+  @Override
+  protected boolean needCustomizedPresentation() {
+    return true;
+  }
+
+  @Override
+  protected String getCustomizedPresentation(Component component) {
+    if (component.getLiveFeatures().is(ComponentFeature.DEV)) {
+      return "Stop " + getActionName();
+    } else {
+      return "Start " + getActionName();
+    }
   }
 }

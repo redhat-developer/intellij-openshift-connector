@@ -11,9 +11,11 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.intellij.execution.process.ProcessHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
@@ -21,15 +23,11 @@ import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 public interface Odo {
     List<String> getNamespaces() throws IOException;
 
-    /**
-     * Return the name of the current active namespace (project for OpenShift).
-     *
-     * @return the active namespace name
-     * @throws IOException if communication errored
-     */
     String getCurrentNamespace() throws IOException;
 
     boolean namespaceExists(String name);
+
+    String getNamespaceKind();
 
     void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
 
@@ -116,13 +114,9 @@ public interface Odo {
 
     boolean isOpenShift();
 
-    /**
-     * Migrate an existing component to the current odo version.
-     *
-     * @param context the component context path
-     * @param name the component name
-     */
     void migrateComponent(String context, String name);
 
-    void release();
+    Map<String, Map<ComponentFeature, ProcessHandler>> getComponentFeatureProcesses();
+
+    void setComponentFeatureProcesses(Map<String, Map<ComponentFeature, ProcessHandler>> processes);
 }

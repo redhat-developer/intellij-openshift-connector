@@ -38,6 +38,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,6 +140,13 @@ public class SwingUtils {
     WindowMoveListener windowMoveListener = new WindowMoveListener(rootPane);
     Stream.of(movableComponents).forEach(
       component -> component.addMouseListener(windowMoveListener));
+  }
+
+  public static Point locationOrMouseLocation(Point location) {
+    if (location == null) {
+      location = MouseInfo.getPointerInfo().getLocation();
+    }
+    return location;
   }
 
 }

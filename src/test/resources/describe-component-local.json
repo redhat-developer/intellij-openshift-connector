@@ -1,0 +1,99 @@
+{
+  "devfilePath": "/IdeaProjects/EmptyProject/devfile.yaml",
+  "devfileData": {
+    "devfile": {
+      "schemaVersion": "2.1.0",
+      "metadata": {
+        "name": "go",
+        "version": "1.0.2",
+        "displayName": "Go Runtime",
+        "description": "Go (version 1.18.x) is an open source programming language that makes it easy to build simple, reliable, and efficient software.",
+        "tags": [
+          "Go"
+        ],
+        "icon": "https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg",
+        "projectType": "Go",
+        "language": "Go",
+        "provider": "Red Hat"
+      },
+      "components": [
+        {
+          "name": "runtime",
+          "container": {
+            "image": "registry.access.redhat.com/ubi9/go-toolset:1.18.9-14",
+            "args": [
+              "tail",
+              "-f",
+              "/dev/null"
+            ],
+            "mountSources": true,
+            "sourceMapping": "/projects",
+            "endpoints": [
+              {
+                "name": "http-go",
+                "targetPort": 8080
+              }
+            ]
+          }
+        }
+      ],
+      "starterProjects": [
+        {
+          "name": "go-starter",
+          "description": "A Go project with a simple HTTP server",
+          "git": {
+            "checkoutFrom": {
+              "revision": "main"
+            },
+            "remotes": {
+              "origin": "https://github.com/devfile-samples/devfile-stack-go.git"
+            }
+          }
+        }
+      ],
+      "commands": [
+        {
+          "id": "build",
+          "exec": {
+            "group": {
+              "kind": "build",
+              "isDefault": true
+            },
+            "commandLine": "go build main.go",
+            "component": "runtime",
+            "workingDir": "${PROJECT_SOURCE}",
+            "env": [
+              {
+                "name": "GOPATH",
+                "value": "${PROJECT_SOURCE}/.go"
+              },
+              {
+                "name": "GOCACHE",
+                "value": "${PROJECT_SOURCE}/.cache"
+              }
+            ]
+          }
+        },
+        {
+          "id": "run",
+          "exec": {
+            "group": {
+              "kind": "run",
+              "isDefault": true
+            },
+            "commandLine": "./main",
+            "component": "runtime",
+            "workingDir": "${PROJECT_SOURCE}"
+          }
+        }
+      ]
+    },
+    "supportedOdoFeatures": {
+      "dev": true,
+      "deploy": false,
+      "debug": false
+    }
+  },
+  "runningIn": null,
+  "managedBy": "odo"
+}

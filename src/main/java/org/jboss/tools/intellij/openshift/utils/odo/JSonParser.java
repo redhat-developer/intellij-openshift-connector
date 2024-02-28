@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class JSonParser {
+    public static final String INGRESSES_FIELD = "ingresses";
+
     private static final String METADATA_FIELD = "metadata";
     private static final String NAME_FIELD = "name";
     private static final String SPEC_FIELD = "spec";
@@ -44,9 +46,10 @@ public class JSonParser {
     private static final String CONTAINER_PORT_FIELD = "containerPort";
     private static final String DEV_FORWARDED_PORTS_FIELD = "devForwardedPorts";
     private static final String RUNNING_IN_FIELD = "runningIn";
+    private static final String RUNNING_ON_FIELD = "runningOn";
+    private static final String PLATFORM = "platform";
     private static final String CONTAINER_NAME_FIELD = "containerName";
     private static final String LANGUAGE_FIELD = "language";
-    public static final String INGRESSES_FIELD = "ingresses";
     private static final String ROUTES_FIELD = "routes";
     private static final String HOST_FIELD = "host";
     private static final String RULES_FIELD = "rules";
@@ -57,8 +60,12 @@ public class JSonParser {
         this.root = root;
     }
 
-    static String get(JsonNode node, String name) {
+    static String getAsText(JsonNode node, String name) {
         return node.has(name) ? node.get(name).asText() : null;
+    }
+
+    static String getAsText(JsonNode node, String name, String defaultValue) {
+        return node.has(name) ? node.get(name).asText() : defaultValue;
     }
 
     public List<URL> parseURLS() {
@@ -80,11 +87,10 @@ public class JSonParser {
         urlItems.forEach(item -> {
             //odo incorrectly reports urls created with the web ui without names
             if (item.has(CONTAINER_NAME_FIELD)) {
-                String name = item.get(CONTAINER_NAME_FIELD).asText();
-                String host = item.has(LOCAL_ADDRESS_FIELD) ?
-                        item.get(LOCAL_ADDRESS_FIELD).asText() : "localhost";
-                String localPort = item.has(LOCAL_PORT_FIELD) ? item.get(LOCAL_PORT_FIELD).asText() : "8080";
-                String containerPort = item.has(CONTAINER_PORT_FIELD) ? item.get(CONTAINER_PORT_FIELD).asText() : "8080";
+                String name = getAsText(item, CONTAINER_NAME_FIELD);
+                String host = getAsText(item, LOCAL_ADDRESS_FIELD, "localhost");
+                String localPort = getAsText(item, LOCAL_PORT_FIELD, "8080");
+                String containerPort = getAsText(item, CONTAINER_PORT_FIELD, "8080");
                 result.add(URL.of(name, host, localPort, containerPort));
             }
         });
@@ -96,14 +102,12 @@ public class JSonParser {
         ingresses.forEach(item -> {
             //odo incorrectly reports urls created with the web ui without names
             if (item.has(NAME_FIELD)) {
-                String name = item.get(NAME_FIELD).asText();
+                String name = getAsText(item, NAME_FIELD);
                 if (item.has(RULES_FIELD)) {
                     item.get(RULES_FIELD).forEach(rule -> {
-                        String host = rule.has(HOST_FIELD) ?
-                                rule.get(HOST_FIELD).asText() : "localhost";
+                        String host = getAsText(rule, HOST_FIELD, "localhost");
                         if (rule.has(JSonParser.PATHS_FIELD)) {
-                            rule.get(PATHS_FIELD).forEach(path -> result.add(URL.of(name, host, "80", "80",
-                                    path.asText())));
+                            rule.get(PATHS_FIELD).forEach(path -> result.add(URL.of(name, host, "80", "80", path.asText())));
                         }
                     });
                 }
@@ -112,8 +116,8 @@ public class JSonParser {
         return result;
     }
 
-    public ComponentInfo parseComponentInfo(ComponentKind kind) {
-        ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
+    public ComponentInfo parseComponentInfo() {
+        ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(ComponentKind.DEVFILE);
         if (root.has(PROJECT_TYPE_FIELD)) {
             String componentTypeName = root.get(PROJECT_TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
@@ -124,39 +128,38 @@ public class JSonParser {
     public ComponentInfo parseDescribeComponentInfo(ComponentKind kind) {
         ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
         if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
-                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
-                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(PROJECT_TYPE_FIELD)) {
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(PROJECT_TYPE_FIELD)) {
             String componentTypeName = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(PROJECT_TYPE_FIELD).asText();
             builder.withComponentTypeName(componentTypeName);
         }
         if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
-                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
-                root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(LANGUAGE_FIELD)) {
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
+            root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).has(LANGUAGE_FIELD)) {
             String language = root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).get(METADATA_FIELD).get(LANGUAGE_FIELD).asText();
             builder.withLanguage(language);
         }
-        ComponentFeatures features = new ComponentFeatures();
         if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(SUPPORTED_ODO_FEATURES_FIELD)) {
             JsonNode featuresNode = root.get(DEVFILE_DATA_FIELD).get(SUPPORTED_ODO_FEATURES_FIELD);
-            getComponentsFeatures(features, featuresNode);
+            List<ComponentFeature.Mode> features = getComponentsFeatures(featuresNode);
+            builder.withSupportedFeatures(features);
         }
-        builder.withFeatures(features);
         return builder.build();
     }
 
-    private static void getComponentsFeatures(ComponentFeatures features, JsonNode featuresNode) {
-        if (featuresNode.has(ComponentFeature.DEV.getKind().getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEV.getKind().getLabel().toLowerCase()).asBoolean()) {
-            features.addFeature(ComponentFeature.DEV);
-            features.addFeature(ComponentFeature.DEV_ON_PODMAN);
+    private List<ComponentFeature.Mode> getComponentsFeatures(JsonNode featuresNode) {
+        List<ComponentFeature.Mode> result = new ArrayList<>();
+        if (featuresNode.has(ComponentFeature.Mode.DEV_MODE.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.Mode.DEV_MODE.getLabel().toLowerCase()).asBoolean()) {
+            result.add(ComponentFeature.Mode.DEV_MODE);
         }
-        if (featuresNode.has(ComponentFeature.DEBUG.getKind().getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEBUG.getKind().getLabel().toLowerCase()).asBoolean()) {
-            features.addFeature(ComponentFeature.DEBUG);
+        if (featuresNode.has(ComponentFeature.Mode.DEBUG_MODE.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.Mode.DEBUG_MODE.getLabel().toLowerCase()).asBoolean()) {
+            result.add(ComponentFeature.Mode.DEBUG_MODE);
         }
-        if (featuresNode.has(ComponentFeature.DEPLOY.getKind().getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.DEPLOY.getKind().getLabel().toLowerCase()).asBoolean()) {
-            features.addFeature(ComponentFeature.DEPLOY);
+        if (featuresNode.has(ComponentFeature.Mode.DEPLOY_MODE.getLabel().toLowerCase()) && featuresNode.get(ComponentFeature.Mode.DEPLOY_MODE.getLabel().toLowerCase()).asBoolean()) {
+            result.add(ComponentFeature.Mode.DEPLOY_MODE);
         }
+        return result;
     }
-
 
     public DebugStatus parseDebugStatus() {
         if (root.has(SPEC_FIELD) && root.get(SPEC_FIELD).has(DEBUG_PROCESS_ID_FIELD)) {
@@ -235,10 +238,25 @@ public class JSonParser {
     }
 
     public ComponentFeatures parseComponentState() {
-        ComponentFeatures state = new ComponentFeatures();
         if (root.has(RUNNING_IN_FIELD)) {
-            getComponentsFeatures(state, root.get(RUNNING_IN_FIELD));
+            return getLiveFeatures(root.get(RUNNING_IN_FIELD), root.get(RUNNING_ON_FIELD), root.get(PLATFORM));
         }
-        return state;
+        return new ComponentFeatures();
+    }
+
+    private ComponentFeatures getLiveFeatures(JsonNode liveFeatures, JsonNode runningOn, JsonNode platform) {
+        ComponentFeatures result = new ComponentFeatures();
+        if (liveFeatures.has(ComponentFeature.Mode.DEV_MODE.getLabel().toLowerCase()) && liveFeatures.get(ComponentFeature.Mode.DEV_MODE.getLabel().toLowerCase()).asBoolean()) {
+            if (platform.asText("").equals(ComponentFeature.Constants.PODMAN)) {
+                result.addFeature(ComponentFeature.DEV_ON_PODMAN);
+            } else if (runningOn.asText("").equals(ComponentFeature.Constants.CLUSTER)) {
+                result.addFeature(ComponentFeature.DEV);
+            }
+        }
+        if (liveFeatures.has(ComponentFeature.Mode.DEPLOY_MODE.getLabel().toLowerCase()) && liveFeatures.get(ComponentFeature.Mode.DEPLOY_MODE.getLabel().toLowerCase()).asBoolean()) {
+            result.addFeature(ComponentFeature.DEPLOY);
+        }
+        //can't retrieve debug mode status from odo. see #redhat-developer/odo/issues/7197
+        return result;
     }
 }

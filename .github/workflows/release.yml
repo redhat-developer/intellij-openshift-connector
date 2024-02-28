@@ -31,7 +31,7 @@ jobs:
 
       # Validate Wrapper before running build
       - name: validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@27152f6fa06a6b8062ef7195c795692e51fc2c81 #v2.0.0
+        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2 #v2.1.1
 
       # Set up Java environment for the next steps
       - name: Setup Java
@@ -42,12 +42,11 @@ jobs:
 
       # Setup Gradle
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3b1b3b9a2104c2b47fbae53f3938079c00c9bb87 #v3.0.0
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 #v3.1.0
         with:
           gradle-home-cache-cleanup: true
 
       - name: Set Release Version
-        id: release_version
         shell: bash
         run: |
           CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
@@ -79,16 +78,20 @@ jobs:
           git push origin $PLUGIN_VERSION
 
       # Set next SNAPSHOT version
-      # TODO uncomment this when CI ( prow/integration tests ) is stable enough, or bypass github settings
       - name: Increment Plugin Version
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           CURRENT_VERSION=$(grep "projectVersion=" gradle.properties | cut -d'=' -f2)
+          echo "current $CURRENT_VERSION"
           IFS="-" read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
           IFS="." read -ra VERSION_NUM <<< "${VERSION_PARTS[0]}"
+          echo "version_num[2] $((VERSION_NUM[2]))"
           ((VERSION_NUM[2]++))
+          echo "version_num[2]++ $((VERSION_NUM[2]))"
           NEW_VERSION="${VERSION_NUM[0]}.${VERSION_NUM[1]}.${VERSION_NUM[2]}-SNAPSHOT"
+          echo "new_version $NEW_VERSION"
           awk -v new_version="$NEW_VERSION" '/projectVersion=/{sub(/=.*/, "=" new_version)}1' gradle.properties > tmpfile && mv tmpfile gradle.properties
           echo "Set $NEW_VERSION in gradle.properties"
           git commit -sam "chore(skip-release): set version to $NEW_VERSION"

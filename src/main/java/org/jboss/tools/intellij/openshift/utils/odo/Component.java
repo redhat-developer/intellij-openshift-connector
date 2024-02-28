@@ -36,7 +36,7 @@ public interface Component {
     class ComponentImpl implements Component {
         private final String name;
         private final String managedBy;
-        private ComponentFeatures state;
+        private final ComponentFeatures state;
         private String path;
         private ComponentInfo info;
 

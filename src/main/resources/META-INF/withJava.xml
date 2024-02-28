@@ -3,7 +3,7 @@
         <action class="org.jboss.tools.intellij.openshift.actions.component.DebugJavaComponentAction"
                 id="org.jboss.tools.intellij.openshift.actions.component.DebugJavaComponentAction" text="Debug">
             <add-to-group group-id="org.jboss.tools.intellij.openshift.actions.component.actions"
-                          relative-to-action="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"
+                          relative-to-action="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"
                           anchor="after"/>
         </action>
     </actions>

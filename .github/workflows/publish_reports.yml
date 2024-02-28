@@ -16,12 +16,8 @@ jobs:
         with:
           path: reports
           pattern: '*-reports'
-          merge-multiple: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{github.event.workflow_run.id}}
-      - name: List test results
-        run: |
-          ls -r reports/
       - name: Publish aggregated tests reports
         uses: scacap/action-surefire-report@687f107f48aa55aff279cc5ce598fd9860871a81 #v1.7.3
         with:

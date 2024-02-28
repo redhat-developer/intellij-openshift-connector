@@ -229,14 +229,15 @@ public class OdoCli implements Odo {
     private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
 
     private JSonParser swagger;
-    /*
-     Map of process launched for feature (dev, debug,...) related.
-     Key is component name
-     Value is map index by the feature and value is the process handler
-     */
-    private final Map<String, Map<ComponentFeature, ProcessHandler>> componentFeatureProcesses = new HashMap<>();
 
-    /*
+    /**
+     * Map of process launched for feature (dev, debug,...) related.
+     * Key is component name
+     * Value is map index by the feature and value is the process handler
+     */
+    private Map<String, Map<ComponentFeature, ProcessHandler>> componentFeatureProcesses = new HashMap<>();
+
+    /**
      Map of process launched for log activity.
      Key is component name
      Value is list with 2 process handler index 0 is dev; index 1 is deploy
@@ -327,6 +328,15 @@ public class OdoCli implements Odo {
         }
     }
 
+    @Override
+    public String getNamespaceKind() {
+        if (isOpenShift()) {
+            return "Project";
+        } else {
+            return "Namespace";
+        }
+    }
+
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
         ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
         try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {
@@ -352,9 +362,6 @@ public class OdoCli implements Odo {
     @Override
     public void start(String project, String context, String component, ComponentFeature feature,
                       Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
-        if (feature.getPeer() != null) {
-            stop(project, context, component, feature.getPeer());
-        }
         Map<ComponentFeature, ProcessHandler> componentMap = componentFeatureProcesses.computeIfAbsent(component, name -> new HashMap<>());
         ProcessHandler handler = componentMap.get(feature);
         if (handler == null) {
@@ -791,14 +798,16 @@ public class OdoCli implements Odo {
     @Override
     public boolean isAuthorized() {
         try {
-            client.secrets().list();
-            // retrieving secrets worked, we're authorized
+            client.authorization().v1().getApiGroups();
+            // retrieving api groups worked, we're authorized
             return true;
         } catch (KubernetesClientException e) {
-            if (KubernetesClientExceptionUtils.isForbidden(e)
-              || KubernetesClientExceptionUtils.isUnauthorized(e)) {
-                // retrieving secrets didn't work, we're NOT authorized
+            if (KubernetesClientExceptionUtils.isUnauthorized(e)) {
+                // retrieving api groups didn't work, we're NOT authorized
                 return false;
+            } else if (KubernetesClientExceptionUtils.isForbidden(e)) {
+                // retrieving api groups didn't work, but we're authorized
+                return true;
             } else {
                 throw e;
             }
@@ -949,11 +958,6 @@ public class OdoCli implements Odo {
     }
 
     @Override
-    public void release() {
-        connection.disconnect();
-    }
-
-    @Override
     public List<ComponentDescriptor> discover(String path) throws IOException {
         return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
                 execute(new File(path), command, envVars, "list", "-o", "json"),
@@ -1011,5 +1015,14 @@ public class OdoCli implements Odo {
         if (logHandlers != null) {
             logHandlers.stream().filter(Objects::nonNull).forEach(ProcessHandler::destroyProcess);
         }
+    }
+
+    public Map<String, Map<ComponentFeature, ProcessHandler>> getComponentFeatureProcesses() {
+        return componentFeatureProcesses;
+    }
+
+    @Override
+    public void setComponentFeatureProcesses(Map<String, Map<ComponentFeature, ProcessHandler>> processes) {
+        this.componentFeatureProcesses = processes;
     }
 }

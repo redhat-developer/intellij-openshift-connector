@@ -1,0 +1,39 @@
+[
+  {
+    "name": "dotnet50",
+    "displayName": ".NET 5.0",
+    "description": ".NET 5.0 application",
+    "registry": {
+      "name": "Staging",
+      "url": "https://registry.stage.devfile.io/",
+      "secure": false
+    },
+    "language": ".NET",
+    "tags": [
+      ".NET",
+      ".NET 5.0"
+    ],
+    "projectType": "dotnet",
+    "version": "1.0.3",
+    "versions": [
+      {
+        "version": "1.0.3",
+        "isDefault": true,
+        "schemaVersion": "2.1.0",
+        "starterProjects": [
+          "dotnet50-example"
+        ],
+        "commandGroups": {
+          "build": true,
+          "debug": false,
+          "deploy": false,
+          "run": true,
+          "test": false
+        }
+      }
+    ],
+    "starterProjects": [
+      "dotnet50-example"
+    ]
+  }
+]

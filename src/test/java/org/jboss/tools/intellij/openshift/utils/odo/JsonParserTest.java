@@ -21,6 +21,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class JsonParserTest {
   private static ObjectMapper MAPPER;
@@ -84,5 +86,27 @@ public class JsonParserTest {
     assertEquals("my-nodejs-app-jmaury-dev.apps.sandbox.x8i5.p1.openshiftapps.com", urls.get(0).getHost());
     assertEquals("/", urls.get(0).getPath());
   }
+
+    @Test
+    public void verifyThatStarterCanBeLoadedFromRegistry() throws IOException {
+        URL url = JsonParserTest.class.getResource("/devfile-registry.json");
+        JSonParser parser = new JSonParser(MAPPER.readTree(url));
+        ComponentTypeInfo componentTypeInfo = parser.parseComponentTypeInfo();
+        assertNotNull(componentTypeInfo);
+        assertEquals(1, componentTypeInfo.getStarters().size());
+        assertEquals("dotnet50-example", componentTypeInfo.getStarters().get(0).getName());
+        assertNull(componentTypeInfo.getStarters().get(0).getDescription());
+    }
+
+    @Test
+    public void verifyThatComponentInfoCanBeLoadedFromDescribe() throws IOException {
+        URL url = JsonParserTest.class.getResource("/describe-component-local.json");
+        JSonParser parser = new JSonParser(MAPPER.readTree(url));
+        ComponentInfo componentInfo = parser.parseDescribeComponentInfo(ComponentKind.DEVFILE);
+        assertNotNull(componentInfo);
+      assertTrue(componentInfo.getSupportedFeatures().contains(ComponentFeature.Mode.DEV_MODE));
+        assertEquals("Go", componentInfo.getComponentTypeName());
+        assertEquals("Go", componentInfo.getLanguage());
+    }
 
 }

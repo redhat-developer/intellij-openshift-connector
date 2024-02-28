@@ -18,7 +18,6 @@ on:
 jobs:
   # Prepare and publish the plugin to JetBrains Marketplace repository
   release:
-    if: ${{ inputs.publishToMarketPlace == 'true'}}
     name: Publish to Marketplace
     runs-on: ubuntu-latest
     permissions:
@@ -57,6 +56,7 @@ jobs:
 
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin to JetBrains Marketplace
+        if: ${{ inputs.publishToMarketPlace == 'true'}}
         env:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
         run: |

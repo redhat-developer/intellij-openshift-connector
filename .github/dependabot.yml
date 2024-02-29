@@ -1,10 +1,14 @@
-# Set update schedule for GitHub Actions
+# Set update schedule for GitHub Actions and Gradle dependencies
 
 version: 2
 updates:
-
+  # Updates for Github Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
+      interval: "weekly"
+  # Updates for Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
       interval: "weekly"

@@ -11,46 +11,23 @@
 package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
-
-import static org.mockito.Mockito.mock;
+import org.jetbrains.annotations.NotNull;
 
 public class CreateProjectActionTest extends ActionTest {
+  public CreateProjectActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new CreateProjectAction();
   }
 
   @Override
-  protected void verifyLoggedInCluster(boolean visible) {
-    assertTrue(visible);
-  }
-
-  public void testActionOnProject() {
-    NamespaceNode projectNode = mock(NamespaceNode.class);
-    AnActionEvent event = createEvent(projectNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnLocalDevComponent() {
-    ComponentNode componentNode = mock(ComponentNode.class);
-    AnActionEvent event = createEvent(componentNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
-  }
-
-  public void testActionOnService() {
-    ServiceNode serviceNode = mock(ServiceNode.class);
-    AnActionEvent event = createEvent(serviceNode);
-    AnAction action = getAction();
-    action.update(event);
-    assertFalse(event.getPresentation().isVisible());
+  protected void verifyLoggedInCluster(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+    assertEquals("New " + (isOpenshift ? "Project" : "Namespace"), presentation.getText());
   }
 }

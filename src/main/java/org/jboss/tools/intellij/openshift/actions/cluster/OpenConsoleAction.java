@@ -13,7 +13,7 @@ package org.jboss.tools.intellij.openshift.actions.cluster;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -23,10 +23,10 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 public class OpenConsoleAction extends LoggedInClusterAction {
 
   @Override
-  public String getTelemetryActionName() { return "open console"; }
+  public String getTelemetryActionName() {return "open console";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     try {
       String url = odo.consoleURL();
       BrowserUtil.open(url);

@@ -17,7 +17,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -33,31 +33,31 @@ public class DeleteServiceAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() { return "delete service"; }
+  public String getTelemetryActionName() {return "delete service";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     ServiceNode serviceNode = (ServiceNode) selected;
     NamespaceNode namespaceNode = serviceNode.getParent();
     if (Messages.NO == Messages.showYesNoDialog(
-        "Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
-        Messages.getQuestionIcon())) {
+      "Delete Service '" + serviceNode.getName() + "'.\nAre you sure?", "Delete Service",
+      Messages.getQuestionIcon())) {
       sendTelemetryResults(TelemetryResult.ABORTED);
       return;
     }
     runWithProgress((ProgressIndicator progress) -> {
-      setProcessing("Deleted", serviceNode);
-      try {
-        odo.deleteService(namespaceNode.getName(), serviceNode.getService());
-        clearProcessing(serviceNode.getParent());
-        sendTelemetryResults(TelemetryResult.SUCCESS);
-      } catch (IOException e) {
-        clearProcessing(serviceNode);
-        sendTelemetryError(e);
-        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Service"));
-      }
-    },
-    "Delete Service " + serviceNode.getName() + "...",
-    getEventProject(anActionEvent));
+        setProcessing("Deleted", serviceNode);
+        try {
+          odo.deleteService(namespaceNode.getName(), serviceNode.getService());
+          clearProcessing(serviceNode.getParent());
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+          clearProcessing(serviceNode);
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Service"));
+        }
+      },
+      "Delete Service " + serviceNode.getName() + "...",
+      getEventProject(anActionEvent));
   }
 }

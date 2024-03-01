@@ -15,34 +15,34 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 public class OpenGettingStartedAction extends OdoAction {
-    private static final String GETTING_STARTED_WINDOW_ID = "OpenShiftGettingStarted";
+  private static final String GETTING_STARTED_WINDOW_ID = "OpenShiftGettingStarted";
 
-    public OpenGettingStartedAction() {
-        super(ApplicationsRootNode.class);
-    }
+  public OpenGettingStartedAction() {
+    super(ApplicationsRootNode.class);
+  }
 
-    @Override
-    public String getTelemetryActionName() {
-        return "open getting started";
-    }
+  @Override
+  public String getTelemetryActionName() {
+    return "open getting started";
+  }
 
-    @Override
-    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-        Project project = anActionEvent.getProject();
-        if (project == null) {
-            return;
-        }
-        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(GETTING_STARTED_WINDOW_ID);
-        if (toolWindow == null) {
-            return;
-        }
-        toolWindow.setAvailable(true, null);
-        toolWindow.activate(null);
-        toolWindow.show(null);
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+    Project project = anActionEvent.getProject();
+    if (project == null) {
+      return;
     }
+    ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(GETTING_STARTED_WINDOW_ID);
+    if (toolWindow == null) {
+      return;
+    }
+    toolWindow.setAvailable(true, null);
+    toolWindow.activate(null);
+    toolWindow.show(null);
+  }
 
 }

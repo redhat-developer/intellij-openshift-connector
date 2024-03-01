@@ -24,6 +24,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.project.ChangeActiveProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.MouseInfo;
@@ -70,7 +71,7 @@ public class ChangeActiveProjectAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     Project project = getEventProject(anActionEvent);
     Point location = ActionUtils.getLocation(anActionEvent);
     ApplicationsRootNode rootNode = getApplicationRootNode(anActionEvent);

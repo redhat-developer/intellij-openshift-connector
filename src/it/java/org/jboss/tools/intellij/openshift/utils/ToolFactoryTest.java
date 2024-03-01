@@ -11,23 +11,25 @@
 package org.jboss.tools.intellij.openshift.utils;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import java.util.concurrent.ExecutionException;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
+
+import java.util.concurrent.ExecutionException;
 
 public class ToolFactoryTest extends BasePlatformTestCase {
- 
-    public void testGetOdo() throws ExecutionException, InterruptedException {
-        Tool<Odo> tool = ToolFactory.getInstance().createOdo(getProject()).get();
-        Odo odo = tool.get();
-        assertNotNull(odo);
-    }
 
-    public void testGetHelm() throws ExecutionException, InterruptedException {
-        Tool<Helm> tool = ToolFactory.getInstance().createHelm(getProject()).get();
-        Helm helm = tool.get();
-        assertNotNull(helm);
-    }
+  public void testGetOdo() throws ExecutionException, InterruptedException {
+    Tool<OdoDelegate> tool = ToolFactory.getInstance().createOdo(getProject()).get();
+    Odo odo = tool.get();
+    assertNotNull(odo);
+  }
+
+  public void testGetHelm() throws ExecutionException, InterruptedException {
+    Tool<Helm> tool = ToolFactory.getInstance().createHelm(getProject()).get();
+    Helm helm = tool.get();
+    assertNotNull(helm);
+  }
 
 }

@@ -19,38 +19,38 @@ import static org.awaitility.Awaitility.with;
 
 public class OdoCliCatalogTest extends OdoCliTest {
 
-    public void testCheckGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        try {
-            createProject(project);
-            List<DevfileComponentType> components = odo.getComponentTypes();
-            assertFalse(components.isEmpty());
-        } finally {
-            odo.deleteProject(project);
-        }
+  public void testCheckGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
+    String project = PROJECT_PREFIX + random.nextInt();
+    try {
+      createProject(project);
+      List<DevfileComponentType> components = odo.getAllComponentTypes();
+      assertFalse(components.isEmpty());
+    } finally {
+      odo.deleteProject(project);
     }
+  }
 
-    public void testCheckGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        try {
-            createProject(project);
-            //After a namespace is created the cluster wide operators takes time to appear
-            //in installed state into the namespace
-            with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
-        } finally {
-            odo.deleteProject(project);
-        }
+  public void testCheckGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
+    String project = PROJECT_PREFIX + random.nextInt();
+    try {
+      createProject(project);
+      //After a namespace is created the cluster wide operators takes time to appear
+      //in installed state into the namespace
+      with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
+    } finally {
+      odo.deleteProject(project);
     }
+  }
 
-    public void testCheckMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        try {
-            createProject(project);
-            //After a namespace is created the cluster wide operators takes time to appear
-            //in installed state into the namespace
-            with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> odo.getServiceTemplates().stream().anyMatch(template -> template.getCRDs().size() > 1));
-        } finally {
-            odo.deleteProject(project);
-        }
+  public void testCheckMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
+    String project = PROJECT_PREFIX + random.nextInt();
+    try {
+      createProject(project);
+      //After a namespace is created the cluster wide operators takes time to appear
+      //in installed state into the namespace
+      with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> odo.getServiceTemplates().stream().anyMatch(template -> template.getCRDs().size() > 1));
+    } finally {
+      odo.deleteProject(project);
     }
+  }
 }

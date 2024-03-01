@@ -17,34 +17,34 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
 public class DevOnPodmanComponentAction extends FeatureComponentAction {
 
-    public DevOnPodmanComponentAction() {
-        super(ComponentFeature.DEV_ON_PODMAN);
-    }
+  public DevOnPodmanComponentAction() {
+    super(ComponentFeature.DEV_ON_PODMAN);
+  }
 
-    @Override
-    protected boolean needCustomizedPresentation() {
-        return true;
-    }
+  @Override
+  protected boolean needCustomizedPresentation() {
+    return true;
+  }
 
-    @Override
-    protected String getCustomizedPresentation(Component component) {
-        if (component.getLiveFeatures().is(ComponentFeature.DEV_ON_PODMAN)) {
-            return "Stop " + getActionName();
-        } else {
-            return "Start " + getActionName();
-        }
+  @Override
+  protected String getCustomizedPresentation(Component component) {
+    if (component.getLiveFeatures().is(ComponentFeature.DEV_ON_PODMAN)) {
+      return "Stop " + getActionName();
+    } else {
+      return "Start " + getActionName();
     }
+  }
 
-    @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        if (e.getPresentation().isVisible()) {
-          Object node = adjust(getSelected(getTree(e)));
-            if (!(node instanceof ComponentNode)) {
-              return;
-            }
-          ComponentNode componentNode = (ComponentNode) node;
-          e.getPresentation().setEnabled(componentNode.getComponent().getInfo().isLocalPodmanPresent());
-        }
+  @Override
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Object node = adjust(getSelected(getTree(e)));
+      if (!(node instanceof ComponentNode)) {
+        return;
+      }
+      ComponentNode componentNode = (ComponentNode) node;
+      e.getPresentation().setEnabled(componentNode.getComponent().getInfo().isLocalPodmanPresent());
     }
+  }
 }

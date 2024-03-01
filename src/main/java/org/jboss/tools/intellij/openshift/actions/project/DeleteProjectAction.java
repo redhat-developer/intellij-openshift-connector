@@ -20,7 +20,7 @@ import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -34,15 +34,15 @@ public class DeleteProjectAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() { return "delete project"; }
+  public String getTelemetryActionName() {return "delete project";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     NamespaceNode namespaceNode = (NamespaceNode) selected;
     if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + namespaceNode.getName() + "'.\nAre you sure?", "Delete Project",
-        Messages.getQuestionIcon())) {
-        sendTelemetryResults(TelemetryResult.ABORTED);
-        return;
+      Messages.getQuestionIcon())) {
+      sendTelemetryResults(TelemetryResult.ABORTED);
+      return;
     }
     runWithProgress((ProgressIndicator progress) -> {
         try {

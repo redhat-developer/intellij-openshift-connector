@@ -11,16 +11,22 @@
 package org.jboss.tools.intellij.openshift.actions.service;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class DeleteServiceActionTest extends ActionTest {
+  public DeleteServiceActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new DeleteServiceAction();
   }
 
   @Override
-  protected void verifyService(boolean visible) {
-    assertTrue(visible);
+  protected void verifyService(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 }

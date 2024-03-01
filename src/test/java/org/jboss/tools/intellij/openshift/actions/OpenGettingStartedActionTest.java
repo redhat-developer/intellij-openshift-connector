@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,21 +8,20 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.cluster;
+package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.Presentation;
-import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jetbrains.annotations.NotNull;
 
-public class LoginActionTest extends ActionTest {
-  public LoginActionTest(boolean isOpenshift) {
+public class OpenGettingStartedActionTest extends ActionTest {
+  public OpenGettingStartedActionTest(boolean isOpenshift) {
     super(isOpenshift);
   }
 
   @Override
   public AnAction getAction() {
-    return new LoginAction();
+    return new OpenGettingStartedAction();
   }
 
   @Override

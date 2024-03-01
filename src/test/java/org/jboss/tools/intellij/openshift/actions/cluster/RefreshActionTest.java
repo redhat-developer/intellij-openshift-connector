@@ -8,15 +8,29 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.component;
+package org.jboss.tools.intellij.openshift.actions.cluster;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
-public class DeplyComponentActionTest extends ActionTest {
-    @Override
-    public AnAction getAction() {
-        return new DeployComponentAction();
-    }
+public class RefreshActionTest extends ActionTest {
+  public RefreshActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
 
+  @Override
+  public AnAction getAction() {
+    return new RefreshAction();
+  }
+
+  protected void verifyLoggedInCluster(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
+
+  @Override
+  protected void verifyLoggedOutCluster(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
 }

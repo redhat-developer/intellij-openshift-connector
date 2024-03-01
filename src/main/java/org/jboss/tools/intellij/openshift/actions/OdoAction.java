@@ -16,7 +16,7 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySenderAware;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,43 +35,43 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     super(filters);
   }
 
-    @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        this.telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-        Odo odo = getOdo(anActionEvent);
-        if (odo == null) {
-          return;
-        }
-        this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
+  @Override
+  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+    this.telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
+    OdoFacade odo = getOdo(anActionEvent);
+    if (odo == null) {
+      return;
     }
+    this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
+  }
 
-    protected Odo getOdo(AnActionEvent anActionEvent) {
-        try {
-          return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
-        } catch(Exception e) {
-          LOGGER.warn("Could not get odo: " + e.getMessage(), e);
-          return null;
-        }
+  protected OdoFacade getOdo(AnActionEvent anActionEvent) {
+    try {
+      return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
+    } catch (Exception e) {
+      LOGGER.warn("Could not get odo: " + e.getMessage(), e);
+      return null;
     }
+  }
 
-    public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
+  public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo);
 
-    @Override
-    public void setTelemetrySender(TelemetrySender telemetrySender) {
-      this.telemetrySender = telemetrySender;
-    }
+  @Override
+  public void setTelemetrySender(TelemetrySender telemetrySender) {
+    this.telemetrySender = telemetrySender;
+  }
 
-    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
-        telemetrySender.sendTelemetryResults(result);
-    }
+  public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+    telemetrySender.sendTelemetryResults(result);
+  }
 
-    @Override
-    public void sendTelemetryError(String message) {
-        telemetrySender.sendTelemetryError(message);
-    }
+  @Override
+  public void sendTelemetryError(String message) {
+    telemetrySender.sendTelemetryError(message);
+  }
 
-    @Override
-    public void sendTelemetryError(Exception exception) {
-        telemetrySender.sendTelemetryError(exception);
-    }
+  @Override
+  public void sendTelemetryError(Exception exception) {
+    telemetrySender.sendTelemetryError(exception);
+  }
 }

@@ -121,6 +121,7 @@ tasks.register('integrationTest', Test) {
 }
 
 tasks.register('integrationUITest', Test) {
+    dependsOn copyKey
     useJUnitPlatform {
         includeTags 'ui-test'
     }
@@ -144,6 +145,11 @@ tasks.register('integrationUITest', Test) {
     }
 }
 
+tasks.register('copyKey', Copy) {
+    from "idea_license_token/idea.key"
+    into "build/idea-sandbox/config-uiTest"
+}
+
 dependencies {
     implementation(
             'io.fabric8:openshift-client:6.4.1',
@@ -163,7 +169,7 @@ dependencies {
             'org.awaitility:awaitility:4.2.0',
             'org.mock-server:mockserver-client-java:5.15.0',
             'org.mock-server:mockserver-netty:5.15.0',
-            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.2.0',
+            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.3.0',
             'org.junit.jupiter:junit-jupiter-engine:5.10.0',
             'org.junit.jupiter:junit-jupiter-api:5.10.0',
             'org.junit.jupiter:junit-jupiter:5.10.0')

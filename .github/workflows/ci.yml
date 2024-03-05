@@ -61,15 +61,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      # TODO remove locally building common-ui-test-library after new release of common-ui-test-library
-      - name: 'Clone common-ui-test-library to Maven Local repository'
-        run: |
-          git clone --branch 174 https://github.com/richard0202/intellij-common-ui-test-library.git ../common-ui-test-library
-      - uses: burrunan/gradle-cache-action@3bf23b8dd95e7d2bacf2470132454fe893a178a1 #v1
-        name: Build common-ui-test-library
-        with:
-          build-root-directory: ../common-ui-test-library
-          arguments: publishToMavenLocal
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -99,13 +90,13 @@ jobs:
         run: chmod +x gradlew
       - name: Play integration tests
         run: ./gradlew integrationTest --continue --no-daemon
-      #- name: Play integration UI tests
-      #  run: |
-      #    echo "${{ secrets.IDEA_KEY_PASSPHRASE }}" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
-      #    export DISPLAY=:99.0
-      #    Xvfb -ac :99 -screen 0 1920x1080x16 &
-      #    sleep 10
-      #    ./gradlew integrationUITest --info --continue
+      - name: Play integration UI tests
+        run: |
+          echo "${{ secrets.IDEA_KEY_PASSPHRASE }}" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
+          export DISPLAY=:99.0
+          Xvfb -ac :99 -screen 0 1920x1080x16 &
+          sleep 10
+          ./gradlew integrationUITest --info --continue --stacktrace
       - uses: actions/upload-artifact@v4
         if: always()
         with:

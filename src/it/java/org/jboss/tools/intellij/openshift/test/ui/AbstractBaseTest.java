@@ -13,7 +13,7 @@ package org.jboss.tools.intellij.openshift.test.ui;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
-import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
@@ -37,7 +37,11 @@ public abstract class AbstractBaseTest {
     public static void connect() {
         robot = IdeaRunner.getInstance().getRemoteRobot();
         ProjectUtility.createEmptyProject(robot, "test-project");
+
+        // TODO fix on IJ Ultimate 2023.2 (it should be possible to set some properties to block Tip Dialogs)
         ProjectUtility.closeTipDialogIfItAppears(robot);
+
+        // TODO fix on IJ Ultimate 2023.2
         ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
         ProjectUtility.closeGotItPopup(robot);
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
@@ -50,8 +54,8 @@ public abstract class AbstractBaseTest {
 
     public boolean isStripeButtonAvailable(String label) {
         try {
-            ToolWindowsPane toolWindowsPane = robot.find(ToolWindowsPane.class);
-            toolWindowsPane.stripeButton(label, false);
+            ToolWindowPane toolWindowPane = robot.find(ToolWindowPane.class);
+            toolWindowPane.stripeButton(label, false);
         } catch (WaitForConditionTimeoutException e) {
             return false;
         }

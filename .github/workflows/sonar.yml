@@ -1,7 +1,7 @@
 name: Sonar
 on:
   workflow_run:
-    workflows: [ "UI and Integration Tests" ]
+    workflows: [ "Java CI with Gradle" ]
     types:
       - completed
 jobs:

@@ -1,9 +1,8 @@
 ---
 name: Bug report
 about: Report a problem with IntelliJ OpenShift Toolkit to help us resolve it and improve
+labels: bug
 ---
-[kind/bug]
-
 <!--
 
 Welcome! - We kindly ask you to:

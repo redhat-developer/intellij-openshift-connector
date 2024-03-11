@@ -42,7 +42,7 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.IDEA_KEY_PASSPHRASE }}
         run: |
-          gpg --decrypt --passphrase ${{ env.GPG_PASSPHRASE }} --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
+          echo -n "$GPG_PASSPHRASE" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10

@@ -3,15 +3,6 @@ on:
   schedule:
     - cron: '0 1 * * *'
   workflow_dispatch:
-    inputs:
-      publishToMarketPlace:
-        description: 'Publish to JetBrains Marketplace ?'
-        required: true
-        type: choice
-        options:
-          - 'true'
-          - 'false'
-        default: 'false'
 
 jobs:
   should-build-change:

@@ -1,9 +1,8 @@
 ---
 name: Feature request
 about: Suggest a new feature for IntelliJ OpenShift Toolkit
+labels: feature
 ---
-[kind/Feature]
-
 <!--
 
 Welcome! - We kindly ask you to:

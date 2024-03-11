@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 public class DescriptorFactory {
 
-  private static final Supplier<Icon> CLUSTER_ICON = () -> IconLoader.findIcon("/images/cluster.png", ApplicationsTreeStructure.class);
+  private static final Supplier<Icon> CLUSTER_ICON = () -> IconLoader.findIcon("/images/cluster.svg", ApplicationsTreeStructure.class);
   private static final Supplier<Icon> NAMESPACE_ICON = () -> IconLoader.findIcon("/images/project.png", ApplicationsTreeStructure.class);
   private static final Supplier<Icon> COMPONENT_ICON = () -> IconLoader.findIcon("/images/component.png", ApplicationsTreeStructure.class);
   private static final Supplier<Icon> SERVICE_ICON = () -> IconLoader.findIcon("/images/service.png", ApplicationsTreeStructure.class);

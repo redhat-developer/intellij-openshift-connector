@@ -1,9 +1,8 @@
 ---
 name: Documentation
 about: Report mistakes or request for documentation
+labels: documentation
 ---
-[kind/Documentation]
-
 <!--
 
 Welcome!

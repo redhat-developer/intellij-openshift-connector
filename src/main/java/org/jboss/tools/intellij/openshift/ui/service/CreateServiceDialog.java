@@ -47,7 +47,7 @@ public class CreateServiceDialog extends DialogWrapper {
     public CreateServiceDialog() {
         super(null, false, IdeModalityType.IDE);
         init();
-        setTitle("Create service");
+        setTitle("Create Service");
     }
 
     @Nullable

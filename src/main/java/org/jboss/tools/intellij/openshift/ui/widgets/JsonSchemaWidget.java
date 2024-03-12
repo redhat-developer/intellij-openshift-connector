@@ -299,7 +299,7 @@ public class JsonSchemaWidget extends JPanel {
                     }
                 } else {
                     String val = (comp instanceof JTextField)?((JTextField) comp).getText(): (String) ((JComboBox)comp).getSelectedItem();
-                    if (val != null && val.length() > 0) {
+                    if (val != null && !val.isEmpty()) {
                         if (name == null) {
                             ((ArrayNode)node).add(val);
                         } else if ("string".equals(type)) {

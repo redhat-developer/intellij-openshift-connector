@@ -54,7 +54,7 @@ public class LinkComponentAction extends OdoAction {
         targetComponent = UIHelper.executeInUI(() ->
           Messages.showEditableChooseDialog(
             "Select component",
-            "Link component",
+            "Link Component",
             Messages.getQuestionIcon(),
             componentsArray,
             componentsArray[0],

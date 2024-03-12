@@ -30,9 +30,9 @@ import static org.keycloak.adapters.installed.KeycloakInstalled.DesktopProvider;
 
 public class OAuthBrowser extends JPanel {
 
-    private JBCefBrowser browser;
+    private final JBCefBrowser browser;
     private KeycloakInstalled adapter;
-    private CompletableFuture<LoginResponse> redirectFuture = new CompletableFuture<>();
+    private final CompletableFuture<LoginResponse> redirectFuture = new CompletableFuture<>();
 
     public OAuthBrowser() {
         browser = new JBCefBrowser();

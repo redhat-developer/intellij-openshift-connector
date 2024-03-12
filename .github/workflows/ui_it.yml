@@ -36,8 +36,6 @@ jobs:
           done
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Play integration tests
-        run: ./gradlew integrationTest --continue --no-daemon
       - name: Play integration UI tests
         env:
           GPG_PASSPHRASE: ${{ secrets.IDEA_KEY_PASSPHRASE }}
@@ -46,7 +44,7 @@ jobs:
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
-          ./gradlew integrationUITest --info --continue --stacktrace
+          ./gradlew integrationUITest --continue --no-daemon
       - uses: actions/upload-artifact@v4
         if: always()
         with:

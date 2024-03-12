@@ -1,11 +1,11 @@
-name: UI and Integration Tests
+name: Integration UI Tests
 on:
   workflow_run:
     workflows: [ "Java CI with Gradle" ]
     types:
       - completed
 jobs:
-  kubernetes-integration-tests:
+  kubernetes-integration-ui-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,10 +45,10 @@ jobs:
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
           ./gradlew integrationUITest --continue --no-daemon
-      - uses: actions/upload-artifact@v4
-        if: always()
+      - name: Publish tests reports
+        uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:
-          name: kubernetes-integration-tests-reports
-          path: |
-            build/test-results/**/*.xml
-            build/jacoco/
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          report_paths: '${{github.workspace}}/reports/**/TEST-*.xml'
+          commit: ${{github.event.workflow_run.head_sha}}
+          check_name: Integration UI Tests Report

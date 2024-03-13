@@ -49,6 +49,6 @@ jobs:
         uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/build/reports/tests/**/TEST-*.xml'
+          report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
           check_name: Integration UI Tests Report

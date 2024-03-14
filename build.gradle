@@ -160,7 +160,7 @@ dependencies {
             'io.jsonwebtoken:jjwt-jackson:0.11.2',
             'org.keycloak:keycloak-installed-adapter:22.0.1',
             'com.squareup.retrofit2:converter-jackson:2.9.0',
-            'com.google.code.gson:gson:2.9.0')
+            'com.google.code.gson:gson:2.10.1')
     testImplementation(
             'org.junit.platform:junit-platform-launcher:1.10.0',
             'org.mockito:mockito-core:4.11.0',

@@ -33,7 +33,7 @@ jobs:
             checksum_url=`echo "${new_url}.sha256"`
             checksum=`curl -s -L ${checksum_url} | sed "s| ||g"`
             jq --indent 4 ".tools.helm.platforms.${platform}.url = \"${new_url}\"" src/main/resources/tools.json \
-              | jq --indent 4 ".tools.helm.platforms.${platform}..sha256sum = \"${checksum}\"" > src/main/resources/tools.json.new
+              | jq --indent 4 ".tools.helm.platforms.${platform}.sha256sum = \"${checksum}\"" > src/main/resources/tools.json.new
             mv src/main/resources/tools.json.new src/main/resources/tools.json
           done
       - name: Create pull request

@@ -18,7 +18,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.16.1'
+    id 'org.jetbrains.intellij' version '1.17.2'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'idea'
     id 'java'
@@ -177,7 +177,7 @@ dependencies {
         implementation('io.undertow:undertow-core:2.3.7.Final') { //keycloak
             because 'https://app.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3339519'
         }
-        implementation('com.squareup.okhttp3:okhttp:4.10.0') { //retrofit
+        implementation('com.squareup.okhttp3:okhttp:4.12.0') { //retrofit
             because 'https://app.snyk.io/vuln/SNYK-JAVA-COMSQUAREUPOKHTTP3-2958044'
         }
         implementation('org.jboss.xnio:xnio-api:3.8.9.Final') { //keycloak

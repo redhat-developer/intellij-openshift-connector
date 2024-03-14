@@ -10,25 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.validation;
 
-import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.*;
-import com.redhat.devtools.intellij.common.utils.VfsRootAccessHelper;
+import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
 
-import java.io.File;
 
 public class DevfileSchemasTest extends BasePlatformTestCase {
 
     public void testQuarkusDevfile() {
         myFixture.setTestDataPath("src/test/resources");
         myFixture.enableInspections(YamlJsonSchemaHighlightingInspection.class);
-        String path = new File("src").getAbsoluteFile().getParentFile().getAbsolutePath();
-        VfsRootAccessHelper.allowRootAccess(path);
         myFixture.configureByFile("devfiles/java-quarkus.yaml");
         myFixture.checkHighlighting();
     }

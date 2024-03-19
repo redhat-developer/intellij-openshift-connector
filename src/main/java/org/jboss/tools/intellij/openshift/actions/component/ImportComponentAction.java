@@ -62,7 +62,7 @@ public class ImportComponentAction extends CreateComponentAction {
                     component.getInfo().getComponentKind());
                   CreateComponentModel model = getModel(project, odo, component.getName(), info);
                   setProcessing("Importing component " + component.getName() + "...", namespaceNode);
-                  createComponent(odo, namespaceNode.getName(), model);
+                  createComponent(odo, model);
                   clearProcessing(namespaceNode);
               } catch (IOException e) {
                   clearProcessing(namespaceNode);

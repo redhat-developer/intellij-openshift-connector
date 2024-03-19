@@ -40,7 +40,7 @@ public class LinkComponentAction extends OdoAction {
 
   @Override
   public String getTelemetryActionName() { return "link component to component"; }
-  
+
   protected String getSelectedTargetComponent(Odo odo, String project, String component) throws IOException {
     String targetComponent = null;
 
@@ -73,7 +73,7 @@ public class LinkComponentAction extends OdoAction {
         try {
           setProcessing("Linking Component...", namespaceNode);
           String targetComponent = getSelectedTargetComponent(odo, namespaceNode.getName(), sourceComponent.getName());
-          linkComponent(targetComponent, sourceComponent, namespaceNode, odo);
+          linkComponent(targetComponent, sourceComponent, odo);
           clearProcessing(namespaceNode);
         } catch (IOException e) {
           clearProcessing(namespaceNode);
@@ -85,10 +85,10 @@ public class LinkComponentAction extends OdoAction {
       getEventProject(anActionEvent));
   }
 
-  private void linkComponent(String targetComponent, Component sourceComponent, NamespaceNode namespaceNode, Odo odo) throws IOException {
+  private void linkComponent(String targetComponent, Component sourceComponent, Odo odo) throws IOException {
     if (targetComponent != null) {
       Notification notification = NotificationUtils.notifyInformation("Link Component", "Linking component to " + targetComponent);
-      odo.link(namespaceNode.getName(), sourceComponent.getPath(), sourceComponent.getName(), targetComponent);
+      odo.link(sourceComponent.getPath(), targetComponent);
       notification.expire();
       NotificationUtils.notifyInformation("Link Component", "Component linked to " + targetComponent);
       sendTelemetryResults(TelemetryResult.SUCCESS);

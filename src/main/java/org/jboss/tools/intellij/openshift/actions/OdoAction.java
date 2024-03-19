@@ -61,8 +61,6 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
       this.telemetrySender = telemetrySender;
     }
 
-    public abstract String getTelemetryActionName();
-
     public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
         telemetrySender.sendTelemetryResults(result);
     }

@@ -75,8 +75,12 @@ public class SwingUtils {
     Matcher matcher = httpLinkRegex.matcher(text);
     while (matcher.find()) {
       builder
-        .append(text, lastIndex, matcher.start())
-        .append("<a href=\"" + matcher.group(1)+ "\">" + matcher.group(1) + "</a>");
+          .append(text, lastIndex, matcher.start())
+          .append("<a href=\"")
+          .append(matcher.group(1))
+          .append("\">")
+          .append(matcher.group(1))
+          .append("</a>");
       lastIndex = matcher.end();
     }
     if (lastIndex < text.length()) {

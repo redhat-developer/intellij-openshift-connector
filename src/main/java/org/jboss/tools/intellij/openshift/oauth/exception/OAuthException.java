@@ -17,12 +17,12 @@ public abstract class OAuthException extends RuntimeException {
 	@Serial
   private static final long serialVersionUID = -66495414279364584L;
 
-	protected OAuthException(String message) {
+  protected OAuthException(String message) {
 		super(message);
 	}
 
-	protected OAuthException(String message, Throwable cause) {
-		super(message, cause);
-	}
+  protected OAuthException(String message, Throwable cause) {
+	super(message, cause);
+  }
 
 }

@@ -31,8 +31,8 @@ public class DeleteBindingAction extends OdoAction {
         try {
             BindingNode node = (BindingNode) selected;
             if (Messages.NO == Messages.showYesNoDialog("Delete binding '" + node.getName() + "'.\nAre you sure?",
-                  "Delete Binding",
-                  Messages.getQuestionIcon())) {
+                "Delete Binding",
+                Messages.getQuestionIcon())) {
                 sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
                 return;
             }

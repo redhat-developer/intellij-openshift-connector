@@ -43,15 +43,12 @@ import java.util.stream.Stream;
 
 public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsTreeStructure.class);
-
-    private final Project project;
-    private final ApplicationsRootNode root;
-
-    private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
-    private final DevfileRegistriesNode registries;
-
     private static final String LOGIN = "Please log in to the cluster";
     private static final String CLUSTER_UNREACHABLE = "Error: Cluster not reachable";
+    private final Project project;
+    private final ApplicationsRootNode root;
+    private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
+    private final DevfileRegistriesNode registries;
 
     public ApplicationsTreeStructure(Project project) {
         this.project = project;
@@ -108,25 +105,25 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] createComponentChildren(ComponentNode componentNode) {
         Odo odo = root.getOdo().getNow(null);
         if (odo == null) {
-            return new Object[] { new MessageNode<>(root, componentNode, "Could not get components") };
+            return new Object[]{new MessageNode<>(root, componentNode, "Could not get components")};
         }
         List<URLNode> urls = getURLs(componentNode);
         List<BindingNode> bindings = getBindings(componentNode, odo);
         return Stream.of(urls, bindings)
-          .filter(item -> !item.isEmpty())
-          .flatMap(Collection::stream)
-          .toArray();
+            .filter(item -> !item.isEmpty())
+            .flatMap(Collection::stream)
+            .toArray();
     }
 
     @NotNull
     private Object[] createNamespaceChildren(@NotNull NamespaceNode namespaceNode) {
         Odo odo = root.getOdo().getNow(null);
         if (odo == null) {
-            return new MessageNode[] { new MessageNode<>(root, namespaceNode, "Could not get project children") };
+            return new MessageNode[]{new MessageNode<>(root, namespaceNode, "Could not get project children")};
         }
 
         if (!odo.namespaceExists(namespaceNode.getName())) {
-            return new MessageNode[] { new ChangeActiveProjectLinkNode(root, namespaceNode) };
+            return new MessageNode[]{new ChangeActiveProjectLinkNode(root, namespaceNode)};
         }
 
         List<Object> nodes = new ArrayList<>();
@@ -141,7 +138,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         try {
             Odo odo = root.getOdo().getNow(null);
             if (odo == null) {
-                return new Object[] { new MessageNode<>(element, element, "Could not get current namespace") };
+                return new Object[]{new MessageNode<>(element, element, "Could not get current namespace")};
             }
             boolean isAuthorized = odo.isAuthorized();
             element.setLogged(isAuthorized);
@@ -166,15 +163,15 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         if (e instanceof KubernetesClientException) {
             KubernetesClientException kce = (KubernetesClientException) e;
             if (KubernetesClientExceptionUtils.isForbidden(kce)
-              || KubernetesClientExceptionUtils.isUnauthorized(kce)) {
+                || KubernetesClientExceptionUtils.isUnauthorized(kce)) {
                 return new MessageNode<>(root, parent, LOGIN);
             } else if (kce.getCause() instanceof NoRouteToHostException) {
                 return new MessageNode<>(root, parent, kce.getCause().getMessage());
             } else if (kce.getCause().getMessage().contains(Constants.DEFAULT_KUBE_URL)) {
                 return new MessageNode<>(root, parent, LOGIN);
             } else if (KubernetesClientExceptionUtils.isHostDown(kce)
-              || KubernetesClientExceptionUtils.isConnectionReset(kce)
-              || KubernetesClientExceptionUtils.isCouldNotConnect(kce)) {
+                || KubernetesClientExceptionUtils.isConnectionReset(kce)
+                || KubernetesClientExceptionUtils.isCouldNotConnect(kce)) {
                 return new MessageNode<>(root, parent, CLUSTER_UNREACHABLE);
             }
         }
@@ -182,14 +179,13 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
 
     private List<BaseNode<?>> getComponents(NamespaceNode namespaceNode, Odo odo) {
-        List<BaseNode<?>> components = new ArrayList<>();
-        components.addAll(load(
-          () -> odo.getComponents(namespaceNode.getName()).stream()
-            .filter(component -> !component.isManagedByHelm()) // dont display helm components
-            .map(component -> new ComponentNode(namespaceNode, component))
-            .collect(Collectors.toList()),
-          namespaceNode,
-          "Could not get components"));
+        List<BaseNode<?>> components = new ArrayList<>(load(
+            () -> odo.getComponents(namespaceNode.getName()).stream()
+                .filter(component -> !component.isManagedByHelm()) // dont display helm components
+                .map(component -> new ComponentNode(namespaceNode, component))
+                .collect(Collectors.toList()),
+            namespaceNode,
+            "Could not get components"));
         if (components.isEmpty()) {
             components.add(new CreateComponentLinkNode(namespaceNode.getRoot(), namespaceNode));
         }
@@ -198,10 +194,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     private List<BaseNode<?>> getServices(NamespaceNode namespaceNode, Odo odo) {
         return load(() -> odo.getServices(namespaceNode.getName()).stream()
-            .map(si -> new ServiceNode(namespaceNode, si))
-            .collect(Collectors.toList()),
-          namespaceNode,
-          "Could not get application services");
+                .map(si -> new ServiceNode(namespaceNode, si))
+                .collect(Collectors.toList()),
+            namespaceNode,
+            "Could not get application services");
     }
 
     private List<BaseNode<?>> getHelmReleases(NamespaceNode namespaceNode) {
@@ -210,10 +206,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return List.of(new MessageNode<>(root, namespaceNode, "Could not get chart releases"));
         }
         return load(() -> helm.list().stream()
-            .map(release -> new ChartReleaseNode(namespaceNode, release))
-            .collect(Collectors.toList()),
-          namespaceNode,
-          "Could not get chart releases");
+                .map(release -> new ChartReleaseNode(namespaceNode, release))
+                .collect(Collectors.toList()),
+            namespaceNode,
+            "Could not get chart releases");
     }
 
     private List<BaseNode<?>> load(Callable<List<BaseNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
@@ -224,6 +220,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return Collections.singletonList(new MessageNode<>(namespace.getRoot(), namespace, errorMessage));
         }
     }
+
     private List<URLNode> getURLs(ComponentNode element) {
         List<URLNode> results = new ArrayList<>();
         Odo odo = element.getRoot().getOdo().getNow(null);
@@ -231,12 +228,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             return Collections.emptyList();
         }
         try {
-            odo.listURLs(
-                element.getParent().getName(),
-                element.getComponent().getPath(), element.getName())
-              .forEach(url ->
-                results.add(new URLNode(element, url))
-              );
+            odo.listURLs(element.getComponent().getPath())
+                .forEach(url ->
+                    results.add(new URLNode(element, url))
+                );
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -246,12 +241,10 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private List<BindingNode> getBindings(ComponentNode element, @NotNull Odo odo) {
         List<BindingNode> results = new ArrayList<>();
         try {
-            odo.listBindings(
-              element.getParent().getName(),
-              element.getComponent().getPath(), element.getName()
-            ).forEach(binding ->
-              results.add(new BindingNode(element, binding))
-            );
+            odo.listBindings(element.getComponent().getPath())
+                .forEach(binding ->
+                    results.add(new BindingNode(element, binding))
+                );
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -261,12 +254,12 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getRegistries(ApplicationsRootNode root) {
         Odo odo = root.getOdo().getNow(null);
         if (odo == null) {
-            return new Object[] { new MessageNode<>(root, root, "Could not get registries") };
+            return new Object[]{new MessageNode<>(root, root, "Could not get registries")};
         }
         List<DevfileRegistryNode> result = new ArrayList<>();
         try {
             odo.listDevfileRegistries().forEach(registry ->
-              result.add(new DevfileRegistryNode(root, registries, registry))
+                result.add(new DevfileRegistryNode(root, registries, registry))
             );
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -277,12 +270,12 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getRegistryComponentTypes(DevfileRegistryNode registryNode) {
         Odo odo = root.getOdo().getNow(null);
         if (odo == null) {
-            return new Object[] { new MessageNode<>(root, registryNode, "Could not get registry component types") };
+            return new Object[]{new MessageNode<>(root, registryNode, "Could not get registry component types")};
         }
         List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
         try {
             odo.getComponentTypes(registryNode.getName()).forEach(type ->
-              result.add(new DevfileRegistryComponentTypeNode(root, registryNode, type)));
+                result.add(new DevfileRegistryComponentTypeNode(root, registryNode, type)));
         } catch (IOException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
         }
@@ -292,13 +285,13 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     private Object[] getRegistryComponentTypeStarters(DevfileRegistryComponentTypeNode componentTypeNode) {
         Odo odo = root.getOdo().getNow(null);
         if (odo == null) {
-            return new Object[] { new MessageNode<>(root, componentTypeNode, "Could not get registry component starters") };
+            return new Object[]{new MessageNode<>(root, componentTypeNode, "Could not get registry component starters")};
         }
         List<DevfileRegistryComponentTypeStarterNode> result = new ArrayList<>();
         try {
             odo.getComponentTypeInfo(componentTypeNode.getName(),
-              componentTypeNode.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->
-              result.add(new DevfileRegistryComponentTypeStarterNode(componentTypeNode.getRoot(), componentTypeNode, starter)));
+                componentTypeNode.getComponentType().getDevfileRegistry().getName()).getStarters().forEach(starter ->
+                result.add(new DevfileRegistryComponentTypeStarterNode(componentTypeNode.getRoot(), componentTypeNode, starter)));
         } catch (IOException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
         }
@@ -384,7 +377,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         private boolean isProcessing() {
             ProcessingNode node = getProcessingNode();
             return node != null
-              && node.isProcessing();
+                && node.isProcessing();
         }
 
         private ProcessingNode getProcessingNode() {

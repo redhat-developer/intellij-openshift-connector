@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class DevfileRegistriesDeserializer extends StdNodeBasedDeserializer<List
   }
 
   @Override
-  public List<DevfileRegistry> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+  public List<DevfileRegistry> convert(JsonNode root, DeserializationContext ctxt) {
     List<DevfileRegistry> result = new ArrayList<>();
     JsonNode registries = root.get(REGISTRIES_FIELD);
     if (registries != null) {

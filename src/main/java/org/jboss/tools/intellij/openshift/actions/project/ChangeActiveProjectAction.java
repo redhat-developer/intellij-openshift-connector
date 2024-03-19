@@ -82,7 +82,7 @@ public class ChangeActiveProjectAction extends OdoAction {
         CompletableFuture
           .supplyAsync(() -> {
             try {
-              return new ClusterProjects(odo.isOpenShift(), odo.getCurrentNamespace(), odo.getNamespaces());
+              return new ClusterProjects(odo.getCurrentNamespace(), odo.getNamespaces());
             } catch (IOException e) {
               NotificationUtils.notifyError(
                 "Change Active " + odo.getNamespaceKind(),
@@ -137,12 +137,10 @@ public class ChangeActiveProjectAction extends OdoAction {
 
   private static final class ClusterProjects {
 
-    private final boolean isOpenShift;
     private final String current;
     private final List<String> all;
 
-    public ClusterProjects(boolean isOpenShift, String current, List<String> all) {
-      this.isOpenShift = isOpenShift;
+    public ClusterProjects(String current, List<String> all) {
       this.current = current;
       this.all = all;
     }

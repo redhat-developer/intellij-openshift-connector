@@ -36,8 +36,7 @@ public class DeleteBindingAction extends OdoAction {
                 sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
                 return;
             }
-            odo.deleteBinding(node.getParent().getNamespace(), node.getParent().getComponent().getPath(),
-                    node.getParent().getComponent().getName(),node.getBinding().getName());
+            odo.deleteBinding(node.getParent().getComponent().getPath(), node.getBinding().getName());
             NodeUtils.fireModified(node.getParent());
             sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         } catch (IOException e) {

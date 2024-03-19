@@ -66,7 +66,7 @@ public class OdoKubernetesClientTest {
   }
 
   @Test
-  public void getCurrentNamespace_should_return_client_namespace() throws IOException {
+  public void getCurrentNamespace_should_return_client_namespace() {
     // given
     final String currentNamespace = "luke skywalker";
     doReturn(currentNamespace)
@@ -78,7 +78,7 @@ public class OdoKubernetesClientTest {
   }
 
   @Test
-  public void getCurrentNamespace_should_return_default_if_there_is_no_client_namespace() throws IOException {
+  public void getCurrentNamespace_should_return_default_if_there_is_no_client_namespace() {
     // given
     doReturn(null)
       .when(kubernetesClient).getNamespace();

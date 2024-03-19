@@ -10,15 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.validation;
 
-import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.*;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.VfsRootAccessHelper;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.io.File;
 

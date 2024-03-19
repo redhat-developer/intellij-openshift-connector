@@ -14,17 +14,21 @@ import com.intellij.openapi.ui.TestDialog;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.apache.commons.io.FileUtils;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOdo;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
+import static org.mockito.Mockito.mock;
 
 
 public abstract class OdoCliTest extends BasePlatformTestCase {
@@ -38,6 +42,8 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     public static final String REGISTRY_NAME = "RegistryForITTests";
 
     protected Odo odo;
+
+    private final OdoProcessHelper processHelper = new OdoProcessHelper();
 
     protected Random random = new Random();
 
@@ -61,13 +67,13 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-        odo = ToolFactory.getInstance().createOdo(getProject()).get();
+        odo = getOdo().get();
         if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
             odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
 
         if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
             odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
-            odo = ToolFactory.getInstance().createOdo(getProject()).get();
+            odo = getOdo().get();
         }
     }
 
@@ -78,19 +84,24 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
         super.tearDown();
     }
 
+    private CompletableFuture<Odo> getOdo() {
+        return ToolFactory.getInstance().createOdo(getProject())
+            .thenApply(odoDelegate -> new ApplicationRootNodeOdo(odoDelegate, mock(ApplicationsRootNode.class), processHelper));
+    }
+
     protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
         odo.createProject(project);
-        odo = ToolFactory.getInstance().createOdo(getProject()).get();
+        odo = getOdo().get();
     }
 
     protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {
         createProject(project);
         cleanLocalProjectDirectory();
-        odo.createComponent(project, "java-springboot", REGISTRY_NAME, component,
+        odo.createComponent("java-springboot", REGISTRY_NAME, component,
                 new File(COMPONENT_PATH).getAbsolutePath(), null, null);
         if (feature != null) {
             AtomicBoolean started = new AtomicBoolean();
-            odo.start(project, new File(COMPONENT_PATH).getAbsolutePath(), component, feature, started::getAndSet, null);
+            odo.start(new File(COMPONENT_PATH).getAbsolutePath(), component, feature, started::getAndSet, null);
             await().atMost(15, TimeUnit.MINUTES).untilTrue(started);
         }
     }

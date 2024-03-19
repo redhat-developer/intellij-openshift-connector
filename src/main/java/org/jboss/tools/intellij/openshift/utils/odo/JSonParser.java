@@ -256,7 +256,7 @@ public class JSonParser {
         if (liveFeatures.has(ComponentFeature.Mode.DEPLOY_MODE.getLabel().toLowerCase()) && liveFeatures.get(ComponentFeature.Mode.DEPLOY_MODE.getLabel().toLowerCase()).asBoolean()) {
             result.addFeature(ComponentFeature.DEPLOY);
         }
-        //can't retrieve debug mode status from odo. see #redhat-developer/odo/issues/7197
+        //can't retrieve debug mode status from odo output. see #redhat-developer/odo/issues/7197
         return result;
     }
 }

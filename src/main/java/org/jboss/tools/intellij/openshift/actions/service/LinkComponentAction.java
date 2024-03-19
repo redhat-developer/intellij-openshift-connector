@@ -81,7 +81,7 @@ public class LinkComponentAction extends OdoAction {
       String[] componentNames = components.stream().map(Component::getName).toArray(String[]::new);
       String componentName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog(
           "Link component",
-        "Select Component",
+          "Select Component",
           Messages.getQuestionIcon(),
           componentNames,
           componentNames[0],

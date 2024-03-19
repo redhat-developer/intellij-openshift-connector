@@ -157,7 +157,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
 
     public void changed() {
         tokenField.setEnabled(getUserName().trim().isEmpty() && getPassword().length == 0);
-        boolean enabled = !(getToken().length > 0);
+        boolean enabled = (getToken().length <= 0);
         userNameField.setEnabled(enabled);
         passwordField.setEnabled(enabled);
     }

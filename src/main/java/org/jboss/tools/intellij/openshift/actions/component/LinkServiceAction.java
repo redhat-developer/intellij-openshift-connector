@@ -100,7 +100,7 @@ public class LinkServiceAction extends OdoAction {
     private void linkService(Service service, Component component, BaseNode<?> namespaceNode, Odo odo, Project project) throws IOException {
         Notification notification = NotificationUtils.notifyInformation("Link service", "Linking component to service " + service.getName());
         String target = service.getName() + '/' + service.getKind() + "." + service.getApiVersion();
-        Binding binding = odo.link(namespaceNode.getName(), component.getPath(), component.getName(), target);
+        Binding binding = odo.link(component.getPath(), target);
         notification.expire();
         NotificationUtils.notifyInformation("Link service", "Component linked to " + service.getName());
         NodeUtils.fireModified(namespaceNode);

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.validation;
 
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
 

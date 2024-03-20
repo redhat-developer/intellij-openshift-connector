@@ -51,7 +51,7 @@ public class LinkComponentAction extends OdoAction {
             if (!components.isEmpty()) {
               Component component = getComponent(components);
               if (component != null) {
-                odo.link(namespaceNode.getName(), component.getPath(), component.getName(), serviceNode.getName());
+                odo.link(component.getPath(), serviceNode.getName());
                 NotificationUtils.notifyInformation("Link component", "Service linked to " + component.getName());
                 sendTelemetryResults(TelemetryResult.SUCCESS);
               } else {

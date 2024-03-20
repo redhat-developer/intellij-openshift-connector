@@ -11,12 +11,16 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FileUtils;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
@@ -29,6 +33,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentTypeInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileRegistry;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoProcessHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.OperatorCRD;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
@@ -37,24 +42,27 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
-
 public class ApplicationRootNodeOdo implements Odo {
     private final Odo delegate;
+    private final OdoProcessHelper processHelper;
     private final ApplicationsRootNode root;
     private final FileOperations fileOperations;
 
-    ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root) {
-        this(delegate, root, new FileOperations());
+    public ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root, OdoProcessHelper processHelper) {
+        this(delegate, processHelper, root, new FileOperations());
     }
 
-    ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root, FileOperations fileOperations) {
+    ApplicationRootNodeOdo(Odo delegate, OdoProcessHelper processHelper, ApplicationsRootNode root, FileOperations fileOperations) {
         this.delegate = delegate;
+        this.processHelper = processHelper;
         this.root = root;
         this.fileOperations = fileOperations;
     }
@@ -65,7 +73,7 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public String getCurrentNamespace() throws IOException {
+    public String getCurrentNamespace() {
         return delegate.getCurrentNamespace();
     }
 
@@ -80,24 +88,57 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public void start(String project, String context, String component, ComponentFeature feature,
+    public void start(String context, String component, ComponentFeature feature,
                       Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
-        delegate.start(project, context, component, feature, callback, processTerminatedCallback);
+        Map<ComponentFeature, ProcessHandler> componentMap = getComponentFeature(component);
+        ProcessAdapter processAdapter = new ProcessAdapter() {
+            private boolean callBackCalled = false;
+
+            @Override
+            public void startNotified(@NotNull ProcessEvent event) {
+                componentMap.put(feature, event.getProcessHandler());
+            }
+
+            @Override
+            public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+                if (callback != null && !callBackCalled && event.getText().contains(feature.getOutput())) {
+                    callback.accept(true);
+                    callBackCalled = true;
+                }
+            }
+
+            @Override
+            public void processTerminated(@NotNull ProcessEvent event) {
+                componentMap.remove(feature);
+                processTerminatedCallback.accept(true);
+            }
+        };
+        delegate.start(context, feature, componentMap.get(feature), processAdapter);
     }
 
     @Override
-    public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
-        delegate.stop(project, context, component, feature);
+    public void start(String context, ComponentFeature feature, ProcessHandler handler, ProcessAdapter processAdapter) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isStarted(String project, String context, String component, ComponentFeature feature) {
-        return delegate.isStarted(project, context, component, feature);
+    public void stop(String context, String component, ComponentFeature feature) throws IOException {
+        delegate.stop(context, feature, getComponentFeature(component).remove(feature));
     }
 
     @Override
-    public void describeComponent(String project, String context, String component) throws IOException {
-        delegate.describeComponent(project, context, component);
+    public void stop(String context, ComponentFeature feature, ProcessHandler handler) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isStarted(String component, ComponentFeature feature) {
+        return getComponentFeature(component).containsKey(feature);
+    }
+
+    @Override
+    public void describeComponent(String context) throws IOException {
+        delegate.describeComponent(context);
     }
 
     @Override
@@ -106,14 +147,14 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public void createComponent(String project, String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
+    public void createComponent(String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
         if (!StringUtil.isEmptyOrSpaces(starter)) {
             File tmpdir = fileOperations.createTempDir("odotmp");
-            delegate.createComponent(project, componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
+            delegate.createComponent(componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
             File directory = fileOperations.copyTo(tmpdir, source);
             fileOperations.refresh(directory);
         } else {
-            delegate.createComponent(project, componentType, registryName, component, source, devfile, starter);
+            delegate.createComponent(componentType, registryName, component, source, devfile, starter);
         }
     }
 
@@ -121,11 +162,6 @@ public class ApplicationRootNodeOdo implements Odo {
     public void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
                               String service, ObjectNode spec, boolean wait) throws IOException {
         delegate.createService(project, serviceTemplate, serviceCRD, service, spec, wait);
-    }
-
-    @Override
-    public String getServiceTemplate(String project, String service) throws IOException {
-        return delegate.getServiceTemplate(project, service);
     }
 
     @Override
@@ -144,13 +180,8 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public void describeServiceTemplate(String template) throws IOException {
-        delegate.describeServiceTemplate(template);
-    }
-
-    @Override
-    public List<URL> listURLs(String project, String context, String component) throws IOException {
-        return delegate.listURLs(project, context, component);
+    public List<URL> listURLs(String context) throws IOException {
+        return delegate.listURLs(context);
     }
 
     @Override
@@ -163,22 +194,35 @@ public class ApplicationRootNodeOdo implements Odo {
         if (context != null) {
             root.removeContext(new File(context));
         }
+        cleanupComponent(component);
         delegate.deleteComponent(project, context, component, kind);
     }
 
     @Override
-    public void follow(String project, String context, String component, boolean deploy, String platform) throws IOException {
-        delegate.follow(project, context, component, deploy, platform);
+    public void follow(String context, String component, boolean deploy, String platform) throws IOException {
+        List<ProcessHandler> handlers = processHelper.getComponentLogProcesses().computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
+        delegate.follow(context, deploy, platform, handlers);
     }
 
     @Override
-    public void log(String project, String context, String component, boolean deploy, String platform) throws IOException {
-        delegate.log(project, context, component, deploy, platform);
+    public void follow(String context, boolean deploy, String platform, List<ProcessHandler> handlers) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isLogRunning(String context, String component, boolean deploy) throws IOException {
-        return delegate.isLogRunning(context, component, deploy);
+    public void log(String context, String component, boolean deploy, String platform) throws IOException {
+        List<ProcessHandler> handlers = processHelper.getComponentLogProcesses().computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
+        delegate.log(context, deploy, platform, handlers);
+    }
+
+    @Override
+    public void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isLogRunning(String component, boolean deploy) {
+        return processHelper.getComponentLogProcesses().computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2])).get(deploy ? 1 : 0) != null;
     }
 
     @Override
@@ -213,8 +257,8 @@ public class ApplicationRootNodeOdo implements Odo {
             String path = entry.getKey();
             ComponentDescriptor componentDescriptor = entry.getValue();
             Optional<Component> found = components.stream()
-              .filter(comp1 -> comp1.getName().equals(componentDescriptor.getName()))
-              .findFirst();
+                .filter(comp1 -> comp1.getName().equals(componentDescriptor.getName()))
+                .findFirst();
             if (found.isPresent()) {
                 updateComponent(project, path, componentDescriptor, found.get());
             } else {
@@ -228,17 +272,21 @@ public class ApplicationRootNodeOdo implements Odo {
     private Component createComponent(String project, ComponentDescriptor componentDescriptor, String path) throws IOException {
         ComponentInfo info = getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE);
         return Component.of(
-          componentDescriptor.getName(),
-          componentDescriptor.getManagedBy(),
-          new ComponentFeatures(),
-          path,
-          info);
+            componentDescriptor.getName(),
+            componentDescriptor.getManagedBy(),
+            new ComponentFeatures(),
+            path,
+            info);
     }
 
     private void updateComponent(String project, String path, ComponentDescriptor componentDescriptor, Component component) throws IOException {
         component.setPath(path);
         ComponentInfo info = getComponentInfo(project, componentDescriptor.getName(), path, ComponentKind.DEVFILE);
         component.setInfo(info);
+        Map<ComponentFeature, ProcessHandler> componentMap = getComponentFeature(component.getName());
+        if (!componentMap.isEmpty()) {
+            componentMap.keySet().forEach(componentFeature -> component.getLiveFeatures().addFeature(componentFeature));
+        }
     }
 
     @Override
@@ -247,43 +295,33 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public void listComponents() throws IOException {
-        delegate.listComponents();
-    }
-
-    @Override
-    public void listServices() throws IOException {
-        delegate.listServices();
-    }
-
-    @Override
     public void about() throws IOException {
         delegate.about();
     }
 
     @Override
-    public Binding link(String project, String context, String component, String target) throws IOException {
-        return delegate.link(project, context, component, target);
+    public Binding link(String context, String target) throws IOException {
+        return delegate.link(context, target);
     }
 
     @Override
-    public List<Binding> listBindings(String project, String context, String component) throws IOException {
-        return delegate.listBindings(project, context, component);
+    public List<Binding> listBindings(String context) throws IOException {
+        return delegate.listBindings(context);
     }
 
     @Override
-    public void deleteBinding(String project, String context, String component, String binding) throws IOException {
-        delegate.deleteBinding(project, context, component, binding);
+    public void deleteBinding(String context, String binding) throws IOException {
+        delegate.deleteBinding(context, binding);
     }
 
     @Override
-    public void debug(String project, String context, String component, Integer port) throws IOException {
-        delegate.debug(project, context, component, port);
+    public void debug(String context, Integer port) throws IOException {
+        delegate.debug(context, port);
     }
 
     @Override
-    public DebugStatus debugStatus(String project, String context, String component) throws IOException {
-        return delegate.debugStatus(project, context, component);
+    public Constants.DebugStatus debugStatus(String context) throws IOException {
+        return delegate.debugStatus(context);
     }
 
     @Override
@@ -332,18 +370,8 @@ public class ApplicationRootNodeOdo implements Odo {
     }
 
     @Override
-    public void migrateComponent(String context, String name){
-        delegate.migrateComponent(context, name);
-    }
-
-    @Override
-    public Map<String, Map<ComponentFeature, ProcessHandler>> getComponentFeatureProcesses() {
-        return delegate.getComponentFeatureProcesses();
-    }
-
-    @Override
-    public void setComponentFeatureProcesses(Map<String, Map<ComponentFeature, ProcessHandler>> processes) {
-        delegate.setComponentFeatureProcesses(processes);
+    public void migrateComponent(String name) {
+        delegate.migrateComponent(name);
     }
 
     /** for testing purposes **/
@@ -366,4 +394,23 @@ public class ApplicationRootNodeOdo implements Odo {
         }
     }
 
+    /**
+     * Stop all running processes for a component
+     *
+     * @param component the component name
+     */
+    private void cleanupComponent(String component) {
+        Map<ComponentFeature, ProcessHandler> featureHandlers = processHelper.getComponentFeatureProcesses().remove(component);
+        if (featureHandlers != null) {
+            featureHandlers.forEach((feat, handler) -> handler.destroyProcess());
+        }
+        List<ProcessHandler> logHandlers = processHelper.getComponentLogProcesses().remove(component);
+        if (logHandlers != null) {
+            logHandlers.stream().filter(Objects::nonNull).forEach(ProcessHandler::destroyProcess);
+        }
+    }
+
+    private Map<ComponentFeature, ProcessHandler> getComponentFeature(String component) {
+        return processHelper.getComponentFeatureProcesses().computeIfAbsent(component, name -> new HashMap<>());
+    }
 }

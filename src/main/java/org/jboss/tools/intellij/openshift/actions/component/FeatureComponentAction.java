@@ -16,14 +16,11 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.ActionUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.DebugComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -33,7 +30,6 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public abstract class FeatureComponentAction extends ContextAwareComponentAction {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureComponentAction.class);
 
     protected final ComponentFeature feature;
 
@@ -63,15 +59,11 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
             }
             ComponentNode componentNode = (ComponentNode) node;
             Component component = componentNode.getComponent();
-            try {
-                Odo odo = componentNode.getRoot().getOdo().getNow(null);
-                if (odo == null) {
-                    return;
-                }
-                e.getPresentation().setText(getCustomizedPresentation(component));
-            } catch (Exception ex) {
-                LOGGER.warn("Could not update {}", componentNode.getName(), e);
+            Odo odo = componentNode.getRoot().getOdo().getNow(null);
+            if (odo == null) {
+                return;
             }
+            e.getPresentation().setText(getCustomizedPresentation(component));
         }
     }
 
@@ -94,13 +86,11 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
-        NamespaceNode namespaceNode = componentNode.getParent();
         runWithProgress(
             (ProgressIndicator progress) -> {
                 try {
                     ComponentFeature feat = getComponentFeature();
                     process(odo,
-                        namespaceNode.getName(),
                         component,
                         feat,
                         b1 -> {
@@ -133,12 +123,12 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
         return debugFeature;
     }
 
-    protected void process(Odo odo, String project, Component component,
+    protected void process(Odo odo, Component component,
                            ComponentFeature feat, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
-        if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
-            odo.stop(project, component.getPath(), component.getName(), feat);
+        if (odo.isStarted(component.getName(), feat)) {
+            odo.stop(component.getPath(), component.getName(), feat);
         } else {
-            odo.start(project, component.getPath(), component.getName(), feat, callback, processTerminatedCallback);
+            odo.start(component.getPath(), component.getName(), feat, callback, processTerminatedCallback);
         }
     }
 }

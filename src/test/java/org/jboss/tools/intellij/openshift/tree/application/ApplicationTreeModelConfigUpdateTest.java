@@ -18,7 +18,6 @@ import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.util.Arrays;
 
@@ -120,10 +119,6 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
         return spy(new ApplicationsRootNode(project, null) {
             @Override
             protected void initConfigWatcher() {
-            }
-
-            @Override
-            protected void loadProjectModel(Odo odo, Project project) {
             }
 
             @Override

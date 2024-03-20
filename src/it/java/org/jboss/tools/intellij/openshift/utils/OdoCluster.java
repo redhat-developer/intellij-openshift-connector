@@ -13,7 +13,6 @@ package org.jboss.tools.intellij.openshift.utils;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 public class OdoCluster {
 
@@ -25,7 +24,7 @@ public class OdoCluster {
 
   private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
 
-  public boolean login(Odo odo) throws ExecutionException, InterruptedException, IOException {
+    public boolean login(Odo odo) throws IOException {
     if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
       odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
       return true;

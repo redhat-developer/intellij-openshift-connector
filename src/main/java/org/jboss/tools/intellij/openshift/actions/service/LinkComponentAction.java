@@ -60,11 +60,11 @@ public class LinkComponentAction extends OdoAction {
             } else {
               String message = "No components to link to";
               sendTelemetryError(message);
-              UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link component"));
+              UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link Component"));
             }
           } catch (IOException e) {
             sendTelemetryError(e);
-            UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link component"));
+            UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link Component"));
           } finally {
             clearProcessing(namespaceNode);
           }
@@ -81,7 +81,7 @@ public class LinkComponentAction extends OdoAction {
       String[] componentNames = components.stream().map(Component::getName).toArray(String[]::new);
       String componentName = UIHelper.executeInUI(() -> Messages.showEditableChooseDialog(
           "Link component",
-          "Select component",
+          "Select Component",
           Messages.getQuestionIcon(),
           componentNames,
           componentNames[0],

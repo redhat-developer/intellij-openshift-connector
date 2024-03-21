@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  * Helper class to handle Openshift token authentication response
- * 
+ *
  */
 public class TokenExtractor {
 	/**
@@ -24,7 +24,7 @@ public class TokenExtractor {
 	public static final Pattern TOKEN_PAGE_PATTERN = Pattern
 			.compile(".*<h2>Your API token is<\\/h2>.*<code>(.*)<\\/code>.*", Pattern.DOTALL);
 
-	private Matcher matcher;
+	private final Matcher matcher;
 
 	public TokenExtractor(String content) {
 		matcher = TOKEN_PAGE_PATTERN.matcher(content);

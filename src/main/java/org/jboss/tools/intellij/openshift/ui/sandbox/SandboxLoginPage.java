@@ -27,7 +27,7 @@ import java.awt.Frame;
 import java.io.IOException;
 
 public class SandboxLoginPage extends WizardStep<SandboxModel> {
-    private static Logger LOGGER = LoggerFactory.getLogger(SandboxLoginPage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SandboxLoginPage.class);
 
     private final SandboxModel model;
     private final Project project;

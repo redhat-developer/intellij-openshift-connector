@@ -11,7 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 public abstract class AbstractComponentType implements ComponentType {
-    private String name;
+    private final String name;
 
     protected AbstractComponentType(String name) {
         this.name = name;

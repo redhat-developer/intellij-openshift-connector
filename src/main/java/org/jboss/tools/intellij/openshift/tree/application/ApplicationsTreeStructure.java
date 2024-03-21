@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
@@ -41,7 +42,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
+public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object>, Disposable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsTreeStructure.class);
     private static final String LOGIN = "Please log in to the cluster";
     private static final String CLUSTER_UNREACHABLE = "Error: Cluster not reachable";
@@ -348,6 +349,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         mutableModelSupport.removeListener(listener);
     }
 
+    @Override
+    public void dispose() {
+      root.dispose();
+    }
+
     public static class ProcessableDescriptor<T> extends LabelAndIconDescriptor<T> {
 
         public ProcessableDescriptor(Project project, T element, Supplier<String> label, Supplier<String> location, Supplier<Icon> nodeIcon, @Nullable NodeDescriptor parentDescriptor) {
@@ -389,5 +395,4 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             }
         }
     }
-
 }

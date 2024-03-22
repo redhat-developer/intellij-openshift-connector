@@ -20,8 +20,8 @@ public class HelmCliListTest extends HelmCliTest {
     // given openshift repo was added to helm
     String releaseName = Charts.CHART_KUBEROS + new Random().nextInt();
     try {
-      Chart jenkinsChart = Charts.get(Charts.CHART_KUBEROS, helm);
-      helm.install(releaseName, jenkinsChart.getName(), jenkinsChart.getVersion(), null);
+      Chart kuberosChart = Charts.get(Charts.CHART_KUBEROS, helm);
+      helm.install(releaseName, kuberosChart.getName(), kuberosChart.getVersion(), null);
       // when
       List<ChartRelease> releases = helm.list();
       // then

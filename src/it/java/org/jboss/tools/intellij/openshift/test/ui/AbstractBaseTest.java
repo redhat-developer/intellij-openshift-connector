@@ -12,8 +12,10 @@ package org.jboss.tools.intellij.openshift.test.ui;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
+import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFrame;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import com.redhat.devtools.intellij.commonuitest.utils.project.CreateCloseUtils;
 import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
@@ -32,20 +34,25 @@ import java.time.Duration;
 public abstract class AbstractBaseTest {
 
     protected static RemoteRobot robot;
+    private static boolean hasConnectedToTestIDE = false;
 
     @BeforeAll
     public static void connect() {
-        robot = IdeaRunner.getInstance().getRemoteRobot();
-        ProjectUtility.createEmptyProject(robot, "test-project");
+        if (!hasConnectedToTestIDE) {
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            hasConnectedToTestIDE = true;
 
-        // TODO fix on IJ Ultimate 2023.2 (it should be possible to set some properties to block Tip Dialogs)
-        ProjectUtility.closeTipDialogIfItAppears(robot);
+            FlatWelcomeFrame flatWelcomeFrame = robot.find(FlatWelcomeFrame.class, Duration.ofSeconds(10));
+            flatWelcomeFrame.disableNotifications();
+            flatWelcomeFrame.preventTipDialogFromOpening();
 
-        // TODO fix on IJ Ultimate 2023.2
-        ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-        ProjectUtility.closeGotItPopup(robot);
-        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
-        ideStatusBar.waitUntilAllBgTasksFinish();
+            CreateCloseUtils.createNewProject(robot, "test-project", CreateCloseUtils.NewProjectType.PLAIN_JAVA);
+            ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+            ProjectUtility.closeGotItPopup(robot);
+
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
+            ideStatusBar.waitUntilAllBgTasksFinish();
+        }
     }
 
     public RemoteRobot getRobotReference() {

@@ -107,817 +107,817 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.inst
 
 public class OdoCli implements Odo {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
-    private static final String DEFAULT_NAMESPACE = "default";
-    private static final String WINDOW_TITLE = "OpenShift";
+  private static final String DEFAULT_NAMESPACE = "default";
+  private static final String WINDOW_TITLE = "OpenShift";
 
-    private static final String METADATA_FIELD = "metadata";
-    private static final String NAME_FIELD = "name";
-    private static final String NAMESPACE_FIELD = "namespace";
-    private static final String SPEC_FIELD = "spec";
-    private final com.intellij.openapi.project.Project project;
-    private final String command;
-    private final KubernetesClient client;
-    private final OpenShiftClient openshiftClient;
-    private final Map<String, String> envVars;
-    private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
-    private String currentNamespace;
-    private JSonParser swagger;
+  private static final String METADATA_FIELD = "metadata";
+  private static final String NAME_FIELD = "name";
+  private static final String NAMESPACE_FIELD = "namespace";
+  private static final String SPEC_FIELD = "spec";
+  private final com.intellij.openapi.project.Project project;
+  private final String command;
+  private final KubernetesClient client;
+  private final OpenShiftClient openshiftClient;
+  private final Map<String, String> envVars;
+  private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
+  private String currentNamespace;
+  private JSonParser swagger;
 
-    public OdoCli(com.intellij.openapi.project.Project project, String command) {
-        this(project,
-            command,
-            ApplicationManager.getApplication().getMessageBus(),
-            new KubernetesClientFactory(),
-            new OpenShiftClientFactory(),
-            new EnvVarFactory(),
-            new TelemetryReport());
-    }
+  public OdoCli(com.intellij.openapi.project.Project project, String command) {
+    this(project,
+      command,
+      ApplicationManager.getApplication().getMessageBus(),
+      new KubernetesClientFactory(),
+      new OpenShiftClientFactory(),
+      new EnvVarFactory(),
+      new TelemetryReport());
+  }
 
-    protected OdoCli(
-        com.intellij.openapi.project.Project project,
-        String command,
-        MessageBus bus,
-        Supplier<KubernetesClient> kubernetesClientFactory,
-        Function<KubernetesClient, OpenShiftClient> openshiftClientFactory,
-        Function<String, Map<String, String>> envVarFactory,
-        TelemetryReport telemetryReport) {
-        this.command = command;
-        this.project = project;
-        MessageBusConnection connection = bus.connect();
-        this.client = kubernetesClientFactory.get();
-        this.openshiftClient = openshiftClientFactory.apply(client);
-        this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
-        telemetryReport.addOdoTelemetryVars(envVars);
-        connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
-            telemetryReport.onTelemetryConfigurationChanged(this.envVars));
-        telemetryReport.report(client);
-    }
+  protected OdoCli(
+    com.intellij.openapi.project.Project project,
+    String command,
+    MessageBus bus,
+    Supplier<KubernetesClient> kubernetesClientFactory,
+    Function<KubernetesClient, OpenShiftClient> openshiftClientFactory,
+    Function<String, Map<String, String>> envVarFactory,
+    TelemetryReport telemetryReport) {
+    this.command = command;
+    this.project = project;
+    MessageBusConnection connection = bus.connect();
+    this.client = kubernetesClientFactory.get();
+    this.openshiftClient = openshiftClientFactory.apply(client);
+    this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
+    telemetryReport.addOdoTelemetryVars(envVars);
+    connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
+      telemetryReport.onTelemetryConfigurationChanged(this.envVars));
+    telemetryReport.report(client);
+  }
 
-    private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
-        ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
-        try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {
-            BinaryOperator<String> reducer = new BinaryOperator<>() {
-                private boolean notificationFound = false;
+  private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
+    ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
+    try (BufferedReader reader = new BufferedReader(new StringReader(output.getStdOut()))) {
+      BinaryOperator<String> reducer = new BinaryOperator<>() {
+        private boolean notificationFound = false;
 
-                @Override
-                public String apply(String s, String s2) {
-                    if (s2.startsWith("---")) {
-                        notificationFound = true;
-                    }
-                    return notificationFound ? s : s + s2 + "\n";
-                }
-            };
-            return reader.lines().reduce("", reducer);
+        @Override
+        public String apply(String s, String s2) {
+          if (s2.startsWith("---")) {
+            notificationFound = true;
+          }
+          return notificationFound ? s : s + s2 + "\n";
         }
+      };
+      return reader.lines().reduce("", reducer);
     }
+  }
 
-    private static String execute(String command, Map<String, String> envs, String... args) throws IOException {
-        return execute(new File(HOME_FOLDER), command, envs, args);
+  private static String execute(String command, Map<String, String> envs, String... args) throws IOException {
+    return execute(new File(HOME_FOLDER), command, envs, args);
+  }
+
+  private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
+    final SimpleModule module = new SimpleModule();
+    module.addDeserializer(List.class, deserializer);
+    return new ObjectMapper(new JsonFactory()).registerModule(module);
+  }
+
+  @Override
+  public List<String> getNamespaces() throws IOException {
+    try {
+      return getNamespacesOrProjects().stream()
+        .map(resource -> resource.getMetadata().getName())
+        .collect(Collectors.toList());
+    } catch (KubernetesClientException e) {
+      throw new IOException(e);
     }
+  }
 
-    private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
-        final SimpleModule module = new SimpleModule();
-        module.addDeserializer(List.class, deserializer);
-        return new ObjectMapper(new JsonFactory()).registerModule(module);
+  private List<? extends HasMetadata> getNamespacesOrProjects() {
+    if (isOpenShift()) {
+      return openshiftClient.projects().list().getItems();
+    } else {
+      return client.namespaces().list().getItems();
     }
+  }
 
-    @Override
-    public List<String> getNamespaces() throws IOException {
+  @Override
+  public String getCurrentNamespace() {
+    if (currentNamespace == null) {
+      currentNamespace = getCurrentNamespace(client.getNamespace());
+    }
+    return currentNamespace;
+  }
+
+  private String getCurrentNamespace(String name) {
+    String namespace = name;
+    if (Strings.isEmpty(name)) {
+      namespace = DEFAULT_NAMESPACE;
+    }
+    return namespace;
+  }
+
+  @Override
+  public boolean namespaceExists(String name) {
+    try {
+      if (isOpenShift()) {
+        return openshiftClient.projects().withName(name).get() != null;
+      } else {
+        return client.namespaces().withName(name).get() != null;
+      }
+    } catch (KubernetesClientException e) {
+      return false;
+    }
+  }
+
+  @Override
+  public String getNamespaceKind() {
+    if (isOpenShift()) {
+      return "Project";
+    } else {
+      return "Namespace";
+    }
+  }
+
+  @Override
+  public void start(String context, ComponentFeature feature, ProcessHandler handler, ProcessAdapter processAdapter) throws IOException {
+    if (handler == null) {
+      List<String> args = new ArrayList<>();
+      args.add(command);
+      args.addAll(feature.getStartArgs());
+      ExecHelper.executeWithTerminal(
+        this.project, WINDOW_TITLE,
+        new File(context),
+        false,
+        envVars,
+        null,
+        null,
+        processAdapter,
+        args.toArray(new String[0]));
+    }
+  }
+
+  @Override
+  public void start(String context, String component, ComponentFeature feature,
+                    Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void stop(String context, ComponentFeature feature, ProcessHandler handler) throws IOException {
+    if (context != null && handler != null) {
+      handler.destroyProcess();
+      if (!feature.getStopArgs().isEmpty()) {
+        execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[0]));
+      }
+    }
+  }
+
+  @Override
+  public void stop(String context, String component, ComponentFeature feature) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isStarted(String component, ComponentFeature feature) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void describeComponent(String context) throws IOException {
+    if (context != null) {
+      ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe", "component");
+    }
+  }
+
+  @Override
+  public List<ComponentMetadata> analyze(String path) throws IOException {
+    return configureObjectMapper(new ComponentMetadatasDeserializer()).readValue(
+      execute(new File(path), command, envVars, "analyze", "-o", "json"),
+      new TypeReference<>() {
+      });
+  }
+
+  @Override
+  public void createComponent(String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
+    List<String> args = new ArrayList<>();
+    args.add("init");
+    if (!Strings.isEmptyOrSpaces(devfile)) {
+      args.add("--devfile-path");
+      args.add(devfile);
+    } else {
+      if (!Strings.isEmptyOrSpaces(starter)) {
+        args.add("--starter");
+        args.add(starter);
+      }
+      args.add("--devfile");
+      args.add(componentType);
+      args.add("--devfile-registry");
+      args.add(registryName);
+    }
+    args.add("--name");
+    args.add(component);
+    execute(new File(source), command, envVars, args.toArray(new String[0]));
+  }
+
+  private CustomResourceDefinitionContext toCustomResourceDefinitionContext(org.jboss.tools.intellij.openshift.utils.odo.Service service) {
+    String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
+    String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
+    return new CustomResourceDefinitionContext.Builder()
+      .withName(service.getKind().toLowerCase() + "s." + group)
+      .withGroup(group)
+      .withScope(Scope.NAMESPACED.value())
+      .withKind(service.getKind())
+      .withPlural(Pluralize.toPlural(service.getKind().toLowerCase()))
+      .withVersion(version)
+      .build();
+  }
+
+  @Override
+  public void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
+                            String service, ObjectNode spec, boolean wait) throws IOException {
+    try {
+      ObjectNode payload = serviceCRD.getSample().deepCopy();
+      updatePayload(payload, spec, project, service);
+      client.resource(Serialization.json().writeValueAsString(payload)).create();
+    } catch (KubernetesClientException e) {
+      throw new IOException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
+    ObjectNode objectNode = (ObjectNode) node;
+    ObjectNode metadataField = (ObjectNode) objectNode.get(METADATA_FIELD);
+    metadataField.set(NAME_FIELD, Serialization.json().getNodeFactory().textNode(service));
+    metadataField.set(NAMESPACE_FIELD, Serialization.json().getNodeFactory().textNode(project));
+    if (spec != null) {
+      objectNode.set(SPEC_FIELD, spec);
+    }
+  }
+
+  @Override
+  public void deleteService(String project, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
+    try {
+      CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
+      client.genericKubernetesResources(context).inNamespace(project).withName(service.getName()).delete();
+    } catch (KubernetesClientException e) {
+      throw new IOException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  @Override
+  public List<DevfileComponentType> getComponentTypes() throws IOException {
+    return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
+      execute(command, envVars, "registry", "list", "-o", "json"),
+      new TypeReference<>() {
+      });
+  }
+
+  private void loadSwagger() {
+    try {
+      HttpRequest req = client.getHttpClient().newHttpRequestBuilder().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
+      CompletableFuture<HttpResponse<byte[]>> completableFuture = client.getHttpClient()
+        .sendAsync(req, byte[].class);
+      HttpResponse<byte[]> response = completableFuture.get();
+      if (response.isSuccessful()) {
+        swagger = new JSonParser(new ObjectMapper().readTree(response.body()));
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    } catch (IOException | ExecutionException e) {
+      LOGGER.warn(e.getLocalizedMessage(), e);
+    }
+  }
+
+  private ObjectNode findSchema(String crd) {
+    try {
+      if (swaggerLoaded.compareAndSet(false, true)) {
+        loadSwagger();
+      }
+      if (swagger != null) {
+        return swagger.findSchema("/apis/" + crd);
+      }
+    } catch (IOException e) {
+      LOGGER.warn(e.getLocalizedMessage(), e);
+    }
+    return null;
+  }
+
+  private void getTargetCRD(GenericKubernetesResource resource,
+                            List<GenericKubernetesResource> bindableKinds) {
+    if (resource.getAdditionalPropertiesNode() != null &&
+      resource.getAdditionalPropertiesNode().has("status")) {
+      for (JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
+        if (status.has("group") && status.has("kind") && status.has("version")) {
+          GenericKubernetesResource bindableKind = new GenericKubernetesResource();
+          bindableKind.setApiVersion(status.get("group").asText() + '/' + status.get("version").asText());
+          bindableKind.setKind(status.get("kind").asText());
+          bindableKinds.add(bindableKind);
+        }
+      }
+    }
+  }
+
+  private List<GenericKubernetesResource> getBindableKinds() {
+    List<GenericKubernetesResource> bindableKinds = new ArrayList<>();
+    client.genericKubernetesResources("binding.operators.coreos.com/v1alpha1", "BindableKinds")
+      .list()
+      .getItems()
+      .forEach(r -> getTargetCRD(r, bindableKinds));
+    return bindableKinds;
+  }
+
+  @Override
+  public List<ServiceTemplate> getServiceTemplates() {
+    try {
+      List<GenericKubernetesResource> bindableKinds = getBindableKinds();
+      // if cluster (either openshift or Kubernetes) supports  operators
+      OpenShiftOperatorHubAPIGroupDSL hubClient = client.adapt(OpenShiftOperatorHubAPIGroupClient.class);
+      ServiceTemplatesDeserializer deserializer = new ServiceTemplatesDeserializer(this::findSchema, bindableKinds);
+      return deserializer.fromList(hubClient.clusterServiceVersions().list());
+    } catch (KubernetesClientException e) {
+      // if client can't be adapted to OperatorHub
+      return Collections.emptyList();
+    }
+  }
+
+  private List<URL> parseURLs(String json) throws IOException {
+    JSonParser parser = new JSonParser(Serialization.json().readTree(json));
+    return parser.parseURLS();
+  }
+
+  @Override
+  public List<URL> listURLs(String context) throws IOException {
+    if (context != null) {
+      return parseURLs(execute(new File(context), command, envVars, "describe", "component", "-o", "json"));
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public ComponentInfo getComponentInfo(String project, String component, String path,
+                                        ComponentKind kind) throws IOException {
+    if (path != null) {
+      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind);
+    } else {
+      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind);
+    }
+  }
+
+  private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
+    JSonParser parser = new JSonParser(Serialization.json().readTree(json));
+    return parser.parseDescribeComponentInfo(kind);
+  }
+
+  /*
+   * We should emulate oc delete all -l app.kubernetes.io/component=comp_name but as the Kubernetes client does not allow
+   * to retrieve all APIGroups we reduce the scope to:
+   * - Deployment
+   * - Service
+   * - Route
+   * - BuildConfig
+   * - ImageStreams
+   */
+  private void deleteDeployment(String project, String deployment) throws IOException {
+    try {
+      client.apps().deployments().inNamespace(project).withName(deployment)
+        .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
+      client.services().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment).list()
+        .getItems().forEach(service -> client.services().withName(service.getMetadata().getName())
+          .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+      if (openshiftClient != null) {
+        openshiftClient.routes().inNamespace(project).withLabelIn(KubernetesLabels.COMPONENT_LABEL, deployment).list()
+          .getItems().forEach(route -> openshiftClient.routes().withName(route.getMetadata().getName())
+            .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+        openshiftClient.buildConfigs().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
+          .list().getItems().forEach(bc -> openshiftClient.buildConfigs().withName(bc.getMetadata().getName())
+            .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+        openshiftClient.imageStreams().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
+          .list().getItems().forEach(is -> openshiftClient.imageStreams().withName(is.getMetadata().getName())
+            .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+      }
+    } catch (KubernetesClientException e) {
+      throw new IOException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  @Override
+  public void deleteComponent(String project, String context, String component,
+                              ComponentKind kind) throws IOException {
+    if (kind != ComponentKind.OTHER) {
+      List<String> args = new ArrayList<>();
+      args.add("delete");
+      args.add("component");
+      args.add("-f");
+      if (context != null) {
+        File dir = createWorkingDirectory(context);
         try {
-            return getNamespacesOrProjects().stream()
-                .map(resource -> resource.getMetadata().getName())
-                .collect(Collectors.toList());
-        } catch (KubernetesClientException e) {
-            throw new IOException(e);
+          execute(dir, command, envVars, args.toArray(new String[0]));
+        } catch (IOException e) {
+          LOGGER.warn(e.getLocalizedMessage(), e);
         }
-    }
-
-    private List<? extends HasMetadata> getNamespacesOrProjects() {
-        if (isOpenShift()) {
-            return openshiftClient.projects().list().getItems();
-        } else {
-            return client.namespaces().list().getItems();
-        }
-    }
-
-    @Override
-    public String getCurrentNamespace() {
-        if (currentNamespace == null) {
-            currentNamespace = getCurrentNamespace(client.getNamespace());
-        }
-        return currentNamespace;
-    }
-
-    private String getCurrentNamespace(String name) {
-        String namespace = name;
-        if (Strings.isEmpty(name)) {
-            namespace = DEFAULT_NAMESPACE;
-        }
-        return namespace;
-    }
-
-    @Override
-    public boolean namespaceExists(String name) {
-        try {
-            if (isOpenShift()) {
-                return openshiftClient.projects().withName(name).get() != null;
-            } else {
-                return client.namespaces().withName(name).get() != null;
-            }
-        } catch (KubernetesClientException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public String getNamespaceKind() {
-        if (isOpenShift()) {
-            return "Project";
-        } else {
-            return "Namespace";
-        }
-    }
-
-    @Override
-    public void start(String context, ComponentFeature feature, ProcessHandler handler, ProcessAdapter processAdapter) throws IOException {
-        if (handler == null) {
-            List<String> args = new ArrayList<>();
-            args.add(command);
-            args.addAll(feature.getStartArgs());
-            ExecHelper.executeWithTerminal(
-                this.project, WINDOW_TITLE,
-                new File(context),
-                false,
-                envVars,
-                null,
-                null,
-                processAdapter,
-                args.toArray(new String[0]));
-        }
-    }
-
-    @Override
-    public void start(String context, String component, ComponentFeature feature,
-                      Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void stop(String context, ComponentFeature feature, ProcessHandler handler) throws IOException {
-        if (context != null && handler != null) {
-            handler.destroyProcess();
-            if (!feature.getStopArgs().isEmpty()) {
-                execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[0]));
-            }
-        }
-    }
-
-    @Override
-    public void stop(String context, String component, ComponentFeature feature) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isStarted(String component, ComponentFeature feature) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void describeComponent(String context) throws IOException {
-        if (context != null) {
-            ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, createWorkingDirectory(context), false, envVars, command, "describe", "component");
-        }
-    }
-
-    @Override
-    public List<ComponentMetadata> analyze(String path) throws IOException {
-        return configureObjectMapper(new ComponentMetadatasDeserializer()).readValue(
-            execute(new File(path), command, envVars, "analyze", "-o", "json"),
-            new TypeReference<>() {
-            });
-    }
-
-    @Override
-    public void createComponent(String componentType, String registryName, String component, String source, String devfile, String starter) throws IOException {
-        List<String> args = new ArrayList<>();
-        args.add("init");
-        if (!Strings.isEmptyOrSpaces(devfile)) {
-            args.add("--devfile-path");
-            args.add(devfile);
-        } else {
-            if (!Strings.isEmptyOrSpaces(starter)) {
-                args.add("--starter");
-                args.add(starter);
-            }
-            args.add("--devfile");
-            args.add(componentType);
-            args.add("--devfile-registry");
-            args.add(registryName);
-        }
+        Files.delete(new File(dir, "devfile.yaml").toPath());
+        FileUtils.deleteQuietly(new File(dir, PLUGIN_FOLDER));
+      } else {
+        args.add("--namespace");
+        args.add(project);
         args.add("--name");
         args.add(component);
-        execute(new File(source), command, envVars, args.toArray(new String[0]));
+        execute(command, envVars, args.toArray(new String[0]));
+      }
+    } else {
+      deleteDeployment(project, component);
     }
+  }
 
-    private CustomResourceDefinitionContext toCustomResourceDefinitionContext(org.jboss.tools.intellij.openshift.utils.odo.Service service) {
-        String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
-        String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
-        return new CustomResourceDefinitionContext.Builder()
-            .withName(service.getKind().toLowerCase() + "s." + group)
-            .withGroup(group)
-            .withScope(Scope.NAMESPACED.value())
-            .withKind(service.getKind())
-            .withPlural(Pluralize.toPlural(service.getKind().toLowerCase()))
-            .withVersion(version)
-            .build();
+  private void doLog(String context, boolean follow, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
+    int index = deploy ? 1 : 0;
+    ProcessHandler handler = handlers.get(index);
+    if (handler == null) {
+      List<String> args = new ArrayList<>();
+      args.add(command);
+      args.add("logs");
+      if (deploy) {
+        args.add("--deploy");
+      } else {
+        args.add("--dev");
+      }
+      if (follow) {
+        args.add("--follow");
+      }
+      if (!Strings.isEmptyOrSpaces(platform)) {
+        args.add("--platform");
+        args.add(platform);
+      }
+      ExecHelper.executeWithTerminal(
+        this.project, WINDOW_TITLE,
+        new File(context),
+        false,
+        envVars,
+        null,
+        null,
+        new ProcessAdapter() {
+          @Override
+          public void startNotified(@NotNull ProcessEvent event) {
+            handlers.set(index, event.getProcessHandler());
+          }
+
+          @Override
+          public void processTerminated(@NotNull ProcessEvent event) {
+            handlers.set(index, null);
+          }
+        },
+        args.toArray(new String[0]));
     }
+  }
 
-    @Override
-    public void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
-                              String service, ObjectNode spec, boolean wait) throws IOException {
-        try {
-            ObjectNode payload = serviceCRD.getSample().deepCopy();
-            updatePayload(payload, spec, project, service);
-            client.resource(Serialization.json().writeValueAsString(payload)).create();
-        } catch (KubernetesClientException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
-        }
+  @Override
+  public void follow(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
+    doLog(context, true, deploy, platform, handlers);
+  }
+
+  @Override
+  public void follow(String context, String component, boolean deploy, String platform) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
+    doLog(context, false, deploy, platform, handlers);
+  }
+
+  @Override
+  public void log(String context, String component, boolean deploy, String platform) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isLogRunning(String component, boolean deploy) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Nullable
+  private File createWorkingDirectory(String context) {
+    if (context != null) {
+      return new File(context);
     }
+    return null;
+  }
 
-    private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
-        ObjectNode objectNode = (ObjectNode) node;
-        ObjectNode metadataField = (ObjectNode) objectNode.get(METADATA_FIELD);
-        metadataField.set(NAME_FIELD, Serialization.json().getNodeFactory().textNode(service));
-        metadataField.set(NAMESPACE_FIELD, Serialization.json().getNodeFactory().textNode(project));
-        if (spec != null) {
-            objectNode.set(SPEC_FIELD, spec);
-        }
+  @Override
+  public void createProject(String project) throws IOException {
+    execute(command, envVars, "create", NAMESPACE_FIELD, project, "-w");
+  }
+
+  @Override
+  public void deleteProject(String project) throws IOException {
+    execute(command, envVars, "delete", NAMESPACE_FIELD, project, "-f", "-w");
+    if (project.equals(currentNamespace)) {
+      currentNamespace = null;
     }
+  }
 
-    @Override
-    public void deleteService(String project, org.jboss.tools.intellij.openshift.utils.odo.Service service) throws IOException {
-        try {
-            CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
-            client.genericKubernetesResources(context).inNamespace(project).withName(service.getName()).delete();
-        } catch (KubernetesClientException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
-        }
+  @Override
+  public void setProject(String project) throws IOException {
+    execute(command, envVars, "set", NAMESPACE_FIELD, project);
+  }
+
+  @Override
+  public void login(String url, String userName, char[] password, char[] token) throws IOException {
+    if (userName != null && !userName.isEmpty()) {
+      execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), "--insecure-skip-tls-verify");
+    } else {
+      execute(command, envVars, "login", url, "-t", String.valueOf(token), "--insecure-skip-tls-verify");
     }
+  }
 
-    @Override
-    public List<DevfileComponentType> getComponentTypes() throws IOException {
-        return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
-            execute(command, envVars, "registry", "list", "-o", "json"),
-            new TypeReference<>() {
-            });
+  @Override
+  public boolean isAuthorized() {
+    try {
+      client.authorization().v1().getApiGroups();
+      // retrieving api groups worked, we're authorized
+      return true;
+    } catch (KubernetesClientException e) {
+      if (KubernetesClientExceptionUtils.isUnauthorized(e)) {
+        // retrieving api groups didn't work, we're NOT authorized
+        return false;
+      } else if (KubernetesClientExceptionUtils.isForbidden(e)) {
+        // retrieving api groups didn't work, but we're authorized
+        return true;
+      } else {
+        throw e;
+      }
     }
+  }
 
-    private void loadSwagger() {
-        try {
-            HttpRequest req = client.getHttpClient().newHttpRequestBuilder().url(new java.net.URL(client.getMasterUrl(), "/openapi/v2")).build();
-            CompletableFuture<HttpResponse<byte[]>> completableFuture = client.getHttpClient()
-                .sendAsync(req, byte[].class);
-            HttpResponse<byte[]> response = completableFuture.get();
-            if (response.isSuccessful()) {
-                swagger = new JSonParser(new ObjectMapper().readTree(response.body()));
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (IOException | ExecutionException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
-    }
+  @Override
+  public List<Component> getComponents(String project) throws IOException {
+    return configureObjectMapper(new ComponentDeserializer()).readValue(
+      execute(command, envVars, "list", "--namespace", project, "-o", "json"),
+      new TypeReference<>() {
+      });
+  }
 
-    private ObjectNode findSchema(String crd) {
-        try {
-            if (swaggerLoaded.compareAndSet(false, true)) {
-                loadSwagger();
-            }
-            if (swagger != null) {
-                return swagger.findSchema("/apis/" + crd);
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    private void getTargetCRD(GenericKubernetesResource resource,
-                              List<GenericKubernetesResource> bindableKinds) {
-        if (resource.getAdditionalPropertiesNode() != null &&
-            resource.getAdditionalPropertiesNode().has("status")) {
-            for (JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
-                if (status.has("group") && status.has("kind") && status.has("version")) {
-                    GenericKubernetesResource bindableKind = new GenericKubernetesResource();
-                    bindableKind.setApiVersion(status.get("group").asText() + '/' + status.get("version").asText());
-                    bindableKind.setKind(status.get("kind").asText());
-                    bindableKinds.add(bindableKind);
-                }
-            }
-        }
-    }
-
-    private List<GenericKubernetesResource> getBindableKinds() {
-        List<GenericKubernetesResource> bindableKinds = new ArrayList<>();
-        client.genericKubernetesResources("binding.operators.coreos.com/v1alpha1", "BindableKinds")
-            .list()
-            .getItems()
-            .forEach(r -> getTargetCRD(r, bindableKinds));
-        return bindableKinds;
-    }
-
-    @Override
-    public List<ServiceTemplate> getServiceTemplates() {
-        try {
-            List<GenericKubernetesResource> bindableKinds = getBindableKinds();
-            // if cluster (either openshift or Kubernetes) supports  operators
-            OpenShiftOperatorHubAPIGroupDSL hubClient = client.adapt(OpenShiftOperatorHubAPIGroupClient.class);
-            ServiceTemplatesDeserializer deserializer = new ServiceTemplatesDeserializer(this::findSchema, bindableKinds);
-            return deserializer.fromList(hubClient.clusterServiceVersions().list());
-        } catch (KubernetesClientException e) {
-            // if client can't be adapted to OperatorHub
-            return Collections.emptyList();
-        }
-    }
-
-    private List<URL> parseURLs(String json) throws IOException {
-        JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-        return parser.parseURLS();
-    }
-
-    @Override
-    public List<URL> listURLs(String context) throws IOException {
-        if (context != null) {
-            return parseURLs(execute(new File(context), command, envVars, "describe", "component", "-o", "json"));
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
-    public ComponentInfo getComponentInfo(String project, String component, String path,
-                                          ComponentKind kind) throws IOException {
-        if (path != null) {
-            return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind);
-        } else {
-            return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind);
-        }
-    }
-
-    private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
-        JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-        return parser.parseDescribeComponentInfo(kind);
-    }
-
-    /*
-     * We should emulate oc delete all -l app.kubernetes.io/component=comp_name but as the Kubernetes client does not allow
-     * to retrieve all APIGroups we reduce the scope to:
-     * - Deployment
-     * - Service
-     * - Route
-     * - BuildConfig
-     * - ImageStreams
-     */
-    private void deleteDeployment(String project, String deployment) throws IOException {
-        try {
-            client.apps().deployments().inNamespace(project).withName(deployment)
-                .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
-            client.services().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment).list()
-                .getItems().forEach(service -> client.services().withName(service.getMetadata().getName())
-                    .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
-            if (openshiftClient != null) {
-                openshiftClient.routes().inNamespace(project).withLabelIn(KubernetesLabels.COMPONENT_LABEL, deployment).list()
-                    .getItems().forEach(route -> openshiftClient.routes().withName(route.getMetadata().getName())
-                        .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
-                openshiftClient.buildConfigs().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
-                    .list().getItems().forEach(bc -> openshiftClient.buildConfigs().withName(bc.getMetadata().getName())
-                        .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
-                openshiftClient.imageStreams().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
-                    .list().getItems().forEach(is -> openshiftClient.imageStreams().withName(is.getMetadata().getName())
-                        .withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
-            }
-        } catch (KubernetesClientException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    @Override
-    public void deleteComponent(String project, String context, String component,
-                                  ComponentKind kind) throws IOException {
-        if (kind != ComponentKind.OTHER) {
-            List<String> args = new ArrayList<>();
-            args.add("delete");
-            args.add("component");
-            args.add("-f");
-            if (context != null) {
-                File dir = createWorkingDirectory(context);
-                try {
-                    execute(dir, command, envVars, args.toArray(new String[0]));
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-                Files.delete(new File(dir, "devfile.yaml").toPath());
-                FileUtils.deleteQuietly(new File(dir, PLUGIN_FOLDER));
-            } else {
-                args.add("--namespace");
-                args.add(project);
-                args.add("--name");
-                args.add(component);
-                execute(command, envVars, args.toArray(new String[0]));
-            }
-        } else {
-            deleteDeployment(project, component);
-        }
-    }
-
-    private void doLog(String context, boolean follow, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
-        int index = deploy ? 1 : 0;
-        ProcessHandler handler = handlers.get(index);
-        if (handler == null) {
-            List<String> args = new ArrayList<>();
-            args.add(command);
-            args.add("logs");
-            if (deploy) {
-                args.add("--deploy");
-            } else {
-                args.add("--dev");
-            }
-            if (follow) {
-                args.add("--follow");
-            }
-            if (!Strings.isEmptyOrSpaces(platform)) {
-                args.add("--platform");
-                args.add(platform);
-            }
-            ExecHelper.executeWithTerminal(
-                this.project, WINDOW_TITLE,
-                new File(context),
-                false,
-                envVars,
-                null,
-                null,
-                new ProcessAdapter() {
-                    @Override
-                    public void startNotified(@NotNull ProcessEvent event) {
-                        handlers.set(index, event.getProcessHandler());
-                    }
-
-                    @Override
-                    public void processTerminated(@NotNull ProcessEvent event) {
-                        handlers.set(index, null);
-                    }
-                },
-                args.toArray(new String[0]));
-        }
-    }
-
-    @Override
-    public void follow(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
-        doLog(context, true, deploy, platform, handlers);
-    }
-
-    @Override
-    public void follow(String context, String component, boolean deploy, String platform) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
-        doLog(context, false, deploy, platform, handlers);
-    }
-
-    @Override
-    public void log(String context, String component, boolean deploy, String platform) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isLogRunning(String component, boolean deploy) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Nullable
-    private File createWorkingDirectory(String context) {
-        if (context != null) {
-            return new File(context);
-        }
-        return null;
-    }
-
-    @Override
-    public void createProject(String project) throws IOException {
-        execute(command, envVars, "create", NAMESPACE_FIELD, project, "-w");
-    }
-
-    @Override
-    public void deleteProject(String project) throws IOException {
-        execute(command, envVars, "delete", NAMESPACE_FIELD, project, "-f", "-w");
-        if (project.equals(currentNamespace)) {
-            currentNamespace = null;
-        }
-    }
-
-    @Override
-    public void setProject(String project) throws IOException {
-        execute(command, envVars, "set", NAMESPACE_FIELD, project);
-    }
-
-    @Override
-    public void login(String url, String userName, char[] password, char[] token) throws IOException {
-        if (userName != null && !userName.isEmpty()) {
-            execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), "--insecure-skip-tls-verify");
-        } else {
-            execute(command, envVars, "login", url, "-t", String.valueOf(token), "--insecure-skip-tls-verify");
-        }
-    }
-
-    @Override
-    public boolean isAuthorized() {
-        try {
-            client.authorization().v1().getApiGroups();
-            // retrieving api groups worked, we're authorized
-            return true;
-        } catch (KubernetesClientException e) {
-            if (KubernetesClientExceptionUtils.isUnauthorized(e)) {
-                // retrieving api groups didn't work, we're NOT authorized
-                return false;
-            } else if (KubernetesClientExceptionUtils.isForbidden(e)) {
-                // retrieving api groups didn't work, but we're authorized
-                return true;
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    @Override
-    public List<Component> getComponents(String project) throws IOException {
-        return configureObjectMapper(new ComponentDeserializer()).readValue(
-            execute(command, envVars, "list", "--namespace", project, "-o", "json"),
-            new TypeReference<>() {
-            });
-    }
-
-    @Override
-    public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project) throws IOException {
-        try {
-            return configureObjectMapper(new ServiceDeserializer()).readValue(
-                execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
-                new TypeReference<>() {
-                });
-        } catch (IOException e) {
-            //https://github.com/openshift/odo/issues/5010
-            if (e.getMessage().contains("\"no operator backed services found in namespace:") ||
-                e.getMessage().contains("failed to list Operator backed services") ||
-                e.getMessage().contains("Service Binding Operator is not installed")) {
-                return Collections.emptyList();
-            }
-            throw e;
-        }
-    }
-
-    @Override
-    public void about() throws IOException {
-        ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "version");
-    }
-
-    private String generateBindingName(List<Binding> bindings) {
-        int counter = 0;
-        int finalCounter = counter;
-        while (bindings.stream().anyMatch(binding -> binding.getName().equals("b" + finalCounter))) {
-            counter++;
-        }
-        return "b" + counter;
-    }
-
-    @Override
-    public Binding link(String context, String target) throws IOException {
-        List<Binding> bindings = listBindings(context);
-        String bindingName = generateBindingName(bindings);
-        execute(new File(context), command, envVars, "add", "binding", "--name", bindingName, "--service",
-            target, "--bind-as-files=false");
-        return listBindings(context).stream().filter(b -> bindingName.equals(b.getName()))
-            .findFirst()
-            .orElse(null);
-    }
-
-    @Override
-    public List<Binding> listBindings(String context) throws IOException {
-        if (context != null) {
-            return configureObjectMapper(new BindingDeserializer()).readValue(
-                execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
-                new TypeReference<>() {
-                });
-        }
+  @Override
+  public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project) throws IOException {
+    try {
+      return configureObjectMapper(new ServiceDeserializer()).readValue(
+        execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
+        new TypeReference<>() {
+        });
+    } catch (IOException e) {
+      //https://github.com/openshift/odo/issues/5010
+      if (e.getMessage().contains("\"no operator backed services found in namespace:") ||
+        e.getMessage().contains("failed to list Operator backed services") ||
+        e.getMessage().contains("Service Binding Operator is not installed")) {
         return Collections.emptyList();
+      }
+      throw e;
     }
+  }
 
-    @Override
-    public void deleteBinding(String context, String binding) throws IOException {
-        execute(new File(context), command, envVars, "remove", "binding", "--name", binding);
+  @Override
+  public void about() throws IOException {
+    ExecHelper.executeWithTerminal(this.project, WINDOW_TITLE, true, envVars, command, "version");
+  }
+
+  private String generateBindingName(List<Binding> bindings) {
+    int counter = 0;
+    int finalCounter = counter;
+    while (bindings.stream().anyMatch(binding -> binding.getName().equals("b" + finalCounter))) {
+      counter++;
     }
+    return "b" + counter;
+  }
 
-    @Override
-    public void debug(String context, Integer port) throws IOException {
-        ExecHelper.executeWithTerminal(
-            this.project,
-            WINDOW_TITLE,
-            createWorkingDirectory(context),
-            false,
-            envVars,
-            command,
-            "debug", "port-forward", "--local-port", port.toString());
+  @Override
+  public Binding link(String context, String target) throws IOException {
+    List<Binding> bindings = listBindings(context);
+    String bindingName = generateBindingName(bindings);
+    execute(new File(context), command, envVars, "add", "binding", "--name", bindingName, "--service",
+      target, "--bind-as-files=false");
+    return listBindings(context).stream().filter(b -> bindingName.equals(b.getName()))
+      .findFirst()
+      .orElse(null);
+  }
+
+  @Override
+  public List<Binding> listBindings(String context) throws IOException {
+    if (context != null) {
+      return configureObjectMapper(new BindingDeserializer()).readValue(
+        execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
+        new TypeReference<>() {
+        });
     }
+    return Collections.emptyList();
+  }
 
-    @Override
-    public DebugStatus debugStatus(String context) throws IOException {
-        try {
-            String json = execute(new File(context), command, envVars, "debug", "info", "-o", "json");
-            JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-            return parser.parseDebugStatus();
-        } catch (IOException e) {
-            if (e.getMessage().contains("debug is not running")) {
-                return DebugStatus.NOT_RUNNING;
-            }
-            throw e;
-        }
+  @Override
+  public void deleteBinding(String context, String binding) throws IOException {
+    execute(new File(context), command, envVars, "remove", "binding", "--name", binding);
+  }
+
+  @Override
+  public void debug(String context, Integer port) throws IOException {
+    ExecHelper.executeWithTerminal(
+      this.project,
+      WINDOW_TITLE,
+      createWorkingDirectory(context),
+      false,
+      envVars,
+      command,
+      "debug", "port-forward", "--local-port", port.toString());
+  }
+
+  @Override
+  public DebugStatus debugStatus(String context) throws IOException {
+    try {
+      String json = execute(new File(context), command, envVars, "debug", "info", "-o", "json");
+      JSonParser parser = new JSonParser(Serialization.json().readTree(json));
+      return parser.parseDebugStatus();
+    } catch (IOException e) {
+      if (e.getMessage().contains("debug is not running")) {
+        return DebugStatus.NOT_RUNNING;
+      }
+      throw e;
     }
+  }
 
-    @Override
-    public java.net.URL getMasterUrl() {
-        return getMasterUrl(client);
-    }
+  @Override
+  public java.net.URL getMasterUrl() {
+    return getMasterUrl(client);
+  }
 
-    private java.net.URL getMasterUrl(KubernetesClient client) {
-        return client.getMasterUrl();
-    }
+  private java.net.URL getMasterUrl(KubernetesClient client) {
+    return client.getMasterUrl();
+  }
 
-    @Override
-    public String consoleURL() throws IOException {
-        try {
-            if (openshiftClient != null) {
-                VersionInfo info = openshiftClient.getOpenShiftV3Version();
-                if (info == null) {
-                    ConfigMap configMap = openshiftClient.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
-                    if (configMap != null) {
-                        return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
-                    }
-                } else {
-                    ConfigMap configMap = openshiftClient.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
-                    String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
-                    return Serialization.json().readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
-                }
-            }
-            //https://<master-ip>:<apiserver-port>/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-            return client.getMasterUrl() + "console";
-        } catch (KubernetesClientException e) {
-            return client.getMasterUrl().toExternalForm();
-        }
-    }
-
-    @Override
-    public boolean isOpenShift() {
-        return openshiftClient != null;
-    }
-
-    @Override
-    public void migrateComponent(String name) {
-        client.apps().deployments().withLabel(KubernetesLabels.COMPONENT_NAME_LABEL, name).delete();
-    }
-
-    @Override
-    public List<ComponentDescriptor> discover(String path) throws IOException {
-        return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
-            execute(new File(path), command, envVars, "list", "-o", "json"),
-            new TypeReference<>() {
-            });
-    }
-
-    @Override
-    public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
-        String json = execute(command, envVars, "registry", "list", "--devfile-registry", registryName, "--devfile", componentType, "-o", "json");
-        JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-        return parser.parseComponentTypeInfo();
-    }
-
-    @Override
-    public List<DevfileRegistry> listDevfileRegistries() throws IOException {
-        return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
-            execute(command, envVars, "preference", "view", "-o", "json"),
-            new TypeReference<>() {
-            });
-    }
-
-    @Override
-    public void createDevfileRegistry(String name, String url, String token) throws IOException {
-        if (!Strings.isEmptyOrSpaces(token)) {
-            execute(command, envVars, "preference", "add", "registry", name, url, "--token", token);
+  @Override
+  public String consoleURL() throws IOException {
+    try {
+      if (openshiftClient != null) {
+        VersionInfo info = openshiftClient.getOpenShiftV3Version();
+        if (info == null) {
+          ConfigMap configMap = openshiftClient.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
+          if (configMap != null) {
+            return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+          }
         } else {
-            execute(command, envVars, "preference", "add", "registry", name, url);
+          ConfigMap configMap = openshiftClient.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
+          String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
+          return Serialization.json().readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
         }
+      }
+      //https://<master-ip>:<apiserver-port>/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+      return client.getMasterUrl() + "console";
+    } catch (KubernetesClientException e) {
+      return client.getMasterUrl().toExternalForm();
     }
+  }
+
+  @Override
+  public boolean isOpenShift() {
+    return openshiftClient != null;
+  }
+
+  @Override
+  public void migrateComponent(String name) {
+    client.apps().deployments().withLabel(KubernetesLabels.COMPONENT_NAME_LABEL, name).delete();
+  }
+
+  @Override
+  public List<ComponentDescriptor> discover(String path) throws IOException {
+    return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
+      execute(new File(path), command, envVars, "list", "-o", "json"),
+      new TypeReference<>() {
+      });
+  }
+
+  @Override
+  public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
+    String json = execute(command, envVars, "registry", "list", "--devfile-registry", registryName, "--devfile", componentType, "-o", "json");
+    JSonParser parser = new JSonParser(Serialization.json().readTree(json));
+    return parser.parseComponentTypeInfo();
+  }
+
+  @Override
+  public List<DevfileRegistry> listDevfileRegistries() throws IOException {
+    return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
+      execute(command, envVars, "preference", "view", "-o", "json"),
+      new TypeReference<>() {
+      });
+  }
+
+  @Override
+  public void createDevfileRegistry(String name, String url, String token) throws IOException {
+    if (!Strings.isEmptyOrSpaces(token)) {
+      execute(command, envVars, "preference", "add", "registry", name, url, "--token", token);
+    } else {
+      execute(command, envVars, "preference", "add", "registry", name, url);
+    }
+  }
+
+  @Override
+  public void deleteDevfileRegistry(String name) throws IOException {
+    execute(command, envVars, "preference", "remove", "registry", "-f", name);
+  }
+
+  @Override
+  public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
+    return getComponentTypes().stream().
+      filter(type -> name.equals(type.getDevfileRegistry().getName())).
+      collect(Collectors.toList());
+  }
+
+  private static final class KubernetesClientFactory implements Supplier<KubernetesClient> {
 
     @Override
-    public void deleteDevfileRegistry(String name) throws IOException {
-        execute(command, envVars, "preference", "remove", "registry", "-f", name);
+    public KubernetesClient get() {
+      String current = ConfigHelper.getCurrentContextName();
+      Config config = Config.autoConfigure(current);
+      return new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
     }
+
+    private void setSslContext(HttpClient.Builder builder, Config config) {
+      try {
+        X509TrustManager externalTrustManager = new IDEATrustManager().configure(List.of(Arrays.stream(SSLUtils.trustManagers(config))
+          .filter(X509ExtendedTrustManager.class::isInstance)
+          .map(X509ExtendedTrustManager.class::cast).toArray(X509ExtendedTrustManager[]::new)));
+        builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
+      } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
+               UnrecoverableKeyException | InvalidKeySpecException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  private static final class OpenShiftClientFactory implements Function<KubernetesClient, OpenShiftClient> {
+    @Override
+    public OpenShiftClient apply(KubernetesClient client) {
+      OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
+      try {
+        if (osClient.isSupported()) {
+          return osClient;
+        } else {
+          return null;
+        }
+      } catch (KubernetesClientException e) {
+        if (e.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+          // openshift but unauthorized
+          return osClient;
+        } else {
+          return null;
+        }
+      }
+    }
+  }
+
+  protected static final class TelemetryReport {
+
+    public void report(KubernetesClient client) {
+      TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
+      try {
+        ClusterInfo info = ClusterHelper.getClusterInfo(client);
+        telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
+        telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
+        telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
+        asyncSend(telemetry);
+      } catch (RuntimeException e) {
+        // do not send telemetry when there is no context ( ie default kube URL as master URL )
+        asyncSend(telemetry.error(e));
+      }
+    }
+
+    @NotNull
+    private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged(Map<String, String> envVars) {
+      return (String key, String value) -> {
+        if (TelemetryConfiguration.KEY_MODE.equals(key)) {
+          addOdoTelemetryVars(envVars);
+        }
+      };
+    }
+
+    private void addOdoTelemetryVars(Map<String, String> envVars) {
+      if (TelemetryConfiguration.getInstance().isEnabled()) {
+        envVars.put("ODO_TRACKING_CONSENT", "yes");
+        envVars.put("TELEMETRY_CALLER", "intellij");
+      } else {
+        envVars.put("ODO_TRACKING_CONSENT", "no");
+      }
+    }
+  }
+
+  protected static final class EnvVarFactory implements Function<String, Map<String, String>> {
 
     @Override
-    public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
-        return getComponentTypes().stream().
-            filter(type -> name.equals(type.getDevfileRegistry().getName())).
-            collect(Collectors.toList());
+    public Map<String, String> apply(String url) {
+      try {
+        return NetworkUtils.buildEnvironmentVariables(url);
+      } catch (URISyntaxException e) {
+        return Collections.emptyMap();
+      }
     }
-
-    private static final class KubernetesClientFactory implements Supplier<KubernetesClient> {
-
-        @Override
-        public KubernetesClient get() {
-            String current = ConfigHelper.getCurrentContextName();
-            Config config = Config.autoConfigure(current);
-            return new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
-        }
-
-        private void setSslContext(HttpClient.Builder builder, Config config) {
-            try {
-                X509TrustManager externalTrustManager = new IDEATrustManager().configure(Arrays.stream(SSLUtils.trustManagers(config))
-                    .filter(X509ExtendedTrustManager.class::isInstance)
-                    .map(X509ExtendedTrustManager.class::cast).toArray(X509ExtendedTrustManager[]::new));
-                builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
-            } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
-                     UnrecoverableKeyException | InvalidKeySpecException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private static final class OpenShiftClientFactory implements Function<KubernetesClient, OpenShiftClient> {
-        @Override
-        public OpenShiftClient apply(KubernetesClient client) {
-            OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
-            try {
-                if (osClient.isSupported()) {
-                    return osClient;
-                } else {
-                    return null;
-                }
-            } catch (KubernetesClientException e) {
-                if (e.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    // openshift but unauthorized
-                    return osClient;
-                } else {
-                    return null;
-                }
-            }
-        }
-    }
-
-    protected static final class TelemetryReport {
-
-        public void report(KubernetesClient client) {
-            TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
-            try {
-                ClusterInfo info = ClusterHelper.getClusterInfo(client);
-                telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
-                telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
-                telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
-                asyncSend(telemetry);
-            } catch (RuntimeException e) {
-                // do not send telemetry when there is no context ( ie default kube URL as master URL )
-                asyncSend(telemetry.error(e));
-            }
-        }
-
-        @NotNull
-        private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged(Map<String, String> envVars) {
-            return (String key, String value) -> {
-                if (TelemetryConfiguration.KEY_MODE.equals(key)) {
-                    addOdoTelemetryVars(envVars);
-                }
-            };
-        }
-
-        private void addOdoTelemetryVars(Map<String, String> envVars) {
-            if (TelemetryConfiguration.getInstance().isEnabled()) {
-                envVars.put("ODO_TRACKING_CONSENT", "yes");
-                envVars.put("TELEMETRY_CALLER", "intellij");
-            } else {
-                envVars.put("ODO_TRACKING_CONSENT", "no");
-            }
-        }
-    }
-
-    protected static final class EnvVarFactory implements Function<String, Map<String, String>> {
-
-        @Override
-        public Map<String, String> apply(String url) {
-            try {
-                return NetworkUtils.buildEnvironmentVariables(url);
-            } catch (URISyntaxException e) {
-                return Collections.emptyMap();
-            }
-        }
-    }
+  }
 }

@@ -16,34 +16,45 @@ import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 import static com.redhat.devtools.intellij.commonuitest.utils.steps.SharedSteps.waitForComponentByXpath;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
 
 /**
- * 
- * @author Ihor Okhrimenko, Ondrej Dockal
+ *
+ * @author Ihor Okhrimenko, Ondrej Dockal, Martin Szuc
  *
  */
 @DefaultXpath(by = "OpenshiftView type", xpath = "//div[@class='IdeFrameImpl']")
 @FixtureName(name = "Openshift View")
 public class OpenshiftView extends ContainerFixture {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenshiftView.class);
+
     public OpenshiftView(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
         super(remoteRobot, remoteComponent);
     }
 
     public void openView() {
-        final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-        waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable(toolWindowPane, "OpenShift"));
-        toolWindowPane.stripeButton("OpenShift", false).click();
+        if (!isViewOpened()) {
+            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
+            toolWindowPane.button(byXpath(getToolWindowButton(OPENSHIFT)), Duration.ofSeconds(2)).click();
+            LOGGER.info("Openshift view opened");
+        }
     }
 
     public void closeView() {
-        final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-        toolWindowPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
+        if (isViewOpened()) {
+            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
+            toolWindowPane.button(byXpath(getToolWindowButton(OPENSHIFT)), Duration.ofSeconds(2)).click();
+            LOGGER.info("Openshift view closed");
+        }
     }
 
     public void expandOpenshiftViewTree(String path) {
@@ -58,23 +69,26 @@ public class OpenshiftView extends ContainerFixture {
     }
 
     public JTreeFixture getOpenshiftConnectorTree() {
-        return find(JTreeFixture.class, byXpath("//div[@class='Tree']"), Duration.ofSeconds(30));
-    }
-
-    private boolean isStripeButtonAvailable(ToolWindowPane toolWindowPane, String label) {
-        try {
-            toolWindowPane.stripeButton(label, false);
-        } catch (WaitForConditionTimeoutException e) {
-            return false;
-        }
-        return true;
+        return find(JTreeFixture.class, byXpath(TREE_CLASS), Duration.ofSeconds(30));
     }
 
     public void menuRightClickAndSelect(RemoteRobot robot, int row, String selection) {
         getOpenshiftConnectorTree().clickRow(row);
         getOpenshiftConnectorTree().rightClickRow(row);
-        waitForComponentByXpath(robot, 5, 1, byXpath("//div[@text='" + selection + "']"));
-        robot.find(ComponentFixture.class, byXpath("//div[@text='" + selection + "']")).click();
+        waitForComponentByXpath(robot, 5, 1, byXpath(getTextXPath(selection)));
+        robot.find(ComponentFixture.class, byXpath(getTextXPath(selection))).click();
+    }
+
+    private boolean isViewOpened() {
+        try {
+            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
+            toolWindowPane.find(ComponentFixture.class, byXpath(OPENSHIFT_BASELABEL));
+            LOGGER.info("Openshift view: View is already opened");
+            return true;
+        } catch (Exception ignored) {
+            LOGGER.info("Openshift view: View is not opened");
+            return false;
+        }
     }
 
 }

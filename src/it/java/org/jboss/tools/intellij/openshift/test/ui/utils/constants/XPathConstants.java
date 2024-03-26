@@ -16,8 +16,16 @@ public class XPathConstants {
     public static final String JTEXT_FIELD = "//div[@class='JTextField']";
     public static final String JPASSWORD_FIELD = "//div[@class='JPasswordField']";
     public static final String CLUSTER_LOGIN_DIALOG = "//div[@accessiblename='Cluster login' and @class='MyDialog']";
+    public static final String TREE_CLASS = "//div[@class='Tree']";
+    public static final String IDE_FRAME_IMPL = "//div[@class='IdeFrameImpl']";
+    public static final String JEDITOR_PANE = "//div[@class='JEditorPane']";
+    public static final String BACK_BUTTON_GETTING_STARTED = "//div[@accessiblename='<< Getting Started with OpenShift Toolkit' and @class='JLabel' and @text='<< Getting Started with OpenShift Toolkit']";
 
-    public static String toolWindowButton(String label) {
+
+    public static String getToolWindowButton(String label) {
         return "//div[@tooltiptext='" + label + "']";
+    }
+    public static String getTextXPath(String selection) {
+        return "//div[@text='" + selection + "']";
     }
 }

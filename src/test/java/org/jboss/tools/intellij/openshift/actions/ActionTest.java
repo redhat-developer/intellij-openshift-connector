@@ -16,7 +16,9 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.ui.treeStructure.Tree;
+import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
 import org.jboss.tools.intellij.openshift.tree.application.ChartReleaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode;
@@ -48,11 +50,20 @@ public abstract class ActionTest extends BasePlatformTestCase {
     TreeSelectionModel model = mock(TreeSelectionModel.class);
     Tree tree = mock(Tree.class);
     TreePath path = mock(TreePath.class);
+    ApplicationsTreeStructure structure = mock(ApplicationsTreeStructure.class);
     when(path.getLastPathComponent()).thenReturn(selected);
     when(tree.getSelectionModel()).thenReturn(model);
     when(model.getSelectionPath()).thenReturn(path);
-    when(model.getSelectionPaths()).thenReturn(new TreePath[] {path});
+    when(model.getSelectionPaths()).thenReturn(new TreePath[]{path});
     when(event.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
+    when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(structure);
+    if (selected instanceof ApplicationsRootNode) {
+      when(structure.getApplicationsRoot()).thenReturn(selected);
+    } else {
+      CompletableFuture<Odo> odoFuture = createOdoFuture(false);
+      ApplicationsRootNode applicationRootNode = createApplicationRootNode(odoFuture);
+      when(structure.getApplicationsRoot()).thenReturn(applicationRootNode);
+    }
     when(event.getPresentation()).thenReturn(presentation);
     return event;
   }
@@ -140,14 +151,14 @@ public abstract class ActionTest extends BasePlatformTestCase {
     return event;
   }
 
-  private ComponentInfo mockInfo(){
+  private ComponentInfo mockInfo() {
     ComponentInfo.Builder builder = new ComponentInfo.Builder();
     return builder.build();
   }
 
   public void testActionOnLocalDevComponent() {
     AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(ComponentFeature.DEV),
-            ".", mockInfo()));
+      ".", mockInfo()));
     verifyLocalDevComponent(event.getPresentation().isVisible());
   }
 
@@ -156,7 +167,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   public void testActionOnLocalOnlyComponent() {
-    AnActionEvent event = setupActionOnComponent(Component.of("comp", null,  new ComponentFeatures(), ".", mockInfo()));
+    AnActionEvent event = setupActionOnComponent(Component.of("comp", null, new ComponentFeatures(), ".", mockInfo()));
     verifyLocalOnlyComponent(event.getPresentation().isVisible());
   }
 

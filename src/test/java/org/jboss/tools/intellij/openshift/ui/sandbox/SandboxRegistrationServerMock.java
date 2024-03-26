@@ -24,7 +24,7 @@ public class SandboxRegistrationServerMock {
 
     private String currentSignupResponse;
 
-    private static String initialSignupResponse = "{\n" +
+    private static final String initialSignupResponse = "{\n" +
             "            \"apiEndpoint\": \"https://api.crc.testing:6443\",\n" +
             "            \"cheDashboardURL\": \"\",\n" +
             "            \"clusterName\": \"\",\n" +
@@ -41,7 +41,7 @@ public class SandboxRegistrationServerMock {
             "            \"username\": \"\"\n" +
             "        }";
 
-    private static String afterVerificationSignupResponse = "{\n" +
+    private static final String afterVerificationSignupResponse = "{\n" +
             "            \"apiEndpoint\": \"https://api.crc.testing:6443\",\n" +
             "            \"cheDashboardURL\": \"\",\n" +
             "            \"clusterName\": \"\",\n" +
@@ -58,7 +58,7 @@ public class SandboxRegistrationServerMock {
             "            \"username\": \"\"\n" +
             "        }";
 
-    private static String afterVerification1SignupResponse = "{\n" +
+    private static final String afterVerification1SignupResponse = "{\n" +
             "            \"apiEndpoint\": \"https://api.crc.testing:6443\",\n" +
             "            \"cheDashboardURL\": \"\",\n" +
             "            \"clusterName\": \"\",\n" +
@@ -75,7 +75,7 @@ public class SandboxRegistrationServerMock {
             "            \"username\": \"\"\n" +
             "        }";
 
-    private static String afterVerification2SignupResponse = "{\n" +
+    private static final String afterVerification2SignupResponse = "{\n" +
             "            \"apiEndpoint\": \"https://api.crc.testing:6443\",\n" +
             "            \"cheDashboardURL\": \"\",\n" +
             "            \"clusterName\": \"\",\n" +

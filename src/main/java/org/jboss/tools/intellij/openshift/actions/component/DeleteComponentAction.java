@@ -64,7 +64,7 @@ public class DeleteComponentAction extends OdoAction {
             clearProcessing(componentNode);
             sendTelemetryError(e);
             UIHelper.executeInUI(() ->
-                Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete component"));
+                Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Component"));
           }
         },
         "Delete Component...",

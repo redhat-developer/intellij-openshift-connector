@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
@@ -41,7 +42,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
+public class ApplicationsTreeStructure extends AbstractTreeStructure implements MutableModel<Object>, Disposable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsTreeStructure.class);
     private static final String LOGIN = "Please log in to the cluster";
     private static final String CLUSTER_UNREACHABLE = "Error: Cluster not reachable";
@@ -67,14 +68,19 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
 
     @NotNull
     @Override
-    public Object @NotNull [] getChildElements(@NotNull Object element) {
+    public  Object @NotNull [] getChildElements(@NotNull Object element) {
         try {
             if (element == this) {
                 return new Object[]{root, registries};
             } else if (element instanceof ApplicationsRootNode) {
-                return getCurrentNamespace((ApplicationsRootNode) element);
+                return new Object[] {
+                  getCurrentNamespace((ApplicationsRootNode) element),
+                  new HelmRepositoriesNode((ApplicationsRootNode) element)
+                };
             } else if (element instanceof NamespaceNode) {
                 return createNamespaceChildren((NamespaceNode) element);
+            } else if (element instanceof HelmRepositoriesNode) {
+                return createHelmRepositoriesChildren((HelmRepositoriesNode) element);
             } else if (element instanceof ComponentNode) {
                 return createComponentChildren((ComponentNode) element);
             } else if (element instanceof DevfileRegistriesNode) {
@@ -133,8 +139,9 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return nodes.toArray();
     }
 
-    private Object[] getCurrentNamespace(ApplicationsRootNode element) {
-        List<Object> namespaces = new ArrayList<>();
+    @NotNull
+    private Object getCurrentNamespace(ApplicationsRootNode element) {
+        Object node;
         try {
             Odo odo = root.getOdo().getNow(null);
             if (odo == null) {
@@ -143,20 +150,38 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             boolean isAuthorized = odo.isAuthorized();
             element.setLogged(isAuthorized);
             if (!isAuthorized) {
-                namespaces.add(new MessageNode<>(root, root, LOGIN));
+                node = new MessageNode<>(root, root, LOGIN);
             } else {
                 String namespace = odo.getCurrentNamespace();
                 if (namespace != null) {
-                    namespaces.add(new NamespaceNode(element, namespace));
+                    node = new NamespaceNode(element, namespace);
                 } else {
-                    namespaces.add(new CreateNamespaceLinkNode(element));
+                    node = new CreateNamespaceLinkNode(element);
                 }
             }
         } catch (Exception e) {
-            namespaces.add(createErrorNode(element, e));
+            node = createErrorNode(element, e);
             element.setLogged(false);
         }
-        return namespaces.toArray();
+        return node;
+    }
+
+    private Object[] createHelmRepositoriesChildren(HelmRepositoriesNode parent) {
+        Helm helm = root.getHelm(true).getNow(null);
+        if (helm == null) {
+            return new Object[] { new MessageNode<>(root, parent, "Could not list repositories: Helm binary missing.") };
+        }
+            try {
+                var repositories = helm.listRepos();
+                if (repositories == null) {
+                    return new Object[] { new MessageNode<>(root, parent, "Could not list repositories: no repositories defined.") };
+                }
+                return repositories.stream()
+                  .map(repository -> new HelmRepositoryNode(root, parent, repository))
+                  .toArray();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
     }
 
     private MessageNode<?> createErrorNode(ParentableNode<?> parent, Exception e) {
@@ -348,6 +373,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         mutableModelSupport.removeListener(listener);
     }
 
+    @Override
+    public void dispose() {
+      root.dispose();
+    }
+
     public static class ProcessableDescriptor<T> extends LabelAndIconDescriptor<T> {
 
         public ProcessableDescriptor(Project project, T element, Supplier<String> label, Supplier<String> location, Supplier<Icon> nodeIcon, @Nullable NodeDescriptor parentDescriptor) {
@@ -389,5 +419,4 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
             }
         }
     }
-
 }

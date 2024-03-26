@@ -21,7 +21,7 @@ import java.util.List;
 public class AuthorizationServer implements IAuthorizationServer {
 
     @Attribute
-    private String id;
+    private final String id;
 
     private String realm;
 
@@ -31,7 +31,7 @@ public class AuthorizationServer implements IAuthorizationServer {
 
     private String displayName;
 
-    private List<IAccount> accounts = new ArrayList<>();
+    private final List<IAccount> accounts = new ArrayList<>();
 
     public AuthorizationServer(String id) {
         this.id = id;

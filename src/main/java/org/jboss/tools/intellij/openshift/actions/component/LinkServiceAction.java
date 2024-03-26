@@ -73,12 +73,12 @@ public class LinkServiceAction extends OdoAction {
                 } else {
                     String message = "No services to link to";
                     sendTelemetryError(message);
-                    UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link service"));
+                    UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link Service"));
                 }
             } catch (IOException | NoSuchElementException e) {
                 clearProcessing(namespaceNode);
                 sendTelemetryError(e);
-                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link service"));
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link Service"));
             }
         },
         "Link Service...",
@@ -90,7 +90,7 @@ public class LinkServiceAction extends OdoAction {
           .map(Service::getName)
           .toArray(String[]::new);
         return UIHelper.executeInUI(() -> Messages.showEditableChooseDialog("Link service",
-          "Select service",
+          "Select Service",
           Messages.getQuestionIcon(),
           servicesArray,
           servicesArray[0],

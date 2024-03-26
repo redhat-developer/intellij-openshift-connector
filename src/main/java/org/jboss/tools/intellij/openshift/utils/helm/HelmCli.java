@@ -58,6 +58,21 @@ public class HelmCli implements Helm {
     }
 
     @Override
+    public List<HelmRepository> listRepos() throws IOException {
+        ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
+          TelemetryService.NAME_PREFIX_MISC + "helm-list repo");
+        try {
+            LOGGER.info("Listing repos.");
+            String repos = execute(command, Collections.emptyMap(), "repo", "list", "-o=json");
+            asyncSend(telemetry.success());
+            return Serialization.json().readValue(repos, new TypeReference<>() {});
+        } catch (IOException e) {
+            asyncSend(telemetry.error(e));
+            throw e;
+        }
+    }
+
+    @Override
     public List<Chart> search() throws IOException {
         ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
           TelemetryService.NAME_PREFIX_MISC + "helm-list charts");

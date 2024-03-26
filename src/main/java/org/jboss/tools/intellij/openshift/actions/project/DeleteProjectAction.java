@@ -55,7 +55,7 @@ public class DeleteProjectAction extends OdoAction {
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
           sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete project"));
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Project"));
         }
       },
       "Delete Project " + namespaceNode.getName(),

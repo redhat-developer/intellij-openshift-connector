@@ -35,6 +35,7 @@ public abstract class AbstractBaseTest {
 
     protected static RemoteRobot robot;
     private static boolean hasConnectedToTestIDE = false;
+    public static final String DEFAULT_CLUSTER_URL = "no (current) context/cluster set";
 
     @BeforeAll
     public static void connect() {

@@ -15,6 +15,8 @@ public class LabelConstants {
     public static final String DEVFILE_REGISTRIES = "Devfile registries";
     public static final String CANCEL = "Cancel";
     public static final String OPENSHIFT = "OpenShift";
+    public static final String KUBERNETES = "Kubernetes";
     public static final String GETTING_STARTED = "Getting Started";
-
+    public static final String PLEASE_LOG_IN_TO_CLUSTER = "Please log in to the cluster";
+    public static final String ABOUT = "About";
 }

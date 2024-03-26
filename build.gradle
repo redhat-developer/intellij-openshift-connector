@@ -138,7 +138,7 @@ tasks.register('integrationUITest', Test) {
         showFailedStandardStreams true
         showFullStackTraces true
     }
-    jvmArgs "-Djava.awt.headless=true"
+    jvmArgs "-Djava.awt.headless=false"
     jacoco {
         includeNoLocationClasses = true
         excludes = ["jdk.internal.*"]

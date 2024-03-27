@@ -11,8 +11,6 @@
 package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ui.IconManager;
-import com.intellij.ui.SizedIcon;
-import com.intellij.ui.scale.JBUIScale;
 import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
 
 import javax.swing.Icon;
@@ -26,28 +24,25 @@ public class ChartIcons {
   private static final Path BASE_PATH = Paths.get("images", "helm");
   private static final String HELM_ICON = "helm.png";
 
-  public static javax.swing.Icon getIcon(ChartVersions chart) {
+  public static Icon getHelmIcon() {
+    return IconManager.getInstance().getIcon(BASE_PATH.resolve(HELM_ICON).toString(), ChartIcons.class);
+  }
+
+  public static Icon getIcon(ChartVersions chart) {
     return getIcon(chart.getName() + chart.getDescription());
   }
 
-  public static javax.swing.Icon getIcon(ChartRelease chart) {
+  public static Icon getIcon(ChartRelease chart) {
     return getIcon(chart.getChart());
   }
 
-  public static javax.swing.Icon getIcon15x15(ChartRelease chart) {
-    Icon icon = getIcon(chart);
-    float scale = 15f / icon.getIconWidth();
-    SizedIcon sized = JBUIScale.scaleIcon(new SizedIcon(icon, icon.getIconHeight(), icon.getIconHeight()));
-    return sized.scale(scale);
-  }
-
-  private static javax.swing.Icon getIcon(String name) {
+  private static Icon getIcon(String name) {
     Optional<IconExpression> found = Stream.of(IconExpression.values())
       .filter((IconExpression available) -> available.isMatching(name))
       .findFirst();
     return found
       .map(iconExpression -> IconManager.getInstance().getIcon(iconExpression.filename, ChartIcons.class))
-      .orElseGet(() -> IconManager.getInstance().getIcon(BASE_PATH.resolve(HELM_ICON).toString(), ChartIcons.class));
+      .orElseGet(ChartIcons::getHelmIcon);
   }
 
   private enum IconExpression {
@@ -88,5 +83,4 @@ public class ChartIcons {
       return chartText.toLowerCase().contains(substring.toLowerCase());
     }
   }
-
 }

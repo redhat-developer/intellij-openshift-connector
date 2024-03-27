@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,23 +8,10 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.utils.odo;
+package org.jboss.tools.intellij.openshift.tree.application;
 
-public abstract class AbstractComponentType implements ComponentType {
-    private final String name;
-
-    protected AbstractComponentType(String name) {
-        this.name = name;
+public class HelmRepositoriesNode extends BaseNode<ApplicationsRootNode> {
+    public HelmRepositoriesNode(ApplicationsRootNode parent) {
+        super(parent, parent, "Helm");
     }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
-
 }

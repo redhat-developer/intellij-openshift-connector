@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat, Inc.
+ * Copyright (c) 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -14,23 +14,20 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 import java.io.IOException;
 import java.util.List;
 
-public class HelmCliSearchTest extends HelmCliTest {
+public class HelmCliRepoTest extends HelmCliTest {
 
-    public void testSearch_should_list_all_charts() throws IOException {
-        // given openshift a repo was added to helm
+    public void testListRepos_should_list_repo_that_was_added() throws IOException {
+        // given openshift repo was added to helm repos
+        String name = "openshift";
+        String url = "https://charts.openshift.io/";
+        helm.addRepo(name, url);
         // when
-        List<Chart> charts = helm.search();
+        List<HelmRepository> repositories = helm.listRepos();
         // then
-      assertFalse(charts.isEmpty());
-    }
-
-    public void testSearch_should_list_kuberos() throws IOException {
-        // given openshift repo was added to helm
-        String id = Charts.CHART_KUBEROS;
-        // when
-        List<Chart> charts = helm.search(id);
-        // then
-        boolean found = charts.stream().anyMatch((Chart chart) -> chart.getName().contains(id));
+        boolean found = repositories.stream().anyMatch((HelmRepository repository) ->
+            repository.getName().equals(name)
+              && repository.getUrl().equals(url)
+        );
         assertTrue(found);
     }
 

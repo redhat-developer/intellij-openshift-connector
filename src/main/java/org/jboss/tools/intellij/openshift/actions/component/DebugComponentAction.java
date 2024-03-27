@@ -161,7 +161,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
             String selected = UIHelper.executeInUI(() ->
               Messages.showEditableChooseDialog(
                 "The component " + component.getName() + " has several ports to connect to,\nchoose the one the debugger will connect to",
-                "Choose debugger port",
+                "Choose Debugger Port",
                 Messages.getQuestionIcon(),
                 ports,
                 ports[0],

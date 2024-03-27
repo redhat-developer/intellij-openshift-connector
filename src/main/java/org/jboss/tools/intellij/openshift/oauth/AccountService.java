@@ -90,11 +90,17 @@ public class AccountService {
       } else {
         IAccount account = identities.get(0);
         AccountStatus status = getStatus(account);
-        token = switch (status) {
-          case VALID -> account.getToken(tokenType);
-          case NEEDS_REFRESH -> performRefresh(account, tokenType);
-          case NEEDS_LOGIN -> performLogin(server, account, tokenType, context);
-        };
+        switch (status) {
+          case VALID:
+            token = account.getToken(tokenType);
+            break;
+          case NEEDS_REFRESH:
+            token = performRefresh(account, tokenType);
+            break;
+          case NEEDS_LOGIN:
+            token = performLogin(server, account, tokenType, context);
+            break;
+        }
 
       }
       return token;

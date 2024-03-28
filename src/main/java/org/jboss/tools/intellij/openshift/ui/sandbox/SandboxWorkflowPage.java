@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.ui.sandbox;
 
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -19,6 +20,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComponentValidator;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.wizard.WizardNavigationState;
@@ -38,6 +40,8 @@ import javax.swing.event.DocumentEvent;
 import java.io.IOException;
 
 public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
+
+    private final Disposable disposable = Disposer.newDisposable();
     private final SandboxModel model;
     private final Project project;
     private JLabel messageLabel;
@@ -76,11 +80,10 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
                 model.setVerificationCode(verificationCodeText.getText());
             }
         });
-        new ComponentValidator(project).withValidator(new CountryCodeValidator(countryCodeText))
+        new ComponentValidator(disposable).withValidator(new CountryCodeValidator(countryCodeText))
                 .andRegisterOnDocumentListener(countryCodeText).installOn(countryCodeText);
-        new ComponentValidator(project).withValidator(new PhoneNumberValidator(phoneNumberText))
+        new ComponentValidator(disposable).withValidator(new PhoneNumberValidator(phoneNumberText))
                 .andRegisterOnDocumentListener(phoneNumberText).installOn(phoneNumberText);
-
     }
 
     private void reportMessage(String message, boolean error) {
@@ -216,4 +219,17 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
         launchJob();
         return root;
     }
+
+  @Override
+  public boolean onCancel() {
+    Disposer.dispose(disposable);
+    return super.onCancel();
+  }
+
+  @Override
+  public boolean onFinish() {
+      Disposer.dispose(disposable);
+      return super.onFinish();
+  }
+
 }

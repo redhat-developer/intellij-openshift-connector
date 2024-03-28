@@ -41,7 +41,7 @@ public class CreateRegistryAction extends OdoAction {
         DevfileRegistriesNode registriesNode = (DevfileRegistriesNode) selected;
         try {
             List<DevfileRegistry> registries = ProgressManager.getInstance().
-                runProcessWithProgressSynchronously(odo::listDevfileRegistries, "Retrieving registries", true, anActionEvent.getProject());
+                runProcessWithProgressSynchronously(odo::listDevfileRegistries, "Retrieving Registries", true, anActionEvent.getProject());
             CreateRegistryDialog dialog = new CreateRegistryDialog(registries);
             dialog.show();
             if (dialog.isOK()) {
@@ -51,7 +51,7 @@ public class CreateRegistryAction extends OdoAction {
             }
         } catch (IOException e) {
             sendTelemetryError(e);
-            Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create registry");
+            Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Registry");
         }
     }
 

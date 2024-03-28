@@ -32,7 +32,7 @@ public class CreateRegistryDialog extends DialogWrapper {
     public CreateRegistryDialog(List<DevfileRegistry> registries) {
         super(null, false, IdeModalityType.IDE);
         init();
-        setTitle("Create registry");
+        setTitle("Create Registry");
         DocumentAdapter adapter = new DocumentAdapter() {
             @Override
             protected void textChanged(@NotNull DocumentEvent e) {

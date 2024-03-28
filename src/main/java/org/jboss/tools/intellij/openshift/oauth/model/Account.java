@@ -19,7 +19,7 @@ import org.jboss.tools.intellij.openshift.oauth.TokenProvider;
 public class Account implements IAccount {
 
 	@Attribute
-	private String id;
+	private final String id;
 
 	@Attribute("IDToken")
 	private String idToken;
@@ -40,7 +40,7 @@ public class Account implements IAccount {
 	private long lastRefreshedTime;
 
 	@Attribute
-	private IAuthorizationServer server;
+	private final IAuthorizationServer server;
 
 	public Account(String id, IAuthorizationServer server) {
 		this.id = id;

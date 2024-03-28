@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -43,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class ApplicationsRootNode
-    implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode> {
+    implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
@@ -213,7 +214,7 @@ public class ApplicationsRootNode
     }
 
     protected void registerProjectListener(Project project) {
-        MessageBusConnection connection = project.getMessageBus().connect(project);
+        MessageBusConnection connection = project.getMessageBus().connect(this);
         connection.subscribe(ProjectTopics.MODULES, this);
     }
 
@@ -268,5 +269,10 @@ public class ApplicationsRootNode
     @Override
     public ApplicationsRootNode getRoot() {
         return this;
+    }
+
+    @Override
+    public void dispose() {
+      resetOdo();
     }
 }

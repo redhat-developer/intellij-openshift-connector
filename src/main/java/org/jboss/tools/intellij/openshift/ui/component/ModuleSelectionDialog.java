@@ -31,7 +31,7 @@ public class ModuleSelectionDialog extends DialogWrapper {
   public ModuleSelectionDialog(Component parent, Project project, Predicate<Module> filter) {
     super(project, parent, false, IdeModalityType.IDE);
     init();
-    setTitle("Select module");
+    setTitle("Select Module");
     DefaultListModel model = new DefaultListModel();
     for (Module m : ModuleManager.getInstance(project).getModules()) {
       if (filter.test(m)) {

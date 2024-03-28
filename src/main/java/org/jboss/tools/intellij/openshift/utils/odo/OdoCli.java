@@ -920,5 +920,4 @@ public class OdoCli implements Odo {
             }
         }
     }
-
 }

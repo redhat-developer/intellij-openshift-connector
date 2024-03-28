@@ -20,9 +20,9 @@ import java.util.List;
 
 public class DevfileRegistriesDeserializer extends StdNodeBasedDeserializer<List<DevfileRegistry>> {
   private static final String NAME_FIELD = "name";
-  
+
   private static final String URL_FIELD = "url";
-  
+
   private static final String SECURE_FIELD = "secure";
 
   private static final String REGISTRIES_FIELD = "registries";

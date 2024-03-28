@@ -161,7 +161,7 @@ public class CreateComponentDialogStep extends WizardStep<CreateComponentModel> 
             componentTypeList.getSelectionModel().clearSelection();
         }
         WizardNavigationState state = model.getCurrentNavigationState();
-        if (model.getName().length() > 0 && model.getContext().length() > 0) {
+        if (!model.getName().isEmpty() && !model.getContext().isEmpty()) {
             state.FINISH.setEnabled(model.isValid());
         } else {
             state.FINISH.setEnabled(false);

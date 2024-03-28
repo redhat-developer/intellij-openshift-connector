@@ -51,6 +51,7 @@ public class WindowToolFactory implements ToolWindowFactory {
             Content content = contentFactory.createContent(panel, "", false);
             ApplicationsTreeStructure structure = new ApplicationsTreeStructure(project);
             StructureTreeModel<ApplicationsTreeStructure> model = new StructureTreeModel<>(structure, content);
+            content.setDisposer(structure);
             new MutableModelSynchronizer<>(model, structure, structure);
             Tree tree = new Tree(new AsyncTreeModel(model, content));
             tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);

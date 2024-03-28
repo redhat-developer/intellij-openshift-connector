@@ -21,7 +21,7 @@ public abstract class HelmCliTest extends BasePlatformTestCase {
 
     protected Helm helm;
 
-    private String projectName = "prj-" + new Random().nextInt();
+    private final String projectName = "prj-" + new Random().nextInt();
 
     @Override
     protected void setUp() throws Exception {

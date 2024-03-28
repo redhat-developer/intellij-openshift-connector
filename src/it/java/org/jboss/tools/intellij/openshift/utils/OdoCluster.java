@@ -24,7 +24,7 @@ public class OdoCluster {
 
   private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
 
-    public boolean login(Odo odo) throws IOException {
+  public boolean login(Odo odo) throws IOException {
     if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
       odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
       return true;

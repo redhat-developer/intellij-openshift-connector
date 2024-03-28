@@ -158,7 +158,7 @@ dependencies {
             'com.redhat.devtools.intellij:intellij-common:1.9.3',
             'io.jsonwebtoken:jjwt-impl:0.12.5',
             'io.jsonwebtoken:jjwt-jackson:0.12.5',
-            'org.keycloak:keycloak-installed-adapter:24.0.1',
+            'org.keycloak:keycloak-installed-adapter:24.0.2',
             'com.squareup.retrofit2:converter-jackson:2.9.0',
             'com.google.code.gson:gson:2.10.1')
     testImplementation(
@@ -171,8 +171,8 @@ dependencies {
             'org.mock-server:mockserver-netty:5.15.0',
             'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.3.0',
             'org.junit.jupiter:junit-jupiter-engine:5.10.2',
-            'org.junit.jupiter:junit-jupiter-api:5.10.0',
-            'org.junit.jupiter:junit-jupiter:5.10.0')
+            'org.junit.jupiter:junit-jupiter-api:5.10.2',
+            'org.junit.jupiter:junit-jupiter:5.10.2')
     constraints {
         implementation('io.undertow:undertow-core:2.3.12.Final') { //keycloak
             because 'https://app.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3339519'

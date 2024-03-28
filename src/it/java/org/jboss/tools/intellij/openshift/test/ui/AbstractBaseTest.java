@@ -11,8 +11,6 @@
 package org.jboss.tools.intellij.openshift.test.ui;
 
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.fixtures.ContainerFixture;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFrame;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
@@ -22,6 +20,7 @@ import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
+import org.jboss.tools.intellij.openshift.test.ui.utils.CleanUpUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.KubeConfigUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
@@ -34,8 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-
-import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
 /**
  * @author Ondrej Dockal, odockal@redhat.com
@@ -67,6 +64,11 @@ public abstract class AbstractBaseTest {
 
             isProjectCreatedAndOpened = true;
         }
+    }
+
+    @AfterEach
+    public void afterEachCleanUp() {
+        CleanUpUtility.cleanUpAll(robot);
     }
 
     protected static void logOut() {

@@ -11,27 +11,33 @@
 package org.jboss.tools.intellij.openshift.oauth;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import org.jboss.tools.intellij.openshift.oauth.model.IAuthorizationServer;
+import org.jetbrains.annotations.NotNull;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 
 public class OAuthUtils {
 
-	private OAuthUtils() {
-	}
-	
-	 /**
+  private OAuthUtils() {
+  }
+
+  /**
    * Extract the email from the OAuth access token.
-   * 
+   *
    * @param token the token
    * @return the email address
    */
-  public static String decodeEmailFromToken(String token) {
-    String[] payloads = token.split("\\.");
-    Claims claims = (Claims) Jwts.parserBuilder().build().parse(payloads[0] + '.' + payloads[1] + '.').getBody();
-    return (String) claims.get("email");
+  public static String decodeEmailFromToken(IAuthorizationServer server, @NotNull String token) {
+    Jws<Claims> claims =
+      Jwts.parser()
+        .keyLocator(header
+          -> getDeployment(server).getPublicKeyLocator().getPublicKey((String) header.get("kid"), getDeployment(server)))
+        .build()
+        .parseSignedClaims(token);
+    return claims.getPayload().get("email", String.class);
   }
 
   public static KeycloakDeployment getDeployment(IAuthorizationServer server) {

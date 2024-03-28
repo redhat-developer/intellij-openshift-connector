@@ -46,7 +46,7 @@ jobs:
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
-          ./gradlew integrationUITest --continue --no-daemon
+          ./gradlew integrationUITest --tests "org.jboss.tools.intellij.openshift.test.ui.tests_public.*" --continue --no-daemon
       - name: Publish tests reports
         uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:

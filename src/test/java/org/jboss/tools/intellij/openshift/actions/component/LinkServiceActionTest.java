@@ -33,8 +33,4 @@ public class LinkServiceActionTest extends ActionTest {
     assertTrue(visible);
   }
 
-  @Override
-  protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
-    assertFalse(visible);
-  }
 }

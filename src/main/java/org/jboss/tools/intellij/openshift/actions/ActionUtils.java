@@ -24,6 +24,7 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySenderAware;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JTree;
 import java.awt.Component;
@@ -69,7 +70,7 @@ public class ActionUtils {
     ProgressManager.getInstance().run(
       new Task.Backgroundable(project, message, true) {
         @Override
-        public void run(ProgressIndicator progress) {
+        public void run(@NotNull ProgressIndicator progress) {
           consumer.accept(progress);
         }
       });

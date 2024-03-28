@@ -31,14 +31,14 @@ import java.util.concurrent.TimeUnit;
 public class SandboxProcessor {
 
   /**
-   * 
+   *
    */
   private static final String SANDBOX_API_ENDPOINT_DEFAULT = "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com";
-  
+
   private static final String SANDBOX_API_ENDPOINT_PROPERTY_KEY = "jboss.sandbox.api.endpoint";
-  
+
   private static final String SANDBOX_API_ENDPOINT = System.getProperty(SANDBOX_API_ENDPOINT_PROPERTY_KEY, SANDBOX_API_ENDPOINT_DEFAULT);
-  
+
   public enum State {
     NONE(false),
     NEEDS_SIGNUP(false),
@@ -46,7 +46,7 @@ public class SandboxProcessor {
     CONFIRM_VERIFICATION(true),
     NEEDS_APPROVAL(false),
     READY(true);
-    
+
     private final boolean needsInteraction;
 
     State(boolean needsInteraction) {
@@ -60,17 +60,17 @@ public class SandboxProcessor {
       return needsInteraction;
     }
   }
-  
-  private SandboxAPI api;
-  
-  private String token;
-  
+
+  private final SandboxAPI api;
+
+  private final String token;
+
   private State state = State.NONE;
-  
+
   private ObjectNode signupPayload;
-  
+
   /**
-   * 
+   *
    */
   public SandboxProcessor(String token, String url) {
     this.token = "Bearer " + token;
@@ -84,15 +84,15 @@ public class SandboxProcessor {
         client(client).
         build().create(SandboxAPI.class);
   }
-  
+
   public SandboxProcessor(String token) {
     this(token, SANDBOX_API_ENDPOINT);
   }
-  
+
   public State getState() {
     return state;
   }
-  
+
   private void getSignupState() throws IOException {
     Response<ObjectNode> response = api.signupState(token).execute();
     if (response.code() == 404) {
@@ -117,12 +117,12 @@ public class SandboxProcessor {
       throw new IOException("Sandbox API returned code: " + response.code());
     }
   }
-  
+
   private void processSignup() throws IOException {
     api.signup(token).execute();
     getSignupState();
   }
-  
+
   private void startVerification(String countryCode, String phoneNumber) throws IOException {
     ObjectNode body = JsonNodeFactory.instance.objectNode();
     body.put("country_code", countryCode);
@@ -133,12 +133,12 @@ public class SandboxProcessor {
     }
     state = State.CONFIRM_VERIFICATION;
   }
-  
+
   private void processVerification(String confirmCode) throws IOException {
     api.completeVerify(token, confirmCode).execute();
     getSignupState();
   }
-  
+
   public State advance(SandboxModel model) throws IOException {
     switch (state) {
     case NONE:

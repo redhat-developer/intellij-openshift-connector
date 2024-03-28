@@ -11,7 +11,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
-import com.intellij.execution.process.ProcessHandler;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -28,8 +28,8 @@ import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
-import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoProcessHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +41,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 public class ApplicationsRootNode
-    implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode> {
+    implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
@@ -56,7 +55,7 @@ public class ApplicationsRootNode
     private CompletableFuture<Helm> helmFuture;
     private boolean logged;
     private Config config;
-    private Map<String, Map<ComponentFeature, ProcessHandler>> processes = new HashMap<>();
+    private final OdoProcessHelper processHelper;
 
     public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure) {
         this.project = project;
@@ -64,6 +63,7 @@ public class ApplicationsRootNode
         initConfigWatcher();
         this.config = loadConfig();
         registerProjectListener(project);
+        this.processHelper = new OdoProcessHelper();
     }
 
     private static boolean shouldLogMessage(String message) {
@@ -85,9 +85,8 @@ public class ApplicationsRootNode
         if (odoFuture == null) {
             this.odoFuture = ToolFactory.getInstance()
                 .createOdo(project)
-                .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this))
+                .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this, processHelper))
                 .whenComplete((odo, err) -> loadProjectModel(odo, project))
-                .whenComplete((odo, err) -> restoreComponentFeatureProcesses(odo))
                 .whenComplete(whenComplete);
         }
         return odoFuture;
@@ -98,18 +97,6 @@ public class ApplicationsRootNode
     }
 
     public void resetOdo() {
-        if (odoFuture != null) {
-            //save current running processes
-            try {
-                this.processes = this.odoFuture.get().getComponentFeatureProcesses();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-                /* Clean up whatever needs to be handled before interrupting  */
-                Thread.currentThread().interrupt();
-            } catch (ExecutionException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
         this.odoFuture = null;
     }
 
@@ -152,16 +139,6 @@ public class ApplicationsRootNode
         }
     }
 
-    private void restoreComponentFeatureProcesses(Odo odo) {
-        if (odo == null) {
-            return;
-        }
-        if (!this.processes.isEmpty()) {
-            // restore running processes
-            odo.setComponentFeatureProcesses(processes);
-        }
-    }
-
     @Override
     public void moduleAdded(@NotNull Project project, @NotNull Module module) {
         addContext(getOdo().getNow(null), ProjectUtils.getModuleRoot(module));
@@ -175,17 +152,17 @@ public class ApplicationsRootNode
     private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
             if (descriptor.isPreOdo3()) {
-                migrateOdo(path, descriptor);
+                migrateOdo(descriptor);
             }
             components.put(path, descriptor);
         }
     }
 
-    private void migrateOdo(String path, ComponentDescriptor descriptor) {
+    private void migrateOdo(ComponentDescriptor descriptor) {
         getOdo()
             .thenAccept(odo -> {
                 if (odo != null) {
-                    odo.migrateComponent(path, descriptor.getName());
+                    odo.migrateComponent(descriptor.getName());
                 }
             })
             .thenRun(() ->
@@ -237,7 +214,7 @@ public class ApplicationsRootNode
     }
 
     protected void registerProjectListener(Project project) {
-        MessageBusConnection connection = project.getMessageBus().connect(project);
+        MessageBusConnection connection = project.getMessageBus().connect(this);
         connection.subscribe(ProjectTopics.MODULES, this);
     }
 
@@ -292,5 +269,10 @@ public class ApplicationsRootNode
     @Override
     public ApplicationsRootNode getRoot() {
         return this;
+    }
+
+    @Override
+    public void dispose() {
+      resetOdo();
     }
 }

@@ -25,8 +25,6 @@ import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.project.CreateNewProjectDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -40,7 +38,6 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public class CreateProjectAction extends LoggedInClusterAction {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CreateProjectAction.class);
 
   public static void execute(ApplicationsRootNode rootNode) {
     Odo odo = rootNode.getOdo().getNow(null);

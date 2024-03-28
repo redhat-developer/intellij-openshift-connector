@@ -14,9 +14,11 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.wm.impl.IdeGlassPaneEx;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.SizedIcon;
 import com.intellij.ui.WindowMoveListener;
 import com.intellij.ui.WindowResizeListener;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.JBFont;
@@ -26,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.AbstractButton;
 import javax.swing.DefaultCellEditor;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -75,8 +78,12 @@ public class SwingUtils {
     Matcher matcher = httpLinkRegex.matcher(text);
     while (matcher.find()) {
       builder
-        .append(text, lastIndex, matcher.start())
-        .append("<a href=\"" + matcher.group(1)+ "\">" + matcher.group(1) + "</a>");
+          .append(text, lastIndex, matcher.start())
+          .append("<a href=\"")
+          .append(matcher.group(1))
+          .append("\">")
+          .append(matcher.group(1))
+          .append("</a>");
       lastIndex = matcher.end();
     }
     if (lastIndex < text.length()) {
@@ -147,6 +154,12 @@ public class SwingUtils {
       location = MouseInfo.getPointerInfo().getLocation();
     }
     return location;
+  }
+
+  public static Icon scaleIcon(int width, Icon icon) {
+    float scale = (float) width / icon.getIconWidth();
+    SizedIcon scaled = JBUIScale.scaleIcon(new SizedIcon(icon, icon.getIconWidth(), icon.getIconHeight()));
+    return scaled.scale(scale);
   }
 
 }

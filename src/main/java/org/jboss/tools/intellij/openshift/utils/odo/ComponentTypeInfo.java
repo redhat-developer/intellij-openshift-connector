@@ -19,17 +19,17 @@ import java.util.List;
  */
 public interface ComponentTypeInfo {
   List<Starter> getStarters();
-  
+
   class Builder {
 
-    private List<Starter> starters = new ArrayList<>();
-    
+    private final List<Starter> starters = new ArrayList<>();
+
 
     public Builder withStarter(Starter starter) {
      starters.add(starter);
      return this;
     }
-    
+
     public ComponentTypeInfo build() {
       return () -> starters;
     }

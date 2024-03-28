@@ -28,7 +28,6 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
-import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -82,13 +81,11 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
         }
         ComponentNode componentNode = (ComponentNode) selected;
         Component component = componentNode.getComponent();
-        NamespaceNode namespaceNode = componentNode.getParent();
         if (component.getLiveFeatures().isDebug()) {
             RunManager runManager = RunManager.getInstance(project);
             final Optional<Integer> port = createOrUpdateConfiguration(
               odo,
               runManager,
-              namespaceNode.getNamespace(),
               component);
             port.ifPresent(portNumber -> executeDebug());
         }
@@ -124,12 +121,11 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
 
     }
 
-    private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, String namespace, Component component) {
+    private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, Component component) {
         ConfigurationType configurationType = getConfigurationType();
         String configurationName = component.getName() + " Remote Debug";
-        Optional<Integer> port = Optional.empty();
         try {
-            port = getPort(odo, namespace, component, port);
+            Optional<Integer> port = getPort(odo, component);
             if (port.isPresent()) {
                 //lookup if existing config already exist, based on name and type
                 runSettings = runManager.findConfigurationByTypeAndName(
@@ -145,15 +141,17 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
                 }
                 initConfiguration(runSettings.getConfiguration(), port.get());
                 runManager.setSelectedConfiguration(runSettings);
+                return port;
             }
         } catch (IOException e) {
             LOG.warn(e.getLocalizedMessage(), e);
         }
-        return port;
+        return Optional.empty();
     }
 
-    private static Optional<Integer> getPort(Odo odo, String namespace, Component component, Optional<Integer> port) throws IOException {
-        List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
+    private static Optional<Integer> getPort(Odo odo, Component component) throws IOException {
+        Optional<Integer> port = Optional.empty();
+        List<URL> urls = odo.listURLs(component.getPath());
         String[] ports = urls.stream()
           .map(URL::getContainerPort)
           .toArray(String[]::new);
@@ -163,7 +161,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
             String selected = UIHelper.executeInUI(() ->
               Messages.showEditableChooseDialog(
                 "The component " + component.getName() + " has several ports to connect to,\nchoose the one the debugger will connect to",
-                "Choose debugger port",
+                "Choose Debugger Port",
                 Messages.getQuestionIcon(),
                 ports,
                 ports[0],

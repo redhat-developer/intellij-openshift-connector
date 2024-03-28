@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>>
   }
 
   @Override
-  public List<Service> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+  public List<Service> convert(JsonNode root, DeserializationContext ctxt) {
     List<Service> result = new ArrayList<>();
     if (root.has(BINDABLE_SERVICES_FIELD)) {
       for (JsonNode service : root.get(BINDABLE_SERVICES_FIELD)) {

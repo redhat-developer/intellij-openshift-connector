@@ -31,18 +31,17 @@ public class DeleteBindingAction extends OdoAction {
         try {
             BindingNode node = (BindingNode) selected;
             if (Messages.NO == Messages.showYesNoDialog("Delete binding '" + node.getName() + "'.\nAre you sure?",
-                    "Delete binding",
-                    Messages.getQuestionIcon())) {
+                "Delete Binding",
+                Messages.getQuestionIcon())) {
                 sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
                 return;
             }
-            odo.deleteBinding(node.getParent().getNamespace(), node.getParent().getComponent().getPath(),
-                    node.getParent().getComponent().getName(),node.getBinding().getName());
+            odo.deleteBinding(node.getParent().getComponent().getPath(), node.getBinding().getName());
             NodeUtils.fireModified(node.getParent());
             sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         } catch (IOException e) {
             sendTelemetryError(e);
-            Messages.showWarningDialog("Error: " + e.getLocalizedMessage(), "Delete binding");
+            Messages.showWarningDialog("Error: " + e.getLocalizedMessage(), "Delete Binding");
         }
     }
 

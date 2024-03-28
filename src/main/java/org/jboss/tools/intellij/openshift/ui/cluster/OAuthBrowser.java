@@ -26,9 +26,9 @@ import java.util.EventObject;
 import java.util.List;
 
 public class OAuthBrowser extends JPanel implements CefLoadHandler {
-    public class TokenEvent extends EventObject {
+    public static class TokenEvent extends EventObject {
 
-        private String token;
+        private final String token;
 
         /**
          * @param browser the browser
@@ -51,12 +51,12 @@ public class OAuthBrowser extends JPanel implements CefLoadHandler {
         void tokenReceived(TokenEvent event);
     }
 
-    private JBCefClient client = JBCefApp.getInstance().createClient();
-    private JBCefBrowser browser;
+    private final transient JBCefBrowser browser;
 
-    private List<TokenListener> listeners = new ArrayList<>();
+    private final List<TokenListener> listeners = new ArrayList<>();
 
     public OAuthBrowser() {
+        JBCefClient client = JBCefApp.getInstance().createClient();
         browser = new JBCefBrowserBuilder().setClient(client).setUrl("https://www.redhat.com").build();
         add(browser.getComponent());
         client.addLoadHandler(this, browser.getCefBrowser());

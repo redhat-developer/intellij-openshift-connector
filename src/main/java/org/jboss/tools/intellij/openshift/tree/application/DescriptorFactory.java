@@ -14,6 +14,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
+import org.jboss.tools.intellij.openshift.ui.SwingUtils;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartIcons;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -35,8 +36,11 @@ public class DescriptorFactory {
   private static final Icon COMPONENT_TYPE_ICON = IconLoader.findIcon("/images/component-type-light.png", ApplicationsTreeStructure.class);
   private static final Icon STARTER_ICON = IconLoader.findIcon("/images/start-project-light.png", ApplicationsTreeStructure.class);
   private static final Icon REGISTRY_ICON = IconLoader.findIcon("/images/registry.svg", ApplicationsTreeStructure.class);
+  private static final Icon HELM_REPOSITORY_ICON = IconLoader.findIcon("/images/helm/repo.svg", ApplicationsTreeStructure.class);
 
-  public static @NotNull NodeDescriptor<?> create(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor, @NotNull ApplicationsTreeStructure structure, @NotNull Project project) {
+  private static final int ICON_WIDTH = 15;
+
+  public static @NotNull NodeDescriptor<?> create(@NotNull Object element, @Nullable NodeDescriptor<?> parentDescriptor, @NotNull ApplicationsTreeStructure structure, @NotNull Project project) {
     if (element == structure) {
       return new LabelAndIconDescriptor<>(
         project,
@@ -157,7 +161,29 @@ public class DescriptorFactory {
         releaseNode,
         releaseNode::getName,
         () -> "Helm Release",
-        () -> ChartIcons.getIcon15x15(releaseNode.getRelease()),
+        () -> SwingUtils.scaleIcon(ICON_WIDTH, ChartIcons.getIcon(releaseNode.getRelease())),
+        parentDescriptor);
+    } else if (element instanceof HelmRepositoriesNode) {
+      HelmRepositoriesNode helmRepositoriesNode = (HelmRepositoriesNode) element;
+      return new ApplicationsTreeStructure.ProcessableDescriptor<>(
+        project,
+        helmRepositoriesNode,
+        helmRepositoriesNode::getName,
+        () -> "Repositories",
+        () -> SwingUtils.scaleIcon(ICON_WIDTH, ChartIcons.getHelmIcon()),
+        parentDescriptor);
+    } else if (element instanceof HelmRepositoryNode) {
+      HelmRepositoryNode helmRepositoryNode = (HelmRepositoryNode) element;
+      return new ApplicationsTreeStructure.ProcessableDescriptor<>(
+        project,
+        helmRepositoryNode,
+        helmRepositoryNode::getName,
+        () -> {
+          var repository = helmRepositoryNode.getRepository();
+          return repository != null ?
+            repository.getUrl() : "";
+        },
+        () -> HELM_REPOSITORY_ICON,
         parentDescriptor);
     }
 

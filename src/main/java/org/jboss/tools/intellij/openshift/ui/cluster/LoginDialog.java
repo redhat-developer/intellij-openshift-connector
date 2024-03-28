@@ -21,6 +21,7 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxDialog;
 import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxModel;
 import org.jboss.tools.intellij.openshift.utils.OCCommandUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JButton;
@@ -56,7 +57,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
         super(project, parent, false, IdeModalityType.IDE);
         this.project = project;
         init();
-        setTitle("Cluster login");
+        setTitle("Cluster Login");
         clusterURLField.setText(clusterURL);
         userNameField.getDocument().addDocumentListener(this);
         passwordField.getDocument().addDocumentListener(this);
@@ -92,7 +93,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
             UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login Command"));
         }
         if (clipboardText == null) {
-            UIHelper.executeInUI(() -> Messages.showErrorDialog("Cannot paste clipboard into the login dialog. Only text is accepted.", "Error when parsing login command"));
+            UIHelper.executeInUI(() -> Messages.showErrorDialog("Cannot paste clipboard into the login dialog. Only text is accepted.", "Error When Parsing Login Command"));
         } else {
             if (OCCommandUtils.isValidCommand(clipboardText)) {
                 String server = OCCommandUtils.getServer(clipboardText);
@@ -112,7 +113,7 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
                 }
             } else {
                 String message = "Login command pasted from clipboard is not valid:\n" + clipboardText;
-                UIHelper.executeInUI(() -> Messages.showErrorDialog(message, "Error when parsing login command"));
+                UIHelper.executeInUI(() -> Messages.showErrorDialog(message, "Error When Parsing Login Command"));
             }
         }
     }
@@ -155,22 +156,14 @@ public class LoginDialog extends DialogWrapper implements DocumentListener {
     }
 
     public void changed() {
-        if (getUserName().trim().length() > 0 || getPassword().length > 0) {
-            tokenField.setEnabled(false);
-        } else {
-            tokenField.setEnabled(true);
-        }
-        if (getToken().length > 0) {
-            userNameField.setEnabled(false);
-            passwordField.setEnabled(false);
-        } else {
-            userNameField.setEnabled(true);
-            passwordField.setEnabled(true);
-        }
+        tokenField.setEnabled(getUserName().trim().isEmpty() && getPassword().length == 0);
+        boolean enabled = (getToken().length <= 0);
+        userNameField.setEnabled(enabled);
+        passwordField.setEnabled(enabled);
     }
 
     @Override
-    protected List<ValidationInfo> doValidateAll() {
+    protected @NotNull List<ValidationInfo> doValidateAll() {
         List<ValidationInfo> validations = new ArrayList<>();
         if (tokenField.isEnabled() && getToken().length == 0) {
             validations.add(new ValidationInfo("Specify the token.", tokenField));

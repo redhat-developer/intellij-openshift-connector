@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat, Inc.
+ * Copyright (c) 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,18 +8,29 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.helm;
+package org.jboss.tools.intellij.openshift.utils.helm;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public class UninstallReleaseActionTest extends ActionTest {
-  @Override
-  public AnAction getAction() {
-    return new UninstallReleaseAction();
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class HelmRepository {
+
+  private String name;
+  private String url;
+
+  public String getName() {
+    return name;
   }
 
-  protected void verifyChartRelease(boolean visible) {
-    assertTrue(visible);
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
   }
 }

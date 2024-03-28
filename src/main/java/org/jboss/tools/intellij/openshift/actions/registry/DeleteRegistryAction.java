@@ -46,7 +46,7 @@ public class DeleteRegistryAction extends OdoAction {
                     sendTelemetryResults(TelemetryResult.SUCCESS);
                 } catch (IOException e) {
                     sendTelemetryError(e);
-                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete registry"));
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Registry"));
                 }
             });
         }

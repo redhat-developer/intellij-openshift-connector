@@ -26,127 +26,127 @@ import java.util.Optional;
 
 public class AccountService {
 
-	private static final AccountService INSTANCE = new AccountService();
+  private static final AccountService INSTANCE = new AccountService();
 
-	private final LoginProvider provider = LoginProvider.get();
+  private final LoginProvider provider = LoginProvider.get();
 
-	private IAccountModel model;
+  private IAccountModel model;
 
-	private AccountService() {
-	}
+  private AccountService() {
+  }
 
-	public static AccountService getDefault() {
-		return INSTANCE;
-	}
+  public static AccountService getDefault() {
+    return INSTANCE;
+  }
 
-	private IAccountModel getModel() {
-		if (null == model) {
-			model = new AccountModel();
-		}
-		return model;
-	}
+  private IAccountModel getModel() {
+    if (null == model) {
+      model = new AccountModel();
+    }
+    return model;
+  }
 
-	public AccountStatus getStatus(IAccount account) {
-		if (account.getAccessToken() == null) {
-			return AccountStatus.NEEDS_LOGIN;
-		}
-		long lastRefreshed = account.getLastRefreshedTime();
-		long current = System.currentTimeMillis();
-		if (current > account.getAccessTokenExpiryTime()) {
-			if (current > account.getRefreshTokenExpiryTime()) {
-				return AccountStatus.NEEDS_LOGIN;
-			} else {
-				return AccountStatus.NEEDS_REFRESH;
-			}
-		}
-		if (wasRefreshed24HAgo(lastRefreshed, current) || wasRefreshedMoreThanHalfTheTotalValidPeriod(
-				account.getAccessTokenExpiryTime(), lastRefreshed, current)) {
-			return AccountStatus.NEEDS_REFRESH;
-		}
-		return AccountStatus.VALID;
-	}
+  public AccountStatus getStatus(IAccount account) {
+    if (account.getAccessToken() == null) {
+      return AccountStatus.NEEDS_LOGIN;
+    }
+    long lastRefreshed = account.getLastRefreshedTime();
+    long current = System.currentTimeMillis();
+    if (current > account.getAccessTokenExpiryTime()) {
+      if (current > account.getRefreshTokenExpiryTime()) {
+        return AccountStatus.NEEDS_LOGIN;
+      } else {
+        return AccountStatus.NEEDS_REFRESH;
+      }
+    }
+    if (wasRefreshed24HAgo(lastRefreshed, current) || wasRefreshedMoreThanHalfTheTotalValidPeriod(
+      account.getAccessTokenExpiryTime(), lastRefreshed, current)) {
+      return AccountStatus.NEEDS_REFRESH;
+    }
+    return AccountStatus.VALID;
+  }
 
-	boolean wasRefreshedMoreThanHalfTheTotalValidPeriod(long expiryTime, long lastRefreshed, long current) {
-		return (current - lastRefreshed) > (expiryTime - current);
-	}
+  boolean wasRefreshedMoreThanHalfTheTotalValidPeriod(long expiryTime, long lastRefreshed, long current) {
+    return (current - lastRefreshed) > (expiryTime - current);
+  }
 
-	boolean wasRefreshed24HAgo(long lastRefreshed, long current) {
-		return (current - lastRefreshed) > OAuthCoreConstants.DURATION_24_HOURS;
-	}
-	
-	private IAuthorizationServer findAuthorizationServer(String serverId) {
-	  Optional<IAuthorizationServer> server = getModel().getAuthorizationServers().stream().filter(cl -> serverId.equals(cl.getId())).findFirst();
-	  return server.orElse(null);
-	}
+  boolean wasRefreshed24HAgo(long lastRefreshed, long current) {
+    return (current - lastRefreshed) > OAuthCoreConstants.DURATION_24_HOURS;
+  }
 
-	public String getToken(String serverId, int tokenType, Object context) {
-		String token = null;
+  private IAuthorizationServer findAuthorizationServer(String serverId) {
+    Optional<IAuthorizationServer> server = getModel().getAuthorizationServers().stream().filter(cl -> serverId.equals(cl.getId())).findFirst();
+    return server.orElse(null);
+  }
 
-		IAuthorizationServer server = findAuthorizationServer(serverId);
-		if (server != null) {
-			List<IAccount> identities = server.getAccounts();
-			if (identities.isEmpty()) {
-				token = performLogin(server, null, tokenType, context);
-			} else {
-				IAccount account = identities.get(0);
-				AccountStatus status = getStatus(account);
-				switch (status) {
-					case VALID:
-						token = account.getToken(tokenType);
-						break;
-					case NEEDS_REFRESH:
-						token = performRefresh(account, tokenType);
-						break;
-					case NEEDS_LOGIN:
-						token = performLogin(server, account, tokenType, context);
-						break;
-				}
+  public String getToken(String serverId, int tokenType, Object context) {
+    String token = null;
 
-			}
-			return token;
-		} else {
-			throw new OAuthConfigurationException("No server found for id: " + serverId);
-		}
-	}
+    IAuthorizationServer server = findAuthorizationServer(serverId);
+    if (server != null) {
+      List<IAccount> identities = server.getAccounts();
+      if (identities.isEmpty()) {
+        token = performLogin(server, null, tokenType, context);
+      } else {
+        IAccount account = identities.get(0);
+        AccountStatus status = getStatus(account);
+        switch (status) {
+          case VALID:
+            token = account.getToken(tokenType);
+            break;
+          case NEEDS_REFRESH:
+            token = performRefresh(account, tokenType);
+            break;
+          case NEEDS_LOGIN:
+            token = performLogin(server, account, tokenType, context);
+            break;
+        }
 
-	private String performLogin(IAuthorizationServer server, IAccount account, int tokenType, Object context) {
-		if (null != provider) {
-			LoginResponse response = provider.login(server, context);
-			if (null != response) {
-				if (null == account) {
-					IAccount newAccount = createAccount(server, response);
-					return newAccount.getToken(tokenType);
-				} else {
-					updateAccount(response, account);
-				}
-				return account.getToken(tokenType);
-			} else {
-				throw new OAuthLoginException(server, account);
-			}
-		} else {
-			throw new OAuthConfigurationException("No login provider found");
-		}
-	}
+      }
+      return token;
+    } else {
+      throw new OAuthConfigurationException("No server found for id: " + serverId);
+    }
+  }
 
-	IAccount createAccount(IAuthorizationServer server, LoginResponse response) {
-		String id = OAuthUtils.decodeEmailFromToken(response.getIDToken());
-		IAccount newAccount = server.createAccount(id);
-		updateAccount(response, newAccount);
-		server.addAccount(newAccount);
-		return newAccount;
-	}
-	
-	void updateAccount(LoginResponse info, IAccount account) {
-	  account.setIDToken(info.getIDToken());
-		account.setAccessToken(info.getAccessToken());
-		account.setRefreshToken(info.getRefreshToken());
-		account.setLastRefreshedTime(System.currentTimeMillis());
-		account.setAccessTokenExpiryTime(info.getAccessTokenExpiryTime());
-		account.setRefreshTokenExpiryTime(info.getRefreshTokenExpiryTime());
-	}
+  private String performLogin(IAuthorizationServer server, IAccount account, int tokenType, Object context) {
+    if (null != provider) {
+      LoginResponse response = provider.login(server, context);
+      if (null != response) {
+        if (null == account) {
+          IAccount newAccount = createAccount(server, response);
+          return newAccount.getToken(tokenType);
+        } else {
+          updateAccount(response, account);
+        }
+        return account.getToken(tokenType);
+      } else {
+        throw new OAuthLoginException(server, account);
+      }
+    } else {
+      throw new OAuthConfigurationException("No login provider found");
+    }
+  }
 
-	private String performRefresh(IAccount account, int tokenType) {
-	  try {
+  IAccount createAccount(IAuthorizationServer server, LoginResponse response) {
+    String id = OAuthUtils.decodeEmailFromToken(server, response.getIDToken());
+    IAccount newAccount = server.createAccount(id);
+    updateAccount(response, newAccount);
+    server.addAccount(newAccount);
+    return newAccount;
+  }
+
+  void updateAccount(LoginResponse info, IAccount account) {
+    account.setIDToken(info.getIDToken());
+    account.setAccessToken(info.getAccessToken());
+    account.setRefreshToken(info.getRefreshToken());
+    account.setLastRefreshedTime(System.currentTimeMillis());
+    account.setAccessTokenExpiryTime(info.getAccessTokenExpiryTime());
+    account.setRefreshTokenExpiryTime(info.getRefreshTokenExpiryTime());
+  }
+
+  private String performRefresh(IAccount account, int tokenType) {
+    try {
       KeycloakDeployment deployment = OAuthUtils.getDeployment(account.getAuthorizationServer());
       AccessTokenResponse response = ServerRequest.invokeRefresh(deployment, account.getRefreshToken());
       account.setIDToken(response.getIdToken());
@@ -159,5 +159,5 @@ public class AccountService {
     } catch (Exception e) {
       throw new OAuthRefreshException(account, e);
     }
-	}
+  }
 }

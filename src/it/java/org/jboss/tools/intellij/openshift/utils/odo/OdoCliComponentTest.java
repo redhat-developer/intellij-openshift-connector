@@ -37,7 +37,7 @@ public class OdoCliComponentTest extends OdoCliTest {
   private String service;
   private String starter;
 
-  public OdoCliComponentTest(ComponentFeature feature) {
+  public OdoCliComponentTest(ComponentFeature feature, String label) {
     this.feature = feature;
   }
 
@@ -117,7 +117,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     createComponent(project, component, starter);
     List<URL> urls = odo.listURLs(COMPONENT_PATH);
     assertEquals(0, urls.size());
-    startComponent(project, component, feature);
+    startComponent(component, feature);
     urls = odo.listURLs(COMPONENT_PATH);
     assertEquals(0, urls.size());
   }
@@ -125,7 +125,7 @@ public class OdoCliComponentTest extends OdoCliTest {
   @Test
   public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
     createComponent(project, component, starter);
-    startComponent(project, component, feature);
+    startComponent(component, feature);
     List<URL> urls = odo.listURLs(COMPONENT_PATH);
     assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
     int debugPort;
@@ -156,7 +156,7 @@ public class OdoCliComponentTest extends OdoCliTest {
   @Test
   public void checkCreateComponentAndStartDev() throws IOException, ExecutionException, InterruptedException {
     createComponent(project, component, starter);
-    startComponent(project, component, feature);
+    startComponent(component, feature);
     assertTrue(odo.isStarted(component, feature));
   }
 }

@@ -118,6 +118,7 @@ tasks.register('integrationTest', Test) {
         includeNoLocationClasses = true
         excludes = ["jdk.internal.*"]
     }
+    dependsOn classpathIndexCleanup
 }
 
 tasks.register('integrationUITest', Test) {

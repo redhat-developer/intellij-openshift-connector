@@ -13,10 +13,10 @@ package org.jboss.tools.intellij.openshift.actions.helm;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import org.jboss.tools.intellij.openshift.actions.HelmAction;
+import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartsDialog;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -27,11 +27,10 @@ public class OpenHelmChartsAction extends HelmAction {
     @Override
     public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
         Project project = getEventProject(anActionEvent);
-        ParentableNode<?> parentableNode = ((ParentableNode<?>) selected);
-        if (parentableNode == null) {
+        ApplicationsRootNode rootNode = NodeUtils.getRoot(selected);
+        if (rootNode == null) {
             return;
         }
-        ApplicationsRootNode rootNode = parentableNode.getRoot();
         Odo odo = rootNode.getOdo().getNow(null);
         if (odo == null) {
             return;

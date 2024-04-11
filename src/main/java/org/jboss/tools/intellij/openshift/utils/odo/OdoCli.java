@@ -26,10 +26,10 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
+import com.redhat.devtools.intellij.common.ssl.IDEATrustManager;
 import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
-import com.redhat.devtools.intellij.kubernetes.model.client.ssl.IDEATrustManager;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.Pluralize;
@@ -825,9 +825,9 @@ public class OdoCli implements OdoDelegate {
 
     private void setSslContext(HttpClient.Builder builder, Config config) {
       try {
-        X509TrustManager externalTrustManager = new IDEATrustManager().configure(Arrays.stream(SSLUtils.trustManagers(config))
+        X509TrustManager externalTrustManager = new IDEATrustManager().configure(List.of(Arrays.stream(SSLUtils.trustManagers(config))
           .filter(X509ExtendedTrustManager.class::isInstance)
-          .map(X509ExtendedTrustManager.class::cast).toArray(X509ExtendedTrustManager[]::new));
+          .map(X509ExtendedTrustManager.class::cast).toArray(X509ExtendedTrustManager[]::new)));
         builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
       } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
                UnrecoverableKeyException | InvalidKeySpecException e) {

@@ -19,20 +19,20 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 public class ShowBindingDetailsAction extends OdoAction {
-  public ShowBindingDetailsAction() {
-    super(BindingNode.class);
-  }
+    public ShowBindingDetailsAction() {
+        super(BindingNode.class);
+    }
 
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    BindingNode node = (BindingNode) selected;
-    BindingDetailDialog dialog = new BindingDetailDialog(anActionEvent.getProject(), null, node.getBinding());
-    dialog.show();
-    sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
-  }
+    @Override
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        BindingNode node = (BindingNode) selected;
+        BindingDetailDialog dialog = new BindingDetailDialog(anActionEvent.getProject(), null, node.getBinding());
+        dialog.show();
+        sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
+    }
 
-  @Override
-  public String getTelemetryActionName() {
-    return "show binding";
-  }
+    @Override
+    public String getTelemetryActionName() {
+        return "show binding";
+    }
 }

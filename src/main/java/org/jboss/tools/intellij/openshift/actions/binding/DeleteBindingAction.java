@@ -22,31 +22,31 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 public class DeleteBindingAction extends OdoAction {
-  public DeleteBindingAction() {
-    super(BindingNode.class);
-  }
-
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    try {
-      BindingNode node = (BindingNode) selected;
-      if (Messages.NO == Messages.showYesNoDialog("Delete binding '" + node.getName() + "'.\nAre you sure?",
-        "Delete Binding",
-        Messages.getQuestionIcon())) {
-        sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
-        return;
-      }
-      odo.deleteBinding(node.getParent().getComponent().getPath(), node.getBinding().getName());
-      NodeUtils.fireModified(node.getParent());
-      sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
-    } catch (IOException e) {
-      sendTelemetryError(e);
-      Messages.showWarningDialog("Error: " + e.getLocalizedMessage(), "Delete Binding");
+    public DeleteBindingAction() {
+        super(BindingNode.class);
     }
-  }
 
-  @Override
-  public String getTelemetryActionName() {
-    return "delete binding";
-  }
+    @Override
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        try {
+            BindingNode node = (BindingNode) selected;
+            if (Messages.NO == Messages.showYesNoDialog("Delete binding '" + node.getName() + "'.\nAre you sure?",
+                "Delete Binding",
+                Messages.getQuestionIcon())) {
+                sendTelemetryResults(TelemetryService.TelemetryResult.ABORTED);
+                return;
+            }
+            odo.deleteBinding(node.getParent().getComponent().getPath(), node.getBinding().getName());
+            NodeUtils.fireModified(node.getParent());
+            sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+            sendTelemetryError(e);
+            Messages.showWarningDialog("Error: " + e.getLocalizedMessage(), "Delete Binding");
+        }
+    }
+
+    @Override
+    public String getTelemetryActionName() {
+        return "delete binding";
+    }
 }

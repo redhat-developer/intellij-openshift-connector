@@ -35,43 +35,43 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     super(filters);
   }
 
-  @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-    this.telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-    Odo odo = getOdo(anActionEvent);
-    if (odo == null) {
-      return;
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+        this.telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
+        Odo odo = getOdo(anActionEvent);
+        if (odo == null) {
+          return;
+        }
+        this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
     }
-    this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
-  }
 
-  protected Odo getOdo(AnActionEvent anActionEvent) {
-    try {
-      return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
-    } catch (Exception e) {
-      LOGGER.warn("Could not get odo: " + e.getMessage(), e);
-      return null;
+    protected Odo getOdo(AnActionEvent anActionEvent) {
+        try {
+          return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
+        } catch(Exception e) {
+          LOGGER.warn("Could not get odo: " + e.getMessage(), e);
+          return null;
+        }
     }
-  }
 
-  public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
+    public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
 
-  @Override
-  public void setTelemetrySender(TelemetrySender telemetrySender) {
-    this.telemetrySender = telemetrySender;
-  }
+    @Override
+    public void setTelemetrySender(TelemetrySender telemetrySender) {
+      this.telemetrySender = telemetrySender;
+    }
 
-  public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
-    telemetrySender.sendTelemetryResults(result);
-  }
+    public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
+        telemetrySender.sendTelemetryResults(result);
+    }
 
-  @Override
-  public void sendTelemetryError(String message) {
-    telemetrySender.sendTelemetryError(message);
-  }
+    @Override
+    public void sendTelemetryError(String message) {
+        telemetrySender.sendTelemetryError(message);
+    }
 
-  @Override
-  public void sendTelemetryError(Exception exception) {
-    telemetrySender.sendTelemetryError(exception);
-  }
+    @Override
+    public void sendTelemetryError(Exception exception) {
+        telemetrySender.sendTelemetryError(exception);
+    }
 }

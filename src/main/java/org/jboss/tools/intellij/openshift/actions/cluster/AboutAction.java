@@ -30,20 +30,20 @@ public class AboutAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() {return "about";}
+  public String getTelemetryActionName() { return "about"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     runWithProgress((ProgressIndicator progress) -> {
-        try {
-          odo.about();
-          sendTelemetryResults(TelemetryResult.SUCCESS);
-        } catch (IOException e) {
-          sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "About"));
-        }
-      },
-      "About...",
-      getEventProject(anActionEvent));
+      try {
+        odo.about();
+        sendTelemetryResults(TelemetryResult.SUCCESS);
+      } catch (IOException e) {
+        sendTelemetryError(e);
+        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "About"));
+      }
+    },
+    "About...",
+    getEventProject(anActionEvent));
   }
 }

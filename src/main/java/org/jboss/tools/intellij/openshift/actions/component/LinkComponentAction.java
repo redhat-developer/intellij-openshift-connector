@@ -39,13 +39,13 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() {return "link component to component";}
+  public String getTelemetryActionName() { return "link component to component"; }
 
   protected String getSelectedTargetComponent(Odo odo, String project, String component) throws IOException {
     String targetComponent = null;
 
     List<Component> components = odo.getComponents(project)
-      .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
+            .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
     if (!components.isEmpty()) {
       if (components.size() == 1) {
         targetComponent = components.get(0).getName();

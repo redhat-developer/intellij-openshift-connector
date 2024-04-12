@@ -29,12 +29,12 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public class LoginAction extends OdoAction {
 
-  public LoginAction() {
-    super(ApplicationsRootNode.class);
-  }
+    public LoginAction() {
+        super(ApplicationsRootNode.class);
+    }
 
-  @Override
-  public String getTelemetryActionName() {return "login to cluster";}
+    @Override
+    public String getTelemetryActionName() { return "login to cluster"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
@@ -45,7 +45,7 @@ public class LoginAction extends OdoAction {
             LoginDialog dialog = new LoginDialog(anActionEvent.getProject(), null, odo.getMasterUrl().toString());
             dialog.show();
             return dialog;
-          });
+            });
           if (loginDialog.isOK()) {
             setProcessing("Logging in...", clusterNode);
             odo.login(

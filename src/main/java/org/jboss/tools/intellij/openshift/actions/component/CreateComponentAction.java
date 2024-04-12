@@ -39,114 +39,114 @@ import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class CreateComponentAction extends OdoAction {
-  public CreateComponentAction() {
-    super(NamespaceNode.class);
-  }
-
-  protected CreateComponentAction(Class... clazz) {
-    super(clazz);
-  }
-
-  public static void execute(ParentableNode<?> node) {
-    if (node == null) {
-      return;
+    public CreateComponentAction() {
+        super(NamespaceNode.class);
     }
-    Odo odo = node.getRoot().getOdo().getNow(null);
-    if (odo == null) {
-      return;
+
+    protected CreateComponentAction(Class... clazz) {
+        super(clazz);
     }
-    NamespaceNode namespaceNode = (NamespaceNode) node;
-    CreateComponentAction action = ActionUtils.createAction(CreateComponentAction.class.getName());
-    action.doActionPerformed(
-      namespaceNode,
-      odo,
-      namespaceNode.getRoot(),
-      namespaceNode.getRoot().getProject());
-  }
 
-  @Override
-  public String getTelemetryActionName() {
-    return "create component";
-  }
-
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    if (selected == null) {
-      return;
-    }
-    NamespaceNode namespaceNode = (NamespaceNode) selected;
-    ApplicationsRootNode rootNode = namespaceNode.getRoot();
-    Project project = rootNode.getProject();
-    doActionPerformed((NamespaceNode) selected, odo, rootNode, project);
-  }
-
-  private void doActionPerformed(NamespaceNode namespaceNode, Odo odo, ApplicationsRootNode rootNode, Project project) {
-    runWithProgress(
-      (ProgressIndicator progress) -> {
-        try {
-          CreateComponentModel model = getModel(project, odo, p -> rootNode.getComponents().containsKey(p));
-          boolean create = !UIHelper.executeInUI(() -> showDialog(model));
-          if (create) {
-            sendTelemetryResults(TelemetryResult.ABORTED);
+    public static void execute(ParentableNode<?> node) {
+        if (node == null) {
             return;
-          }
-          setProcessing("Creating component...", namespaceNode);
-          createComponent(odo, model);
-          clearProcessing(namespaceNode);
-          rootNode.addContext(model.getContext());
-          NodeUtils.fireModified(namespaceNode);
-          sendTelemetryResults(TelemetryResult.SUCCESS);
-        } catch (IOException e) {
-          clearProcessing(namespaceNode);
-          sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Component"));
         }
-      },
-      "Create Component...",
-      project);
-  }
-
-  protected void createComponent(Odo odo, CreateComponentModel model)
-    throws IOException {
-    computeTelemetry(model);
-    String type = model.getSelectedComponentType() != null ?
-      model.getSelectedComponentType().getName() : null;
-    String registry = model.getSelectedComponentType() instanceof DevfileComponentType ?
-      ((DevfileComponentType) model.getSelectedComponentType()).getDevfileRegistry().getName() : null;
-    String devFile = model.isProjectHasDevfile() ?
-      Constants.DEVFILE_NAME : null;
-    odo.createComponent(
-      type,
-      registry,
-      model.getName(),
-      model.getContext(),
-      devFile,
-      model.getSelectedComponentStarter());
-  }
-
-  protected boolean showDialog(CreateComponentModel model) {
-    CreateComponentDialog dialog = new CreateComponentDialog(model.getProject(), true, model);
-    dialog.show();
-    return dialog.isOK();
-  }
-
-  @NotNull
-  protected CreateComponentModel getModel(Project project, Odo odo, Predicate<String> componentChecker) throws IOException {
-    CreateComponentModel model = new CreateComponentModel("Create component", project, odo, odo.getComponentTypes());
-    model.setComponentPredicate(componentChecker);
-    return model;
-  }
-
-  private void computeTelemetry(CreateComponentModel model) {
-    telemetrySender
-      .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
-    telemetrySender
-      .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
-    if (!model.isProjectHasDevfile() && StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
-      telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
+        Odo odo = node.getRoot().getOdo().getNow(null);
+        if (odo == null) {
+            return;
+        }
+        NamespaceNode namespaceNode = (NamespaceNode) node;
+        CreateComponentAction action = ActionUtils.createAction(CreateComponentAction.class.getName());
+        action.doActionPerformed(
+            namespaceNode,
+            odo,
+            namespaceNode.getRoot(),
+            namespaceNode.getRoot().getProject());
     }
-    if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {
-      telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());
+
+    @Override
+    public String getTelemetryActionName() {
+        return "create component";
     }
-  }
+
+    @Override
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        if (selected == null) {
+            return;
+        }
+        NamespaceNode namespaceNode = (NamespaceNode) selected;
+        ApplicationsRootNode rootNode = namespaceNode.getRoot();
+        Project project = rootNode.getProject();
+        doActionPerformed((NamespaceNode) selected, odo, rootNode, project);
+    }
+
+    private void doActionPerformed(NamespaceNode namespaceNode, Odo odo, ApplicationsRootNode rootNode, Project project) {
+        runWithProgress(
+            (ProgressIndicator progress) -> {
+                try {
+                    CreateComponentModel model = getModel(project, odo, p -> rootNode.getComponents().containsKey(p));
+                    boolean create = !UIHelper.executeInUI(() -> showDialog(model));
+                    if (create) {
+                        sendTelemetryResults(TelemetryResult.ABORTED);
+                        return;
+                    }
+                    setProcessing("Creating component...", namespaceNode);
+                    createComponent(odo, model);
+                    clearProcessing(namespaceNode);
+                    rootNode.addContext(model.getContext());
+                    NodeUtils.fireModified(namespaceNode);
+                    sendTelemetryResults(TelemetryResult.SUCCESS);
+                } catch (IOException e) {
+                    clearProcessing(namespaceNode);
+                    sendTelemetryError(e);
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Component"));
+                }
+            },
+            "Create Component...",
+            project);
+    }
+
+    protected void createComponent(Odo odo, CreateComponentModel model)
+        throws IOException {
+        computeTelemetry(model);
+        String type = model.getSelectedComponentType() != null ?
+            model.getSelectedComponentType().getName() : null;
+        String registry = model.getSelectedComponentType() instanceof DevfileComponentType ?
+            ((DevfileComponentType) model.getSelectedComponentType()).getDevfileRegistry().getName() : null;
+        String devFile = model.isProjectHasDevfile() ?
+            Constants.DEVFILE_NAME : null;
+        odo.createComponent(
+            type,
+            registry,
+            model.getName(),
+            model.getContext(),
+            devFile,
+            model.getSelectedComponentStarter());
+    }
+
+    protected boolean showDialog(CreateComponentModel model) {
+        CreateComponentDialog dialog = new CreateComponentDialog(model.getProject(), true, model);
+        dialog.show();
+        return dialog.isOK();
+    }
+
+    @NotNull
+    protected CreateComponentModel getModel(Project project, Odo odo, Predicate<String> componentChecker) throws IOException {
+        CreateComponentModel model = new CreateComponentModel("Create component", project, odo, odo.getComponentTypes());
+        model.setComponentPredicate(componentChecker);
+        return model;
+    }
+
+    private void computeTelemetry(CreateComponentModel model) {
+        telemetrySender
+            .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
+        telemetrySender
+            .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
+        if (!model.isProjectHasDevfile() && StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
+            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
+        }
+        if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {
+            telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());
+        }
+    }
 }

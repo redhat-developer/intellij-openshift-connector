@@ -26,30 +26,30 @@ import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProg
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class DescribeComponentAction extends OdoAction {
-  public DescribeComponentAction() {
-    super(ComponentNode.class);
-  }
+    public DescribeComponentAction() {
+        super(ComponentNode.class);
+    }
 
-  @Override
-  public String getTelemetryActionName() {
-    return "describe component";
-  }
+    @Override
+    public String getTelemetryActionName() {
+        return "describe component";
+    }
 
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    ComponentNode componentNode = (ComponentNode) selected;
-    Component component = componentNode.getComponent();
-    runWithProgress(
-      (ProgressIndicator progress) -> {
-        try {
-          odo.describeComponent(component.getPath());
-          sendTelemetryResults(TelemetryResult.SUCCESS);
-        } catch (IOException e) {
-          sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe"));
-        }
-      },
-      "Describing Component " + component.getName() + "...",
-      getEventProject(anActionEvent));
-  }
+    @Override
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        ComponentNode componentNode = (ComponentNode) selected;
+        Component component = componentNode.getComponent();
+        runWithProgress(
+            (ProgressIndicator progress) -> {
+                try {
+                    odo.describeComponent(component.getPath());
+                    sendTelemetryResults(TelemetryResult.SUCCESS);
+                } catch (IOException e) {
+                    sendTelemetryError(e);
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe"));
+                }
+            },
+            "Describing Component " + component.getName() + "...",
+            getEventProject(anActionEvent));
+    }
 }

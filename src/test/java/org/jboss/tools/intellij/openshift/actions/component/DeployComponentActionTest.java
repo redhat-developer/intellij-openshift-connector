@@ -13,10 +13,9 @@ package org.jboss.tools.intellij.openshift.actions.component;
 import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
-public class DeplyComponentActionTest extends ActionTest {
-    @Override
-    public AnAction getAction() {
-        return new DeployComponentAction();
-    }
-
+public class DeployComponentActionTest extends ActionTest {
+  @Override
+  public AnAction getAction() {
+    return new DeployComponentAction();
+  }
 }

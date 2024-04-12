@@ -459,16 +459,18 @@ public class OdoCli implements Odo {
   @Override
   public ComponentInfo getComponentInfo(String project, String component, String path,
                                         ComponentKind kind) throws IOException {
+    boolean isPodmanPresent = !execute(command, envVars, "version").contains("unable to fetch the podman client version");
+
     if (path != null) {
-      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind);
+      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind, isPodmanPresent);
     } else {
-      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind);
+      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind, isPodmanPresent);
     }
   }
 
-  private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
+  private ComponentInfo parseComponentInfo(String json, ComponentKind kind, boolean isPodmanPresent) throws IOException {
     JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-    return parser.parseDescribeComponentInfo(kind);
+    return parser.parseDescribeComponentInfo(kind, isPodmanPresent);
   }
 
   /*

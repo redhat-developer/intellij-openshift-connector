@@ -23,6 +23,8 @@ public interface ComponentInfo {
 
     List<ComponentFeature.Mode> getSupportedFeatures();
 
+    boolean isLocalPodmanPresent();
+
     class Builder {
         private String componentTypeName;
 
@@ -31,6 +33,8 @@ public interface ComponentInfo {
         private List<ComponentFeature.Mode> supportedFeatures = new ArrayList<>();
 
         private String language;
+
+        private boolean isLocalPodmanPresent;
 
         public Builder withComponentTypeName(String componentTypeName) {
             this.componentTypeName = componentTypeName;
@@ -50,6 +54,11 @@ public interface ComponentInfo {
         public Builder withLanguage(String language) {
             this.language = language;
             return this;
+        }
+
+        public Builder withLocalPodmanPresence(boolean isLocalPodmanPresent) {
+            this.isLocalPodmanPresent = isLocalPodmanPresent;
+             return this;
         }
 
         public ComponentInfo build() {
@@ -73,6 +82,11 @@ public interface ComponentInfo {
                 @Override
                 public List<ComponentFeature.Mode> getSupportedFeatures() {
                     return supportedFeatures;
+                }
+
+                @Override
+                public boolean isLocalPodmanPresent() {
+                    return isLocalPodmanPresent;
                 }
             };
         }

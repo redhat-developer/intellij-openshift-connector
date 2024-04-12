@@ -132,7 +132,7 @@ public class ChangeActiveProjectAction extends OdoAction {
   @Override
   public boolean isVisible(Object selected) {
     return (selected instanceof NamespaceNode)
-            || (selected instanceof ApplicationsRootNode && ((ApplicationsRootNode) selected).isLogged());
+      || (selected instanceof ApplicationsRootNode && ((ApplicationsRootNode) selected).isLogged());
   }
 
   private static final class ClusterProjects {

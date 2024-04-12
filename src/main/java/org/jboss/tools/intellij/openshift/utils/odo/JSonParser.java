@@ -125,7 +125,7 @@ public class JSonParser {
         return builder.build();
     }
 
-    public ComponentInfo parseDescribeComponentInfo(ComponentKind kind) {
+    public ComponentInfo parseDescribeComponentInfo(ComponentKind kind, boolean isPodmanPresent) {
         ComponentInfo.Builder builder = new ComponentInfo.Builder().withComponentKind(kind);
         if (root.has(DEVFILE_DATA_FIELD) && root.get(DEVFILE_DATA_FIELD).has(DEVFILE_FIELD) &&
             root.get(DEVFILE_DATA_FIELD).get(DEVFILE_FIELD).has(METADATA_FIELD) &&
@@ -144,7 +144,7 @@ public class JSonParser {
             List<ComponentFeature.Mode> features = getComponentsFeatures(featuresNode);
             builder.withSupportedFeatures(features);
         }
-        return builder.build();
+         return builder.withLocalPodmanPresence(isPodmanPresent).build();
     }
 
     private List<ComponentFeature.Mode> getComponentsFeatures(JsonNode featuresNode) {

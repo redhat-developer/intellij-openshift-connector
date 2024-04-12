@@ -59,10 +59,6 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
             }
             ComponentNode componentNode = (ComponentNode) node;
             Component component = componentNode.getComponent();
-            Odo odo = componentNode.getRoot().getOdo().getNow(null);
-            if (odo == null) {
-                return;
-            }
             e.getPresentation().setText(getCustomizedPresentation(component));
         }
     }

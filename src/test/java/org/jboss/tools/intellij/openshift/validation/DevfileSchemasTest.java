@@ -13,14 +13,27 @@ package org.jboss.tools.intellij.openshift.validation;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
 
+import java.util.Collections;
+
 
 public class DevfileSchemasTest extends BasePlatformTestCase {
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    System.setProperty("NO_FS_ROOTS_ACCESS_CHECK", "true");
+  }
 
-    public void testQuarkusDevfile() {
-        myFixture.setTestDataPath("src/test/resources");
-        myFixture.enableInspections(YamlJsonSchemaHighlightingInspection.class);
-        myFixture.configureByFile("devfiles/java-quarkus.yaml");
-        myFixture.checkHighlighting();
-    }
+  @Override
+  public void tearDown() throws Exception {
+    System.clearProperty("NO_FS_ROOTS_ACCESS_CHECK");
+    super.tearDown();
+  }
+
+  public void testQuarkusDevfile() {
+    myFixture.setTestDataPath("src/test/resources");
+    myFixture.enableInspections(Collections.singletonList(YamlJsonSchemaHighlightingInspection.class));
+    myFixture.configureByFile("devfiles/java-quarkus.yaml");
+    myFixture.checkHighlighting();
+  }
 
 }

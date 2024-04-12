@@ -115,7 +115,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
     try {
       odo.createProject(newProject);
       notification.expire();
-      NotificationUtils.notifyInformation("Create " + kind, kind + " "  + newProject + " successfully created");
+      NotificationUtils.notifyInformation("Create " + kind, kind + " " + newProject + " successfully created");
       sendTelemetryResults(TelemetryResult.SUCCESS);
     } catch (IOException | CompletionException e) {
       notification.expire();

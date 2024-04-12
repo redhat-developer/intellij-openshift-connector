@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.actions.component;
 
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 
@@ -33,4 +35,16 @@ public class DevOnPodmanComponentAction extends FeatureComponentAction {
         }
     }
 
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        if (e.getPresentation().isVisible()) {
+          Object node = adjust(getSelected(getTree(e)));
+            if (!(node instanceof ComponentNode)) {
+              return;
+            }
+          ComponentNode componentNode = (ComponentNode) node;
+          e.getPresentation().setEnabled(componentNode.getComponent().getInfo().isLocalPodmanPresent());
+        }
+    }
 }

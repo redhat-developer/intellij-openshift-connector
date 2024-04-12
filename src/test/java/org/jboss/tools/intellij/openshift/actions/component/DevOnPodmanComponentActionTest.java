@@ -14,9 +14,9 @@ import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
 public class DevOnPodmanComponentActionTest extends ActionTest {
-    @Override
-    public AnAction getAction() {
-        return new DevOnPodmanComponentAction();
-    }
+  @Override
+  public AnAction getAction() {
+    return new DevOnPodmanComponentAction();
+  }
 
 }

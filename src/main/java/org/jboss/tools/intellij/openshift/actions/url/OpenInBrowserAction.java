@@ -26,12 +26,12 @@ public class OpenInBrowserAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() {return "open URL";}
+  public String getTelemetryActionName() { return "open URL"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    BrowserUtil.open(getURL(((URLNode) selected).getUrl()));
-    sendTelemetryResults(TelemetryResult.SUCCESS);
+      BrowserUtil.open(getURL(((URLNode)selected).getUrl()));
+      sendTelemetryResults(TelemetryResult.SUCCESS);
   }
 
   protected String getURL(URL url) {

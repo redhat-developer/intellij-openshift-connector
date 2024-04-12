@@ -34,15 +34,15 @@ public class DeleteProjectAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() {return "delete project";}
+  public String getTelemetryActionName() { return "delete project"; }
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     NamespaceNode namespaceNode = (NamespaceNode) selected;
     if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + namespaceNode.getName() + "'.\nAre you sure?", "Delete Project",
-      Messages.getQuestionIcon())) {
-      sendTelemetryResults(TelemetryResult.ABORTED);
-      return;
+        Messages.getQuestionIcon())) {
+        sendTelemetryResults(TelemetryResult.ABORTED);
+        return;
     }
     runWithProgress((ProgressIndicator progress) -> {
         try {

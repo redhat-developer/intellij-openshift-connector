@@ -25,30 +25,30 @@ import java.io.IOException;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class DeleteRegistryAction extends OdoAction {
-  public DeleteRegistryAction() {
-    super(DevfileRegistryNode.class);
-  }
-
-  @Override
-  public String getTelemetryActionName() {return "delete registry";}
-
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    DevfileRegistryNode registryNode = (DevfileRegistryNode) selected;
-    if (Messages.NO == Messages.showYesNoDialog("Delete registry '" + registryNode.getName() + "'.\nAre you sure?", "Delete registry",
-      Messages.getQuestionIcon())) {
-      sendTelemetryResults(TelemetryResult.ABORTED);
-    } else {
-      ExecHelper.submit(() -> {
-        try {
-          odo.deleteDevfileRegistry(registryNode.getName());
-          NodeUtils.fireRemoved(registryNode);
-          sendTelemetryResults(TelemetryResult.SUCCESS);
-        } catch (IOException e) {
-          sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Registry"));
-        }
-      });
+    public DeleteRegistryAction() {
+        super(DevfileRegistryNode.class);
     }
-  }
+
+    @Override
+    public String getTelemetryActionName() { return "delete registry"; }
+
+    @Override
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        DevfileRegistryNode registryNode = (DevfileRegistryNode) selected;
+        if (Messages.NO == Messages.showYesNoDialog("Delete registry '" + registryNode.getName() + "'.\nAre you sure?", "Delete registry",
+                Messages.getQuestionIcon())) {
+            sendTelemetryResults(TelemetryResult.ABORTED);
+        } else {
+            ExecHelper.submit(() -> {
+                try {
+                    odo.deleteDevfileRegistry(registryNode.getName());
+                    NodeUtils.fireRemoved(registryNode);
+                    sendTelemetryResults(TelemetryResult.SUCCESS);
+                } catch (IOException e) {
+                    sendTelemetryError(e);
+                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Registry"));
+                }
+            });
+        }
+    }
 }

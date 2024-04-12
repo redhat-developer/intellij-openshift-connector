@@ -14,29 +14,29 @@ import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
 public class DeleteComponentActionTest extends ActionTest {
-  @Override
-  public AnAction getAction() {
-    return new DeleteComponentAction();
-  }
+    @Override
+    public AnAction getAction() {
+        return new DeleteComponentAction();
+    }
 
-  @Override
-  protected void verifyLocalDevComponent(boolean visible) {
-    assertTrue(visible);
-  }
+    @Override
+    protected void verifyLocalDevComponent(boolean visible) {
+        assertTrue(visible);
+    }
 
-  @Override
-  protected void verifyLocalOnlyComponent(boolean visible) {
-    assertTrue(visible);
-  }
+    @Override
+    protected void verifyLocalOnlyComponent(boolean visible) {
+        assertTrue(visible);
+    }
 
-  @Override
-  protected void verifyRemoteOnlyDevComponent(boolean visible) {
-    assertTrue(visible);
-  }
+    @Override
+    protected void verifyRemoteOnlyDevComponent(boolean visible) {
+        assertTrue(visible);
+    }
 
-  @Override
-  protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
-    assertTrue(visible);
-  }
+    @Override
+    protected void verifyRemoteOnlyDevComponentWithoutContext(boolean visible) {
+        assertTrue(visible);
+    }
 
 }

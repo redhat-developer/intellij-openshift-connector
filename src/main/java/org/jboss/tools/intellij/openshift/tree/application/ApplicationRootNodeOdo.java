@@ -32,8 +32,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentMetadata;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentTypeInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileRegistry;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProcessHelper;
 import org.jboss.tools.intellij.openshift.utils.odo.OperatorCRD;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
@@ -51,17 +50,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class ApplicationRootNodeOdo implements OdoFacade {
-  private final OdoDelegate delegate;
+public class ApplicationRootNodeOdo implements Odo {
+  private final Odo delegate;
   private final OdoProcessHelper processHelper;
   private final ApplicationsRootNode root;
   private final FileOperations fileOperations;
 
-  public ApplicationRootNodeOdo(OdoDelegate delegate, ApplicationsRootNode root, OdoProcessHelper processHelper) {
+  public ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root, OdoProcessHelper processHelper) {
     this(delegate, processHelper, root, new FileOperations());
   }
 
-  ApplicationRootNodeOdo(OdoDelegate delegate, OdoProcessHelper processHelper, ApplicationsRootNode root, FileOperations fileOperations) {
+  ApplicationRootNodeOdo(Odo delegate, OdoProcessHelper processHelper, ApplicationsRootNode root, FileOperations fileOperations) {
     this.delegate = delegate;
     this.processHelper = processHelper;
     this.root = root;
@@ -118,8 +117,18 @@ public class ApplicationRootNodeOdo implements OdoFacade {
   }
 
   @Override
+  public void start(String context, ComponentFeature feature, ProcessHandler handler, ProcessAdapter processAdapter) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void stop(String context, String component, ComponentFeature feature) throws IOException {
     delegate.stop(context, feature, getComponentFeature(component).remove(feature));
+  }
+
+  @Override
+  public void stop(String context, ComponentFeature feature, ProcessHandler handler) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -161,8 +170,8 @@ public class ApplicationRootNodeOdo implements OdoFacade {
   }
 
   @Override
-  public List<DevfileComponentType> getAllComponentTypes() throws IOException {
-    return delegate.getAllComponentTypes();
+  public List<DevfileComponentType> getComponentTypes() throws IOException {
+    return delegate.getComponentTypes();
   }
 
   @Override
@@ -196,9 +205,19 @@ public class ApplicationRootNodeOdo implements OdoFacade {
   }
 
   @Override
+  public void follow(String context, boolean deploy, String platform, List<ProcessHandler> handlers) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void log(String context, String component, boolean deploy, String platform) throws IOException {
     List<ProcessHandler> handlers = processHelper.getComponentLogProcesses().computeIfAbsent(component, name -> Arrays.asList(new ProcessHandler[2]));
     delegate.log(context, deploy, platform, handlers);
+  }
+
+  @Override
+  public void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -341,8 +360,8 @@ public class ApplicationRootNodeOdo implements OdoFacade {
   }
 
   @Override
-  public List<DevfileComponentType> getComponentTypesFromRegistry(String name) throws IOException {
-    return delegate.getComponentTypesFromRegistry(name);
+  public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
+    return delegate.getComponentTypes(name);
   }
 
   @Override
@@ -353,11 +372,6 @@ public class ApplicationRootNodeOdo implements OdoFacade {
   @Override
   public void migrateComponent(String name) {
     delegate.migrateComponent(name);
-  }
-
-  @Override
-  public boolean checkPodman() throws IOException {
-    return delegate.checkPodman();
   }
 
   /**

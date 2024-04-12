@@ -11,9 +11,12 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
@@ -25,6 +28,15 @@ public interface Odo {
   boolean namespaceExists(String name);
 
   String getNamespaceKind();
+
+  void start(String context, ComponentFeature feature, ProcessHandler handler, ProcessAdapter processAdapter) throws IOException;
+
+  void start(String context, String component, ComponentFeature feature,
+             Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException;
+
+  void stop(String context, String component, ComponentFeature feature) throws IOException;
+
+  void stop(String context, ComponentFeature feature, ProcessHandler handler) throws IOException;
 
   void describeComponent(String context) throws IOException;
 
@@ -39,9 +51,7 @@ public interface Odo {
 
   void deleteService(String project, Service service) throws IOException;
 
-  List<DevfileComponentType> getAllComponentTypes() throws IOException;
-
-  List<DevfileComponentType> getComponentTypesFromRegistry(String name) throws IOException;
+  List<DevfileComponentType> getComponentTypes() throws IOException;
 
   List<ServiceTemplate> getServiceTemplates() throws IOException;
 
@@ -52,6 +62,14 @@ public interface Odo {
   void deleteComponent(String project, String context, String component, ComponentKind kind) throws IOException;
 
   boolean isLogRunning(String component, boolean deploy);
+
+  void follow(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException;
+
+  void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException;
+
+  void follow(String context, String component, boolean deploy, String platform) throws IOException;
+
+  void log(String context, String component, boolean deploy, String platform) throws IOException;
 
   void createProject(String project) throws IOException;
 
@@ -93,9 +111,10 @@ public interface Odo {
 
   void deleteDevfileRegistry(String name) throws IOException;
 
+  List<DevfileComponentType> getComponentTypes(String name) throws IOException;
+
   boolean isOpenShift();
 
   void migrateComponent(String name);
 
-  boolean checkPodman() throws IOException;
 }

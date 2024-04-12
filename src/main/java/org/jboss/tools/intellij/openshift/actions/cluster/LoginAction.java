@@ -17,7 +17,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.cluster.LoginDialog;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class LoginAction extends OdoAction {
   public String getTelemetryActionName() {return "login to cluster";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     runWithProgress((ProgressIndicator progress) -> {
         try {

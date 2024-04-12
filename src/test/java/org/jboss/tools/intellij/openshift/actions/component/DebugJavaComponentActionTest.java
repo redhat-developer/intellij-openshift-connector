@@ -14,10 +14,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 
 public class DebugJavaComponentActionTest extends ActionTest {
-  public DebugJavaComponentActionTest(boolean isOpenshift) {
-    super(isOpenshift);
-  }
-
   @Override
   public AnAction getAction() {
     return new DebugJavaComponentAction();

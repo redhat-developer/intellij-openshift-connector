@@ -24,7 +24,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -49,7 +48,7 @@ public class ImportComponentAction extends CreateComponentAction {
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();
@@ -77,7 +76,7 @@ public class ImportComponentAction extends CreateComponentAction {
 
   @NotNull
   private CreateComponentModel getModel(Project project, Odo odo, String name, ComponentInfo info) throws IOException {
-    List<DevfileComponentType> types = odo.getAllComponentTypes();
+    List<DevfileComponentType> types = odo.getComponentTypes();
     CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
     ComponentType type = select(types, info.getComponentTypeName());
     model.setName(name);

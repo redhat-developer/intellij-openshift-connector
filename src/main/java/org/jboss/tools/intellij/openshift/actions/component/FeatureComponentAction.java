@@ -20,7 +20,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.DebugComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -60,10 +59,6 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
       }
       ComponentNode componentNode = (ComponentNode) node;
       Component component = componentNode.getComponent();
-      Odo odo = componentNode.getRoot().getOdo().getNow(null);
-      if (odo == null) {
-        return;
-      }
       e.getPresentation().setText(getCustomizedPresentation(component));
     }
   }
@@ -84,7 +79,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     runWithProgress(
@@ -124,7 +119,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     return debugFeature;
   }
 
-  protected void process(OdoFacade odo, Component component,
+  protected void process(Odo odo, Component component,
                          ComponentFeature feat, Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) throws IOException {
     if (odo.isStarted(component.getName(), feat)) {
       odo.stop(component.getPath(), component.getName(), feat);

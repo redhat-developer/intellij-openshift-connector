@@ -299,7 +299,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
     List<DevfileRegistryComponentTypeNode> result = new ArrayList<>();
     try {
-      odo.getComponentTypesFromRegistry(registryNode.getName()).forEach(type ->
+      odo.getComponentTypes(registryNode.getName()).forEach(type ->
         result.add(new DevfileRegistryComponentTypeNode(root, registryNode, type)));
     } catch (IOException e) {
       LOGGER.error(e.getLocalizedMessage(), e);

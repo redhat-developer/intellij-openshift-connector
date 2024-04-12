@@ -18,7 +18,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.ui.service.CreateServiceDialog;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.ServiceTemplate;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +39,7 @@ public class CreateServiceAction extends OdoAction {
   public String getTelemetryActionName() {return "create service";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     NamespaceNode namespaceNode = (NamespaceNode) selected;
     if (namespaceNode == null) {
       return;

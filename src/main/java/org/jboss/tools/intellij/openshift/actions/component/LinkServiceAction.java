@@ -27,7 +27,6 @@ import org.jboss.tools.intellij.openshift.ui.binding.BindingDetailDialog;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +52,7 @@ public class LinkServiceAction extends OdoAction {
 
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();

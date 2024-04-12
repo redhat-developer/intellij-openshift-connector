@@ -11,22 +11,16 @@
 package org.jboss.tools.intellij.openshift.actions.cluster;
 
 import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jetbrains.annotations.NotNull;
 
 public class OpenConsoleActionTest extends ActionTest {
-  public OpenConsoleActionTest(boolean isOpenshift) {
-    super(isOpenshift);
-  }
-
   @Override
   public AnAction getAction() {
     return new OpenConsoleAction();
   }
 
   @Override
-  protected void verifyLoggedInCluster(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
+  protected void verifyLoggedInCluster(boolean visible) {
+    assertTrue(visible);
   }
 }

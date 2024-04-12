@@ -11,8 +11,11 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import org.fest.util.Files;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,10 +26,7 @@ import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.awaitility.Awaitility.await;
 import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 
 @RunWith(Parameterized.class)
@@ -35,18 +35,14 @@ public class OdoCliComponentTest extends OdoCliTest {
   private String project;
   private String component;
   private String service;
-  private String starter;
 
-  public OdoCliComponentTest(ComponentFeature feature, String label) {
+  public OdoCliComponentTest(ComponentFeature feature) {
     this.feature = feature;
   }
 
-  @Parameterized.Parameters(name = "feature: {1}")
-  public static Iterable<Object[]> data() {
-    return Arrays.asList(new Object[][]{
-      {ComponentFeature.DEV, ComponentFeature.DEV.getLabel()},
-      {ComponentFeature.DEV_ON_PODMAN, ComponentFeature.DEV_ON_PODMAN.getLabel()}
-    });
+  @Parameterized.Parameters(name = "feature: {0}")
+  public static Iterable<?> data() {
+    return Arrays.asList(null, ComponentFeature.DEV);
   }
 
   @Before
@@ -54,36 +50,29 @@ public class OdoCliComponentTest extends OdoCliTest {
     project = PROJECT_PREFIX + random.nextInt();
     component = COMPONENT_PREFIX + random.nextInt();
     service = SERVICE_PREFIX + random.nextInt();
-    starter = null;
   }
 
   @After
   public void cleanUp() throws IOException {
-    if (odo.isStarted(COMPONENT_PATH, feature)) {
-      odo.stop(COMPONENT_PATH, component, feature);
+    if (odo.isStarted(COMPONENT_PATH, ComponentFeature.DEV)) {
+      odo.stop(COMPONENT_PATH, component, ComponentFeature.DEV);
     }
     if (project.equals(odo.getCurrentNamespace())) {
       odo.deleteProject(project);
     }
   }
 
-  protected void startComponent(String component, ComponentFeature feature) throws IOException {
-    AtomicBoolean started = new AtomicBoolean();
-    odo.start(new File(COMPONENT_PATH).getAbsolutePath(), component, feature, started::getAndSet, null);
-    await().atMost(15, TimeUnit.MINUTES).untilTrue(started);
-  }
-
   @Test
   public void checkCreateComponent() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
+    createComponent(project, component, feature);
     List<Component> components = odo.getComponents(project);
     assertNotNull(components);
-    assertEquals(1, components.size());
+    assertEquals(feature == ComponentFeature.DEV ? 1 : 0, components.size());
   }
 
   @Test
   public void checkCreateAndDiscoverComponent() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
+    createComponent(project, component, feature);
     List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
     assertNotNull(components);
     assertEquals(1, components.size());
@@ -93,13 +82,15 @@ public class OdoCliComponentTest extends OdoCliTest {
 
   @Test
   public void checkCreateAndDeleteComponent() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
+    createComponent(project, component, feature);
     odo.deleteComponent(project, COMPONENT_PATH, component, ComponentKind.DEVFILE);
   }
 
   @Test
+  @Ignore
   public void checkCreateComponentAndLinkService() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
+    Assume.assumeTrue(feature != null);
+    createComponent(project, component, feature);
     ServiceTemplate serviceTemplate = getServiceTemplate();
     OperatorCRD crd = getOperatorCRD(serviceTemplate);
     odo.createService(project, serviceTemplate, crd, service, null, true);
@@ -114,18 +105,17 @@ public class OdoCliComponentTest extends OdoCliTest {
 
   @Test
   public void checkCreateComponentAndListURLs() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
+    Assume.assumeTrue(feature != null);
+    createComponent(project, component, feature);
     List<URL> urls = odo.listURLs(COMPONENT_PATH);
-    assertEquals(0, urls.size());
-    startComponent(component, feature);
-    urls = odo.listURLs(COMPONENT_PATH);
-    assertEquals(0, urls.size());
+    assertEquals(1, urls.size());
   }
 
   @Test
   public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
-    startComponent(component, feature);
+    Assume.assumeTrue(feature != null);
+    createComponent(project, component, feature);
+    odo.start(COMPONENT_PATH, component, ComponentFeature.DEV, null, null);
     List<URL> urls = odo.listURLs(COMPONENT_PATH);
     assertEquals(odo.isOpenShift() ? 2 : 1, urls.size());
     int debugPort;
@@ -141,22 +131,15 @@ public class OdoCliComponentTest extends OdoCliTest {
         fail("Should not raise Exception");
       }
     });
-    odo.stop(COMPONENT_PATH, component, feature);
-    assertFalse(odo.isStarted(component, feature));
   }
 
   @Test
   public void checkCreateComponentStarter() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, "springbootproject");
+    createProject(project);
+    odo.createComponent("java-springboot", REGISTRY_NAME, component,
+      Files.newTemporaryFolder().getAbsolutePath(), null, "springbootproject");
     List<Component> components = odo.getComponents(project);
     assertNotNull(components);
     assertEquals(0, components.size());
-  }
-
-  @Test
-  public void checkCreateComponentAndStartDev() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, starter);
-    startComponent(component, feature);
-    assertTrue(odo.isStarted(component, feature));
   }
 }

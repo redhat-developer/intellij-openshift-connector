@@ -11,22 +11,16 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jetbrains.annotations.NotNull;
 
 public class CreateComponentActionTest extends ActionTest {
-  public CreateComponentActionTest(boolean isOpenshift) {
-    super(isOpenshift);
-  }
-
   @Override
   public AnAction getAction() {
     return new CreateComponentAction();
   }
 
   @Override
-  protected void verifyProject(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
+  protected void verifyProject(boolean visible) {
+    assertTrue(visible);
   }
 }

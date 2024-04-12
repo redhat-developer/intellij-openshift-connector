@@ -16,7 +16,7 @@ import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySenderAware;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +38,14 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     this.telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
-    OdoFacade odo = getOdo(anActionEvent);
+    Odo odo = getOdo(anActionEvent);
     if (odo == null) {
       return;
     }
     this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), odo);
   }
 
-  protected OdoFacade getOdo(AnActionEvent anActionEvent) {
+  protected Odo getOdo(AnActionEvent anActionEvent) {
     try {
       return ActionUtils.getApplicationRootNode(anActionEvent).getOdo().getNow(null);
     } catch (Exception e) {
@@ -54,7 +54,7 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     }
   }
 
-  public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo);
+  public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo);
 
   @Override
   public void setTelemetrySender(TelemetrySender telemetrySender) {

@@ -31,7 +31,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -74,7 +73,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
     if (project == null) {
       sendTelemetryResults(TelemetryResult.ABORTED);

@@ -17,7 +17,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeature;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -54,11 +53,11 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     doLog((ComponentNode) selected, odo, false);
   }
 
-  protected void doLog(ComponentNode componentNode, OdoFacade odo, boolean follow) {
+  protected void doLog(ComponentNode componentNode, Odo odo, boolean follow) {
     Component component = componentNode.getComponent();
     Optional<Boolean> isDeploy = isRunningInBothDevAndDeploy(componentNode, odo);
     if (isDeploy.isEmpty()) {

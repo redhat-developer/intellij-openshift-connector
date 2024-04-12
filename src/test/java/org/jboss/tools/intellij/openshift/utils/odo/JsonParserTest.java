@@ -41,10 +41,10 @@ public class JsonParserTest {
   }
 
   @Test
-  public void verifyThatURLSCanBeLoadedFromDevMode() throws IOException{
+  public void verifyThatURLSCanBeLoadedFromDevMode() throws IOException {
     URL url = JsonParserTest.class.getResource("/describe-component-dev.json");
     JSonParser parser = new JSonParser(MAPPER.readTree(url));
-    List< org.jboss.tools.intellij.openshift.utils.odo.URL> urls = parser.parseURLS();
+    List<org.jboss.tools.intellij.openshift.utils.odo.URL> urls = parser.parseURLS();
     assertNotNull(urls);
     assertEquals(2, urls.size());
     assertEquals("40001", urls.get(0).getLocalPort());
@@ -55,10 +55,10 @@ public class JsonParserTest {
   }
 
   @Test
-  public void verifyThatURLSCanBeLoadedFromDeployModeOnKubernetes() throws IOException{
+  public void verifyThatURLSCanBeLoadedFromDeployModeOnKubernetes() throws IOException {
     URL url = JsonParserTest.class.getResource("/describe-component-deploy-kubernetes.json");
     JSonParser parser = new JSonParser(MAPPER.readTree(url));
-    List< org.jboss.tools.intellij.openshift.utils.odo.URL> urls = parser.parseURLS();
+    List<org.jboss.tools.intellij.openshift.utils.odo.URL> urls = parser.parseURLS();
     assertNotNull(urls);
     assertEquals(2, urls.size());
     assertEquals("80", urls.get(0).getLocalPort());
@@ -74,10 +74,10 @@ public class JsonParserTest {
   }
 
   @Test
-  public void verifyThatURLSCanBeLoadedFromDeployModeOnOpenShift() throws IOException{
+  public void verifyThatURLSCanBeLoadedFromDeployModeOnOpenShift() throws IOException {
     URL url = JsonParserTest.class.getResource("/describe-component-deploy-openshift.json");
     JSonParser parser = new JSonParser(MAPPER.readTree(url));
-    List< org.jboss.tools.intellij.openshift.utils.odo.URL> urls = parser.parseURLS();
+    List<org.jboss.tools.intellij.openshift.utils.odo.URL> urls = parser.parseURLS();
     assertNotNull(urls);
     assertEquals(1, urls.size());
     assertEquals("80", urls.get(0).getLocalPort());
@@ -87,26 +87,26 @@ public class JsonParserTest {
     assertEquals("/", urls.get(0).getPath());
   }
 
-    @Test
-    public void verifyThatStarterCanBeLoadedFromRegistry() throws IOException {
-        URL url = JsonParserTest.class.getResource("/devfile-registry.json");
-        JSonParser parser = new JSonParser(MAPPER.readTree(url));
-        ComponentTypeInfo componentTypeInfo = parser.parseComponentTypeInfo();
-        assertNotNull(componentTypeInfo);
-        assertEquals(1, componentTypeInfo.getStarters().size());
-        assertEquals("dotnet50-example", componentTypeInfo.getStarters().get(0).getName());
-        assertNull(componentTypeInfo.getStarters().get(0).getDescription());
-    }
+  @Test
+  public void verifyThatStarterCanBeLoadedFromRegistry() throws IOException {
+    URL url = JsonParserTest.class.getResource("/devfile-registry.json");
+    JSonParser parser = new JSonParser(MAPPER.readTree(url));
+    ComponentTypeInfo componentTypeInfo = parser.parseComponentTypeInfo();
+    assertNotNull(componentTypeInfo);
+    assertEquals(1, componentTypeInfo.getStarters().size());
+    assertEquals("dotnet50-example", componentTypeInfo.getStarters().get(0).getName());
+    assertNull(componentTypeInfo.getStarters().get(0).getDescription());
+  }
 
-    @Test
-    public void verifyThatComponentInfoCanBeLoadedFromDescribe() throws IOException {
-        URL url = JsonParserTest.class.getResource("/describe-component-local.json");
-        JSonParser parser = new JSonParser(MAPPER.readTree(url));
-        ComponentInfo componentInfo = parser.parseDescribeComponentInfo(ComponentKind.DEVFILE);
-        assertNotNull(componentInfo);
-      assertTrue(componentInfo.getSupportedFeatures().contains(ComponentFeature.Mode.DEV_MODE));
-        assertEquals("Go", componentInfo.getComponentTypeName());
-        assertEquals("Go", componentInfo.getLanguage());
-    }
+  @Test
+  public void verifyThatComponentInfoCanBeLoadedFromDescribe() throws IOException {
+    URL url = JsonParserTest.class.getResource("/describe-component-local.json");
+    JSonParser parser = new JSonParser(MAPPER.readTree(url));
+    ComponentInfo componentInfo = parser.parseDescribeComponentInfo(ComponentKind.DEVFILE, false);
+    assertNotNull(componentInfo);
+    assertTrue(componentInfo.getSupportedFeatures().contains(ComponentFeature.Mode.DEV_MODE));
+    assertEquals("Go", componentInfo.getComponentTypeName());
+    assertEquals("Go", componentInfo.getLanguage());
+  }
 
 }

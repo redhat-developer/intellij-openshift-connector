@@ -14,8 +14,8 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.DownloadHelper;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.helm.HelmCli;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCli;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
@@ -34,13 +34,13 @@ public class ToolFactory {
     return INSTANCE;
   }
 
-  private final Tool<OdoDelegate> odo = new Tool<>("odo", OdoCli::new);
+  private final Tool<Odo> odo = new Tool<>("odo", OdoCli::new);
   private final Tool<Helm> helm = new Tool<>("helm", (project, command) -> new HelmCli(command));
 
   private ToolFactory() {
   }
 
-  public CompletableFuture<OdoDelegate> createOdo(Project project) {
+  public CompletableFuture<Odo> createOdo(Project project) {
     return odo.create(project);
   }
 

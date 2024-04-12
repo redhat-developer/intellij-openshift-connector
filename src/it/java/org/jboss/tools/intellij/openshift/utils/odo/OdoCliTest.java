@@ -24,7 +24,9 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
 import static org.mockito.Mockito.mock;
 
@@ -34,15 +36,12 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   public static final String COMPONENT_PATH = "src/it/projects/springboot-rest";
 
   // see https://operatorhub.io/operator/cloud-native-postgresql/ STABLE channel for versions
-  public static final String SERVICE_TEMPLATE = "cloud-native-postgresql";
-  public static final String SERVICE_KUBE_VERSION = "v1.16.2";
-  public static final String SERVICE_OPENSHIFT_VERSION = "v1.22.1";
-
+  public static final String SERVICE_TEMPLATE = "cloud-native-postgresql.v1.16.2";
   public static final String SERVICE_CRD = "clusters.postgresql.k8s.enterprisedb.io";
   public static final String REGISTRY_URL = "https://registry.stage.devfile.io";
   public static final String REGISTRY_NAME = "RegistryForITTests";
 
-  protected OdoFacade odo;
+  protected Odo odo;
 
   private final OdoProcessHelper processHelper = new OdoProcessHelper();
 
@@ -85,7 +84,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     super.tearDown();
   }
 
-  private CompletableFuture<OdoFacade> getOdo() {
+  private CompletableFuture<Odo> getOdo() {
     return ToolFactory.getInstance().createOdo(getProject())
       .thenApply(odoDelegate -> new ApplicationRootNodeOdo(odoDelegate, mock(ApplicationsRootNode.class), processHelper));
   }
@@ -95,11 +94,16 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     odo = getOdo().get();
   }
 
-  protected void createComponent(String project, String component, String starter) throws IOException, ExecutionException, InterruptedException {
+  protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {
     createProject(project);
     cleanLocalProjectDirectory();
     odo.createComponent("java-springboot", REGISTRY_NAME, component,
-      new File(COMPONENT_PATH).getAbsolutePath(), null, starter);
+      new File(COMPONENT_PATH).getAbsolutePath(), null, null);
+    if (feature != null) {
+      AtomicBoolean started = new AtomicBoolean();
+      odo.start(new File(COMPONENT_PATH).getAbsolutePath(), component, feature, started::getAndSet, null);
+      await().atMost(15, TimeUnit.MINUTES).untilTrue(started);
+    }
   }
 
   private void cleanLocalProjectDirectory() throws IOException {
@@ -116,7 +120,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
 
   protected ServiceTemplate getServiceTemplate() throws IOException {
     with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
-    ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE + "." + (odo.isOpenShift() ? SERVICE_OPENSHIFT_VERSION : SERVICE_KUBE_VERSION))).findFirst().orElse(null);
+    ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE)).findFirst().orElse(null);
     assertNotNull(serviceTemplate);
     return serviceTemplate;
   }
@@ -125,5 +129,4 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     cleanLocalProjectDirectory();
     odo.createService(project, serviceTemplate, crd, service, null, false);
   }
-
 }

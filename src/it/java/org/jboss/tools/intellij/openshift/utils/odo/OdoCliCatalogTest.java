@@ -23,7 +23,7 @@ public class OdoCliCatalogTest extends OdoCliTest {
     String project = PROJECT_PREFIX + random.nextInt();
     try {
       createProject(project);
-      List<DevfileComponentType> components = odo.getAllComponentTypes();
+      List<DevfileComponentType> components = odo.getComponentTypes();
       assertFalse(components.isEmpty());
     } finally {
       odo.deleteProject(project);

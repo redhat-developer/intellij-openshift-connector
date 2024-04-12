@@ -84,6 +84,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -104,7 +105,7 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPEN
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
 
-public class OdoCli implements OdoDelegate {
+public class OdoCli implements Odo {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
@@ -258,6 +259,12 @@ public class OdoCli implements OdoDelegate {
   }
 
   @Override
+  public void start(String context, String component, ComponentFeature feature,
+                    Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void stop(String context, ComponentFeature feature, ProcessHandler handler) throws IOException {
     if (context != null && handler != null) {
       handler.destroyProcess();
@@ -265,6 +272,11 @@ public class OdoCli implements OdoDelegate {
         execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[0]));
       }
     }
+  }
+
+  @Override
+  public void stop(String context, String component, ComponentFeature feature) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -355,7 +367,7 @@ public class OdoCli implements OdoDelegate {
   }
 
   @Override
-  public List<DevfileComponentType> getAllComponentTypes() throws IOException {
+  public List<DevfileComponentType> getComponentTypes() throws IOException {
     return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
       execute(command, envVars, "registry", "list", "-o", "json"),
       new TypeReference<>() {
@@ -447,16 +459,18 @@ public class OdoCli implements OdoDelegate {
   @Override
   public ComponentInfo getComponentInfo(String project, String component, String path,
                                         ComponentKind kind) throws IOException {
+    boolean isPodmanPresent = !execute(command, envVars, "version").contains("unable to fetch the podman client version");
+
     if (path != null) {
-      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind);
+      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind, isPodmanPresent);
     } else {
-      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind);
+      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind, isPodmanPresent);
     }
   }
 
-  private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
+  private ComponentInfo parseComponentInfo(String json, ComponentKind kind, boolean isPodmanPresent) throws IOException {
     JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-    return parser.parseDescribeComponentInfo(kind);
+    return parser.parseDescribeComponentInfo(kind, isPodmanPresent);
   }
 
   /*
@@ -567,8 +581,18 @@ public class OdoCli implements OdoDelegate {
   }
 
   @Override
+  public void follow(String context, String component, boolean deploy, String platform) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
     doLog(context, false, deploy, platform, handlers);
+  }
+
+  @Override
+  public void log(String context, String component, boolean deploy, String platform) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -803,15 +827,10 @@ public class OdoCli implements OdoDelegate {
   }
 
   @Override
-  public List<DevfileComponentType> getComponentTypesFromRegistry(String name) throws IOException {
-    return getAllComponentTypes().stream().
+  public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
+    return getComponentTypes().stream().
       filter(type -> name.equals(type.getDevfileRegistry().getName())).
       collect(Collectors.toList());
-  }
-
-  @Override
-  public boolean checkPodman() throws IOException {
-    return !execute(command, envVars, "version").contains("unable to fetch the podman client version");
   }
 
   private static final class KubernetesClientFactory implements Supplier<KubernetesClient> {

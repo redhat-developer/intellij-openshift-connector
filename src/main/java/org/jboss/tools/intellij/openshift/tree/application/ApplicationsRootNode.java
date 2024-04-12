@@ -29,7 +29,6 @@ import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProcessHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ public class ApplicationsRootNode
   private final ApplicationsTreeStructure structure;
   private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
   private final Map<String, ComponentDescriptor> components = new HashMap<>();
-  private CompletableFuture<OdoFacade> odoFuture;
+  private CompletableFuture<Odo> odoFuture;
   private CompletableFuture<Helm> helmFuture;
   private boolean logged;
   private Config config;
@@ -82,18 +81,18 @@ public class ApplicationsRootNode
     this.logged = logged;
   }
 
-  private CompletableFuture<OdoFacade> getOdo(BiConsumer<OdoFacade, Throwable> whenComplete) {
+  private CompletableFuture<Odo> getOdo(BiConsumer<Odo, Throwable> whenComplete) {
     if (odoFuture == null) {
       this.odoFuture = ToolFactory.getInstance()
         .createOdo(project)
-        .thenApply(odoDelegate -> (OdoFacade) new ApplicationRootNodeOdo(odoDelegate, this, processHelper))
+        .thenApply(odo -> (Odo) new ApplicationRootNodeOdo(odo, this, processHelper))
         .whenComplete((odo, err) -> loadProjectModel(odo, project))
         .whenComplete(whenComplete);
     }
     return odoFuture;
   }
 
-  public CompletableFuture<OdoFacade> getOdo() {
+  public CompletableFuture<Odo> getOdo() {
     return getOdo((odo, err) -> structure.fireModified(this));
   }
 
@@ -131,7 +130,7 @@ public class ApplicationsRootNode
     return components;
   }
 
-  protected void loadProjectModel(OdoFacade odo, Project project) {
+  protected void loadProjectModel(Odo odo, Project project) {
     if (odo == null) {
       return;
     }

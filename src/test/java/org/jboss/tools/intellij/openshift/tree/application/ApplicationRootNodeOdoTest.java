@@ -15,7 +15,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeatures;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentKind;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
+import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProcessHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,14 +50,14 @@ public class ApplicationRootNodeOdoTest {
     null);
   private static final File tempDir = FileUtils.getTempDirectory();
   private static final File destinationDir = FileUtils.getUserDirectory();
-  private OdoDelegate odo;
+  private Odo odo;
   private ApplicationsRootNode rootNode;
   private ApplicationRootNodeOdo rootNodeOdo;
   private ApplicationRootNodeOdo.FileOperations fileOperations;
 
   @Before
   public void before() throws IOException {
-    this.odo = mock(OdoDelegate.class);
+    this.odo = mock(Odo.class);
     this.rootNode = mock(ApplicationsRootNode.class);
     this.fileOperations = mockFileOperations(tempDir, destinationDir);
     OdoProcessHelper processHelper = mock(OdoProcessHelper.class);

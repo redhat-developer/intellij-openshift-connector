@@ -11,41 +11,46 @@
 package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
-import org.jetbrains.annotations.NotNull;
+import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
+import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
+import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
+
+import static org.mockito.Mockito.mock;
 
 public class CreateProjectActionTest extends ActionTest {
-  public CreateProjectActionTest(boolean isOpenshift) {
-    super(isOpenshift);
-  }
-
   @Override
   public AnAction getAction() {
     return new CreateProjectAction();
   }
 
   @Override
-  protected void verifyLoggedInCluster(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
-    assertEquals("New " + (isOpenshift ? "Project" : "Namespace"), presentation.getText());
+  protected void verifyLoggedInCluster(boolean visible) {
+    assertTrue(visible);
   }
-/*
+
   public void testActionOnProject() {
     NamespaceNode projectNode = mock(NamespaceNode.class);
-    AnActionEvent event = createEventAndUpdateAction(projectNode);
+    AnActionEvent event = createEvent(projectNode);
+    AnAction action = getAction();
+    action.update(event);
     assertFalse(event.getPresentation().isVisible());
   }
 
   public void testActionOnLocalDevComponent() {
     ComponentNode componentNode = mock(ComponentNode.class);
-    AnActionEvent event = createEventAndUpdateAction(componentNode);
+    AnActionEvent event = createEvent(componentNode);
+    AnAction action = getAction();
+    action.update(event);
     assertFalse(event.getPresentation().isVisible());
   }
 
   public void testActionOnService() {
     ServiceNode serviceNode = mock(ServiceNode.class);
-    AnActionEvent event = createEventAndUpdateAction(serviceNode);
+    AnActionEvent event = createEvent(serviceNode);
+    AnAction action = getAction();
+    action.update(event);
     assertFalse(event.getPresentation().isVisible());
-  }*/
+  }
 }

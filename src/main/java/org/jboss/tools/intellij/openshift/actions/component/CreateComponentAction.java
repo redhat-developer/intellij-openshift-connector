@@ -28,7 +28,6 @@ import org.jboss.tools.intellij.openshift.ui.component.CreateComponentDialog;
 import org.jboss.tools.intellij.openshift.ui.component.CreateComponentModel;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class CreateComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
     if (selected == null) {
       return;
     }
@@ -133,7 +132,7 @@ public class CreateComponentAction extends OdoAction {
 
   @NotNull
   protected CreateComponentModel getModel(Project project, Odo odo, Predicate<String> componentChecker) throws IOException {
-    CreateComponentModel model = new CreateComponentModel("Create component", project, odo, odo.getAllComponentTypes());
+    CreateComponentModel model = new CreateComponentModel("Create component", project, odo, odo.getComponentTypes());
     model.setComponentPredicate(componentChecker);
     return model;
   }

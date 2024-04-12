@@ -19,30 +19,30 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jetbrains.annotations.NotNull;
 
 public class OpenGettingStartedAction extends OdoAction {
-  private static final String GETTING_STARTED_WINDOW_ID = "OpenShiftGettingStarted";
+    private static final String GETTING_STARTED_WINDOW_ID = "OpenShiftGettingStarted";
 
-  public OpenGettingStartedAction() {
-    super(ApplicationsRootNode.class);
-  }
-
-  @Override
-  public String getTelemetryActionName() {
-    return "open getting started";
-  }
-
-  @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-    Project project = anActionEvent.getProject();
-    if (project == null) {
-      return;
+    public OpenGettingStartedAction() {
+        super(ApplicationsRootNode.class);
     }
-    ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(GETTING_STARTED_WINDOW_ID);
-    if (toolWindow == null) {
-      return;
+
+    @Override
+    public String getTelemetryActionName() {
+        return "open getting started";
     }
-    toolWindow.setAvailable(true, null);
-    toolWindow.activate(null);
-    toolWindow.show(null);
-  }
+
+    @Override
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+        Project project = anActionEvent.getProject();
+        if (project == null) {
+            return;
+        }
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(GETTING_STARTED_WINDOW_ID);
+        if (toolWindow == null) {
+            return;
+        }
+        toolWindow.setAvailable(true, null);
+        toolWindow.activate(null);
+        toolWindow.show(null);
+    }
 
 }

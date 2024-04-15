@@ -17,6 +17,12 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.9.0</b></p>
+  <ul>
+  <li>Support IDEA 2024.1</li>
+  <li>Minimal supported IDEA version bumped to 2022.3</li>
+  <li>Bug fixes</li>
+  </ul>
   <p><b>1.8.0</b></p>
   <ul>
   <li>Support debug on Podman</li>

@@ -5,10 +5,20 @@ concurrency: release
 
 on:
   workflow_dispatch:
+    inputs:
+      publishToMarketPlace:
+        description: 'Publish to JetBrains Marketplace ?'
+        required: true
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+        default: 'false'
 
 jobs:
   # Prepare and publish the plugin to JetBrains Marketplace repository
   release:
+    if: ${{ inputs.publishToMarketPlace == 'true' }}
     name: Publish to Marketplace
     runs-on: ubuntu-latest
     permissions:

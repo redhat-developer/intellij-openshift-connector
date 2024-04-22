@@ -283,13 +283,13 @@
   <actions>
     <group id="org.jboss.tools.intellij.toolWindow">
       <action class="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction"
-              id="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction" text="Share your feedback"
+              id="org.jboss.tools.intellij.openshift.actions.toolwindow.FeedBackAction" text="Share Your Feedback"
               icon="AllIcons.CodeWithMe.CwmAccess"/>
     </group>
     <group id="org.jboss.tools.intellij.tree" popup="true">
       <!-- Application Explorer -->
       <!-- Top level: cluster -->
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to cluster"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" id="org.jboss.tools.intellij.openshift.actions.cluster.LoginAction" text="Log in to Cluster"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction" text="Change Project"/>
       <separator/>
@@ -327,7 +327,7 @@
       <!-- URL level -->
       <action class="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" id="org.jboss.tools.intellij.openshift.actions.url.OpenInBrowserAction" text="Open in Browser"/>
       <!-- binding level -->
-      <action class="org.jboss.tools.intellij.openshift.actions.binding.ShowBindingDetailsAction" id="org.jboss.tools.intellij.openshift.actions.binding.ShowBindingDetailsAction" text="Show binding information"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.binding.ShowBindingDetailsAction" id="org.jboss.tools.intellij.openshift.actions.binding.ShowBindingDetailsAction" text="Show Binding Information"/>
       <action class="org.jboss.tools.intellij.openshift.actions.binding.DeleteBindingAction" id="org.jboss.tools.intellij.openshift.actions.binding.DeleteBindingAction" text="Delete"/>
       <!-- project level -->
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
@@ -336,7 +336,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" id="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" text="Open Helm Charts"/>
       <separator/>
       <!-- registry management -->
-      <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New registry"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.CreateRegistryAction" text="New Registry"/>
       <action class="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" id="org.jboss.tools.intellij.openshift.actions.registry.DeleteRegistryAction" text="Delete"/>
       <action class="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" id="org.jboss.tools.intellij.openshift.actions.helm.UninstallReleaseAction" text="Uninstall"/>
     </group>

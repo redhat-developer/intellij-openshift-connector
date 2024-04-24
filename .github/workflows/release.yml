@@ -23,7 +23,7 @@ on:
 jobs:
   # Prepare and publish the plugin to JetBrains Marketplace repository
   release:
-    name: Publish to Marketplace
+    name: Publish new release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -120,6 +120,7 @@ jobs:
           )"
 
       - name: Upload Release Asset
+        if: ${{ inputs.publishToMarketPlace == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ inputs.release_version }} ./build/distributions/*

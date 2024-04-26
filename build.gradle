@@ -160,7 +160,7 @@ dependencies {
             'org.junit.jupiter:junit-jupiter:5.10.2')
     constraints {
         implementation('io.undertow:undertow-core:2.3.13.Final') { //keycloak
-            because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-3358786'
+            because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-6567186'
         }
         implementation('com.squareup.okhttp3:okhttp:4.12.0') { //retrofit
             because 'https://security.snyk.io/vuln/SNYK-JAVA-COMSQUAREUPOKHTTP3-2958044'

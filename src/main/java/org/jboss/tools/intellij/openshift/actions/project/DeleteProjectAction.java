@@ -34,31 +34,45 @@ public class DeleteProjectAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() { return "delete project"; }
+  public void update(AnActionEvent e) {
+    super.update(e);
+    if (e.getPresentation().isVisible()) {
+      Odo odo = getOdo(e);
+      if (odo == null) {
+        return;
+      }
+      // overrides label given in plugin.xml
+      e.getPresentation().setText("Delete " + odo.getNamespaceKind());
+    }
+  }
+
+  @Override
+  public String getTelemetryActionName() {return "delete project";}
 
   @Override
   public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+    String kind = odo.getNamespaceKind();
     NamespaceNode namespaceNode = (NamespaceNode) selected;
-    if (Messages.NO == Messages.showYesNoDialog("Delete Project '" + namespaceNode.getName() + "'.\nAre you sure?", "Delete Project",
-        Messages.getQuestionIcon())) {
-        sendTelemetryResults(TelemetryResult.ABORTED);
-        return;
+    if (Messages.NO == Messages.showYesNoDialog("Delete " + kind + " '" + namespaceNode.getName() + "'.\n\nDELETING " + kind.toUpperCase() + " WILL DELETE ALL ASSOCIATED RESOURCES ON THE CLUSTER.\n\nAre you sure?", "Delete " + kind,
+      Messages.getQuestionIcon())) {
+      sendTelemetryResults(TelemetryResult.ABORTED);
+      return;
     }
     runWithProgress((ProgressIndicator progress) -> {
         try {
-          Notification notif = NotificationUtils.notifyInformation("Delete project", "Deleting project " + namespaceNode.getName());
+          Notification notif = NotificationUtils.notifyInformation("Delete " + kind, "Deleting " + kind.toLowerCase() + " " + namespaceNode.getName());
           Notifications.Bus.notify(notif);
           odo.deleteProject(namespaceNode.getName());
           notif.expire();
-          NotificationUtils.notifyInformation("Delete project", "Project " + namespaceNode.getName() + " has been successfully deleted");
+          NotificationUtils.notifyInformation("Delete " + kind, kind + " " + namespaceNode.getName() + " has been successfully deleted");
           NodeUtils.fireRemoved(namespaceNode);
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
           sendTelemetryError(e);
-          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Project"));
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete " + kind));
         }
       },
-      "Delete Project " + namespaceNode.getName(),
+      "Delete " + kind + " " + namespaceNode.getName(),
       getEventProject(anActionEvent)
     );
   }

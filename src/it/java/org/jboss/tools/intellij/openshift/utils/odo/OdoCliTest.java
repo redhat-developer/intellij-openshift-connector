@@ -85,8 +85,9 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   }
 
   private CompletableFuture<Odo> getOdo() {
-    return ToolFactory.getInstance().createOdo(getProject())
-      .thenApply(odoDelegate -> new ApplicationRootNodeOdo(odoDelegate, mock(ApplicationsRootNode.class), processHelper));
+    return ToolFactory.getInstance()
+      .createOdo(getProject())
+      .thenApply(tool -> new ApplicationRootNodeOdo(tool.get(), false, mock(ApplicationsRootNode.class), processHelper));
   }
 
   protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {

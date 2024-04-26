@@ -140,7 +140,7 @@ dependencies {
             'io.fabric8:openshift-client:6.12.0',
             'org.apache.commons:commons-compress:1.26.1',
             'org.apache.commons:commons-exec:1.4.0',
-            'com.redhat.devtools.intellij:intellij-common:1.9.5',
+            'com.redhat.devtools.intellij:intellij-common:1.9.6-SNAPSHOT',
             'io.jsonwebtoken:jjwt-impl:0.12.5',
             'io.jsonwebtoken:jjwt-jackson:0.12.5',
             'org.keycloak:keycloak-installed-adapter:24.0.3',

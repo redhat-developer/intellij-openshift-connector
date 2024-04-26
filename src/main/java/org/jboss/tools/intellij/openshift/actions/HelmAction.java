@@ -45,7 +45,7 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   protected Helm getHelm(AnActionEvent anActionEvent) {
     try {
-      return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true).getNow(null);
+      return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true);
     } catch (Exception e) {
       LOGGER.warn("Could not get helm: " + e.getMessage(), e);
       return null;

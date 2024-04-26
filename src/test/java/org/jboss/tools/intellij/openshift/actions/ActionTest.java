@@ -16,6 +16,9 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.ui.treeStructure.Tree;
+import java.util.concurrent.CompletableFuture;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsTreeStructure;
@@ -35,11 +38,8 @@ import org.jboss.tools.intellij.openshift.utils.odo.Service;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-import java.util.concurrent.CompletableFuture;
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -104,11 +104,11 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   @NotNull
-  protected static ApplicationsRootNode createApplicationRootNode(CompletableFuture<Odo> odoFuture) {
+  protected static ApplicationsRootNode createApplicationRootNode(CompletableFuture<? extends Odo> odoFuture) {
     ApplicationsRootNode applicationsRootNode = mock(ApplicationsRootNode.class);
-    when(applicationsRootNode.isLogged()).thenReturn(true);
-    when(applicationsRootNode.getRoot()).thenReturn(applicationsRootNode);
-    when(applicationsRootNode.getOdo()).thenReturn(odoFuture);
+    doReturn(true).when(applicationsRootNode).isLogged();
+    doReturn(applicationsRootNode).when(applicationsRootNode).getRoot();
+    doReturn(odoFuture).when(applicationsRootNode).getOdo();
     return applicationsRootNode;
   }
 
@@ -116,6 +116,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
   protected static CompletableFuture<Odo> createOdoFuture(boolean isOpenShift) {
     Odo odo = mock(Odo.class);
     when(odo.isOpenShift()).thenReturn(isOpenShift);
+
     CompletableFuture<Odo> odoFuture = mock(CompletableFuture.class);
     when(odoFuture.getNow(any())).thenReturn(odo);
     return odoFuture;

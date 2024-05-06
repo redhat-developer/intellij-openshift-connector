@@ -11,7 +11,7 @@
 package org.jboss.tools.intellij.openshift.test.ui.utils.constants;
 
 public class LabelConstants {
-    public static final String LOG_IN_TO_CLUSTER = "Log in to cluster";
+    public static final String LOG_IN_TO_CLUSTER = "Log in to Cluster";
     public static final String DEVFILE_REGISTRIES = "Devfile registries";
     public static final String CANCEL = "Cancel";
     public static final String OPENSHIFT = "OpenShift";

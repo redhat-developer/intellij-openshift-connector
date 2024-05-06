@@ -15,7 +15,7 @@ public class XPathConstants {
     public static final String GETTING_STARTED_BASELABEL = "//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']";
     public static final String JTEXT_FIELD = "//div[@class='JTextField']";
     public static final String JPASSWORD_FIELD = "//div[@class='JPasswordField']";
-    public static final String CLUSTER_LOGIN_DIALOG = "//div[@accessiblename='Cluster login' and @class='MyDialog']";
+    public static final String CLUSTER_LOGIN_DIALOG = "//div[@accessiblename='Cluster Login' and @class='MyDialog']";
     public static final String TREE_CLASS = "//div[@class='Tree']";
     public static final String MYDIALOG_CLASS = "//div[@class='MyDialog']";
     public static final String NEXT_BROWSE_ALL_THE_DEVFILE_STACKS = "//div[@accessiblename='Next: Browse all the Devfile stacks from Devfile registries >' and @class='JLabel' and @text='Next: Browse all the Devfile stacks from Devfile registries >']";

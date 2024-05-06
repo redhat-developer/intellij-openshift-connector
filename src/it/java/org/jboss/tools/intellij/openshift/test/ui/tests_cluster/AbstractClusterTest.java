@@ -76,6 +76,7 @@ public abstract class AbstractClusterTest extends AbstractBaseTest {
         }
         sleep(2000);
         view.refreshTree(robot);
+        ideStatusBar.waitUntilAllBgTasksFinish();
 
         waitForLoginToFinish(view, expectedURL);
 
@@ -93,9 +94,7 @@ public abstract class AbstractClusterTest extends AbstractBaseTest {
         while (isLoading && attempts < 24) { // 24 attempts * 5 seconds = 2 minutes max wait
             try {
                 LOGGER.info("Waiting for login to finish, attempt #" + attempts);
-                sleep(2000);
-                view.waitForTreeItem("loading…", 5, 1);
-                view.waitForTreeItem(expectedURL, 2, 1);
+                view.waitForTreeItem(expectedURL, 5, 1);
                 isLoading = false;
             } catch (Exception e) {
                 attempts++;

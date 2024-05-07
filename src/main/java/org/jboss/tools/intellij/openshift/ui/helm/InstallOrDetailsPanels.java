@@ -12,16 +12,17 @@ package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.ide.plugins.MultiPanel;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
+import java.awt.Component;
+import java.util.stream.Stream;
+import javax.swing.JComponent;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.ui.helm.install.InstallPanel;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 
-import javax.swing.JComponent;
-import java.awt.Component;
-import java.util.stream.Stream;
-
-public class ChartPanels extends MultiPanel {
+public class InstallOrDetailsPanels extends MultiPanel {
 
   public static final int DETAILS_PANEL = 0;
   public static final int INSTALL_PANEL = 1;
@@ -29,13 +30,15 @@ public class ChartPanels extends MultiPanel {
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
   private final Odo odo;
+  private final Project project;
   private ChartVersions chart;
   private final Disposable disposable = Disposer.newDisposable();
 
-  public ChartPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm, Odo odo) {
+  InstallOrDetailsPanels(ApplicationsRootNode rootNode, Disposable parentDisposable, Helm helm, Odo odo, Project project) {
     this.rootNode = rootNode;
     this.helm = helm;
     this.odo = odo;
+    this.project = project;
     Disposer.register(parentDisposable, disposable);
   }
 
@@ -44,7 +47,7 @@ public class ChartPanels extends MultiPanel {
     if (key == DETAILS_PANEL) {
       return new DetailsPanel(chart, disposable, this);
     } else if (key == INSTALL_PANEL) {
-      return new InstallPanel(chart, rootNode, disposable, helm, odo);
+      return new InstallPanel(chart, rootNode, disposable, helm, odo, project);
     } else {
       return null;
     }

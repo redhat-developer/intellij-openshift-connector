@@ -10,6 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.helm;
 
-interface ChartPanel {
+public interface ChartPanel {
     void setChart(ChartVersions chart);
   }

@@ -14,6 +14,7 @@ import com.intellij.find.SearchTextArea;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.OnePixelDivider;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBLabel;
@@ -47,6 +48,7 @@ import org.jboss.tools.intellij.openshift.ui.TableRowFilterFactory;
 import org.jboss.tools.intellij.openshift.utils.helm.Chart;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,12 +62,23 @@ public class ChartsDialog extends UndecoratedDialog {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartsDialog.class);
 
+  @Override
+  protected @NotNull List<ValidationInfo> doValidateAll() {
+    return super.doValidateAll();
+  }
+
+  private static final int INITIAL_HEIGHT = 800;
+  public static final int ICON_COLUMN_WIDTH = 50;
+  public static final int NAME_COLUMN_WIDTH = 250;
+  public static final int DESCRIPTION_COLUMN_WIDTH = 500;
+
   private static final String OPENSHIFT_REPO_NAME = "openshift";
   private static final String OPENSHIFT_REPO_URL = "https://charts.openshift.io/";
 
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
   private final Odo odo;
+  private final Project project;
 
   private JBLabel title;
   private ChartsTableModel chartsTableModel;
@@ -77,6 +90,7 @@ public class ChartsDialog extends UndecoratedDialog {
     this.rootNode = rootNode;
     this.helm = helm;
     this.odo = odo;
+    this.project = project;
     init();
   }
 
@@ -118,10 +132,10 @@ public class ChartsDialog extends UndecoratedDialog {
 
     OnePixelSplitter splitter = new OnePixelSplitter(true, .66f);
     splitter.getDivider().setBackground(OnePixelDivider.BACKGROUND);
-    panel.add(splitter, "spanx, pushx, growx, growy, pushy, wrap");
+    panel.add(splitter, "spanx, pushx, growx, pushy, growy, height " + INITIAL_HEIGHT + ", wrap");
 
     this.chartsTableModel = new ChartsTableModel();
-    this.chartsTable = SwingUtils.createTable(10, chartsTableModel);
+    this.chartsTable =  new JBTable(chartsTableModel);
     chartsTable.setShowGrid(false);
     chartsTable.setFocusable(false);
     chartsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -135,11 +149,11 @@ public class ChartsDialog extends UndecoratedDialog {
       .usingInput(filterTextArea.getDocument());
     splitter.setFirstComponent(tableScrolledPane);
 
-    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), helm, odo);
-    chartPanels.select(ChartPanels.DETAILS_PANEL,true);
+    InstallOrDetailsPanels installOrDetailsPanels = new InstallOrDetailsPanels(rootNode, getDisposable(), helm, odo, project);
+    installOrDetailsPanels.select(InstallOrDetailsPanels.DETAILS_PANEL,true);
     chartsTable.getSelectionModel().addListSelectionListener(
-      onTableItemSelected(chartPanels, chartsTable, chartsTableModel));
-    splitter.setSecondComponent(chartPanels);
+      onTableItemSelected(installOrDetailsPanels, chartsTable, chartsTableModel));
+    splitter.setSecondComponent(installOrDetailsPanels);
 
     IdeFocusManager.getInstance(null).requestFocus(searchTextArea, true);
 
@@ -155,7 +169,7 @@ public class ChartsDialog extends UndecoratedDialog {
     };
   }
 
-  private ListSelectionListener onTableItemSelected(final ChartPanels chartDetailsPane, final JTable table, final ChartsTableModel model) {
+  private ListSelectionListener onTableItemSelected(final InstallOrDetailsPanels chartDetailsPane, final JTable table, final ChartsTableModel model) {
     return e -> {
       if (e.getValueIsAdjusting()
         || table.getRowCount() == 0) {
@@ -176,9 +190,9 @@ public class ChartsDialog extends UndecoratedDialog {
       .runAsync(() -> {
           statusIcon.setLoading();
           tableModel.setupColumns();
-          table.getColumn(ChartsTableModel.ICON_COLUMN).setMaxWidth(50);
-          table.getColumn(ChartsTableModel.NAME_COLUMN).setPreferredWidth(250);
-          table.getColumn(ChartsTableModel.DESCRIPTION_COLUMN).setPreferredWidth(500);
+          table.getColumn(ChartsTableModel.ICON_COLUMN).setMaxWidth(ICON_COLUMN_WIDTH);
+          table.getColumn(ChartsTableModel.NAME_COLUMN).setPreferredWidth(NAME_COLUMN_WIDTH);
+          table.getColumn(ChartsTableModel.DESCRIPTION_COLUMN).setPreferredWidth(DESCRIPTION_COLUMN_WIDTH);
         }
         , EXECUTOR_UI);
   }
@@ -212,6 +226,7 @@ public class ChartsDialog extends UndecoratedDialog {
           List<ChartVersions> chartVersions = toChartVersions(charts);
           tableModel.setCharts(chartVersions);
           table.setRowSelectionInterval(0, 0);
+          table.getParent().doLayout(); // fore repaint
           statusIcon.setEmpty();
         }, EXECUTOR_UI);
   }

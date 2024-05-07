@@ -333,7 +333,7 @@
       <action class="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.DeleteProjectAction" text="Delete"/>
       <separator/>
       <!-- helm -->
-      <action class="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" id="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" text="Open Helm Charts"/>
+      <action class="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" id="org.jboss.tools.intellij.openshift.actions.helm.OpenHelmChartsAction" text="Install Helm Charts"/>
       <action class="org.jboss.tools.intellij.openshift.actions.helm.AddHelmRepoAction" id="org.jboss.tools.intellij.openshift.actions.helm.AddHelmRepoAction" text="Add Repository"/>
       <action class="org.jboss.tools.intellij.openshift.actions.helm.EditHelmRepoAction" id="org.jboss.tools.intellij.openshift.actions.helm.EditHelmRepoAction" text="Edit Repository"/>
       <action class="org.jboss.tools.intellij.openshift.actions.helm.RemoveRepositoriesAction" id="org.jboss.tools.intellij.openshift.actions.helm.RemoveRepositoriesAction" text="Remove Repositories"/>

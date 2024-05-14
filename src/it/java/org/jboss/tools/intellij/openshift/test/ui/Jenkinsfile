@@ -43,7 +43,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     wrap([$class: 'Xvnc']) {
-                        sh "./gradlew integrationUITest --info --tests 'org.jboss.tools.intellij.openshift.test.ui.tests_cluster.*'"
+                        sh "./gradlew clusterIntegrationUITest --info"
                     }
                 }
             }

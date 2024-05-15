@@ -23,11 +23,9 @@ jobs:
           validate-wrappers: true
       - uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde #v1.10.0
         name: Start cluster
-        with:
-          version: v0.11.1
       - name: Setup cluster
         run: |
-          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.19.1/install.sh | bash -s v0.19.1
+          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.26.0/install.sh | bash -s v0.26.0
           kubectl create -f https://operatorhub.io/install/service-binding-operator.yaml
           kubectl create -f https://operatorhub.io/install/stable/cloud-native-postgresql.yaml
           nb=0

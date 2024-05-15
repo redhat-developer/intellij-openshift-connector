@@ -11,20 +11,22 @@
 package org.jboss.tools.intellij.openshift.utils;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import java.util.concurrent.ExecutionException;
+import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-
-import java.util.concurrent.ExecutionException;
 
 public class ToolFactoryTest extends BasePlatformTestCase {
  
     public void testGetOdo() throws ExecutionException, InterruptedException {
-        Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
+        Tool<Odo> tool = ToolFactory.getInstance().createOdo(getProject()).get();
+        Odo odo = tool.get();
         assertNotNull(odo);
     }
 
     public void testGetHelm() throws ExecutionException, InterruptedException {
-        Helm helm = ToolFactory.getInstance().createHelm(getProject()).get();
+        Tool<Helm> tool = ToolFactory.getInstance().createHelm(getProject()).get();
+        Helm helm = tool.get();
         assertNotNull(helm);
     }
 

@@ -52,16 +52,18 @@ import java.util.function.Consumer;
 
 public class ApplicationRootNodeOdo implements Odo {
     private final Odo delegate;
+    private final boolean isDownloaded;
     private final OdoProcessHelper processHelper;
     private final ApplicationsRootNode root;
     private final FileOperations fileOperations;
 
-    public ApplicationRootNodeOdo(Odo delegate, ApplicationsRootNode root, OdoProcessHelper processHelper) {
-        this(delegate, processHelper, root, new FileOperations());
+    public ApplicationRootNodeOdo(Odo delegate, boolean isDownloaded, ApplicationsRootNode root, OdoProcessHelper processHelper) {
+        this(delegate, isDownloaded, processHelper, root, new FileOperations());
     }
 
-    ApplicationRootNodeOdo(Odo delegate, OdoProcessHelper processHelper, ApplicationsRootNode root, FileOperations fileOperations) {
+    ApplicationRootNodeOdo(Odo delegate, boolean isDownloaded, OdoProcessHelper processHelper, ApplicationsRootNode root, FileOperations fileOperations) {
         this.delegate = delegate;
+        this.isDownloaded = isDownloaded;
         this.processHelper = processHelper;
         this.root = root;
         this.fileOperations = fileOperations;
@@ -372,6 +374,10 @@ public class ApplicationRootNodeOdo implements Odo {
     @Override
     public void migrateComponent(String name) {
         delegate.migrateComponent(name);
+    }
+
+    public boolean isDownloaded() {
+        return isDownloaded;
     }
 
     /** for testing purposes **/

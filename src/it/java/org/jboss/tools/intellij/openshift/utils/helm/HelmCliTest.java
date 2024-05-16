@@ -11,11 +11,11 @@
 package org.jboss.tools.intellij.openshift.utils.helm;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import java.util.Random;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
+import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
-
-import java.util.Random;
 
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
@@ -26,17 +26,21 @@ public abstract class HelmCliTest extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
+        Tool<Odo> odoTool = ToolFactory.getInstance().createOdo(getProject()).get();
+        Odo odo = odoTool.get();
         OdoCluster.INSTANCE.login(odo);
         odo.createProject(projectName);
-        this.helm = ToolFactory.getInstance().createHelm(getProject()).get();
+        Tool<Helm> helmTool = ToolFactory.getInstance().createHelm(getProject()).get();
+        this.helm = helmTool.get();
         Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        Odo odo = ToolFactory.getInstance().createOdo(getProject()).get();
-        odo.deleteProject(projectName);
+        ToolFactory.Tool<Odo> tool = ToolFactory.getInstance().createOdo(getProject()).getNow(null);
+        if (tool != null) {
+            tool.get().deleteProject(projectName);
+        }
         super.tearDown();
     }
 

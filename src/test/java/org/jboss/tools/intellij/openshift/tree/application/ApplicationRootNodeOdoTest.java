@@ -61,7 +61,7 @@ public class ApplicationRootNodeOdoTest {
         this.rootNode = mock(ApplicationsRootNode.class);
         this.fileOperations = mockFileOperations(tempDir, destinationDir);
         OdoProcessHelper processHelper = mock(OdoProcessHelper.class);
-        this.rootNodeOdo = new ApplicationRootNodeOdo(odo, processHelper, rootNode, fileOperations);
+        this.rootNodeOdo = new ApplicationRootNodeOdo(odo, false, processHelper, rootNode, fileOperations);
     }
 
     @Test

@@ -76,7 +76,7 @@ sourceSets {
 test {
     // Discover and execute JUnit4-based tests
     useJUnit()
-    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'disabled'
     jvmArgs "-Djava.awt.headless=true"
     jacoco {
         includeNoLocationClasses = true
@@ -85,7 +85,7 @@ test {
 }
 
 tasks.register('integrationTest', Test) {
-    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'disabled'
     description = 'Runs the integration tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -110,7 +110,7 @@ tasks.register('integrationUITest', Test) {
     useJUnitPlatform {
         includeTags 'ui-test'
     }
-    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'disabled'
     description = 'Runs the integration UI tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs

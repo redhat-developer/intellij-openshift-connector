@@ -143,7 +143,7 @@ dependencies {
             'com.redhat.devtools.intellij:intellij-common:1.9.6-SNAPSHOT',
             'io.jsonwebtoken:jjwt-impl:0.12.5',
             'io.jsonwebtoken:jjwt-jackson:0.12.5',
-            'org.keycloak:keycloak-installed-adapter:24.0.3',
+            'org.keycloak:keycloak-installed-adapter:24.0.4',
             'com.squareup.retrofit2:converter-jackson:2.11.0',
             'com.google.code.gson:gson:2.10.1')
     testImplementation(

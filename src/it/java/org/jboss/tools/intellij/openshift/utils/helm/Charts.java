@@ -31,7 +31,7 @@ public class Charts {
   }
 
   public static void addRepository(Pair<String, String> pair, Helm helm) throws IOException {
-    helm.addRepo(pair.first, pair.second);
+    helm.addRepo(pair.first, pair.second, null);
   }
 
 }

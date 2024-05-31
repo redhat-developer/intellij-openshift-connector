@@ -36,7 +36,10 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   public static final String COMPONENT_PATH = "src/it/projects/nodejs";
 
   // see https://operatorhub.io/operator/cloud-native-postgresql/ STABLE channel for versions
-  public static final String SERVICE_TEMPLATE = "cloud-native-postgresql.v1.16.2";
+  public static final String SERVICE_TEMPLATE = "cloud-native-postgresql";
+  public static final String SERVICE_KUBE_VERSION = "v1.16.2";
+  public static final String SERVICE_OPENSHIFT_VERSION = "v1.22.1";
+
   public static final String SERVICE_CRD = "clusters.postgresql.k8s.enterprisedb.io";
   public static final String REGISTRY_URL = "https://registry.stage.devfile.io";
   public static final String REGISTRY_NAME = "RegistryForITTests";
@@ -120,10 +123,9 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   }
 
   protected ServiceTemplate getServiceTemplate() throws IOException {
-    with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
-    ServiceTemplate serviceTemplate = odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE)).findFirst().orElse(null);
-    assertNotNull(serviceTemplate);
-    return serviceTemplate;
+    with().pollDelay(10, TimeUnit.SECONDS).await().atMost(5, TimeUnit.MINUTES).until(() -> !odo.getServiceTemplates().isEmpty());
+    with().pollDelay(10, TimeUnit.SECONDS).await().atMost(5, TimeUnit.MINUTES).until(() -> odo.getServiceTemplates().stream().anyMatch(s -> s.getName().equals(SERVICE_TEMPLATE + "." + (odo.isOpenShift() ? SERVICE_OPENSHIFT_VERSION : SERVICE_KUBE_VERSION))));
+    return odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE + "." + (odo.isOpenShift() ? SERVICE_OPENSHIFT_VERSION : SERVICE_KUBE_VERSION))).findFirst().orElse(null);
   }
 
   protected void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {

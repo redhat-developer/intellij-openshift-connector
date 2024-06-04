@@ -13,11 +13,6 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.intellij.openapi.util.text.StringUtil;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
-import org.jboss.tools.intellij.openshift.utils.Serialization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,8 +20,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jboss.tools.intellij.openshift.utils.Serialization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
@@ -43,21 +43,48 @@ public class HelmCli implements Helm {
     }
 
     @Override
-    public String addRepo(String name, String url) throws IOException {
+    public String addRepo(String name, String url, String flags) throws IOException {
         ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
           TelemetryService.NAME_PREFIX_MISC + "helm-add repo");
         try {
             LOGGER.info("Adding repo {} at {}.", name, url);
-            String result = execute(command, Collections.emptyMap(), "repo", "add", name, url);
+            String result = execute(command, Collections.emptyMap(), "repo", "add", name, url, flags);
             asyncSend(telemetry.success());
             return result;
         } catch (IOException e) {
+            LOGGER.info("Could not att repo {} at {}.", name, url);
             asyncSend(telemetry.error(e));
             throw e;
         }
     }
 
     @Override
+    public void removeRepos(String... names) throws IOException {
+        LOGGER.info("Removing repositories {}.", String.join(", ", names));
+        List<String> notRemoved = Arrays.stream(names)
+          .map(this::removeRepo)
+          .filter(Objects::nonNull)
+          .toList();
+        if (!notRemoved.isEmpty()) {
+            throw new IOException("Could not remove repositories " + String.join(", ", notRemoved));
+        }
+    }
+
+    private String removeRepo(String name) {
+        ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
+          TelemetryService.NAME_PREFIX_MISC + "helm-remove repository");
+        try {
+            execute(command, Collections.emptyMap(), "repo", "remove", name);
+            asyncSend(telemetry.success());
+            return null;
+        } catch (IOException e) {
+            LOGGER.info("Could not remove repository " + name, e);
+            asyncSend(telemetry.error(e.getMessage()));
+            return name;
+        }
+    }
+
+        @Override
     public List<HelmRepository> listRepos() throws IOException {
         ActionMessage telemetry = TelemetryService.instance().getBuilder().action(
           TelemetryService.NAME_PREFIX_MISC + "helm-list repo");

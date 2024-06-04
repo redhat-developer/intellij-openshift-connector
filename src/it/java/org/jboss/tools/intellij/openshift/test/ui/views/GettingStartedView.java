@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.test.ui.views;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;

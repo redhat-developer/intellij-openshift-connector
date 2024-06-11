@@ -101,7 +101,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {
     createProject(project);
     cleanLocalProjectDirectory();
-    odo.createComponent("nodejs", REGISTRY_NAME, component,
+    odo.createComponent("go", REGISTRY_NAME, component,
       new File(COMPONENT_PATH).getAbsolutePath(), null, null);
     if (feature != null) {
       AtomicBoolean started = new AtomicBoolean();

@@ -136,8 +136,8 @@ public class OdoCliComponentTest extends OdoCliTest {
   @Test
   public void checkCreateComponentStarter() throws IOException, ExecutionException, InterruptedException {
     createProject(project);
-    odo.createComponent("nodejs", REGISTRY_NAME, component,
-      Files.newTemporaryFolder().getAbsolutePath(), null, "nodejs-starter");
+    odo.createComponent("go", REGISTRY_NAME, component,
+      Files.newTemporaryFolder().getAbsolutePath(), null, "go-starter");
     List<Component> components = odo.getComponents(project);
     assertNotNull(components);
     assertEquals(0, components.size());

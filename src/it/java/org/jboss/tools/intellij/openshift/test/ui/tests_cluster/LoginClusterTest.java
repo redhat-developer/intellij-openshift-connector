@@ -28,7 +28,6 @@ public class LoginClusterTest extends AbstractClusterTest {
         logOut();
         loginWithUsername();
         verifyClusterLogin(currentClusterUrl);
-        logOut();
         LOGGER.info("usernameLoginTest: End");
     }
 }

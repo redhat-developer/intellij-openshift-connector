@@ -30,13 +30,6 @@ public class AboutClusterTest extends AbstractClusterTest {
     @Test
     public void aboutLoggedInTest() {
         LOGGER.info("aboutLoggedInTest: Start");
-        loginWithUsername();
-        try {
-            verifyClusterLogin(currentClusterUrl);
-        } catch (Exception e) {
-            LOGGER.error("AboutLoggedInTest: Failed to login!");
-            fail("AboutLoggedInTest: Failed to login!");
-        }
 
         AboutPublicTest.selectAboutAndGetClipboardContent();
         AboutPublicTest.verifyClipboardContent("odo version", "Server:");

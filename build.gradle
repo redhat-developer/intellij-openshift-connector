@@ -107,7 +107,9 @@ tasks.register('integrationTest', Test) {
 
 tasks.register('clusterIntegrationUITest', Test) {
     dependsOn copyKey
-    useJUnitPlatform()
+    useJUnitPlatform {
+        includeTags 'ui-test'
+    }
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'disabled'
     description = 'Runs the cluster integration UI tests.'
     group = 'verification'
@@ -135,7 +137,7 @@ tasks.register('publicIntegrationUITest', Test) {
         includeTags 'ui-test'
     }
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'disabled'
-    description = 'Runs the integration UI tests.'
+    description = 'Runs the public integration UI tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath

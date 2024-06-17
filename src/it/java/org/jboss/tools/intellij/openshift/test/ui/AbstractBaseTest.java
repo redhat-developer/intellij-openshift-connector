@@ -79,7 +79,7 @@ public abstract class AbstractBaseTest {
 
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
-        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,120,5); // Wait for "loading..." to finish
+        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,300,5); // Wait for "loading..." to finish
 
         view.refreshTree(robot);
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);

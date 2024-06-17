@@ -14,24 +14,25 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GettingStartedTest extends AbstractPublicTest {
 
     @Test
-    @BeforeAll
-    public static void gettingStartedShowsOnStartup() {
+    @Order(1)
+    public void gettingStartedShowsOnStartup() {
         GettingStartedView view = robot.find(GettingStartedView.class);
         view.closeView();
     }
 
     @Test
+    @Order(2)
     public void gettingStartedContainsAllItems() {
         GettingStartedView view = robot.find(GettingStartedView.class);
         view.openView();
@@ -47,6 +48,7 @@ public class GettingStartedTest extends AbstractPublicTest {
     }
 
     @Test
+    @Order(3)
     public void gettingStartedBehaviour() {
         GettingStartedView view = robot.find(GettingStartedView.class);
         view.openView();

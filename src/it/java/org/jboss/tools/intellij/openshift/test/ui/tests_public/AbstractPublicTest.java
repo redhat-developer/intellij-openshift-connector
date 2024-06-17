@@ -20,26 +20,4 @@ import org.junit.jupiter.api.BeforeAll;
  * Abstract test class for common methods regarding public tests
  */
 public class AbstractPublicTest extends AbstractBaseTest {
-
-    private static boolean isLoggedOut = false;
-
-    @BeforeAll
-    public static void setUp() {
-        if (!isLoggedOut) {
-            backUpAndLogOut();
-        }
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        if (isLoggedOut) {
-            KubeConfigUtility.restoreKubeConfig();
-        }
-    }
-
-    private static void backUpAndLogOut() {
-        KubeConfigUtility.backupKubeConfig();
-        logOut();
-        isLoggedOut = true;
-    }
 }

@@ -28,7 +28,7 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HelmAction.class);
 
-  protected final TelemetrySender telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
+  protected TelemetrySender telemetrySender;
 
   protected HelmAction(Class... filters) {
     super(filters);
@@ -36,6 +36,7 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+    telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
     Helm helm = getHelm(anActionEvent);
     if (helm == null) {
       return;
@@ -64,11 +65,11 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   @Override
   public void sendTelemetryError(String message) {
-      telemetrySender.sendTelemetryError(message);
+    telemetrySender.sendTelemetryError(message);
   }
 
   @Override
   public void sendTelemetryError(Exception exception) {
-      telemetrySender.sendTelemetryError(exception);
+    telemetrySender.sendTelemetryError(exception);
   }
 }

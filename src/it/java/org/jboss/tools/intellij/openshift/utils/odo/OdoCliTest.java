@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 
 public abstract class OdoCliTest extends BasePlatformTestCase {
 
-  public static final String COMPONENT_PATH = "src/it/projects/nodejs";
+  public static final String COMPONENT_PATH = "src/it/projects/go";
 
   // see https://operatorhub.io/operator/cloud-native-postgresql/ STABLE channel for versions
   public static final String SERVICE_TEMPLATE = "cloud-native-postgresql";

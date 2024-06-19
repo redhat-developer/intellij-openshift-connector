@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 
 public abstract class OdoCliTest extends BasePlatformTestCase {
 
-  public static final String COMPONENT_PATH = "src/it/projects/nodejs";
+  public static final String COMPONENT_PATH = "src/it/projects/go";
 
   // see https://operatorhub.io/operator/cloud-native-postgresql/ STABLE channel for versions
   public static final String SERVICE_TEMPLATE = "cloud-native-postgresql";
@@ -101,7 +101,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   protected void createComponent(String project, String component, ComponentFeature feature) throws IOException, ExecutionException, InterruptedException {
     createProject(project);
     cleanLocalProjectDirectory();
-    odo.createComponent("nodejs", REGISTRY_NAME, component,
+    odo.createComponent("go", REGISTRY_NAME, component,
       new File(COMPONENT_PATH).getAbsolutePath(), null, null);
     if (feature != null) {
       AtomicBoolean started = new AtomicBoolean();

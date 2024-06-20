@@ -13,22 +13,59 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HelmCliRepoTest extends HelmCliTest {
 
     public void testListRepos_should_list_repo_that_was_added() throws IOException {
-        // given openshift repo was added to helm repos
         String name = "openshift";
-        String url = "https://charts.openshift.io/";
-        helm.addRepo(name, url);
-        // when
-        List<HelmRepository> repositories = helm.listRepos();
-        // then
-        boolean found = repositories.stream().anyMatch((HelmRepository repository) ->
-            repository.getName().equals(name)
-              && repository.getUrl().equals(url)
-        );
-        assertTrue(found);
+        try {
+            // given openshift repo was added to helm repos
+            String url = "https://charts.openshift.io/";
+            helm.addRepo(name, url, null);
+            // when
+            List<HelmRepository> repositories = helm.listRepos();
+            // then
+            boolean found = repositories.stream().anyMatch((HelmRepository repository) ->
+              repository.getName().equals(name)
+                && repository.getUrl().equals(url)
+            );
+            assertTrue(found);
+        } finally {
+            silentlyRemoveRepos(name);
+        }
     }
 
+    public void testRemoveRepos_should_remove_repo_that_was_added() throws IOException {
+        String name = "openshift-charts";
+        String name2 = "openshift-charts2";
+        try {
+            // given openshift repo was added to helm repos
+            helm.addRepo(name, "https://charts.openshift.io/", null);
+            helm.addRepo(name2, "https://charts.openshift.io/", null);
+            List<String> helmRepositoryNames = helm.listRepos().stream()
+              .map(HelmRepository::getName)
+              .collect(Collectors.toList());
+            assertThat(helmRepositoryNames).contains(name, name2);
+            // when
+            helm.removeRepos(name, name2);
+            // then
+            helmRepositoryNames = helm.listRepos().stream()
+              .map(HelmRepository::getName)
+              .collect(Collectors.toList());
+            assertThat(helmRepositoryNames).doesNotContain(name, name2);
+        } finally {
+            silentlyRemoveRepos(name, name2);
+        }
+    }
+
+    private void silentlyRemoveRepos(String... names) {
+        try {
+            helm.removeRepos(names);
+        } catch(Exception e) {
+            // ignore
+        }
+    }
 }

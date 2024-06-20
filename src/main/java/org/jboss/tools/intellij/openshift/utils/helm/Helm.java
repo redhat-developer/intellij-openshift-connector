@@ -15,7 +15,9 @@ import java.util.List;
 
 public interface Helm {
 
-  String addRepo(String name, String url) throws IOException;
+  String addRepo(String name, String url, String flags) throws IOException;
+
+  void removeRepos(String... name) throws IOException;
 
   List<HelmRepository> listRepos() throws IOException;
 

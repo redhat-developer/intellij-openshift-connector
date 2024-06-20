@@ -10,33 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui;
 
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.wm.impl.IdeGlassPaneEx;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.SizedIcon;
-import com.intellij.ui.WindowMoveListener;
-import com.intellij.ui.WindowResizeListener;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.JBFont;
-import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.AbstractButton;
-import javax.swing.DefaultCellEditor;
-import javax.swing.Icon;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JRootPane;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -47,6 +29,16 @@ import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import javax.swing.AbstractButton;
+import javax.swing.DefaultCellEditor;
+import javax.swing.Icon;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.text.JTextComponent;
+import org.jetbrains.annotations.NotNull;
 
 public class SwingUtils {
 
@@ -134,19 +126,6 @@ public class SwingUtils {
     return UIUtil.uiTraverser(component)
       .bfsTraversal()
       .filter(c -> c instanceof JComboBox || c instanceof AbstractButton || c instanceof JTextComponent);
-  }
-
-  public static void setGlassPaneResizable(JRootPane rootPane, Disposable disposable) {
-    WindowResizeListener resizeListener = new WindowResizeListener(rootPane, JBUI.insets(10), null);
-    IdeGlassPaneEx glassPane = (IdeGlassPaneEx) rootPane.getGlassPane();
-    glassPane.addMousePreprocessor(resizeListener, disposable);
-    glassPane.addMouseMotionPreprocessor(resizeListener, disposable);
-  }
-
-  public static void setMovable(JRootPane rootPane, JComponent... movableComponents) {
-    WindowMoveListener windowMoveListener = new WindowMoveListener(rootPane);
-    Stream.of(movableComponents).forEach(
-      component -> component.addMouseListener(windowMoveListener));
   }
 
   public static Point locationOrMouseLocation(Point location) {

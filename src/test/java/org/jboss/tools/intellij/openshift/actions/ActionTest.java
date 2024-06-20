@@ -26,6 +26,8 @@ import org.jboss.tools.intellij.openshift.tree.application.ChartReleaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistriesNode;
 import org.jboss.tools.intellij.openshift.tree.application.DevfileRegistryNode;
+import org.jboss.tools.intellij.openshift.tree.application.HelmRepositoriesNode;
+import org.jboss.tools.intellij.openshift.tree.application.HelmRepositoryNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.tree.application.ServiceNode;
 import org.jboss.tools.intellij.openshift.tree.application.URLNode;
@@ -253,6 +255,30 @@ public abstract class ActionTest extends BasePlatformTestCase {
   }
 
   protected void verifyChartRelease(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnHelmRepositories() {
+    HelmRepositoriesNode helmRepositoriesNode = mock(HelmRepositoriesNode.class);
+    AnActionEvent event = createEvent(helmRepositoriesNode);
+    AnAction action = getAction();
+    action.update(event);
+    verifyHelmRepositories(event.getPresentation().isVisible());
+  }
+
+  protected void verifyHelmRepositories(boolean visible) {
+    assertFalse(visible);
+  }
+
+  public void testActionOnHelmRepository() {
+    HelmRepositoryNode helmRepositoryNode = mock(HelmRepositoryNode.class);
+    AnActionEvent event = createEvent(helmRepositoryNode);
+    AnAction action = getAction();
+    action.update(event);
+    verifyHelmRepository(event.getPresentation().isVisible());
+  }
+
+  protected void verifyHelmRepository(boolean visible) {
     assertFalse(visible);
   }
 }

@@ -12,16 +12,10 @@ package org.jboss.tools.intellij.openshift.ui.helm;
 
 import com.intellij.find.SearchTextArea;
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.CommonShortcuts;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.OnePixelDivider;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.OnePixelSplitter;
-import com.intellij.ui.PopupBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -29,6 +23,22 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.render.RenderingUtil;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
+import com.redhat.devtools.intellij.common.ui.UndecoratedDialog;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.border.Border;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import net.miginfocom.swing.MigLayout;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.StatusIcon;
@@ -41,31 +51,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JRootPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.RootPaneContainer;
-import javax.swing.border.Border;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
-import java.awt.Window;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
-
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_BACKGROUND;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.EXECUTOR_UI;
 import static org.jboss.tools.intellij.openshift.ui.SwingUtils.setBold;
 import static org.jboss.tools.intellij.openshift.ui.helm.ChartVersions.toChartVersions;
 
-public class ChartsDialog extends DialogWrapper {
+public class ChartsDialog extends UndecoratedDialog {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ChartsDialog.class);
 
@@ -93,30 +84,13 @@ public class ChartsDialog extends DialogWrapper {
   protected void init() {
     super.init();
     setUndecorated(true);
-    Window dialogWindow = getPeer().getWindow();
-    JRootPane rootPane = ((RootPaneContainer) dialogWindow).getRootPane();
-    registerShortcuts(rootPane);
-    setBorders(rootPane);
-    SwingUtils.setGlassPaneResizable(getPeer().getRootPane(), getDisposable());
-    SwingUtils.setMovable(getRootPane(), title, statusIcon.get());
+    registerEscapeShortcut(e -> closeImmediately());
+    setGlassPaneResizable();
+    setMovableUsing(title, statusIcon.get());
 
     setupTable(chartsTable, chartsTableModel, statusIcon)
       .thenCompose((Void) -> addDefaultRepo(helm))
       .thenCompose((Void) -> load(chartsTable, chartsTableModel, statusIcon, helm));
-  }
-
-  private static void setBorders(JRootPane rootPane) {
-    rootPane.setBorder(PopupBorder.Factory.create(true, true));
-    rootPane.setWindowDecorationStyle(JRootPane.NONE);
-  }
-
-  private void registerShortcuts(JRootPane rootPane) {
-    AnAction escape = ActionManager.getInstance().getAction("EditorEscape");
-    DumbAwareAction.create(e -> closeImmediately())
-      .registerCustomShortcutSet(
-        escape == null ? CommonShortcuts.ESCAPE : escape.getShortcutSet(),
-        rootPane,
-        myDisposable);
   }
 
   @Override
@@ -213,7 +187,7 @@ public class ChartsDialog extends DialogWrapper {
     return CompletableFuture
       .runAsync(() -> {
         try {
-          helm.addRepo(OPENSHIFT_REPO_NAME, OPENSHIFT_REPO_URL);
+          helm.addRepo(OPENSHIFT_REPO_NAME, OPENSHIFT_REPO_URL, null);
         } catch (IOException e) {
           throw new RuntimeException(e.getMessage(), e);
         }
@@ -240,12 +214,6 @@ public class ChartsDialog extends DialogWrapper {
           table.setRowSelectionInterval(0, 0);
           statusIcon.setEmpty();
         }, EXECUTOR_UI);
-  }
-
-  private void closeImmediately() {
-    if (isVisible()) {
-      doCancelAction();
-    }
   }
 
   private static Border createSearchTextBorders() {

@@ -159,7 +159,7 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-api:5.10.2',
             'org.junit.jupiter:junit-jupiter:5.10.2')
     constraints {
-        implementation('io.undertow:undertow-core:2.3.13.Final') { //keycloak
+        implementation('io.undertow:undertow-core:2.3.14.Final') { //keycloak
             because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-6567186'
         }
         implementation('org.bouncycastle:bcprov-jdk18on:1.78.1') { //keycloak

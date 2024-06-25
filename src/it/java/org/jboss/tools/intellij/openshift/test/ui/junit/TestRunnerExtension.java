@@ -30,7 +30,7 @@ public class TestRunnerExtension implements BeforeAllCallback, CloseableResource
 		System.out.println("Initialize IdeaRunner and start IDE");
 		// need to initialize store, so that close method will be called at the testing end
 		context.getRoot().getStore(Namespace.GLOBAL).put("InitializeTest", this);
-		IdeaRunner.getInstance().startIDE(IntelliJVersion.ULTIMATE_V_2023_2, 8580);
+		IdeaRunner.getInstance().startIDE(IntelliJVersion.ULTIMATE_V_2024_1, 8580);
 	}
 
 	@Override

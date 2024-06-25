@@ -39,8 +39,8 @@ jobs:
       - name: Create pull request
         if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
-          git config --global user.email "openshifttools-bot@users.noreply.github.com"
-          git config --global user.name "openshifttools-bot"
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
           git checkout -b "helm-${{ env.LATEST_TOOL_RELEASE }}"
           git commit -am "fix: Update helm to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "helm-${{ env.LATEST_TOOL_RELEASE }}"

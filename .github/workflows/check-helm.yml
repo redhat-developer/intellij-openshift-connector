@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TOOL_REPO: helm/helm
-      GH_TOKEN: ${{ secrets.HELM_CHECK_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check Out Code
         uses: actions/checkout@v4

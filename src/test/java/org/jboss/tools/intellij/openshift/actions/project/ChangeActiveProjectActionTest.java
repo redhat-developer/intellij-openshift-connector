@@ -11,22 +11,29 @@
 package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class ChangeActiveProjectActionTest extends ActionTest {
+  public ChangeActiveProjectActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new ChangeActiveProjectAction();
   }
 
   @Override
-  protected void verifyProject(boolean visible) {
-    assertTrue(visible);
+  protected void verifyProject(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 
   @Override
-  protected void verifyLoggedInCluster(boolean visible) {
-    assertTrue(visible);
+  protected void verifyLoggedInCluster(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+    assertEquals("Change " + (isOpenshift ? "Project" : "Namespace"), presentation.getText());
   }
 
 }

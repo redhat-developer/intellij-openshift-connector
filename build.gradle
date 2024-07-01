@@ -104,6 +104,9 @@ tasks.register('integrationTest', Test) {
         excludes = ["jdk.internal.*"]
     }
 }
+classpathIndexCleanup {
+    dependsOn compileIntegrationTestJava
+}
 
 tasks.register('integrationUITest', Test) {
     dependsOn copyKey

@@ -11,45 +11,47 @@
 package org.jboss.tools.intellij.openshift.utils.helm;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import java.util.Random;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
+
+import java.util.Random;
 
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
-    protected Helm helm;
+  protected Helm helm;
 
-    private final String projectName = "prj-" + new Random().nextInt();
+  private final String projectName = "prj-" + new Random().nextInt();
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        Tool<Odo> odoTool = ToolFactory.getInstance().createOdo(getProject()).get();
-        Odo odo = odoTool.get();
-        OdoCluster.INSTANCE.login(odo);
-        odo.createProject(projectName);
-        Tool<Helm> helmTool = ToolFactory.getInstance().createHelm(getProject()).get();
-        this.helm = helmTool.get();
-        Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    Tool<OdoDelegate> odoTool = ToolFactory.getInstance().createOdo(getProject()).get();
+    Odo odo = odoTool.get();
+    OdoCluster.INSTANCE.login(odo);
+    odo.createProject(projectName);
+    Tool<Helm> helmTool = ToolFactory.getInstance().createHelm(getProject()).get();
+    this.helm = helmTool.get();
+    Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    Tool<OdoDelegate> tool = ToolFactory.getInstance().createOdo(getProject()).getNow(null);
+    if (tool != null) {
+      tool.get().deleteProject(projectName);
     }
+    super.tearDown();
+  }
 
-    @Override
-    protected void tearDown() throws Exception {
-        ToolFactory.Tool<Odo> tool = ToolFactory.getInstance().createOdo(getProject()).getNow(null);
-        if (tool != null) {
-            tool.get().deleteProject(projectName);
-        }
-        super.tearDown();
+  protected void safeUninstall(String releaseName) {
+    try {
+      helm.uninstall(releaseName);
+    } catch (Exception e) {
+      LOG.info("Could not uninstall release " + releaseName, e);
     }
-
-    protected void safeUninstall(String releaseName) {
-        try {
-            helm.uninstall(releaseName);
-        } catch (Exception e) {
-            LOG.info("Could not uninstall release " + releaseName, e);
-        }
-    }
+  }
 
 }

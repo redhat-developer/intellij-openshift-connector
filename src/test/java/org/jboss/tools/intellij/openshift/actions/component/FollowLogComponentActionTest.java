@@ -15,33 +15,18 @@ import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jetbrains.annotations.NotNull;
 
-public class DescribeComponentActionTest extends ActionTest {
-  public DescribeComponentActionTest(boolean isOpenshift) {
+public class FollowLogComponentActionTest extends ActionTest {
+  public FollowLogComponentActionTest(boolean isOpenshift) {
     super(isOpenshift);
   }
 
   @Override
   public AnAction getAction() {
-    return new DescribeComponentAction();
+    return new FollowLogComponentAction();
   }
 
   @Override
   protected void verifyLocalDevComponentWithNoSupportedFeatures(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
-  }
-
-  @Override
-  protected void verifyLocalOnlyComponent(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
-  }
-
-  @Override
-  protected void verifyRemoteOnlyDevComponent(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
-  }
-
-  @Override
-  protected void verifyRemoteOnlyDevComponentWithoutContext(@NotNull Presentation presentation) {
     assertTrue(presentation.isVisible());
   }
 
@@ -64,4 +49,10 @@ public class DescribeComponentActionTest extends ActionTest {
   protected void verifyLocalDevComponentWithDevSupportedFeatures(@NotNull Presentation presentation) {
     assertTrue(presentation.isVisible());
   }
+
+  @Override
+  protected void verifyRemoteOnlyDevComponent(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
+
 }

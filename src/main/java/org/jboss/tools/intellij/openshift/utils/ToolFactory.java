@@ -17,37 +17,37 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.helm.HelmCli;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoCli;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
 
 public class ToolFactory {
 
     private static final String TOOLS_JSON = "/tools.json";
 
-    private static ToolFactory INSTANCE;
+  private static ToolFactory INSTANCE;
 
-    public static ToolFactory getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new ToolFactory();
-        }
-        return INSTANCE;
+  public static ToolFactory getInstance() {
+    if (INSTANCE == null) {
+      INSTANCE = new ToolFactory();
     }
+    return INSTANCE;
+  }
 
-    private final Factory<Odo> odo = new Factory<>("odo", OdoCli::new);
-    private final Factory<Helm> helm = new Factory<>("helm", (project, command) -> new HelmCli(command));
+  private final Factory<OdoDelegate> odo = new Factory<>("odo", OdoCli::new);
+  private final Factory<Helm> helm = new Factory<>("helm", (project, command) -> new HelmCli(command));
 
-    private ToolFactory() {
-    }
+  private ToolFactory() {
+  }
 
-    public CompletableFuture<Tool<Odo>> createOdo(Project project) {
+    public CompletableFuture<Tool<OdoDelegate>> createOdo(Project project) {
         return odo.create(project);
     }
 
-    public CompletableFuture<Tool<Helm>> createHelm(Project project) {
-        return helm.create(project);
-    }
+  public CompletableFuture<Tool<Helm>> createHelm(Project project) {
+    return helm.create(project);
+  }
 
-    public static class Tool<T> {
+  public static class Tool<T> {
         private final T tool;
         private final boolean isDownloaded;
 
@@ -67,30 +67,30 @@ public class ToolFactory {
 
     private static class Factory<T> {
 
-        private final String name;
+    private final String name;
         private final URL url = ToolFactory.class.getResource(TOOLS_JSON);
 
-        private final BiFunction<Project, String, T> toolFactory;
+    private final BiFunction<Project, String, T> toolFactory;
 
-        private Factory(String name, BiFunction<Project, String, T> toolFactory) {
-            this.name = name;
-            this.toolFactory = toolFactory;
-        }
-
-        private CompletableFuture<Tool<T>> create(Project project) {
-            return create(name, toolFactory, project);
-        }
-
-        private CompletableFuture<Tool<T>> create(String name, BiFunction<Project, String, T> toolFactory, Project project) {
-            return DownloadHelper.getInstance()
-              .downloadIfRequiredAsync(name, url)
-              .thenApply(toolInstance -> {
-                  if (toolInstance != null) {
-                      return new Tool<>(toolFactory.apply(project, toolInstance.getCommand()), toolInstance.isDownloaded());
-                  } else {
-                      return null;
-                  }
-              });
-        }
+    private Factory(String name, BiFunction<Project, String, T> toolFactory) {
+      this.name = name;
+      this.toolFactory = toolFactory;
     }
+
+    private CompletableFuture<Tool<T>> create(Project project) {
+      return create(name, toolFactory, project);
+    }
+
+    private CompletableFuture<Tool<T>> create(String name, BiFunction<Project, String, T> toolFactory, Project project) {
+      return DownloadHelper.getInstance()
+        .downloadIfRequiredAsync(name, url)
+        .thenApply(toolInstance -> {
+          if (toolInstance != null) {
+            return new Tool<>(toolFactory.apply(project, toolInstance.getCommand()), toolInstance.isDownloaded());
+          } else {
+            return null;
+          }
+        });
+    }
+  }
 }

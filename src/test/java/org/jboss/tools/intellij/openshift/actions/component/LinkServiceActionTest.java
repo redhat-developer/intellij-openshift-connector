@@ -11,26 +11,53 @@
 package org.jboss.tools.intellij.openshift.actions.component;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class LinkServiceActionTest extends ActionTest {
+  public LinkServiceActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new LinkServiceAction();
   }
 
-  protected void verifyLocalDevComponent(boolean visible) {
-    assertTrue(visible);
+  @Override
+  protected void verifyLocalDevComponentWithNoSupportedFeatures(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 
   @Override
-  protected void verifyLocalOnlyComponent(boolean visible) {
-    assertTrue(visible);
+  protected void verifyLocalOnlyComponent(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 
   @Override
-  protected void verifyRemoteOnlyDevComponent(boolean visible) {
-    assertTrue(visible);
+  protected void verifyRemoteOnlyDevComponent(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
+
+  @Override
+  protected void verifyRemoteDeployComponent(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
+
+  @Override
+  protected void verifyLocalDevOnPodmanComponentWithNoSupportedFeatures(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
+
+  @Override
+  protected void verifyLocalDevOnPodmanComponentWithDevSupportedFeatures(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
+  }
+
+  @Override
+  protected void verifyLocalDevComponentWithDevSupportedFeatures(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 
 }

@@ -31,6 +31,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -46,154 +47,154 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public abstract class DebugComponentAction extends ContextAwareComponentAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DebugComponentAction.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DebugComponentAction.class);
 
-    private RunnerAndConfigurationSettings runSettings;
+  private RunnerAndConfigurationSettings runSettings;
 
-    private ExecutionEnvironment environment;
+  private ExecutionEnvironment environment;
 
-    @Override
-    public boolean isVisible(Object selected) {
-        boolean visible = super.isVisible(selected);
-        if (visible) {
-            ComponentNode componentNode = (ComponentNode) selected;
-            Component component = componentNode.getComponent();
-            return (isDebugRunning(component) && isDebuggable(component.getInfo()));
-        }
-        return false;
+  @Override
+  public boolean isVisible(Object selected) {
+    boolean visible = super.isVisible(selected);
+    if (visible) {
+      ComponentNode componentNode = (ComponentNode) selected;
+      Component component = componentNode.getComponent();
+      return (isDebugRunning(component) && isDebuggable(component.getInfo()));
     }
+    return false;
+  }
 
-    private boolean isDebugRunning(Component component) {
-        return component.getLiveFeatures().isDebug();
+  private boolean isDebugRunning(Component component) {
+    return component.getLiveFeatures().isDebug();
+  }
+
+  @Override
+  public String getTelemetryActionName() {
+    return "debug component";
+  }
+
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+    Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
+    if (project == null) {
+      sendTelemetryResults(TelemetryResult.ABORTED);
+      return;
     }
-
-    @Override
-    public String getTelemetryActionName() {
-        return "debug component";
+    ComponentNode componentNode = (ComponentNode) selected;
+    Component component = componentNode.getComponent();
+    if (component.getLiveFeatures().isDebug()) {
+      RunManager runManager = RunManager.getInstance(project);
+      final Optional<Integer> port = createOrUpdateConfiguration(
+        odo,
+        runManager,
+        component);
+      port.ifPresent(portNumber -> executeDebug());
     }
+  }
 
-    @Override
-    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-        Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
-        if (project == null) {
-            sendTelemetryResults(TelemetryResult.ABORTED);
-            return;
-        }
-        ComponentNode componentNode = (ComponentNode) selected;
-        Component component = componentNode.getComponent();
-        if (component.getLiveFeatures().isDebug()) {
-            RunManager runManager = RunManager.getInstance(project);
-            final Optional<Integer> port = createOrUpdateConfiguration(
-              odo,
-              runManager,
-              component);
-            port.ifPresent(portNumber -> executeDebug());
-        }
-    }
-
-    private void executeDebug() {
-        telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
-        ExecHelper.submit(() -> {
-            // check if local debugger process is already running.
-            if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
-                UIHelper.executeInUI(() ->
-                                             Messages.showMessageDialog(
-                                                     "'" + runSettings.getName() + "' is a single-instance run configuration "
-                                                             + "and already running.",
-                                                     "Process '" + runSettings.getName() + "' is already running",
-                                                     Messages.getInformationIcon()));
-                return;
-            }
-            // if debugger not running, run the debug config
-            ApplicationManager.getApplication().invokeLater(
-                    () -> {
-                        try {
-                            Objects.requireNonNull(ProgramRunner.getRunner(
-                                    DefaultDebugExecutor.getDebugExecutorInstance().getId(),
-                                    runSettings.getConfiguration())).execute(getEnvironment());
-                            sendTelemetryResults(TelemetryResult.SUCCESS);
-                        } catch (ExecutionException e) {
-                            sendTelemetryError(e);
-                            LOG.error(e.getLocalizedMessage(), e);
-                        }
-                    });
+  private void executeDebug() {
+    telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
+    ExecHelper.submit(() -> {
+      // check if local debugger process is already running.
+      if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
+        UIHelper.executeInUI(() ->
+          Messages.showMessageDialog(
+            "'" + runSettings.getName() + "' is a single-instance run configuration "
+              + "and already running.",
+            "Process '" + runSettings.getName() + "' is already running",
+            Messages.getInformationIcon()));
+        return;
+      }
+      // if debugger not running, run the debug config
+      ApplicationManager.getApplication().invokeLater(
+        () -> {
+          try {
+            Objects.requireNonNull(ProgramRunner.getRunner(
+              DefaultDebugExecutor.getDebugExecutorInstance().getId(),
+              runSettings.getConfiguration())).execute(getEnvironment());
+            sendTelemetryResults(TelemetryResult.SUCCESS);
+          } catch (ExecutionException e) {
+            sendTelemetryError(e);
+            LOG.error(e.getLocalizedMessage(), e);
+          }
         });
+    });
 
-    }
+  }
 
-    private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, Component component) {
-        ConfigurationType configurationType = getConfigurationType();
-        String configurationName = component.getName() + " Remote Debug";
-        try {
-            Optional<Integer> port = getPort(odo, component);
-            if (port.isPresent()) {
-                //lookup if existing config already exist, based on name and type
-                runSettings = runManager.findConfigurationByTypeAndName(
-                        configurationType.getId(), configurationName);
-                if (runSettings == null) {
-                    // no run configuration found, create one and assign the selected port
-                    runSettings = runManager.createConfiguration(
-                            configurationName, configurationType.getConfigurationFactories()[0]);
-                    // also reset environment
-                    environment = null;
-                    runSettings.getConfiguration().setAllowRunningInParallel(false);
-                    runManager.addConfiguration(runSettings);
-                }
-                initConfiguration(runSettings.getConfiguration(), port.get());
-                runManager.setSelectedConfiguration(runSettings);
-                return port;
-            }
-        } catch (IOException e) {
-            LOG.warn(e.getLocalizedMessage(), e);
+  private Optional<Integer> createOrUpdateConfiguration(Odo odo, RunManager runManager, Component component) {
+    ConfigurationType configurationType = getConfigurationType();
+    String configurationName = component.getName() + " Remote Debug";
+    try {
+      Optional<Integer> port = getPort(odo, component);
+      if (port.isPresent()) {
+        //lookup if existing config already exist, based on name and type
+        runSettings = runManager.findConfigurationByTypeAndName(
+          configurationType.getId(), configurationName);
+        if (runSettings == null) {
+          // no run configuration found, create one and assign the selected port
+          runSettings = runManager.createConfiguration(
+            configurationName, configurationType.getConfigurationFactories()[0]);
+          // also reset environment
+          environment = null;
+          runSettings.getConfiguration().setAllowRunningInParallel(false);
+          runManager.addConfiguration(runSettings);
         }
-        return Optional.empty();
-    }
-
-    private static Optional<Integer> getPort(Odo odo, Component component) throws IOException {
-        Optional<Integer> port = Optional.empty();
-        List<URL> urls = odo.listURLs(component.getPath());
-        String[] ports = urls.stream()
-          .map(URL::getContainerPort)
-          .toArray(String[]::new);
-        if (ports.length == 1) {
-            port = Optional.of(Integer.parseInt(urls.get(0).getLocalPort()));
-        } else if (ports.length > 1) {
-            String selected = UIHelper.executeInUI(() ->
-              Messages.showEditableChooseDialog(
-                "The component " + component.getName() + " has several ports to connect to,\nchoose the one the debugger will connect to",
-                "Choose Debugger Port",
-                Messages.getQuestionIcon(),
-                ports,
-                ports[0],
-                null));
-            //get the local mapped port
-            Optional<String> remotePort = urls.stream()
-              .filter(url -> url.getContainerPort().equals(selected))
-              .map(URL::getLocalPort).findFirst();
-            port = Optional.of(Integer.parseInt(remotePort.orElseThrow()));
-        }
+        initConfiguration(runSettings.getConfiguration(), port.get());
+        runManager.setSelectedConfiguration(runSettings);
         return port;
+      }
+    } catch (IOException e) {
+      LOG.warn(e.getLocalizedMessage(), e);
     }
+    return Optional.empty();
+  }
 
-    private ExecutionEnvironment getEnvironment() {
-        if (environment == null) {
-            try {
-                environment = ExecutionEnvironmentBuilder.create(
-                        DefaultDebugExecutor.getDebugExecutorInstance(), runSettings).build();
-            } catch (ExecutionException e) {
-                telemetrySender.error(e);
-                LOG.error(e.getLocalizedMessage(), e);
-            }
-        }
-        return environment;
+  private static Optional<Integer> getPort(Odo odo, Component component) throws IOException {
+    Optional<Integer> port = Optional.empty();
+    List<URL> urls = odo.listURLs(component.getPath());
+    String[] ports = urls.stream()
+      .map(URL::getContainerPort)
+      .toArray(String[]::new);
+    if (ports.length == 1) {
+      port = Optional.of(Integer.parseInt(urls.get(0).getLocalPort()));
+    } else if (ports.length > 1) {
+      String selected = UIHelper.executeInUI(() ->
+        Messages.showEditableChooseDialog(
+          "The component " + component.getName() + " has several ports to connect to,\nchoose the one the debugger will connect to",
+          "Choose Debugger Port",
+          Messages.getQuestionIcon(),
+          ports,
+          ports[0],
+          null));
+      //get the local mapped port
+      Optional<String> remotePort = urls.stream()
+        .filter(url -> url.getContainerPort().equals(selected))
+        .map(URL::getLocalPort).findFirst();
+      port = Optional.of(Integer.parseInt(remotePort.orElseThrow()));
     }
+    return port;
+  }
 
-    protected abstract boolean isDebuggable(@NotNull ComponentInfo componentInfo);
+  private ExecutionEnvironment getEnvironment() {
+    if (environment == null) {
+      try {
+        environment = ExecutionEnvironmentBuilder.create(
+          DefaultDebugExecutor.getDebugExecutorInstance(), runSettings).build();
+      } catch (ExecutionException e) {
+        telemetrySender.error(e);
+        LOG.error(e.getLocalizedMessage(), e);
+      }
+    }
+    return environment;
+  }
 
-    protected abstract String getDebugLanguage();
+  protected abstract boolean isDebuggable(@NotNull ComponentInfo componentInfo);
 
-    protected abstract ConfigurationType getConfigurationType();
+  protected abstract String getDebugLanguage();
 
-    protected abstract void initConfiguration(RunConfiguration configuration, Integer port);
+  protected abstract ConfigurationType getConfigurationType();
+
+  protected abstract void initConfiguration(RunConfiguration configuration, Integer port);
 
 }

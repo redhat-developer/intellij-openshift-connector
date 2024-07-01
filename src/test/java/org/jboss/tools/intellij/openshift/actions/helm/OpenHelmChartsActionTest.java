@@ -11,16 +11,22 @@
 package org.jboss.tools.intellij.openshift.actions.helm;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class OpenHelmChartsActionTest extends ActionTest {
+  public OpenHelmChartsActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new OpenHelmChartsAction();
   }
 
   @Override
-  protected void verifyProject(boolean visible) {
-    assertTrue(visible);
+  protected void verifyProject(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 }

@@ -18,7 +18,7 @@ import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -34,10 +34,10 @@ public class DeleteComponentAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() { return "delete component"; }
+  public String getTelemetryActionName() {return "delete component";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component component = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();
@@ -49,25 +49,25 @@ public class DeleteComponentAction extends OdoAction {
     }
 
     runWithProgress((ProgressIndicator progress) -> {
-          setProcessing("Deleted", componentNode);
-          try {
-            odo.deleteComponent(
-                namespaceNode.getName(),
-                component.getPath(),
-                component.getName(),
-                component.getInfo().getComponentKind());
-            componentNode.stopProcessing();
-            componentNode.getRoot().getStructure().fireRemoved(componentNode);
-            clearProcessing(componentNode);
-            sendTelemetryResults(TelemetryResult.SUCCESS);
-          } catch (IOException e) {
-            clearProcessing(componentNode);
-            sendTelemetryError(e);
-            UIHelper.executeInUI(() ->
-                Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Component"));
-          }
-        },
-        "Delete Component...",
-        getEventProject(anActionEvent));
+        setProcessing("Deleted", componentNode);
+        try {
+          odo.deleteComponent(
+            namespaceNode.getName(),
+            component.getPath(),
+            component.getName(),
+            component.getInfo().getComponentKind());
+          componentNode.stopProcessing();
+          componentNode.getRoot().getStructure().fireRemoved(componentNode);
+          clearProcessing(componentNode);
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+          clearProcessing(componentNode);
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() ->
+            Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Component"));
+        }
+      },
+      "Delete Component...",
+      getEventProject(anActionEvent));
   }
 }

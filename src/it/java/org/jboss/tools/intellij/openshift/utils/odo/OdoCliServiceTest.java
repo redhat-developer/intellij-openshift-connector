@@ -10,46 +10,49 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class OdoCliServiceTest extends OdoCliTest {
 
-    public void testCheckCreateService() throws IOException, ExecutionException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String service = SERVICE_PREFIX + random.nextInt();
-        try {
-            createService(project, service);
-            List<Service> services = odo.getServices(project);
-            assertNotNull(services);
-            assertEquals(1, services.size());
-        } finally {
-            odo.deleteProject(project);
-        }
-    }
+  private final String projectPath = new File("src/it/projects/springboot-rest").getAbsolutePath();
 
-    public void testCheckCreateDeleteService() throws IOException, ExecutionException, InterruptedException {
-        String project = PROJECT_PREFIX + random.nextInt();
-        String service = SERVICE_PREFIX + random.nextInt();
-        try {
-            createService(project, service);
-            List<Service> services = odo.getServices(project);
-            assertNotNull(services);
-            assertEquals(1, services.size());
-            odo.deleteService(project, services.get(0));
-            services = odo.getServices(project);
-            assertNotNull(services);
-            assertEquals(0, services.size());
-        } finally {
-            odo.deleteProject(project);
-        }
+  public void testCheckCreateService() throws IOException, ExecutionException, InterruptedException {
+    String project = PROJECT_PREFIX + random.nextInt();
+    String service = SERVICE_PREFIX + random.nextInt();
+    try {
+      createService(project, service);
+      List<Service> services = odo.getServices(project);
+      assertNotNull(services);
+      assertEquals(1, services.size());
+    } finally {
+      odo.deleteProject(project);
     }
+  }
 
-    private void createService(String project, String service) throws IOException, ExecutionException, InterruptedException {
-        createProject(project);
-        ServiceTemplate serviceTemplate = getServiceTemplate();
-        OperatorCRD crd = getOperatorCRD(serviceTemplate);
-        createService(project, serviceTemplate, crd, service);
+  public void testCheckCreateDeleteService() throws IOException, ExecutionException, InterruptedException {
+    String project = PROJECT_PREFIX + random.nextInt();
+    String service = SERVICE_PREFIX + random.nextInt();
+    try {
+      createService(project, service);
+      List<Service> services = odo.getServices(project);
+      assertNotNull(services);
+      assertEquals(1, services.size());
+      odo.deleteService(project, services.get(0));
+      services = odo.getServices(project);
+      assertNotNull(services);
+      assertEquals(0, services.size());
+    } finally {
+      odo.deleteProject(project);
     }
+  }
+
+  private void createService(String project, String service) throws IOException, ExecutionException, InterruptedException {
+    createProject(project);
+    ServiceTemplate serviceTemplate = getServiceTemplate();
+    OperatorCRD crd = getOperatorCRD(serviceTemplate);
+    createService(project, serviceTemplate, crd, service, projectPath);
+  }
 }

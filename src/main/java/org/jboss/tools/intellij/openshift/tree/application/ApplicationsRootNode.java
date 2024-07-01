@@ -37,13 +37,14 @@ import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoProcessHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ApplicationsRootNode
-    implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable {
+  implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
     private final Project project;
@@ -56,29 +57,29 @@ public class ApplicationsRootNode
     private Config config;
     private final OdoProcessHelper processHelper;
 
-    public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure) {
-        this.project = project;
-        this.structure = structure;
-        initConfigWatcher();
-        this.config = loadConfig();
-        registerProjectListener(project);
-        this.processHelper = new OdoProcessHelper();
-    }
+  public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure) {
+    this.project = project;
+    this.structure = structure;
+    initConfigWatcher();
+    this.config = loadConfig();
+    registerProjectListener(project);
+    this.processHelper = new OdoProcessHelper();
+  }
 
-    private static boolean shouldLogMessage(String message) {
-        return !(message.contains("Unauthorized") ||
-            message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
-            message.contains("the server has asked for the client to provide credentials") ||
-            message.contains("connect: no route to host"));
-    }
+  private static boolean shouldLogMessage(String message) {
+    return !(message.contains("Unauthorized") ||
+      message.contains("unable to access the cluster: servicebindings.binding.operators.coreos.com") ||
+      message.contains("the server has asked for the client to provide credentials") ||
+      message.contains("connect: no route to host"));
+  }
 
-    public boolean isLogged() {
-        return logged;
-    }
+  public boolean isLogged() {
+    return logged;
+  }
 
-    public void setLogged(boolean logged) {
-        this.logged = logged;
-    }
+  public void setLogged(boolean logged) {
+    this.logged = logged;
+  }
 
     private CompletableFuture<ApplicationRootNodeOdo> doGetOdo() {
         if (odoFuture == null) {
@@ -93,7 +94,7 @@ public class ApplicationsRootNode
         return odoFuture;
     }
 
-    public CompletableFuture<? extends Odo> getOdo() {
+    public CompletableFuture<ApplicationRootNodeOdo> getOdo() {
         return doGetOdo()
           .whenComplete((ApplicationRootNodeOdo odo, Throwable err) -> {
             if (odo.isDownloaded()) {
@@ -102,9 +103,9 @@ public class ApplicationsRootNode
         });
     }
 
-    public void resetOdo() {
-        this.odoFuture = null;
-    }
+  public void resetOdo() {
+    this.odoFuture = null;
+  }
 
     public CompletableFuture<ToolFactory.Tool<Helm>> getHelmTool(boolean notify) {
         if (helmFuture == null) {
@@ -131,45 +132,45 @@ public class ApplicationsRootNode
         return project;
     }
 
-    protected void initConfigWatcher() {
-        ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
-    }
+  protected void initConfigWatcher() {
+    ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
+  }
 
-    protected Config loadConfig() {
-        return ConfigHelper.safeLoadKubeConfig();
-    }
+  protected Config loadConfig() {
+    return ConfigHelper.safeLoadKubeConfig();
+  }
 
-    public Map<String, ComponentDescriptor> getComponents() {
-        return components;
-    }
+  public Map<String, ComponentDescriptor> getLocalComponents() {
+    return components;
+  }
 
-    protected void loadProjectModel(Odo odo, Project project) {
-        if (odo == null) {
-            return;
-        }
-        for (Module module : ModuleManager.getInstance(project).getModules()) {
-            addContext(odo, ProjectUtils.getModuleRoot(module));
-        }
+  protected void loadProjectModel(OdoFacade odo, Project project) {
+    if (odo == null) {
+      return;
     }
+    for (Module module : ModuleManager.getInstance(project).getModules()) {
+      addContext(odo, ProjectUtils.getModuleRoot(module));
+    }
+  }
 
-    @Override
-    public void moduleAdded(@NotNull Project project, @NotNull Module module) {
-        addContext(getOdo().getNow(null), ProjectUtils.getModuleRoot(module));
-    }
+  @Override
+  public void moduleAdded(@NotNull Project project, @NotNull Module module) {
+    addContext(getOdo().getNow(null), ProjectUtils.getModuleRoot(module));
+  }
 
-    @Override
-    public void moduleRemoved(@NotNull Project project, @NotNull Module module) {
-        removeContext(ProjectUtils.getModuleRoot(module));
-    }
+  @Override
+  public void moduleRemoved(@NotNull Project project, @NotNull Module module) {
+    removeContext(ProjectUtils.getModuleRoot(module));
+  }
 
-    private void addContextToSettings(String path, ComponentDescriptor descriptor) {
-        if (!components.containsKey(path)) {
-            if (descriptor.isPreOdo3()) {
-                migrateOdo(descriptor);
-            }
-            components.put(path, descriptor);
-        }
+  private void addContextToSettings(String path, ComponentDescriptor descriptor) {
+    if (!components.containsKey(path)) {
+      if (descriptor.isPreOdo3()) {
+        migrateOdo(descriptor);
+      }
+      components.put(path, descriptor);
     }
+  }
 
     private void migrateOdo(ComponentDescriptor descriptor) {
         doGetOdo().whenComplete((odo, err) -> {
@@ -183,60 +184,60 @@ public class ApplicationsRootNode
                     "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
     }
 
-    private void addContext(Odo odo, VirtualFile modulePathFile) {
-        if (odo == null) {
-            return;
+  private void addContext(Odo odo, VirtualFile modulePathFile) {
+    if (odo == null) {
+      return;
+    }
+    if (modulePathFile != null && modulePathFile.isValid()) {
+      try {
+        List<ComponentDescriptor> descriptors = odo.discover(modulePathFile.toNioPath().toString());
+        descriptors.forEach(descriptor ->
+          addContextToSettings(descriptor.getPath(), descriptor)
+        );
+      } catch (IOException ex) {
+        //filter out some common exception when no logged or no authorizations
+        if (shouldLogMessage(ex.getMessage())) {
+          LOGGER.warn(ex.getLocalizedMessage(), ex);
         }
-        if (modulePathFile != null && modulePathFile.isValid()) {
-            try {
-                List<ComponentDescriptor> descriptors = odo.discover(modulePathFile.toNioPath().toString());
-                descriptors.forEach(descriptor ->
-                    addContextToSettings(descriptor.getPath(), descriptor)
-                );
-            } catch (IOException ex) {
-                //filter out some common exception when no logged or no authorizations
-                if (shouldLogMessage(ex.getMessage())) {
-                    LOGGER.warn(ex.getLocalizedMessage(), ex);
-                }
-            }
-        }
+      }
     }
+  }
 
-    public void addContext(String modulePath) {
-        addContext(
-            getOdo().getNow(null),
-            LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
-    }
+  public void addContext(String modulePath) {
+    addContext(
+      getOdo().getNow(null),
+      LocalFileSystem.getInstance().refreshAndFindFileByPath(modulePath));
+  }
 
-    private void removeContextFromSettings(String modulePath) {
-        if (components.containsKey(modulePath)) {
-            components.remove(modulePath);
-            structure.fireModified(this);
-        }
+  private void removeContextFromSettings(String modulePath) {
+    if (components.containsKey(modulePath)) {
+      components.remove(modulePath);
+      structure.fireModified(this);
     }
+  }
 
-    public void removeContext(File file) {
-        if (file.exists()) {
-            removeContextFromSettings(file.getPath());
-        }
+  public void removeContext(File file) {
+    if (file.exists()) {
+      removeContextFromSettings(file.getPath());
     }
+  }
 
-    private void removeContext(VirtualFile modulePathFile) {
-        removeContextFromSettings(modulePathFile.getPath());
-    }
+  private void removeContext(VirtualFile modulePathFile) {
+    removeContextFromSettings(modulePathFile.getPath());
+  }
 
-    protected void registerProjectListener(Project project) {
-        MessageBusConnection connection = project.getMessageBus().connect(this);
-        connection.subscribe(ProjectTopics.MODULES, this);
-    }
+  protected void registerProjectListener(Project project) {
+    MessageBusConnection connection = project.getMessageBus().connect(this);
+    connection.subscribe(ProjectTopics.MODULES, this);
+  }
 
-    @Override
-    public void onUpdate(ConfigWatcher source, Config config) {
-        if (!ConfigHelper.areEqual(config, this.config)) {
-            this.config = config;
-            refresh();
-        }
+  @Override
+  public void onUpdate(ConfigWatcher source, Config config) {
+    if (!ConfigHelper.areEqual(config, this.config)) {
+      this.config = config;
+      refresh();
     }
+  }
 
     public synchronized void refresh() {
         resetOdo();
@@ -245,48 +246,48 @@ public class ApplicationsRootNode
         );
     }
 
-    @Override
-    public ApplicationsTreeStructure getStructure() {
-        return structure;
-    }
+  @Override
+  public ApplicationsTreeStructure getStructure() {
+    return structure;
+  }
 
-    @Override
-    public synchronized void startProcessing(String message) {
-        this.processingNode.startProcessing(message);
-    }
+  @Override
+  public synchronized void startProcessing(String message) {
+    this.processingNode.startProcessing(message);
+  }
 
-    @Override
-    public synchronized void stopProcessing() {
-        this.processingNode.stopProcessing();
-    }
+  @Override
+  public synchronized void stopProcessing() {
+    this.processingNode.stopProcessing();
+  }
 
-    @Override
-    public synchronized boolean isProcessing() {
-        return processingNode.isProcessing();
-    }
+  @Override
+  public synchronized boolean isProcessing() {
+    return processingNode.isProcessing();
+  }
 
-    @Override
-    public synchronized boolean isProcessingStopped() {
-        return processingNode.isProcessingStopped();
-    }
+  @Override
+  public synchronized boolean isProcessingStopped() {
+    return processingNode.isProcessingStopped();
+  }
 
-    @Override
-    public String getMessage() {
-        return processingNode.getMessage();
-    }
+  @Override
+  public String getMessage() {
+    return processingNode.getMessage();
+  }
 
-    @Override
-    public ApplicationsRootNode getParent() {
-        return this;
-    }
+  @Override
+  public ApplicationsRootNode getParent() {
+    return this;
+  }
 
-    @Override
-    public ApplicationsRootNode getRoot() {
-        return this;
-    }
+  @Override
+  public ApplicationsRootNode getRoot() {
+    return this;
+  }
 
-    @Override
-    public void dispose() {
-      resetOdo();
-    }
+  @Override
+  public void dispose() {
+    resetOdo();
+  }
 }

@@ -17,7 +17,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -26,30 +26,30 @@ import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProg
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.TelemetryResult;
 
 public class DescribeComponentAction extends OdoAction {
-    public DescribeComponentAction() {
-        super(ComponentNode.class);
-    }
+  public DescribeComponentAction() {
+    super(ComponentNode.class);
+  }
 
-    @Override
-    public String getTelemetryActionName() {
-        return "describe component";
-    }
+  @Override
+  public String getTelemetryActionName() {
+    return "describe component";
+  }
 
-    @Override
-    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-        ComponentNode componentNode = (ComponentNode) selected;
-        Component component = componentNode.getComponent();
-        runWithProgress(
-            (ProgressIndicator progress) -> {
-                try {
-                    odo.describeComponent(component.getPath());
-                    sendTelemetryResults(TelemetryResult.SUCCESS);
-                } catch (IOException e) {
-                    sendTelemetryError(e);
-                    UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe"));
-                }
-            },
-            "Describing Component " + component.getName() + "...",
-            getEventProject(anActionEvent));
-    }
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+    ComponentNode componentNode = (ComponentNode) selected;
+    Component component = componentNode.getComponent();
+    runWithProgress(
+      (ProgressIndicator progress) -> {
+        try {
+          odo.describeComponent(component.getPath());
+          sendTelemetryResults(TelemetryResult.SUCCESS);
+        } catch (IOException e) {
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Describe"));
+        }
+      },
+      "Describing Component " + component.getName() + "...",
+      getEventProject(anActionEvent));
+  }
 }

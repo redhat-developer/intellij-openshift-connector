@@ -24,6 +24,7 @@ import org.jboss.tools.intellij.openshift.utils.odo.ComponentInfo;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.DevfileComponentType;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -34,59 +35,59 @@ import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessi
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
 
 public class ImportComponentAction extends CreateComponentAction {
-    public ImportComponentAction() {
-        super(ComponentNode.class);
-    }
+  public ImportComponentAction() {
+    super(ComponentNode.class);
+  }
 
-    @Override
-    public String getTelemetryActionName() { return "import component"; }
+  @Override
+  public String getTelemetryActionName() {return "import component";}
 
-    @Override
-    public boolean isVisible(Object selected) {
-        return super.isVisible(selected)
-                && NodeUtils.hasContext(selected);
-    }
+  @Override
+  public boolean isVisible(Object selected) {
+    return super.isVisible(selected)
+      && NodeUtils.hasContext(selected);
+  }
 
-    @Override
-    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
-        ComponentNode componentNode = (ComponentNode) selected;
-        Component component = componentNode.getComponent();
-        NamespaceNode namespaceNode = componentNode.getParent();
-        Project project = getEventProject(anActionEvent);
-        runWithProgress((ProgressIndicator progress) -> {
-              try {
-                  ComponentInfo info = odo.getComponentInfo(
-                    namespaceNode.getName(),
-                    component.getName(),
-                    null,
-                    component.getInfo().getComponentKind());
-                  CreateComponentModel model = getModel(project, odo, component.getName(), info);
-                  setProcessing("Importing component " + component.getName() + "...", namespaceNode);
-                  createComponent(odo, model);
-                  clearProcessing(namespaceNode);
-              } catch (IOException e) {
-                  clearProcessing(namespaceNode);
-                  sendTelemetryError(e);
-                  UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
-              }
-          },
-          "Importing Component...",
-          project);
-    }
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
+    ComponentNode componentNode = (ComponentNode) selected;
+    Component component = componentNode.getComponent();
+    NamespaceNode namespaceNode = componentNode.getParent();
+    Project project = getEventProject(anActionEvent);
+    runWithProgress((ProgressIndicator progress) -> {
+        try {
+          ComponentInfo info = odo.getComponentInfo(
+            namespaceNode.getName(),
+            component.getName(),
+            null,
+            component.getInfo().getComponentKind());
+          CreateComponentModel model = getModel(project, odo, component.getName(), info);
+          setProcessing("Importing component " + component.getName() + "...", namespaceNode);
+          createComponent(odo, model);
+          clearProcessing(namespaceNode);
+        } catch (IOException e) {
+          clearProcessing(namespaceNode);
+          sendTelemetryError(e);
+          UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
+        }
+      },
+      "Importing Component...",
+      project);
+  }
 
-    @NotNull
-    private CreateComponentModel getModel(Project project, Odo odo, String name, ComponentInfo info) throws IOException {
-        List<DevfileComponentType> types = odo.getComponentTypes();
-        CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
-        ComponentType type = select(types, info.getComponentTypeName());
-        model.setName(name);
-        model.setSelectedComponentType(type);
-        model.setImportMode(true);
-        return model;
-    }
+  @NotNull
+  private CreateComponentModel getModel(Project project, Odo odo, String name, ComponentInfo info) throws IOException {
+    List<DevfileComponentType> types = odo.getAllComponentTypes();
+    CreateComponentModel model = new CreateComponentModel("Import component", project, odo, types);
+    ComponentType type = select(types, info.getComponentTypeName());
+    model.setName(name);
+    model.setSelectedComponentType(type);
+    model.setImportMode(true);
+    return model;
+  }
 
-    private ComponentType select(List<DevfileComponentType> types, String componentTypeName) {
-        return types.stream().filter(type -> componentTypeName.equals(type.getName())).
-                findFirst().orElse(null);
-    }
+  private ComponentType select(List<DevfileComponentType> types, String componentTypeName) {
+    return types.stream().filter(type -> componentTypeName.equals(type.getName())).
+      findFirst().orElse(null);
+  }
 }

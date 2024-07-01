@@ -15,14 +15,14 @@ import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jetbrains.annotations.NotNull;
 
-public class LoginActionTest extends ActionTest {
-  public LoginActionTest(boolean isOpenshift) {
+public class RefreshActionTest extends ActionTest {
+  public RefreshActionTest(boolean isOpenshift) {
     super(isOpenshift);
   }
 
   @Override
   public AnAction getAction() {
-    return new LoginAction();
+    return new RefreshAction();
   }
 
   @Override

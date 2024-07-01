@@ -11,15 +11,22 @@
 package org.jboss.tools.intellij.openshift.actions.helm;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class UninstallReleaseActionTest extends ActionTest {
+  public UninstallReleaseActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new UninstallReleaseAction();
   }
 
-  protected void verifyChartRelease(boolean visible) {
-    assertTrue(visible);
+  @Override
+  protected void verifyChartRelease(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,30 +8,25 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.intellij.openshift.actions.cluster;
+package org.jboss.tools.intellij.openshift.actions.url;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jetbrains.annotations.NotNull;
 
-public class LoginActionTest extends ActionTest {
-  public LoginActionTest(boolean isOpenshift) {
+public class OpenInBrowserActionTest extends ActionTest {
+  public OpenInBrowserActionTest(boolean isOpenshift) {
     super(isOpenshift);
   }
 
   @Override
   public AnAction getAction() {
-    return new LoginAction();
+    return new OpenInBrowserAction();
   }
 
   @Override
-  protected void verifyLoggedInCluster(@NotNull Presentation presentation) {
-    assertTrue(presentation.isVisible());
-  }
-
-  @Override
-  protected void verifyLoggedOutCluster(@NotNull Presentation presentation) {
+  protected void verifyURL(@NotNull Presentation presentation) {
     assertTrue(presentation.isVisible());
   }
 }

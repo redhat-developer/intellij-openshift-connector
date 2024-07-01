@@ -10,12 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
@@ -84,12 +81,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.jboss.tools.intellij.openshift.Constants.DebugStatus;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_CONFIG_NAMESPACE;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
@@ -105,7 +100,7 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPEN
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
 
-public class OdoCli implements Odo {
+public class OdoCli implements OdoDelegate {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
@@ -124,6 +119,7 @@ public class OdoCli implements Odo {
   private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
   private String currentNamespace;
   private JSonParser swagger;
+  private final boolean isPodmanPresent;
 
   public OdoCli(com.intellij.openapi.project.Project project, String command) {
     this(project,
@@ -153,7 +149,9 @@ public class OdoCli implements Odo {
     connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
       telemetryReport.onTelemetryConfigurationChanged(this.envVars));
     telemetryReport.report(client);
+    isPodmanPresent = checkPodmanPresence();
   }
+
 
   private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
     ExecHelper.ExecResult output = ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);
@@ -175,12 +173,6 @@ public class OdoCli implements Odo {
 
   private static String execute(String command, Map<String, String> envs, String... args) throws IOException {
     return execute(new File(HOME_FOLDER), command, envs, args);
-  }
-
-  private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
-    final SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, deserializer);
-    return new ObjectMapper(new JsonFactory()).registerModule(module);
   }
 
   @Override
@@ -259,12 +251,6 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void start(String context, String component, ComponentFeature feature,
-                    Consumer<Boolean> callback, Consumer<Boolean> processTerminatedCallback) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public void stop(String context, ComponentFeature feature, ProcessHandler handler) throws IOException {
     if (context != null && handler != null) {
       handler.destroyProcess();
@@ -272,16 +258,6 @@ public class OdoCli implements Odo {
         execute(createWorkingDirectory(context), command, envVars, feature.getStopArgs().toArray(new String[0]));
       }
     }
-  }
-
-  @Override
-  public void stop(String context, String component, ComponentFeature feature) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean isStarted(String component, ComponentFeature feature) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -293,7 +269,7 @@ public class OdoCli implements Odo {
 
   @Override
   public List<ComponentMetadata> analyze(String path) throws IOException {
-    return configureObjectMapper(new ComponentMetadatasDeserializer()).readValue(
+    return Serialization.configure(new ComponentMetadatasDeserializer()).readValue(
       execute(new File(path), command, envVars, "analyze", "-o", "json"),
       new TypeReference<>() {
       });
@@ -367,8 +343,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<DevfileComponentType> getComponentTypes() throws IOException {
-    return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
+  public List<DevfileComponentType> getAllComponentTypes() throws IOException {
+    return Serialization.configure(new ComponentTypesDeserializer()).readValue(
       execute(command, envVars, "registry", "list", "-o", "json"),
       new TypeReference<>() {
       });
@@ -459,16 +435,14 @@ public class OdoCli implements Odo {
   @Override
   public ComponentInfo getComponentInfo(String project, String component, String path,
                                         ComponentKind kind) throws IOException {
-    boolean isPodmanPresent = !execute(command, envVars, "version").contains("unable to fetch the podman client version");
-
     if (path != null) {
-      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind, isPodmanPresent);
+      return parseComponentInfo(execute(new File(path), command, envVars, "describe", "component", "-o", "json"), kind);
     } else {
-      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind, isPodmanPresent);
+      return parseComponentInfo(execute(command, envVars, "describe", "component", "--namespace", project, "--name", component, "-o", "json"), kind);
     }
   }
 
-  private ComponentInfo parseComponentInfo(String json, ComponentKind kind, boolean isPodmanPresent) throws IOException {
+  private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
     JSonParser parser = new JSonParser(Serialization.json().readTree(json));
     return parser.parseDescribeComponentInfo(kind, isPodmanPresent);
   }
@@ -581,18 +555,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void follow(String context, String component, boolean deploy, String platform) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public void log(String context, boolean deploy, String platform, List<ProcessHandler> handlers) throws IOException {
     doLog(context, false, deploy, platform, handlers);
-  }
-
-  @Override
-  public void log(String context, String component, boolean deploy, String platform) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -655,8 +619,8 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Component> getComponents(String project) throws IOException {
-    return configureObjectMapper(new ComponentDeserializer()).readValue(
+  public List<Component> getComponentsOnCluster(String project) throws IOException {
+    return Serialization.configure(new ComponentDeserializer()).readValue(
       execute(command, envVars, "list", "--namespace", project, "-o", "json"),
       new TypeReference<>() {
       });
@@ -665,7 +629,7 @@ public class OdoCli implements Odo {
   @Override
   public List<org.jboss.tools.intellij.openshift.utils.odo.Service> getServices(String project) throws IOException {
     try {
-      return configureObjectMapper(new ServiceDeserializer()).readValue(
+      return Serialization.configure(new ServiceDeserializer()).readValue(
         execute(command, envVars, "list", "service", "--namespace", project, "-o", "json"),
         new TypeReference<>() {
         });
@@ -708,7 +672,7 @@ public class OdoCli implements Odo {
   @Override
   public List<Binding> listBindings(String context) throws IOException {
     if (context != null) {
-      return configureObjectMapper(new BindingDeserializer()).readValue(
+      return Serialization.configure(new BindingDeserializer()).readValue(
         execute(new File(context), command, envVars, "describe", "binding", "-o", "json"),
         new TypeReference<>() {
         });
@@ -731,20 +695,6 @@ public class OdoCli implements Odo {
       envVars,
       command,
       "debug", "port-forward", "--local-port", port.toString());
-  }
-
-  @Override
-  public DebugStatus debugStatus(String context) throws IOException {
-    try {
-      String json = execute(new File(context), command, envVars, "debug", "info", "-o", "json");
-      JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-      return parser.parseDebugStatus();
-    } catch (IOException e) {
-      if (e.getMessage().contains("debug is not running")) {
-        return DebugStatus.NOT_RUNNING;
-      }
-      throw e;
-    }
   }
 
   @Override
@@ -791,7 +741,7 @@ public class OdoCli implements Odo {
 
   @Override
   public List<ComponentDescriptor> discover(String path) throws IOException {
-    return configureObjectMapper(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
+    return Serialization.configure(new ComponentDescriptorsDeserializer(new File(path).getAbsolutePath())).readValue(
       execute(new File(path), command, envVars, "list", "-o", "json"),
       new TypeReference<>() {
       });
@@ -806,7 +756,7 @@ public class OdoCli implements Odo {
 
   @Override
   public List<DevfileRegistry> listDevfileRegistries() throws IOException {
-    return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
+    return Serialization.configure(new DevfileRegistriesDeserializer()).readValue(
       execute(command, envVars, "preference", "view", "-o", "json"),
       new TypeReference<>() {
       });
@@ -827,10 +777,24 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<DevfileComponentType> getComponentTypes(String name) throws IOException {
-    return getComponentTypes().stream().
+  public List<DevfileComponentType> getComponentTypesFromRegistry(String name) throws IOException {
+    return getAllComponentTypes().stream().
       filter(type -> name.equals(type.getDevfileRegistry().getName())).
       collect(Collectors.toList());
+  }
+
+  private boolean checkPodmanPresence() {
+    CompletableFuture<ExecHelper.ExecResult> result = new CompletableFuture<>();
+    try {
+      result.complete(ExecHelper.executeWithResult(command, false, new File(HOME_FOLDER), envVars, "version"));
+      return !result.get().getStdOut().contains("unable to fetch the podman client version");
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      LOGGER.warn(e.getLocalizedMessage(), e);
+    } catch (ExecutionException | IOException e) {
+      LOGGER.warn(e.getLocalizedMessage(), e);
+    }
+    return false;
   }
 
   private static final class KubernetesClientFactory implements Supplier<KubernetesClient> {

@@ -186,7 +186,7 @@ public class SandboxWorkflowPage extends WizardStep<SandboxModel> {
     }
 
     private void launchJob() {
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Login to Red Hat Developer Sandbox", true) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Login to red hat developer sandbox", true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 retrieveState(indicator);

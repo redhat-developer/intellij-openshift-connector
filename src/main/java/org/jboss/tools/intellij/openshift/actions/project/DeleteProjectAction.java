@@ -20,7 +20,7 @@ import org.jboss.tools.intellij.openshift.actions.NodeUtils;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class DeleteProjectAction extends OdoAction {
   public void update(AnActionEvent e) {
     super.update(e);
     if (e.getPresentation().isVisible()) {
-      Odo odo = getOdo(e);
+      OdoFacade odo = getOdo(e);
       if (odo == null) {
         return;
       }
@@ -50,7 +50,7 @@ public class DeleteProjectAction extends OdoAction {
   public String getTelemetryActionName() {return "delete project";}
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     String kind = odo.getNamespaceKind();
     NamespaceNode namespaceNode = (NamespaceNode) selected;
     if (Messages.NO == Messages.showYesNoDialog("Delete " + kind + " '" + namespaceNode.getName() + "'.\n\nDELETING " + kind.toUpperCase() + " WILL DELETE ALL ASSOCIATED RESOURCES ON THE CLUSTER.\n\nAre you sure?", "Delete " + kind,

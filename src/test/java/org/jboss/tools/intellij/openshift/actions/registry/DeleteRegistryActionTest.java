@@ -11,16 +11,22 @@
 package org.jboss.tools.intellij.openshift.actions.registry;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class DeleteRegistryActionTest extends ActionTest {
+  public DeleteRegistryActionTest(boolean isOpenshift) {
+    super(isOpenshift);
+  }
+
   @Override
   public AnAction getAction() {
     return new DeleteRegistryAction();
   }
 
   @Override
-  protected void verifyRegistry(boolean visible) {
-    assertTrue(visible);
+  protected void verifyRegistry(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 }

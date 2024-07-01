@@ -21,6 +21,7 @@ import org.jboss.tools.intellij.openshift.tree.application.ComponentNode;
 import org.jboss.tools.intellij.openshift.tree.application.NamespaceNode;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -39,13 +40,13 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  public String getTelemetryActionName() { return "link component to component"; }
+  public String getTelemetryActionName() {return "link component to component";}
 
-  protected String getSelectedTargetComponent(Odo odo, String project, String component) throws IOException {
+  protected String getSelectedTargetComponent(OdoFacade odo, String project, String component) throws IOException {
     String targetComponent = null;
 
     List<Component> components = odo.getComponents(project)
-            .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
+      .stream().filter(comp -> !comp.getName().equals(component)).collect(Collectors.toList());
     if (!components.isEmpty()) {
       if (components.size() == 1) {
         targetComponent = components.get(0).getName();
@@ -65,7 +66,7 @@ public class LinkComponentAction extends OdoAction {
   }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     ComponentNode componentNode = (ComponentNode) selected;
     Component sourceComponent = componentNode.getComponent();
     NamespaceNode namespaceNode = componentNode.getParent();

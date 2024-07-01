@@ -51,7 +51,7 @@ public class CreateRegistryAction extends OdoAction {
         sendTelemetryResults(TelemetryResult.ABORTED);
       }
     } catch (IOException e) {
-      sendTelemetryError(e);
+      sendTelemetryError(e.getMessage());
       Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Registry");
     }
   }
@@ -63,7 +63,7 @@ public class CreateRegistryAction extends OdoAction {
         ActionUtils.getApplicationTreeStructure(anActionEvent).fireModified(registriesNode);
         sendTelemetryResults(TelemetryResult.SUCCESS);
       } catch (IOException e) {
-        sendTelemetryError(e);
+        sendTelemetryError(e.getMessage());
         UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(),
           "Create registry"));
       }

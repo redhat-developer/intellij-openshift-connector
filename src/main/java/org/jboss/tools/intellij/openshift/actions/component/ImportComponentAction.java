@@ -67,7 +67,7 @@ public class ImportComponentAction extends CreateComponentAction {
           clearProcessing(namespaceNode);
         } catch (IOException e) {
           clearProcessing(namespaceNode);
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Import"));
         }
       },

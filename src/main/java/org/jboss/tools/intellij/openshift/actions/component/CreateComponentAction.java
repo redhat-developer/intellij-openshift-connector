@@ -99,7 +99,7 @@ public class CreateComponentAction extends OdoAction {
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
           clearProcessing(namespaceNode);
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Component"));
         }
       },
@@ -112,8 +112,8 @@ public class CreateComponentAction extends OdoAction {
     computeTelemetry(model);
     String type = model.getSelectedComponentType() != null ?
       model.getSelectedComponentType().getName() : null;
-    String registry = model.getSelectedComponentType() instanceof DevfileComponentType ?
-      ((DevfileComponentType) model.getSelectedComponentType()).getDevfileRegistry().getName() : null;
+    String registry = model.getSelectedComponentType() instanceof DevfileComponentType devfileComponentType ?
+      devfileComponentType.getDevfileRegistry().getName() : null;
     String devFile = model.isProjectHasDevfile() ?
       Constants.DEVFILE_NAME : null;
     odo.createComponent(

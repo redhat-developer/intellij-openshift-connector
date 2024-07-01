@@ -78,7 +78,7 @@ public class LinkServiceAction extends OdoAction {
           }
         } catch (IOException | NoSuchElementException e) {
           clearProcessing(namespaceNode);
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link Service"));
         }
       },

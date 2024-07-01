@@ -81,7 +81,7 @@ public class ShowLogComponentAction extends ContextAwareComponentAction {
           }
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
         }
       });

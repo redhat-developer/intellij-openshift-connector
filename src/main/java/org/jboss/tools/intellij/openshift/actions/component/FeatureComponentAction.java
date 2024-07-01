@@ -42,8 +42,8 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
   @Override
   public boolean isVisible(Object selected) {
     boolean visible = super.isVisible(selected);
-    if (visible && selected instanceof ComponentNode) {
-      Component component = ((ComponentNode) selected).getComponent();
+    if (visible && selected instanceof ComponentNode componentNode) {
+      Component component = componentNode.getComponent();
       visible = component.getInfo().getSupportedFeatures().contains(feature.getMode());
     }
     return visible;
@@ -54,10 +54,9 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
     super.update(e);
     if (e.getPresentation().isVisible() && needCustomizedPresentation()) {
       Object node = adjust(getSelected(getTree(e)));
-      if (!(node instanceof ComponentNode)) {
+      if (!(node instanceof ComponentNode componentNode)) {
         return;
       }
-      ComponentNode componentNode = (ComponentNode) node;
       Component component = componentNode.getComponent();
       e.getPresentation().setText(getCustomizedPresentation(component));
     }
@@ -104,7 +103,7 @@ public abstract class FeatureComponentAction extends ContextAwareComponentAction
             });
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), getActionName()));
         }
       },

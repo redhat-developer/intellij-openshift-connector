@@ -17,6 +17,8 @@ import com.intellij.remoterobot.fixtures.DefaultXpath;
 import com.intellij.remoterobot.fixtures.FixtureName;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
@@ -28,6 +30,8 @@ import java.time.Duration;
 @DefaultXpath(by = "MyDialog type", xpath = "//div[@accessiblename='Project Structure' and @class='MyDialog']")
 @FixtureName(name = "Project Structure Dialog")
 public class ProjectStructureDialog extends CommonContainerFixture {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectStructureDialog.class);
+
     public ProjectStructureDialog(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
         super(remoteRobot, remoteComponent);
     }
@@ -39,10 +43,12 @@ public class ProjectStructureDialog extends CommonContainerFixture {
      */
     public static void cancelProjectStructureDialogIfItAppears(RemoteRobot remoteRobot) {
         try {
+            LOGGER.info("Checking for 'Project Structure' dialog...");
             ProjectStructureDialog projectStructureDialog = remoteRobot.find(ProjectStructureDialog.class, Duration.ofSeconds(20));
             projectStructureDialog.button("Cancel").click();
+            LOGGER.info("'Project Structure' dialog found and canceled.");
         } catch (WaitForConditionTimeoutException e) {
-            e.printStackTrace();
+            LOGGER.warn("'Project Structure' dialog did not appear within the timeout period.");
         }
     }
 }

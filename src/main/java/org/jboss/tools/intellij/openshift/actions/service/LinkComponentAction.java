@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
@@ -63,7 +62,7 @@ public class LinkComponentAction extends OdoAction {
             UIHelper.executeInUI(() -> Messages.showWarningDialog(message, "Link Component"));
           }
         } catch (IOException e) {
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Link Component"));
         } finally {
           clearProcessing(namespaceNode);
@@ -91,6 +90,6 @@ public class LinkComponentAction extends OdoAction {
   }
 
   private List<Component> getTargetComponents(OdoFacade odo, String project) throws IOException {
-    return odo.getComponents(project).stream().filter(component -> component.getLiveFeatures().isOnCluster()).collect(Collectors.toList());
+    return odo.getComponents(project).stream().filter(component -> component.getLiveFeatures().isOnCluster()).toList();
   }
 }

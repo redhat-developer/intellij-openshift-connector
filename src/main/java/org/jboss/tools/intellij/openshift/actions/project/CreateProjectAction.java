@@ -120,7 +120,7 @@ public class CreateProjectAction extends LoggedInClusterAction {
       sendTelemetryResults(TelemetryResult.SUCCESS);
     } catch (IOException | CompletionException e) {
       notification.expire();
-      sendTelemetryError(e);
+      sendTelemetryError(e.getMessage());
       UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create " + kind));
     }
   }

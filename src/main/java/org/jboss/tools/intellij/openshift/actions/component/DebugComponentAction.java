@@ -114,7 +114,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
               runSettings.getConfiguration())).execute(getEnvironment());
             sendTelemetryResults(TelemetryResult.SUCCESS);
           } catch (ExecutionException e) {
-            sendTelemetryError(e);
+            sendTelemetryError(e.getMessage());
             LOG.error(e.getLocalizedMessage(), e);
           }
         });
@@ -182,7 +182,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
         environment = ExecutionEnvironmentBuilder.create(
           DefaultDebugExecutor.getDebugExecutorInstance(), runSettings).build();
       } catch (ExecutionException e) {
-        sendTelemetryError(e);
+        sendTelemetryError(e.getMessage());
         LOG.error(e.getLocalizedMessage(), e);
       }
     }

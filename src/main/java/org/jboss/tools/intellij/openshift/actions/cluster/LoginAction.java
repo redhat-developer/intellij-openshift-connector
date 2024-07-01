@@ -58,7 +58,7 @@ public class LoginAction extends OcAction {
             sendTelemetryResults(TelemetryResult.ABORTED);
           }
         } catch (IOException e) {
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
         } finally {
           clearProcessing(clusterNode);

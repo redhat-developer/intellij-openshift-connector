@@ -53,7 +53,7 @@ public class DeleteServiceAction extends OdoAction {
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
           clearProcessing(serviceNode);
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Delete Service"));
         }
       },

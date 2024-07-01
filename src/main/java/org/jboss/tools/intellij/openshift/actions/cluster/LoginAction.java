@@ -60,7 +60,7 @@ public class LoginAction extends OdoAction {
           }
         } catch (IOException e) {
           clearProcessing(clusterNode);
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
         }
       },

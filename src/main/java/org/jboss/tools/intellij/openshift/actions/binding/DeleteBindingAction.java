@@ -40,7 +40,7 @@ public class DeleteBindingAction extends OdoAction {
       NodeUtils.fireModified(node.getParent());
       sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
     } catch (IOException e) {
-      sendTelemetryError(e);
+      sendTelemetryError(e.getMessage());
       Messages.showWarningDialog("Error: " + e.getLocalizedMessage(), "Delete Binding");
     }
   }

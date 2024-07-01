@@ -32,7 +32,7 @@ public class OpenConsoleAction extends LoggedInClusterAction {
       BrowserUtil.open(url);
       sendTelemetryResults(TelemetryResult.SUCCESS);
     } catch (IOException e) {
-      sendTelemetryError(e);
+      sendTelemetryError(e.getMessage());
       Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Open Console Dashboard");
     }
 

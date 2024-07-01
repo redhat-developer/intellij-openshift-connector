@@ -70,8 +70,4 @@ public abstract class OdoAction extends StructureTreeAction implements Telemetry
     telemetrySender.sendTelemetryError(message);
   }
 
-  @Override
-  public void sendTelemetryError(Exception exception) {
-    telemetrySender.sendTelemetryError(exception);
-  }
 }

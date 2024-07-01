@@ -64,11 +64,7 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   @Override
   public void sendTelemetryError(String message) {
-      telemetrySender.sendTelemetryError(message);
+    telemetrySender.sendTelemetryError(message);
   }
 
-  @Override
-  public void sendTelemetryError(Exception exception) {
-      telemetrySender.sendTelemetryError(exception);
-  }
 }

@@ -160,7 +160,7 @@ dependencies {
             'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.4.0',
             'org.junit.jupiter:junit-jupiter-engine:5.10.3',
             'org.junit.jupiter:junit-jupiter-api:5.10.3',
-            'org.junit.jupiter:junit-jupiter:5.10.2')
+            'org.junit.jupiter:junit-jupiter:5.10.3')
     constraints {
         implementation('io.undertow:undertow-core:2.3.14.Final') { //keycloak
             because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-6567186'

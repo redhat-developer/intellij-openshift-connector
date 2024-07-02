@@ -66,6 +66,7 @@ public class ChartsDialog extends UndecoratedDialog {
   private final ApplicationsRootNode rootNode;
   private final Helm helm;
   private final Odo odo;
+  private final Project project;
 
   private JBLabel title;
   private ChartsTableModel chartsTableModel;
@@ -77,6 +78,7 @@ public class ChartsDialog extends UndecoratedDialog {
     this.rootNode = rootNode;
     this.helm = helm;
     this.odo = odo;
+    this.project = project;
     init();
   }
 
@@ -118,10 +120,10 @@ public class ChartsDialog extends UndecoratedDialog {
 
     OnePixelSplitter splitter = new OnePixelSplitter(true, .66f);
     splitter.getDivider().setBackground(OnePixelDivider.BACKGROUND);
-    panel.add(splitter, "spanx, pushx, growx, growy, pushy, wrap");
+    panel.add(splitter, "spanx, pushx, growx, pushy, growy, height 800:800, wrap");
 
     this.chartsTableModel = new ChartsTableModel();
-    this.chartsTable = SwingUtils.createTable(10, chartsTableModel);
+    this.chartsTable =  new JBTable(chartsTableModel);
     chartsTable.setShowGrid(false);
     chartsTable.setFocusable(false);
     chartsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -135,11 +137,11 @@ public class ChartsDialog extends UndecoratedDialog {
       .usingInput(filterTextArea.getDocument());
     splitter.setFirstComponent(tableScrolledPane);
 
-    ChartPanels chartPanels = new ChartPanels(rootNode, getDisposable(), helm, odo);
-    chartPanels.select(ChartPanels.DETAILS_PANEL,true);
+    InstallOrDetailsPanels installOrDetailsPanels = new InstallOrDetailsPanels(rootNode, getDisposable(), helm, odo, project);
+    installOrDetailsPanels.select(InstallOrDetailsPanels.DETAILS_PANEL,true);
     chartsTable.getSelectionModel().addListSelectionListener(
-      onTableItemSelected(chartPanels, chartsTable, chartsTableModel));
-    splitter.setSecondComponent(chartPanels);
+      onTableItemSelected(installOrDetailsPanels, chartsTable, chartsTableModel));
+    splitter.setSecondComponent(installOrDetailsPanels);
 
     IdeFocusManager.getInstance(null).requestFocus(searchTextArea, true);
 
@@ -155,7 +157,7 @@ public class ChartsDialog extends UndecoratedDialog {
     };
   }
 
-  private ListSelectionListener onTableItemSelected(final ChartPanels chartDetailsPane, final JTable table, final ChartsTableModel model) {
+  private ListSelectionListener onTableItemSelected(final InstallOrDetailsPanels chartDetailsPane, final JTable table, final ChartsTableModel model) {
     return e -> {
       if (e.getValueIsAdjusting()
         || table.getRowCount() == 0) {
@@ -212,6 +214,7 @@ public class ChartsDialog extends UndecoratedDialog {
           List<ChartVersions> chartVersions = toChartVersions(charts);
           tableModel.setCharts(chartVersions);
           table.setRowSelectionInterval(0, 0);
+          table.getParent().doLayout(); // fore repaint
           statusIcon.setEmpty();
         }, EXECUTOR_UI);
   }

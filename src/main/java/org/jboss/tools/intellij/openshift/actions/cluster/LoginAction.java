@@ -53,15 +53,15 @@ public class LoginAction extends OdoAction {
               loginDialog.getUserName(),
               loginDialog.getPassword(),
               loginDialog.getToken());
-            clearProcessing(clusterNode);
             sendTelemetryResults(TelemetryResult.SUCCESS);
           } else {
             sendTelemetryResults(TelemetryResult.ABORTED);
           }
         } catch (IOException e) {
-          clearProcessing(clusterNode);
           sendTelemetryError(e);
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
+        } finally {
+          clearProcessing(clusterNode);
         }
       },
       "Logging in...",

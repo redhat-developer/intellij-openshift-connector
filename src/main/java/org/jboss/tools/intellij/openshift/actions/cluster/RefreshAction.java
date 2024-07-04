@@ -14,14 +14,15 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
-import org.jboss.tools.intellij.openshift.actions.NodeUtils;
+import javax.swing.tree.TreePath;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ParentableNode;
 
-import javax.swing.tree.TreePath;
-
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.getRoot;
+import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 
@@ -32,12 +33,12 @@ public class RefreshAction extends StructureTreeAction {
 
     public static void execute(ParentableNode<?> node) {
         RefreshAction action = (RefreshAction) ActionManager.getInstance().getAction(RefreshAction.class.getName());
-        action.doActionPerformed(NodeUtils.getRoot(node));
+        action.doActionPerformed(getRoot(node));
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        doActionPerformed(NodeUtils.getRoot(selected));
+        doActionPerformed(getRoot(selected));
     }
 
     public void doActionPerformed(ApplicationsRootNode root) {
@@ -45,12 +46,14 @@ public class RefreshAction extends StructureTreeAction {
           return;
         }
         runWithProgress((ProgressIndicator progress) -> {
+              setProcessing("Refreshing...", root);
               root.refresh();
               asyncSend(
                 TelemetryService.instance().getBuilder()
                   .action(PREFIX_ACTION + "refresh cluster")
                   .success()
               );
+              clearProcessing(root);
           },
           "Refreshing...",
           root.getProject());

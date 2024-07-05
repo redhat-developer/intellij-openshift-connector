@@ -150,7 +150,7 @@ dependencies {
             'com.squareup.retrofit2:converter-jackson:2.11.0',
             'com.google.code.gson:gson:2.11.0')
     testImplementation(
-            'org.junit.platform:junit-platform-launcher:1.10.2',
+            'org.junit.platform:junit-platform-launcher:1.10.3',
             'org.mockito:mockito-core:5.12.0',
             'org.easytesting:fest-assert:1.4',
             'com.redhat.devtools.intellij:intellij-common:1.9.6-SNAPSHOT:test',
@@ -159,8 +159,8 @@ dependencies {
             'org.mock-server:mockserver-netty:5.15.0',
             'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.4.0',
             'org.junit.jupiter:junit-jupiter-engine:5.10.3',
-            'org.junit.jupiter:junit-jupiter-api:5.10.2',
-            'org.junit.jupiter:junit-jupiter:5.10.2')
+            'org.junit.jupiter:junit-jupiter-api:5.10.3',
+            'org.junit.jupiter:junit-jupiter:5.10.3')
     constraints {
         implementation('io.undertow:undertow-core:2.3.14.Final') { //keycloak
             because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-6567186'

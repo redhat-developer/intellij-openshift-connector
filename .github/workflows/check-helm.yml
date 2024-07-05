@@ -23,7 +23,7 @@ jobs:
         run: |
           echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state open --search "fix: update helm ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
       - name: Update tools.json with latest helm version
-        if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) && (env.LATEST_TOOL_RELEASE != '') }}
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           jq --indent 4 '.tools.helm.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/main/resources/tools.json | jq --indent 4 '.tools.helm.versionMatchRegExpr = "${{ env.LATEST_TOOL_RELEASE }}"' > src/main/resources/tools.json.new
           mv src/main/resources/tools.json.new src/main/resources/tools.json
@@ -37,7 +37,7 @@ jobs:
             mv src/main/resources/tools.json.new src/main/resources/tools.json
           done
       - name: Create pull request
-        if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) && (env.LATEST_TOOL_RELEASE != '') }}
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"

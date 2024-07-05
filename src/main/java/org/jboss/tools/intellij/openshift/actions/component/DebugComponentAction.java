@@ -93,7 +93,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
   }
 
   private void executeDebug() {
-    telemetrySender.addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
+    addProperty(PROP_DEBUG_COMPONENT_LANGUAGE, getDebugLanguage().toLowerCase());
     ExecHelper.submit(() -> {
       // check if local debugger process is already running.
       if (ExecutionManagerImpl.isProcessRunning(getEnvironment().getContentToReuse())) {
@@ -182,7 +182,7 @@ public abstract class DebugComponentAction extends ContextAwareComponentAction {
         environment = ExecutionEnvironmentBuilder.create(
           DefaultDebugExecutor.getDebugExecutorInstance(), runSettings).build();
       } catch (ExecutionException e) {
-        telemetrySender.error(e);
+        sendTelemetryError(e);
         LOG.error(e.getLocalizedMessage(), e);
       }
     }

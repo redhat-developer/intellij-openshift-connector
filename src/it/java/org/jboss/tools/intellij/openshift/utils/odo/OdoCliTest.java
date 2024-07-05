@@ -16,7 +16,9 @@ import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOdo;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
+import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,25 +58,23 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
 
   protected static final String REGISTRY_PREFIX = "reg";
 
-  protected static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
-
-  protected static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
-
-  protected static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
-
   private TestDialog previousTestDialog;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
+    rootNode.getOcTool().whenComplete((ocTool, throwable) -> {
+      try {
+        Oc oc = ocTool.get();
+        OdoCluster.INSTANCE.login(oc);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
     odo = getOdo().get();
     if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
       odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
-    if (CLUSTER_URL != null && !odo.getMasterUrl().toString().startsWith(CLUSTER_URL)) {
-      odo.login(CLUSTER_URL, CLUSTER_USER, CLUSTER_PASSWORD.toCharArray(), null);
-      odo = getOdo().get();
-    }
   }
 
   @Override

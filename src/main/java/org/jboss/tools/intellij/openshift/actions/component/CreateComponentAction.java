@@ -139,15 +139,13 @@ public class CreateComponentAction extends OdoAction {
   }
 
   private void computeTelemetry(CreateComponentModel model) {
-    telemetrySender
-      .addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
-    telemetrySender
-      .addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
+    addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
+    addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
     if (!model.isProjectHasDevfile() && StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
-      telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
+      addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
     }
     if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {
-      telemetrySender.addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());
+      addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());
     }
   }
 }

@@ -11,7 +11,6 @@
 package org.jboss.tools.intellij.openshift.utils.helm;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.intellij.openapi.util.text.StringUtil;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import java.io.File;
 import java.io.IOException;
@@ -131,7 +130,7 @@ public class HelmCli implements Helm {
     }
 
     @Override
-    public String install(String name, String chart, String version, String additionalArguments) throws IOException {
+    public String install(String name, String chart, String version, File valuesFile) throws IOException {
         // telemetry sent in ChartsDialog
         List<String> arguments = new ArrayList<>();
         arguments.add("install");
@@ -139,11 +138,14 @@ public class HelmCli implements Helm {
         arguments.add(chart);
         arguments.add("--version");
         arguments.add(version);
-        if (!StringUtil.isEmptyOrSpaces(additionalArguments)) {
-            arguments.addAll(Arrays.stream(additionalArguments.split(" ")).collect(Collectors.toList()));
+        if (valuesFile != null
+          && valuesFile.exists()
+          && valuesFile.length() > 0) {
+            arguments.add("-f");
+            arguments.add(valuesFile.getAbsolutePath());
         }
         LOGGER.info("Installing chart {} in version {}.", chart, version);
-        return execute(command, Collections.emptyMap(), arguments.toArray(new String[arguments.size()]));
+        return execute(command, Collections.emptyMap(), arguments.toArray(new String[]{}));
     }
 
     @Override
@@ -193,6 +195,11 @@ public class HelmCli implements Helm {
             }
           ));
         return new HelmEnv(env);
+    }
+
+    @Override
+    public String showValues(String chart) throws IOException {
+        return execute(command, Collections.emptyMap(), "show", "values", chart);
     }
 
     private static String execute(String command, Map<String, String> envs, String... args) throws IOException {

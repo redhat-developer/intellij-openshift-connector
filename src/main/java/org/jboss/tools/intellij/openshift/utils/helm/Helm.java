@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.helm;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,9 +28,11 @@ public interface Helm {
 
   List<ChartRelease> list() throws IOException;
 
-  String install(String name, String chart, String version, String parameters) throws IOException;
+  String install(String name, String chart, String version, File valuesFile) throws IOException;
 
   String uninstall(String... names) throws IOException;
 
   HelmCli.HelmEnv env() throws IOException;
+
+  String showValues(String chart) throws IOException;
 }

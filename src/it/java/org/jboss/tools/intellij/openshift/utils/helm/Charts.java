@@ -20,6 +20,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class Charts {
 
   public static final String CHART_KUBEROS = "kuberos";
+  public static final String CHART_SYSDIG = "sysdig";
 
   public static final Pair<String, String> REPOSITORY_STABLE = new Pair("stable", "https://charts.helm.sh/stable");
   public static final Pair<String, String> REPOSITORY_OPENSHIFT = new Pair("openshift", "https://charts.openshift.io/");

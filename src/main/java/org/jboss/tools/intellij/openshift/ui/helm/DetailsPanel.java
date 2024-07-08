@@ -34,7 +34,7 @@ class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel, Disposab
   private JLabel descriptionLabel;
   private JButton installButton;
 
-  public DetailsPanel(ChartVersions chart, Disposable parentDisposable, MultiPanel multiPanel) {
+  DetailsPanel(ChartVersions chart, Disposable parentDisposable, MultiPanel multiPanel) {
     super(new MigLayout(
         "flowx, fillx, hidemode 3",
         "[50:50:50][100:100:100][fill][right]"),
@@ -103,7 +103,7 @@ class DetailsPanel extends JBPanel<DetailsPanel> implements ChartPanel, Disposab
   }
 
   private void onInstall(ActionEvent actionEvent) {
-    multiPanel.select(ChartPanels.INSTALL_PANEL, false);
+    multiPanel.select(InstallOrDetailsPanels.INSTALL_PANEL, false);
   }
 
   @Override

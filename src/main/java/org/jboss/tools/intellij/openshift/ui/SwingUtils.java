@@ -21,6 +21,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.UIUtil;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.MouseInfo;
@@ -139,6 +140,19 @@ public class SwingUtils {
     float scale = (float) width / icon.getIconWidth();
     SizedIcon scaled = JBUIScale.scaleIcon(new SizedIcon(icon, icon.getIconWidth(), icon.getIconHeight()));
     return scaled.scale(scale);
+  }
+
+  public static void layoutParent(int parents, Container container) {
+    if (container == null) {
+      return;
+    }
+    while (parents-- > 0) {
+      if (container.getParent() == null) {
+        break;
+      }
+      container = container.getParent();
+    }
+    container.doLayout();
   }
 
 }

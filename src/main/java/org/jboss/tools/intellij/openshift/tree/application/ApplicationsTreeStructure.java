@@ -15,6 +15,7 @@ import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.tree.LeafState;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
@@ -52,10 +53,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
   private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
   private final DevfileRegistriesNode registries;
 
-  public ApplicationsTreeStructure(Project project) {
+  public ApplicationsTreeStructure(Project project, Disposable parentDisposable) {
     this.project = project;
-    this.root = new ApplicationsRootNode(project, this);
+    this.root = new ApplicationsRootNode(project, this, parentDisposable);
     this.registries = new DevfileRegistriesNode(root);
+    Disposer.register(parentDisposable, this);
   }
 
   @Override

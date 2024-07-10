@@ -1,0 +1,52 @@
+#!/usr/bin/env groovy
+package org.jboss.tools.intellij.openshift.test.ui
+
+pipeline {
+    agent {
+        node('rhel8')
+    }
+    environment {
+        IDEA_KEY_FILE = credentials('idea-key-b64')
+    }
+    stages {
+        stage('Checkout repo') {
+            steps {
+                deleteDir()
+                git url: "https://github.com/${params.FORK}/intellij-openshift-connector.git", branch: "${params.BRANCH}"
+            }
+        }
+
+        stage('Pre-login to cluster') {
+            steps {
+                sh 'oc login $CLUSTER_URL -u $CLUSTER_USER -p $CLUSTER_PASSWORD --insecure-skip-tls-verify'
+            }
+        }
+
+        stage('Copy and decode idea.key') {
+            steps {
+                sh 'mkdir -p idea_license_token'
+                sh 'cp $IDEA_KEY_FILE idea_license_token/idea.key'
+            }
+        }
+
+        stage('Setup JDK') {
+            steps {
+                script {
+                    def jdkHome = tool 'openjdk-17'
+                    env.JAVA_HOME = "${jdkHome}"
+                    env.PATH = "${jdkHome}/bin:${env.PATH}"
+                }
+            }
+        }
+
+        stage('integration UI tests') {
+            steps {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    wrap([$class: 'Xvnc']) {
+                        sh "./gradlew clusterIntegrationUITest --info"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,47 @@
+name: Public Integration UI Tests
+on:
+  workflow_run:
+    workflows: [ "Java CI with Gradle" ]
+    types:
+      - completed
+jobs:
+  public-integration-ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@750cdda3edd6d51b7fdfc069d2e2818cf3c44f4c #v3.3.1
+        with:
+          add-job-summary: 'on-failure'
+          add-job-summary-as-pr-comment: 'on-failure'
+          validate-wrappers: true
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Play public integration UI tests
+        env:
+          GPG_PASSPHRASE: ${{ secrets.IDEA_KEY_PASSPHRASE }}
+        run: |
+          echo -n "$GPG_PASSPHRASE" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
+          export DISPLAY=:99.0
+          Xvfb -ac :99 -screen 0 1920x1080x16 &
+          sleep 10
+          ./gradlew publicIntegrationUITest --continue --no-daemon
+      - name: Publish tests reports
+        uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
+          commit: ${{github.event.workflow_run.head_sha}}
+          check_name: Public Integration UI Tests Report
+      - name: Publish screenshots as artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: ./build/screenshots

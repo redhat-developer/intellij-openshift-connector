@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import io.fabric8.kubernetes.api.model.AuthInfo;
@@ -18,7 +19,6 @@ import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
 import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
-
 import java.util.Arrays;
 
 import static org.mockito.Mockito.doReturn;
@@ -116,7 +116,7 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
     }
 
     protected ApplicationsRootNode createApplicationsRootNode(Project project, Config config) {
-        return spy(new ApplicationsRootNode(project, null) {
+        return spy(new ApplicationsRootNode(project, null, Disposer.newDisposable()) {
             @Override
             protected void initConfigWatcher() {
             }

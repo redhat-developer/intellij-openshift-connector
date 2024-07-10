@@ -16,6 +16,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
@@ -57,13 +58,14 @@ public class ApplicationsRootNode
     private Config config;
     private final OdoProcessHelper processHelper;
 
-  public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure) {
+  public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure, Disposable parent) {
     this.project = project;
     this.structure = structure;
     initConfigWatcher();
     this.config = loadConfig();
     registerProjectListener(project);
     this.processHelper = new OdoProcessHelper();
+    Disposer.register(parent, this);
   }
 
   private static boolean shouldLogMessage(String message) {

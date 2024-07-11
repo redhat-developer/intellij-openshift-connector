@@ -18,7 +18,6 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOd
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
-import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,10 +63,9 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-    rootNode.getOcTool().whenComplete((ocTool, throwable) -> {
+    ToolFactory.getInstance().createOc(getProject()).whenComplete((ocTool, throwable) -> {
       try {
-        Oc oc = ocTool.get();
-        OdoCluster.INSTANCE.login(oc);
+        OdoCluster.INSTANCE.login(ocTool.get());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

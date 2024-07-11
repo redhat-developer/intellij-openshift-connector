@@ -24,18 +24,12 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
@@ -44,19 +38,28 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 public class ApplicationsRootNode
   implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
-    private final Project project;
-    private final ApplicationsTreeStructure structure;
-    private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
-    private final Map<String, ComponentDescriptor> components = new HashMap<>();
-    private CompletableFuture<ApplicationRootNodeOdo> odoFuture;
-    private CompletableFuture<Tool<Helm>> helmFuture;
-    private boolean logged;
-    private Config config;
-    private final OdoProcessHelper processHelper;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
+  private final Project project;
+  private final ApplicationsTreeStructure structure;
+  private final ProcessingNodeImpl processingNode = new ProcessingNodeImpl();
+  private final Map<String, ComponentDescriptor> components = new HashMap<>();
+  private CompletableFuture<ApplicationRootNodeOdo> odoFuture;
+  private CompletableFuture<Tool<Helm>> helmFuture;
+  private CompletableFuture<Tool<Oc>> ocFuture;
+  private boolean logged;
+  private Config config;
+  private final OdoProcessHelper processHelper;
 
   public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure, Disposable parent) {
     this.project = project;
@@ -83,56 +86,63 @@ public class ApplicationsRootNode
     this.logged = logged;
   }
 
-    private CompletableFuture<ApplicationRootNodeOdo> doGetOdo() {
-        if (odoFuture == null) {
-            this.odoFuture = ToolFactory.getInstance()
-              .createOdo(project)
-              .thenApply(tool -> {
-                  ApplicationRootNodeOdo odo = new ApplicationRootNodeOdo(tool.get(), tool.isDownloaded(), this, processHelper);
-                  loadProjectModel(odo, project);
-                  return odo;
-              });
-        }
-        return odoFuture;
-    }
-
-    public CompletableFuture<ApplicationRootNodeOdo> getOdo() {
-        return doGetOdo()
-          .whenComplete((ApplicationRootNodeOdo odo, Throwable err) -> {
-            if (odo.isDownloaded()) {
-                structure.fireModified(this);
-            }
+  private CompletableFuture<ApplicationRootNodeOdo> doGetOdo() {
+    if (odoFuture == null) {
+      this.odoFuture = ToolFactory.getInstance()
+        .createOdo(project)
+        .thenApply(tool -> {
+          ApplicationRootNodeOdo odo = new ApplicationRootNodeOdo(tool.get(), tool.isDownloaded(), this, processHelper);
+          loadProjectModel(odo, project);
+          return odo;
         });
     }
+    return odoFuture;
+  }
+
+  public CompletableFuture<ApplicationRootNodeOdo> getOdo() {
+    return doGetOdo()
+      .whenComplete((ApplicationRootNodeOdo odo, Throwable err) -> {
+        if (odo.isDownloaded()) {
+          structure.fireModified(this);
+        }
+      });
+  }
 
   public void resetOdo() {
     this.odoFuture = null;
   }
 
-    public CompletableFuture<ToolFactory.Tool<Helm>> getHelmTool(boolean notify) {
-        if (helmFuture == null) {
-            this.helmFuture = ToolFactory.getInstance()
-                .createHelm(project)
-                .whenComplete((tool, err) -> {
-                        if (notify && tool.isDownloaded()) {
-                            structure.fireModified(this);
-                        }
-                    });
-        }
-        return helmFuture;
+  public CompletableFuture<ToolFactory.Tool<Oc>> getOcTool() {
+    if (ocFuture == null) {
+      this.ocFuture = ToolFactory.getInstance().createOc(project);
     }
+    return ocFuture;
+  }
 
-    public Helm getHelm(boolean notify) {
-        Tool<Helm> tool = getHelmTool(notify).getNow(null);
-        if (tool == null) {
-            return null;
-        }
-        return tool.get();
+  public CompletableFuture<ToolFactory.Tool<Helm>> getHelmTool(boolean notify) {
+    if (helmFuture == null) {
+      this.helmFuture = ToolFactory.getInstance()
+        .createHelm(project)
+        .whenComplete((tool, err) -> {
+          if (notify && tool.isDownloaded()) {
+            structure.fireModified(this);
+          }
+        });
     }
+    return helmFuture;
+  }
 
-    public Project getProject() {
-        return project;
+  public Helm getHelm(boolean notify) {
+    Tool<Helm> tool = getHelmTool(notify).getNow(null);
+    if (tool == null) {
+      return null;
     }
+    return tool.get();
+  }
+
+  public Project getProject() {
+    return project;
+  }
 
   protected void initConfigWatcher() {
     ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
@@ -174,17 +184,17 @@ public class ApplicationsRootNode
     }
   }
 
-    private void migrateOdo(ComponentDescriptor descriptor) {
-        doGetOdo().whenComplete((odo, err) -> {
-                if (odo != null) {
-                    odo.migrateComponent(descriptor.getName());
-                }
-            })
-            .thenRun(() ->
-                NotificationUtils.notifyInformation(
-                    "Component migration",
-                    "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
-    }
+  private void migrateOdo(ComponentDescriptor descriptor) {
+    doGetOdo().whenComplete((odo, err) -> {
+        if (odo != null) {
+          odo.migrateComponent(descriptor.getName());
+        }
+      })
+      .thenRun(() ->
+        NotificationUtils.notifyInformation(
+          "Component migration",
+          "The component " + descriptor.getName() + " has been migrated to odo 3.x"));
+  }
 
   private void addContext(Odo odo, VirtualFile modulePathFile) {
     if (odo == null) {
@@ -241,12 +251,12 @@ public class ApplicationsRootNode
     }
   }
 
-    public synchronized void refresh() {
-        resetOdo();
-        doGetOdo().whenComplete((odo, err) ->
-          structure.fireModified(ApplicationsRootNode.this)
-        );
-    }
+  public synchronized void refresh() {
+    resetOdo();
+    doGetOdo().whenComplete((odo, err) ->
+      structure.fireModified(ApplicationsRootNode.this)
+    );
+  }
 
   @Override
   public ApplicationsTreeStructure getStructure() {

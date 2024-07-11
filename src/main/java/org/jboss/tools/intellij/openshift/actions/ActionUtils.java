@@ -12,7 +12,6 @@ package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -32,6 +31,7 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
+import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 
 public class ActionUtils {
@@ -55,7 +55,7 @@ public class ActionUtils {
   }
 
   private static JTree getTree(AnActionEvent e) {
-    Component component = e.getData(PlatformDataKeys.CONTEXT_COMPONENT);
+    Component component = e.getData(CONTEXT_COMPONENT);
     if (!(component instanceof Tree)) {
       throw new IllegalArgumentException("invalid context: not a com.intellij.ui.treeStructure.Tree");
     }
@@ -89,8 +89,7 @@ public class ActionUtils {
 
   public static <T extends StructureTreeAction> T createAction(String id) {
     T action = (T) ActionManager.getInstance().getAction(id);
-    if (action instanceof TelemetrySenderAware) {
-      TelemetrySenderAware sender = (TelemetrySenderAware) action;
+    if (action instanceof TelemetrySenderAware sender) {
       sender.setTelemetrySender(new TelemetrySender(PREFIX_ACTION + sender.getTelemetryActionName()));
     }
     return action;

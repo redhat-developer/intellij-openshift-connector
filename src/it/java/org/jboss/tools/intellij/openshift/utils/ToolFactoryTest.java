@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.utils;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
 
@@ -30,6 +31,12 @@ public class ToolFactoryTest extends BasePlatformTestCase {
     Tool<Helm> tool = ToolFactory.getInstance().createHelm(getProject()).get();
     Helm helm = tool.get();
     assertNotNull(helm);
+  }
+
+  public void testGetOc() throws ExecutionException, InterruptedException {
+    Tool<Oc> tool = ToolFactory.getInstance().createOc(getProject()).get();
+    Oc oc = tool.get();
+    assertNotNull(oc);
   }
 
 }

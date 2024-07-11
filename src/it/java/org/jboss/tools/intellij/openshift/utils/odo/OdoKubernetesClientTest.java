@@ -27,7 +27,7 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.ProjectList;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectOperation;
-import org.jboss.tools.intellij.openshift.utils.odo.OdoCli.TelemetryReport;
+import org.jboss.tools.intellij.openshift.utils.Cli;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -245,7 +245,7 @@ public class OdoKubernetesClientTest {
       .when(authorization).getApiGroups();
     Odo odo = createOdo(kubernetesClient, openShiftClient);
     // when
-    boolean found = odo.isAuthorized();
+    odo.isAuthorized();
     // then
   }
 
@@ -259,7 +259,7 @@ public class OdoKubernetesClientTest {
     Supplier<KubernetesClient> kubernetesClientFactory = () -> kubernetesClient;
     Function<KubernetesClient, OpenShiftClient> openShiftClientFactory = client -> openShiftClient;
     Function<String, Map<String, String>> envVarFactory = url -> new HashMap<>();
-    TelemetryReport telemetryReport = mock(TelemetryReport.class);
+    Cli.TelemetryReport telemetryReport = mock(Cli.TelemetryReport.class);
     return new OdoCli(project, command, bus, kubernetesClientFactory, openShiftClientFactory, envVarFactory, telemetryReport);
   }
 
@@ -313,7 +313,7 @@ public class OdoKubernetesClientTest {
     var v1 = mock(V1AuthorizationAPIGroupDSL.class);
     doReturn(apiGroupList)
       .when(v1).getApiGroups();
-    var authorization =  mock(AuthorizationAPIGroupDSL.class);
+    var authorization = mock(AuthorizationAPIGroupDSL.class);
     doReturn(v1)
       .when(authorization).v1();
     doReturn(authorization)

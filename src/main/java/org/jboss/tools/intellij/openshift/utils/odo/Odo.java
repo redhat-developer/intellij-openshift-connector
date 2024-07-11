@@ -55,8 +55,6 @@ public interface Odo {
 
   void setProject(String project) throws IOException;
 
-  void login(String url, String userName, char[] password, char[] token) throws IOException;
-
   boolean isAuthorized();
 
   List<Service> getServices(String project) throws IOException;

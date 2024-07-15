@@ -271,8 +271,8 @@ In case of any queries, please use the [Feedback & Question](#feedback--question
 * `New Component` - Create locally a new Component.
 * `New Service` - Perform Service Catalog operations when it is enabled in the cluster. The created service can then be
   linked to a component.
-* `Delete` - Delete an existing Project/Namespace.
-* `Open Helm Charts` - Open a dialog to install a Helm Chart inside the current project/namespace.
+* `Delete Project`/`Delete Namespace` - Delete an existing Project/Namespace.
+* `Install Helm Charts` - Open a dialog to install a Helm Chart inside the current project/namespace.
 
 WARNING: Use the above delete action will perform the same delete action as in the cluster. That means all resources tied to that project/namespace will be also deleted (ie secrets, configMaps,...)  
 
@@ -322,7 +322,7 @@ WARNING: Use the above delete action will perform the same delete action as in t
 
 #### Actions available for a Helm Release in a project/namespace
 
-* `Uninstall` - Uninstall the Helm release from the project/namespace.
+* `Remove` - Uninstall the Helm release from the project/namespace.
 
 #### Icons Representation
 
@@ -348,8 +348,10 @@ WARNING: Use the above delete action will perform the same delete action as in t
 This extension uses the following CLI tool to interact with OpenShift cluster:
 
 * odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
+* oc - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+* helm - [helm](https://mirror.openshift.com/pub/openshift-v4/clients/helm/)
 
-> If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically.
+> If any of the above tool is located in a directory from `PATH` environment variable it will be used automatically. Warning, if the desired version is incompatible with the one found in PATH, the tooling will download automatically a compatible version. 
 > The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
 **NOTE:** This plugin is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!

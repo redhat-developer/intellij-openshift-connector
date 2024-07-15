@@ -27,6 +27,31 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 ## New features
 
+### More actions on Helm Charts
+
+We've added new actions on the Helm Chart node. 
+
+You can now refresh the list of repositories ( if you added a repo using the CLI, for ex.)
+![](images/1.10.0/helm-refresh.png)
+
+You can also add a new repository
+![](images/1.10.0/helm-add-dialog.png)
+
+You can edit an existing repository
+![](images/1.10.0/helm-edit.png)
+![](images/1.10.0/helm-edit-dialog.png)
+
+And you can remove a repository.
+
+### Edit Helm charts parameters in YAML style
+
+Now when you're installing a helm chart release, the additional parameters can be edited with a YAML editor with basic validation.
+![](images/1.10.0/helm-chart-install.png)
+![](images/1.10.0/helm-chart-install-validation.png)
+
+
+## Features
+
 ### Debug is now supported when component is running on Podman
 
 This new improvement enables you to debug your component when using Podman, similar to the debug on Cluster.
@@ -37,8 +62,6 @@ This new improvement enables you to debug your component when using Podman, simi
 Along with the usage of `namespace` labels when dealing with kubernetes cluster, we added several actions to create or
 change current project/namespace.
 ![](images/1.8.0/project_or_namespace.gif)
-
-## Features
 
 ### Install Helm Charts on the current cluster within the IDE
 

@@ -322,7 +322,7 @@ WARNING: Use the above delete action will perform the same delete action as in t
 
 #### Actions available for a Helm Release in a project/namespace
 
-* `Remove` - Uninstall the Helm release from the project/namespace.
+* `Uninstall` - Uninstall the Helm release from the project/namespace.
 
 #### Icons Representation
 

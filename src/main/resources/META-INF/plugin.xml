@@ -17,6 +17,12 @@
     ]]></description>
 
   <change-notes><![CDATA[
+  <p><b>1.10.0</b></p>
+  <ul>
+  <li>Added actions for adding/removing/editing helm repositories</li>
+  <li>Added a refresh action for helm repositories</li>
+  <li>Use a YAML editor when installing chart for additional parameters</li>
+  <li>Bug fixes</li>
   <p><b>1.9.0</b></p>
   <ul>
   <li>Support IDEA 2024.1</li>

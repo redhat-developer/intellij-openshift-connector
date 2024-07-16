@@ -69,7 +69,7 @@ public class CreateServiceAction extends OdoAction {
           sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
         } catch (IOException e) {
           clearProcessing(namespaceNode);
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Create Service"));
         }
       },

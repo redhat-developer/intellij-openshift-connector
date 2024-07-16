@@ -39,7 +39,7 @@ public class AboutAction extends OdoAction {
           odo.about();
           sendTelemetryResults(TelemetryResult.SUCCESS);
         } catch (IOException e) {
-          sendTelemetryError(e);
+          sendTelemetryError(e.getMessage());
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "About"));
         }
       },

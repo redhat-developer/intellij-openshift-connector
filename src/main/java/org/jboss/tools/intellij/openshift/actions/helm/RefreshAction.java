@@ -34,10 +34,10 @@ public class RefreshAction extends HelmAction {
     if (!(selected instanceof HelmRepositoriesNode)) {
       return;
     }
-    doActionPerformed((HelmRepositoriesNode) selected, helm, getEventProject(event));
+    doActionPerformed((HelmRepositoriesNode) selected, getEventProject(event));
   }
 
-  public void doActionPerformed(HelmRepositoriesNode helmRepositories, Helm helm, Project project) {
+  public void doActionPerformed(HelmRepositoriesNode helmRepositories, Project project) {
     if (helmRepositories == null) {
       return;
     }
@@ -52,7 +52,7 @@ public class RefreshAction extends HelmAction {
   }
 
   @Override
-  protected String getTelemetryActionName() {
+  public String getTelemetryActionName() {
     return PREFIX_ACTION + "refresh helm repositories";
   }
 }

@@ -43,11 +43,6 @@ public abstract class TelemetryAction extends StructureTreeAction implements Tel
     telemetrySender.sendTelemetryError(message);
   }
 
-  @Override
-  public void sendTelemetryError(Exception exception) {
-    telemetrySender.sendTelemetryError(exception);
-  }
-
   public void addProperty(String property, @NotNull String value) {
     if (telemetrySender != null) {
       telemetrySender.addProperty(property, value);

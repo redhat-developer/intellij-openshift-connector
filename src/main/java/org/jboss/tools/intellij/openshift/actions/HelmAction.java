@@ -11,10 +11,7 @@
 package org.jboss.tools.intellij.openshift.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetryHandler;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetrySender;
-import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -24,11 +21,9 @@ import javax.swing.tree.TreePath;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.PREFIX_ACTION;
 
-public abstract class HelmAction extends StructureTreeAction implements TelemetryHandler {
+public abstract class HelmAction extends TelemetryAction {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HelmAction.class);
-
-  protected final TelemetrySender telemetrySender = new TelemetrySender(PREFIX_ACTION + getTelemetryActionName());
 
   protected HelmAction(Class... filters) {
     super(filters);
@@ -36,6 +31,7 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
 
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+    setTelemetrySender(new TelemetrySender(PREFIX_ACTION + getTelemetryActionName()));
     Helm helm = getHelm(anActionEvent);
     if (helm == null) {
       return;
@@ -47,7 +43,7 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
     try {
       return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true);
     } catch (Exception e) {
-      LOGGER.warn("Could not get helm: " + e.getMessage(), e);
+      LOGGER.warn("Could not get helm: {}", e.getMessage(), e);
       return null;
     }
   }
@@ -56,19 +52,4 @@ public abstract class HelmAction extends StructureTreeAction implements Telemetr
     // noop implementation
   }
 
-  protected abstract String getTelemetryActionName();
-
-  public void sendTelemetryResults(TelemetryService.TelemetryResult result) {
-    telemetrySender.sendTelemetryResults(result);
-  }
-
-  @Override
-  public void sendTelemetryError(String message) {
-      telemetrySender.sendTelemetryError(message);
-  }
-
-  @Override
-  public void sendTelemetryError(Exception exception) {
-      telemetrySender.sendTelemetryError(exception);
-  }
 }

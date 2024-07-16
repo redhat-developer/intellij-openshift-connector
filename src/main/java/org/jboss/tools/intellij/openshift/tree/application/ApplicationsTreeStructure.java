@@ -15,6 +15,7 @@ import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.tree.LeafState;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
@@ -52,10 +53,11 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
   private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
   private final DevfileRegistriesNode registries;
 
-  public ApplicationsTreeStructure(Project project) {
+  public ApplicationsTreeStructure(Project project, Disposable parentDisposable) {
     this.project = project;
-    this.root = new ApplicationsRootNode(project, this);
+    this.root = new ApplicationsRootNode(project, this, parentDisposable);
     this.registries = new DevfileRegistriesNode(root);
+    Disposer.register(parentDisposable, this);
   }
 
   @Override
@@ -167,27 +169,27 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     return node;
   }
 
-    private Object[] createHelmRepositoriesChildren(HelmRepositoriesNode parent) {
-        Helm helm = root.getHelm(true);
-        if (helm == null) {
-            return new Object[] { new MessageNode<>(root, parent, "Could not list repositories: Helm binary missing.") };
-        }
-            try {
-                var repositories = helm.listRepos();
-                if (repositories == null) {
-                    return new Object[] { new MessageNode<>(root, parent, "Could not list repositories: no repositories defined.") };
-                }
-                return repositories.stream()
-                  .map(repository -> new HelmRepositoryNode(root, parent, repository))
-                  .toArray();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+  private Object[] createHelmRepositoriesChildren(HelmRepositoriesNode parent) {
+    Helm helm = root.getHelm(true);
+    if (helm == null) {
+      return new Object[]{new MessageNode<>(root, parent, "Could not list repositories: Helm binary missing.")};
     }
+    try {
+      var repositories = helm.listRepos();
+      if (repositories == null) {
+        return new Object[]{new MessageNode<>(root, parent, "Could not list repositories: no repositories defined.")};
+      }
+      return repositories.stream()
+        .map(repository -> new HelmRepositoryNode(root, parent, repository))
+        .toArray();
+    } catch (IOException e) {
+      LOGGER.error(e.getMessage(), e);
+      return new Object[]{new MessageNode<>(root, parent, "Could not list repositories: " + e.getMessage())};
+    }
+  }
 
   private MessageNode<?> createErrorNode(ParentableNode<?> parent, Exception e) {
-    if (e instanceof KubernetesClientException) {
-      KubernetesClientException kce = (KubernetesClientException) e;
+    if (e instanceof KubernetesClientException kce) {
       if (KubernetesClientExceptionUtils.isForbidden(kce)
         || KubernetesClientExceptionUtils.isUnauthorized(kce)) {
         return new MessageNode<>(root, parent, LOGIN);
@@ -226,17 +228,17 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
       "Could not get application services");
   }
 
-    private List<BaseNode<?>> getHelmReleases(NamespaceNode namespaceNode) {
-        Helm helm = namespaceNode.getRoot().getHelm(true);
-        if (helm == null) {
-            return List.of(new MessageNode<>(root, namespaceNode, "Could not get chart releases"));
-        }
-        return load(() -> helm.list().stream()
-                .map(release -> new ChartReleaseNode(namespaceNode, release))
-                .collect(Collectors.toList()),
-            namespaceNode,
-            "Could not get chart releases");
+  private List<BaseNode<?>> getHelmReleases(NamespaceNode namespaceNode) {
+    Helm helm = namespaceNode.getRoot().getHelm(true);
+    if (helm == null) {
+      return List.of(new MessageNode<>(root, namespaceNode, "Could not get chart releases"));
     }
+    return load(() -> helm.list().stream()
+        .map(release -> new ChartReleaseNode(namespaceNode, release))
+        .collect(Collectors.toList()),
+      namespaceNode,
+      "Could not get chart releases");
+  }
 
   private List<BaseNode<?>> load(Callable<List<BaseNode<?>>> callable, NamespaceNode namespace, String errorMessage) {
     try {

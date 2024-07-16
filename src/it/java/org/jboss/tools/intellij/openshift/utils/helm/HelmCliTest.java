@@ -14,6 +14,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
+import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
 
@@ -29,8 +30,9 @@ public abstract class HelmCliTest extends BasePlatformTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     Tool<OdoDelegate> odoTool = ToolFactory.getInstance().createOdo(getProject()).get();
+    Tool<Oc> ocTool = ToolFactory.getInstance().createOc(getProject()).get();
     Odo odo = odoTool.get();
-    OdoCluster.INSTANCE.login(odo);
+    OdoCluster.INSTANCE.login(ocTool.get());
     odo.createProject(projectName);
     Tool<Helm> helmTool = ToolFactory.getInstance().createHelm(getProject()).get();
     this.helm = helmTool.get();

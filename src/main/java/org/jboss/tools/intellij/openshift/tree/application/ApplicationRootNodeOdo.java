@@ -222,11 +222,6 @@ public class ApplicationRootNodeOdo implements OdoFacade {
   }
 
   @Override
-  public void login(String url, String userName, char[] password, char[] token) throws IOException {
-    delegate.login(url, userName, password, token);
-  }
-
-  @Override
   public boolean isAuthorized() {
     return delegate.isAuthorized();
   }

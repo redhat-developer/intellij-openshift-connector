@@ -27,6 +27,31 @@ The extension also supports OpenShift running on Azure, AWS, and any others supp
 
 ## New features
 
+### More actions on Helm Charts
+
+We've added new actions on the Helm Chart node. 
+
+You can now refresh the list of repositories ( if you added a repo using the CLI, for ex.)
+![](images/1.10.0/helm-refresh.png)
+
+You can also add a new repository
+![](images/1.10.0/helm-add-dialog.png)
+
+You can edit an existing repository
+![](images/1.10.0/helm-edit.png)
+![](images/1.10.0/helm-edit-dialog.png)
+
+And you can remove a repository.
+
+### Edit Helm charts parameters in YAML style
+
+Now when you're installing a helm chart release, the additional parameters can be edited with a YAML editor with basic validation.
+![](images/1.10.0/helm-chart-install.png)
+![](images/1.10.0/helm-chart-install-validation.png)
+
+
+## Features
+
 ### Debug is now supported when component is running on Podman
 
 This new improvement enables you to debug your component when using Podman, similar to the debug on Cluster.
@@ -37,8 +62,6 @@ This new improvement enables you to debug your component when using Podman, simi
 Along with the usage of `namespace` labels when dealing with kubernetes cluster, we added several actions to create or
 change current project/namespace.
 ![](images/1.8.0/project_or_namespace.gif)
-
-## Features
 
 ### Install Helm Charts on the current cluster within the IDE
 
@@ -248,8 +271,8 @@ In case of any queries, please use the [Feedback & Question](#feedback--question
 * `New Component` - Create locally a new Component.
 * `New Service` - Perform Service Catalog operations when it is enabled in the cluster. The created service can then be
   linked to a component.
-* `Delete` - Delete an existing Project/Namespace.
-* `Open Helm Charts` - Open a dialog to install a Helm Chart inside the current project/namespace.
+* `Delete Project`/`Delete Namespace` - Delete an existing Project/Namespace.
+* `Install Helm Charts` - Open a dialog to install a Helm Chart inside the current project/namespace.
 
 WARNING: Use the above delete action will perform the same delete action as in the cluster. That means all resources tied to that project/namespace will be also deleted (ie secrets, configMaps,...)  
 
@@ -325,8 +348,10 @@ WARNING: Use the above delete action will perform the same delete action as in t
 This extension uses the following CLI tool to interact with OpenShift cluster:
 
 * odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/)
+* oc - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+* helm - [helm](https://mirror.openshift.com/pub/openshift-v4/clients/helm/)
 
-> If `odo` tool is located in a directory from `PATH` environment variable it will be used automatically.
+> If any of the above tool is located in a directory from `PATH` environment variable it will be used automatically. Warning, if the desired version is incompatible with the one found in PATH, the tooling will download automatically a compatible version. 
 > The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see a notification for the missing tool.
 
 **NOTE:** This plugin is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!

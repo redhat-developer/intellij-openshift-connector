@@ -21,35 +21,26 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
-import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
-import com.redhat.devtools.intellij.common.ssl.IDEATrustManager;
-import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
-import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
-import io.fabric8.kubernetes.client.internal.SSLUtils;
 import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.utils.Cli;
 import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
 import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.jetbrains.annotations.NotNull;
@@ -57,23 +48,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -93,14 +74,8 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONFIG_NAMESPACE
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.IS_OPENSHIFT;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.KUBERNETES_VERSION;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.NAME_PREFIX_MISC;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPENSHIFT_VERSION;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
 
-public class OdoCli implements OdoDelegate {
+public class OdoCli extends Cli implements OdoDelegate {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
@@ -113,7 +88,6 @@ public class OdoCli implements OdoDelegate {
   private static final String SPEC_FIELD = "spec";
   private final com.intellij.openapi.project.Project project;
   private final String command;
-  private final KubernetesClient client;
   private final OpenShiftClient openshiftClient;
   private final Map<String, String> envVars;
   private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
@@ -125,10 +99,10 @@ public class OdoCli implements OdoDelegate {
     this(project,
       command,
       ApplicationManager.getApplication().getMessageBus(),
-      new KubernetesClientFactory(),
+      new Cli.KubernetesClientFactory(),
       new OpenShiftClientFactory(),
-      new EnvVarFactory(),
-      new TelemetryReport());
+      new Cli.EnvVarFactory(),
+      new Cli.TelemetryReport());
   }
 
   protected OdoCli(
@@ -138,14 +112,14 @@ public class OdoCli implements OdoDelegate {
     Supplier<KubernetesClient> kubernetesClientFactory,
     Function<KubernetesClient, OpenShiftClient> openshiftClientFactory,
     Function<String, Map<String, String>> envVarFactory,
-    TelemetryReport telemetryReport) {
+    Cli.TelemetryReport telemetryReport) {
+    super(kubernetesClientFactory);
     this.command = command;
     this.project = project;
     MessageBusConnection connection = bus.connect();
-    this.client = kubernetesClientFactory.get();
     this.openshiftClient = openshiftClientFactory.apply(client);
     this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
-    telemetryReport.addOdoTelemetryVars(envVars);
+    telemetryReport.addTelemetryVars(envVars);
     connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
       telemetryReport.onTelemetryConfigurationChanged(this.envVars));
     telemetryReport.report(client);
@@ -591,15 +565,6 @@ public class OdoCli implements OdoDelegate {
   }
 
   @Override
-  public void login(String url, String userName, char[] password, char[] token) throws IOException {
-    if (userName != null && !userName.isEmpty()) {
-      execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), "--insecure-skip-tls-verify");
-    } else {
-      execute(command, envVars, "login", url, "-t", String.valueOf(token), "--insecure-skip-tls-verify");
-    }
-  }
-
-  @Override
   public boolean isAuthorized() {
     try {
       client.authorization().v1().getApiGroups();
@@ -797,27 +762,6 @@ public class OdoCli implements OdoDelegate {
     return false;
   }
 
-  private static final class KubernetesClientFactory implements Supplier<KubernetesClient> {
-
-    @Override
-    public KubernetesClient get() {
-      String current = ConfigHelper.getCurrentContextName();
-      Config config = Config.autoConfigure(current);
-      return new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
-    }
-
-    private void setSslContext(HttpClient.Builder builder, Config config) {
-      try {
-        X509TrustManager externalTrustManager = new IDEATrustManager().configure(List.of(Arrays.stream(SSLUtils.trustManagers(config))
-          .filter(X509ExtendedTrustManager.class::isInstance)
-          .map(X509ExtendedTrustManager.class::cast).toArray(X509ExtendedTrustManager[]::new)));
-        builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
-      } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
-               UnrecoverableKeyException | InvalidKeySpecException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
 
   private static final class OpenShiftClientFactory implements Function<KubernetesClient, OpenShiftClient> {
     @Override
@@ -840,50 +784,4 @@ public class OdoCli implements OdoDelegate {
     }
   }
 
-  protected static final class TelemetryReport {
-
-    public void report(KubernetesClient client) {
-      TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
-      try {
-        ClusterInfo info = ClusterHelper.getClusterInfo(client);
-        telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
-        telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
-        telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
-        asyncSend(telemetry);
-      } catch (RuntimeException e) {
-        // do not send telemetry when there is no context ( ie default kube URL as master URL )
-        asyncSend(telemetry.error(e));
-      }
-    }
-
-    @NotNull
-    private TelemetryConfiguration.ConfigurationChangedListener onTelemetryConfigurationChanged(Map<String, String> envVars) {
-      return (String key, String value) -> {
-        if (TelemetryConfiguration.KEY_MODE.equals(key)) {
-          addOdoTelemetryVars(envVars);
-        }
-      };
-    }
-
-    private void addOdoTelemetryVars(Map<String, String> envVars) {
-      if (TelemetryConfiguration.getInstance().isEnabled()) {
-        envVars.put("ODO_TRACKING_CONSENT", "yes");
-        envVars.put("TELEMETRY_CALLER", "intellij");
-      } else {
-        envVars.put("ODO_TRACKING_CONSENT", "no");
-      }
-    }
-  }
-
-  protected static final class EnvVarFactory implements Function<String, Map<String, String>> {
-
-    @Override
-    public Map<String, String> apply(String url) {
-      try {
-        return NetworkUtils.buildEnvironmentVariables(url);
-      } catch (URISyntaxException e) {
-        return Collections.emptyMap();
-      }
-    }
-  }
 }

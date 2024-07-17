@@ -1,4 +1,4 @@
-name: Integration UI Tests
+name: Cluster Integration UI Tests
 on:
   workflow_run:
     workflows: [ "Java CI with Gradle" ]
@@ -38,19 +38,26 @@ jobs:
           done
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Play integration UI tests
+      - name: Play cluster integration UI tests
         env:
           GPG_PASSPHRASE: ${{ secrets.IDEA_KEY_PASSPHRASE }}
+          CLUSTER_ALREADY_LOGGED_IN: 'true'
         run: |
           echo -n "$GPG_PASSPHRASE" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
-          ./gradlew integrationUITest --continue --no-daemon
+          ./gradlew clusterIntegrationUITest --continue --no-daemon --info
       - name: Publish tests reports
         uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
-          check_name: Integration UI Tests Report
+          check_name: Cluster Integration UI Tests Report
+      - name: Publish screenshots as artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: ./build/screenshots

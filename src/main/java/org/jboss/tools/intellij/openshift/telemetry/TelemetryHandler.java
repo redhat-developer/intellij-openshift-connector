@@ -14,8 +14,8 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public interface TelemetryHandler {
 
-    void sendTelemetryResults(TelemetryResult result);
-    void sendTelemetryError(String message);
-    void sendTelemetryError(Exception exception);
+  void sendTelemetryResults(TelemetryResult result);
+
+  void sendTelemetryError(String message);
 
 }

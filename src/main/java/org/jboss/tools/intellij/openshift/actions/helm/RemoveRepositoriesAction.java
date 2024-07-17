@@ -52,9 +52,7 @@ public class RemoveRepositoriesAction extends HelmAction {
       return;
     }
 
-    runWithProgress((ProgressIndicator progress) -> {
-        removeRepositories(repositories, helm);
-      },
+    runWithProgress((ProgressIndicator progress) -> removeRepositories(repositories, helm),
       "Remove Helm Repositories...",
       project);
   }

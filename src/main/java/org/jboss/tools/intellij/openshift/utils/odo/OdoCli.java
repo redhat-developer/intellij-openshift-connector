@@ -64,8 +64,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
+import static io.fabric8.openshift.client.OpenShiftClient.BASE_API_GROUP;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_CONFIG_NAMESPACE;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
@@ -153,8 +153,7 @@ public class OdoCli extends Cli implements OdoDelegate {
   public List<String> getNamespaces() throws IOException {
     try {
       return getNamespacesOrProjects().stream()
-        .map(resource -> resource.getMetadata().getName())
-        .collect(Collectors.toList());
+        .map(resource -> resource.getMetadata().getName()).toList();
     } catch (KubernetesClientException e) {
       throw new IOException(e);
     }
@@ -356,9 +355,10 @@ public class OdoCli extends Cli implements OdoDelegate {
 
   private void getTargetCRD(GenericKubernetesResource resource,
                             List<GenericKubernetesResource> bindableKinds) {
-    if (resource.getAdditionalPropertiesNode() != null &&
-      resource.getAdditionalPropertiesNode().has("status")) {
-      for (JsonNode status : resource.getAdditionalPropertiesNode().get("status")) {
+    JsonNode additionalPropertiesNode = client.getKubernetesSerialization().convertValue(resource.getAdditionalProperties(), JsonNode.class);
+    if (additionalPropertiesNode != null &&
+      additionalPropertiesNode.has("status")) {
+      for (JsonNode status : additionalPropertiesNode.get("status")) {
         if (status.has("group") && status.has("kind") && status.has("version")) {
           GenericKubernetesResource bindableKind = new GenericKubernetesResource();
           bindableKind.setApiVersion(status.get("group").asText() + '/' + status.get("version").asText());
@@ -744,8 +744,7 @@ public class OdoCli extends Cli implements OdoDelegate {
   @Override
   public List<DevfileComponentType> getComponentTypesFromRegistry(String name) throws IOException {
     return getAllComponentTypes().stream().
-      filter(type -> name.equals(type.getDevfileRegistry().getName())).
-      collect(Collectors.toList());
+      filter(type -> name.equals(type.getDevfileRegistry().getName())).toList();
   }
 
   private boolean checkPodmanPresence() {
@@ -768,7 +767,7 @@ public class OdoCli extends Cli implements OdoDelegate {
     public OpenShiftClient apply(KubernetesClient client) {
       OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
       try {
-        if (osClient.isSupported()) {
+        if (osClient.hasApiGroup(BASE_API_GROUP, false)) {
           return osClient;
         } else {
           return null;

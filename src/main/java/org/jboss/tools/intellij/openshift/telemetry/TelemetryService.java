@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.telemetry;
 
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.extensions.DefaultPluginDescriptor;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
@@ -49,10 +50,14 @@ public class TelemetryService {
 
   private static TelemetryService instance;
 
-  private final Lazy<TelemetryMessageBuilder> builder = new Lazy<>(() -> new TelemetryMessageBuilder(PluginManager.getPluginByClass(this.getClass())));
+  private Lazy<TelemetryMessageBuilder> builder = null;
 
   private TelemetryService() {
-    // prevent instantiation
+    if (!ApplicationManager.getApplication().isUnitTestMode()) {
+      builder = new Lazy<>(() -> new TelemetryMessageBuilder(PluginManager.getPluginByClass(this.getClass())));
+    } else {
+      builder = new Lazy<>(() -> new TelemetryMessageBuilder(new DefaultPluginDescriptor("")));
+    }
   }
 
   public static TelemetryService instance() {

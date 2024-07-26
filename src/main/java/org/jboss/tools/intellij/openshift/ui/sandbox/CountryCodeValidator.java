@@ -17,27 +17,24 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class CountryCodeValidator implements Supplier<ValidationInfo> {
-    private final JTextComponent component;
+  private final JTextComponent component;
 
-    /*
-     * see https://github.com/codeready-toolchain/registration-service/blob/master/pkg/assets/landingpage.js
-     */
-    private static final Pattern pattern = Pattern
-            .compile("^[+]?\\d+$");
+  private static final Pattern pattern = Pattern
+    .compile("^[+]?\\d{1,3}$");
 
-    public CountryCodeValidator(JTextComponent component) {
-        this.component = component;
+  public CountryCodeValidator(JTextComponent component) {
+    this.component = component;
+  }
+
+  @Override
+  public ValidationInfo get() {
+    String text = component.getText();
+    if (text.isEmpty()) {
+      return new ValidationInfo("Please provide a country code", component);
     }
-
-    @Override
-    public ValidationInfo get() {
-        String text = component.getText();
-        if (text.isEmpty()) {
-            return new ValidationInfo("Please provide a country code", component);
-        }
-        if (pattern.matcher(text).matches()) {
-            return null;
-        }
-        return new ValidationInfo("Country code must be a number", component);
+    if (pattern.matcher(text).matches()) {
+      return null;
     }
+    return new ValidationInfo("Country code must be a number", component);
+  }
 }

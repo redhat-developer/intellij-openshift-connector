@@ -26,7 +26,7 @@ public class TelemetrySender implements TelemetryHandler {
   private static final Pattern CLUSTER_URL_PATTERN = Pattern.compile("http(.*)/apis", Pattern.CASE_INSENSITIVE);
   public static final String ANONYMOUS_CLUSTER_URL = "<CLUSTER_URL>";
 
-  private static final Pattern TOKEN_PATTERN = Pattern.compile("token-(.*):([\\d]+)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern TOKEN_PATTERN = Pattern.compile("token-(.*):(\\d+)", Pattern.CASE_INSENSITIVE);
   public static final String ANONYMOUS_TOKEN = "<TOKEN>";
 
   private final TelemetryMessageBuilder.ActionMessage telemetry;

@@ -17,27 +17,27 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class PhoneNumberValidator implements Supplier<ValidationInfo> {
-    private final JTextComponent component;
+  private final JTextComponent component;
 
-    /*
-     * see https://github.com/codeready-toolchain/registration-service/blob/master/pkg/assets/landingpage.js
-     */
-    private static final Pattern pattern = Pattern
-            .compile("^[(]?[0-9]+[)]?[-\\s\\.]?[0-9]+[-\\s\\.\\/0-9]*$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern pattern = Pattern
+    .compile("^[(]?\\d{2,3}[)]?[ \\-./]?\\d{2,3}[ \\-./]?\\d{2,4}[ \\-./]?\\d{0,4}[ \\-./]?\\d{0,4}$", Pattern.CASE_INSENSITIVE);
 
-    public PhoneNumberValidator(JTextComponent component) {
-        this.component = component;
+  public PhoneNumberValidator(JTextComponent component) {
+    this.component = component;
+  }
+
+  @Override
+  public ValidationInfo get() {
+    String text = component.getText();
+    if (text.isEmpty()) {
+      return new ValidationInfo("Please provide a phone number", component);
     }
-
-    @Override
-    public ValidationInfo get() {
-        String text = component.getText();
-        if (text.isEmpty()) {
-            return new ValidationInfo("Please provide a phone number", component);
-        }
-        if (pattern.matcher(text).matches()) {
-            return null;
-        }
-        return new ValidationInfo("Phone number should be digits optionally separated by - or ' '", component);
+    if (pattern.matcher(text).matches()) {
+      if (text.chars().allMatch(Character::isDigit) && text.length() < 7) {
+        return new ValidationInfo("Phone number should be at least 7 digits", component);
+      }
+      return null;
     }
+    return new ValidationInfo("Phone number should be digits optionally separated by space or '-' or '.' or '/'", component);
+  }
 }

@@ -10,31 +10,25 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.ui.cluster;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 /**
  * Helper class to handle Openshift token authentication response
- *
  */
 public class TokenExtractor {
-	/**
-	 * Regular expression used to check if browser page is page that displays the OAuth token
-	 */
-	public static final Pattern TOKEN_PAGE_PATTERN = Pattern
-			.compile(".*<h2>Your API token is<\\/h2>.*<code>(.*)<\\/code>.*", Pattern.DOTALL);
 
-	private final Matcher matcher;
+  private final Document doc;
 
-	public TokenExtractor(String content) {
-		matcher = TOKEN_PAGE_PATTERN.matcher(content);
-	}
+  public TokenExtractor(String content) {
+    doc = Jsoup.parse(content);
+  }
 
-	public boolean isTokenPage() {
-		return matcher.matches();
-	}
+  public boolean isTokenPage() {
+    return doc.select("h2").text().contains("Your API token is");
+  }
 
-	public String getToken() {
-		return matcher.group(1);
-	}
+  public String getToken() {
+    return doc.select("h2").next().select("code").text();
+  }
 }

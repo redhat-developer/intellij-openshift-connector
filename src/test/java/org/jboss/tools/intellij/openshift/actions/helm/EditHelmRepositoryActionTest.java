@@ -15,18 +15,18 @@ import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
 import org.jetbrains.annotations.NotNull;
 
-public class AddHelmRepositoryActionTest extends ActionTest {
-  public AddHelmRepositoryActionTest(boolean isOpenshift) {
+public class EditHelmRepositoryActionTest extends ActionTest {
+  public EditHelmRepositoryActionTest(boolean isOpenshift) {
     super(isOpenshift);
   }
 
   @Override
   public AnAction getAction() {
-    return new AddHelmRepoAction();
+    return new EditHelmRepoAction();
   }
 
   @Override
-  protected void verifyHelmRepositories(@NotNull Presentation presentation) {
+  protected void verifyHelmRepository(@NotNull Presentation presentation) {
     assertTrue(presentation.isVisible());
   }
 }

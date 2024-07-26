@@ -30,7 +30,7 @@ import static org.awaitility.Awaitility.with;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
-  protected static final String COMPONENT_PATH = "src/it/projects/go";
+  private static final String COMPONENT_PATH = "src/it/projects/go";
   private final ComponentFeature feature;
   private String project;
   private String component;
@@ -45,26 +45,31 @@ public class OdoCliComponentTest extends OdoCliTest {
   public static Iterable<Object[]> data() {
     return Arrays.asList(new Object[][]{
       {ComponentFeature.DEV, ComponentFeature.DEV.getLabel()},
-      {ComponentFeature.DEV_ON_PODMAN, ComponentFeature.DEV_ON_PODMAN.getLabel()}
+      {ComponentFeature.DEV_ON_PODMAN, ComponentFeature.DEV_ON_PODMAN.getLabel()},
     });
   }
 
   @Before
-  public void initTestEnv() {
+  public void initTestEnv() throws IOException {
     project = PROJECT_PREFIX + random.nextInt();
     component = COMPONENT_PREFIX + random.nextInt();
     service = SERVICE_PREFIX + random.nextInt();
+    odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
   }
 
   @After
   public void cleanUp() throws IOException {
-    if (odo.isStarted(COMPONENT_PATH, feature)) {
-      odo.stop(COMPONENT_PATH, component, feature);
+    if (!odo.discover(projectPath).isEmpty()) {
+      odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
+    }
+    if (odo.isStarted(component, feature)) {
+      odo.stop(projectPath, component, feature);
     }
     if (project.equals(odo.getCurrentNamespace())) {
       odo.deleteProject(project);
     }
     cleanLocalProjectDirectory(projectPath);
+    odo.deleteDevfileRegistry(REGISTRY_NAME);
   }
 
   protected void startComponent(String component, ComponentFeature feature) throws IOException {
@@ -82,16 +87,20 @@ public class OdoCliComponentTest extends OdoCliTest {
     descriptors = odo.discover(projectPath);
     assertNotNull(descriptors);
     assertEquals(1, descriptors.size());
+    //cleanup
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
   public void checkCreateAndDiscoverComponent() throws IOException, ExecutionException, InterruptedException {
     createComponent(project, component, projectPath);
-    List<ComponentDescriptor> components = odo.discover(COMPONENT_PATH);
+    List<ComponentDescriptor> components = odo.discover(projectPath);
     assertNotNull(components);
     assertEquals(1, components.size());
     assertEquals(projectPath, components.get(0).getPath());
     assertEquals(component, components.get(0).getName());
+    //cleanup
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -111,6 +120,7 @@ public class OdoCliComponentTest extends OdoCliTest {
     createComponent(project, component, projectPath);
     ServiceTemplate serviceTemplate = getServiceTemplate();
     OperatorCRD crd = getOperatorCRD(serviceTemplate);
+    assertNotNull(crd);
     odo.createService(project, serviceTemplate, crd, service, null, true);
     List<Service> deployedServices = odo.getServices(project);
     assertNotNull(deployedServices);
@@ -118,24 +128,39 @@ public class OdoCliComponentTest extends OdoCliTest {
     Service deployedService = deployedServices.get(0);
     assertNotNull(deployedService);
     String target = deployedService.getName() + '/' + deployedService.getKind() + "." + deployedService.getApiVersion();
-    Binding binding = odo.link(COMPONENT_PATH, target);
+    Binding binding = odo.link(projectPath, target);
     assertNotNull(binding);
+    List<Binding> bindings = odo.listBindings(projectPath);
+    assertEquals(1, bindings.size());
+    //cleanup
+    odo.deleteBinding(projectPath, binding.getName());
+    bindings = odo.listBindings(projectPath);
+    assertEquals(0, bindings.size());
+    odo.deleteService(project, deployedService);
+    deployedServices = odo.getServices(project);
+    assertEquals(0, deployedServices.size());
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
   public void checkCreateComponentAndListURLs() throws IOException, ExecutionException, InterruptedException {
     createComponent(project, component, projectPath);
-    List<URL> urls = odo.listURLs(COMPONENT_PATH);
+    List<URL> urls = odo.listURLs(projectPath);
     assertEquals(0, urls.size());
     startComponent(component, feature);
-    urls = odo.listURLs(COMPONENT_PATH);
+    urls = odo.listURLs(projectPath);
     assertEquals(1, urls.size());
+    //cleanup
+    odo.stop(projectPath, component, feature);
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
   public void checkCreateComponentAndDebug() throws IOException, ExecutionException, InterruptedException {
     createComponent(project, component, projectPath);
-    startComponent(component, feature);
+    DebugComponentFeature debugComponentFeature = new DebugComponentFeature(feature);
+    startComponent(component, debugComponentFeature);
+    assertTrue(odo.isStarted(component, debugComponentFeature));
     int debugPort;
     try (ServerSocket serverSocket = new ServerSocket(0)) {
       debugPort = serverSocket.getLocalPort();
@@ -143,12 +168,24 @@ public class OdoCliComponentTest extends OdoCliTest {
     ExecHelper.submit(() -> {
       try {
         odo.debug(projectPath, debugPort);
-        assertTrue(odo.isStarted(component, feature));
       } catch (IOException e) {
         fail("Should not raise Exception");
       }
     });
+    List<Component> components = odo.getComponents(project);
+    assertNotNull(components);
+    assertEquals(1, components.size());
+    Component comp = components.get(0);
+    assertNotNull(comp);
+    ComponentFeatures features = comp.getLiveFeatures();
+    assertNotNull(features);
+    assertFalse(features.isEmpty());
+    assertEquals(1, features.size());
+    // assertTrue(features.isDebug());  odo issue, see #redhat-developer/odo/issues/7197
+    assertTrue(features.isDev());
+    //cleanup
     odo.stop(projectPath, component, feature);
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -157,12 +194,34 @@ public class OdoCliComponentTest extends OdoCliTest {
     List<ComponentDescriptor> descriptors = odo.discover(projectPath);
     assertNotNull(descriptors);
     assertEquals(1, descriptors.size());
+    //cleanup
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
   public void checkCreateComponentAndStartDev() throws IOException, ExecutionException, InterruptedException {
     createComponent(project, component, projectPath);
     startComponent(component, feature);
-    with().pollDelay(10, TimeUnit.SECONDS).await().atMost(10, TimeUnit.MINUTES).until(() -> odo.isStarted(component, feature));
+    assertTrue(odo.isStarted(component, feature));
+    ComponentInfo info = odo.getComponentInfo(project, component, projectPath, ComponentKind.DEVFILE);
+    assertNotNull(info.getSupportedFeatures());
+    assertEquals(2, info.getSupportedFeatures().size());
+    List<ComponentFeature.Mode> supportedFeatures = info.getSupportedFeatures();
+    assertTrue(supportedFeatures.contains(ComponentFeature.Mode.DEV_MODE));
+    assertTrue(supportedFeatures.contains(ComponentFeature.Mode.DEBUG_MODE));
+    List<Component> components = odo.getComponents(project);
+    assertNotNull(components);
+    assertEquals(1, components.size());
+    Component comp = components.get(0);
+    assertNotNull(comp);
+    ComponentFeatures features = comp.getLiveFeatures();
+    assertNotNull(features);
+    assertFalse(features.isEmpty());
+    assertEquals(1, features.size());
+    assertTrue(features.isDev());
+    //cleanup
+    odo.stop(projectPath, component, feature);
+    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
+
 }

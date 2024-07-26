@@ -81,9 +81,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
     when(applicationsRootNode.isLogged()).thenReturn(isLogged);
     when(applicationsRootNode.getRoot()).thenReturn(applicationsRootNode);
     when(applicationsRootNode.getOdo()).thenReturn(odoFuture);
-    ApplicationRootNodeOdo odo = mock(ApplicationRootNodeOdo.class);
-    when(odo.getNamespaceKind()).thenReturn(isOpenshift ? "Project" : "Namespace");
-    when(odoFuture.getNow(null)).thenReturn(odo);
     return applicationsRootNode;
   }
 
@@ -92,6 +89,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
     ApplicationRootNodeOdo odo = mock(ApplicationRootNodeOdo.class);
     when(odo.isOpenShift()).thenReturn(isOpenshift);
     CompletableFuture<ApplicationRootNodeOdo> odoFuture = mock(CompletableFuture.class);
+    when(odo.getNamespaceKind()).thenReturn(isOpenshift ? "Project" : "Namespace");
     when(odoFuture.getNow(any())).thenReturn(odo);
     return odoFuture;
   }
@@ -117,7 +115,6 @@ public abstract class ActionTest extends BasePlatformTestCase {
       when(structure.getApplicationsRoot()).thenReturn(applicationRootNode);
       when(node.getRoot()).thenReturn(applicationRootNode);
     }
-
     when(event.getPresentation()).thenReturn(presentation);
     return event;
   }
@@ -300,7 +297,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
     AnActionEvent event = createEvent(helmRepositoriesNode);
     AnAction action = getAction();
     action.update(event);
-    verifyHelmRepositories(event.getPresentation().isVisible());
+    verifyHelmRepositories(event.getPresentation());
   }
 
   @Test
@@ -309,7 +306,7 @@ public abstract class ActionTest extends BasePlatformTestCase {
     AnActionEvent event = createEvent(helmRepositoryNode);
     AnAction action = getAction();
     action.update(event);
-    verifyHelmRepository(event.getPresentation().isVisible());
+    verifyHelmRepository(event.getPresentation());
   }
 
   /**
@@ -388,11 +385,11 @@ public abstract class ActionTest extends BasePlatformTestCase {
     defaultAssertions(presentation);
   }
 
-  protected void verifyHelmRepositories(boolean visible) {
-    assertFalse(visible);
+  protected void verifyHelmRepositories(@NotNull Presentation presentation) {
+    defaultAssertions(presentation);
   }
 
-  protected void verifyHelmRepository(boolean visible) {
-    assertFalse(visible);
+  protected void verifyHelmRepository(@NotNull Presentation presentation) {
+    defaultAssertions(presentation);
   }
 }

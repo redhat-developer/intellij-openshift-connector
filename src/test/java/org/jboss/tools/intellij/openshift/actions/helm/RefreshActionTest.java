@@ -11,7 +11,9 @@
 package org.jboss.tools.intellij.openshift.actions.helm;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Presentation;
 import org.jboss.tools.intellij.openshift.actions.ActionTest;
+import org.jetbrains.annotations.NotNull;
 
 public class RefreshActionTest extends ActionTest {
   public RefreshActionTest(boolean isOpenshift) {
@@ -24,7 +26,7 @@ public class RefreshActionTest extends ActionTest {
   }
 
   @Override
-  protected void verifyHelmRepositories(boolean visible) {
-    assertTrue(visible);
+  protected void verifyHelmRepositories(@NotNull Presentation presentation) {
+    assertTrue(presentation.isVisible());
   }
 }

@@ -71,14 +71,11 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
       }
     });
     odo = getOdo().get();
-    if (odo.listDevfileRegistries().stream().noneMatch(c -> c.getName().equals(REGISTRY_NAME)))
-      odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
   }
 
   @Override
   protected void tearDown() throws Exception {
     MessagesHelper.setTestDialog(previousTestDialog);
-    odo.deleteDevfileRegistry(REGISTRY_NAME);
     super.tearDown();
   }
 
@@ -110,9 +107,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   }
 
   protected OperatorCRD getOperatorCRD(ServiceTemplate serviceTemplate) {
-    OperatorCRD crd = serviceTemplate.getCRDs().stream().filter(c -> c.getName().equals(SERVICE_CRD)).findFirst().orElse(null);
-    assertNotNull(crd);
-    return crd;
+    return serviceTemplate.getCRDs().stream().filter(c -> c.getName().equals(SERVICE_CRD)).findFirst().orElse(null);
   }
 
   protected ServiceTemplate getServiceTemplate() throws IOException {

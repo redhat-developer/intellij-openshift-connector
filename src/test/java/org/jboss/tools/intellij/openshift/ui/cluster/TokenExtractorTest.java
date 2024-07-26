@@ -21,7 +21,7 @@ public class TokenExtractorTest {
 
   @Test
   public void checkTokenExtractionOk() {
-    String contents = "<html><head></head><body><h2>Your API token is</h2>\n  <code>sha256~abcd-1234567890ABCDEF</code>\n</body></html>";
+    String contents = "<html><head></head><body><h2>Your API token is</h2>\n  <code>sha256~abcd-1234567890ABCDEF</code>\n</body></html>"; //# notsecret
     TokenExtractor extractor = new TokenExtractor(contents);
     assertTrue(extractor.isTokenPage());
     assertEquals("sha256~abcd-1234567890ABCDEF", extractor.getToken());
@@ -44,7 +44,7 @@ public class TokenExtractorTest {
 
   @Test
   public void checkTokenExtractionWithMultipleH2() {
-    String contents = "<html><head></head><body><h2>Your API token is</h2>\n  <code>sha256~abcd-1234567890ABCDEF</code>\n<h2>Log in with this token</h2>\n<pre>oc login <span class=\"nowrap\">--token=sha256~abcd-1234567890ABCDEF</span> <span class=\"nowrap\">--server=https://url.com:1234</span></pre></body></html>";
+    String contents = "<html><head></head><body><h2>Your API token is</h2>\n  <code>sha256~abcd-1234567890ABCDEF</code>\n<h2>Log in with this token</h2>\n<pre>oc login <span class=\"nowrap\">--token=sha256~abcd-1234567890ABCDEF</span> <span class=\"nowrap\">--server=https://url.com:1234</span></pre></body></html>"; //# notsecret
     TokenExtractor extractor = new TokenExtractor(contents);
     assertTrue(extractor.isTokenPage());
     assertEquals("sha256~abcd-1234567890ABCDEF", extractor.getToken());

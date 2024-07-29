@@ -26,33 +26,33 @@ public class OCCommandUtilsTest {
   @Test
   public void testCommandWithToken() {
     assertEquals("123456789123456789",
-      OCCommandUtils.getToken("oc login https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.getToken("oc login https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertEquals("123456789123456789",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=123456789123456789   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=123456789123456789   "));  //# notsecret
     assertEquals("1234567891234567..89",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567..89   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567..89   ")); //# notsecret
     assertEquals("12345678912345678_9",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=12345678912345678_9   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=12345678912345678_9   ")); //# notsecret
     assertEquals("1234567891234567.89",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567.89   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567.89   ")); //# notsecret
     assertEquals("1234567891234567-89",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567-89   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567-89   ")); //# notsecret
   }
 
   @Test
   public void testCommandWithTokenOCP4() {
     assertEquals("sha256~123456789123456789",
-      OCCommandUtils.getToken("oc login https://api.engint.openshift.com --token=sha256~123456789123456789"));
+      OCCommandUtils.getToken("oc login https://api.engint.openshift.com --token=sha256~123456789123456789")); //# notsecret
     assertEquals("sha256~123456789123456789",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~123456789123456789   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~123456789123456789   ")); //# notsecret
     assertEquals("sha256~1234567891234567..89",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567..89   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567..89   ")); //# notsecret
     assertEquals("sha256~12345678912345678_9",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~12345678912345678_9   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~12345678912345678_9   ")); //# notsecret
     assertEquals("sha256~1234567891234567.89",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567.89   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567.89   ")); //# notsecret
     assertEquals("sha256~1234567891234567-89",
-      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567-89   "));
+      OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567-89   ")); //# notsecret
   }
 
   @Test
@@ -68,24 +68,24 @@ public class OCCommandUtilsTest {
   @Test
   public void testValidCommand() {
     assertFalse(
-      OCCommandUtils.isValidCommand("oc loginhttps://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.isValidCommand("oc loginhttps://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertTrue(
-      OCCommandUtils.isValidCommand("oc login https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.isValidCommand("oc login https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertTrue(OCCommandUtils.isValidCommand("oc login https://12.34.5.6:8443 -u developer -p deve"));
   }
 
   @Test
   public void testServerAddress() {
     assertEquals("https://api.engint.openshift.com",
-      OCCommandUtils.getServer("oc login https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.getServer("oc login https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertEquals("https://api.engint.openshift.com",
-      OCCommandUtils.getServer("oc login -s=https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.getServer("oc login -s=https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertEquals("https://api.engint.openshift.com",
-      OCCommandUtils.getServer("oc login -s https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.getServer("oc login -s https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertEquals("https://api.engint.openshift.com",
-      OCCommandUtils.getServer("oc login --server=https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.getServer("oc login --server=https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
     assertEquals("https://api.engint.openshift.com",
-      OCCommandUtils.getServer("oc login --server https://api.engint.openshift.com --token=123456789123456789"));
+      OCCommandUtils.getServer("oc login --server https://api.engint.openshift.com --token=123456789123456789")); //# notsecret
   }
 
   @Test

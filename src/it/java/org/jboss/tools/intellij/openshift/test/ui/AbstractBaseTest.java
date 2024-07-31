@@ -64,7 +64,7 @@ public abstract class AbstractBaseTest {
             flatWelcomeFrame.disableNotifications();
             flatWelcomeFrame.preventTipDialogFromOpening();
 
-            CreateCloseUtils.createNewProject(robot, "test-project", CreateCloseUtils.NewProjectType.PLAIN_JAVA);
+            CreateCloseUtils.createEmptyProject(robot, "test-project");
             ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
             ProjectUtility.closeGotItPopup(robot);
 

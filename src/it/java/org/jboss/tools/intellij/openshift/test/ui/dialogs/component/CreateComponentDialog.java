@@ -15,6 +15,7 @@ import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
+import org.assertj.swing.fixture.JComboBoxFixture;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
@@ -88,6 +89,18 @@ public class CreateComponentDialog extends CommonContainerFixture {
         if (!itemFound) {
             throw new RuntimeException("Component type not found: " + type);
         }
+    }
+
+    /**
+     * Selects a project starter from the combo box.
+     * @param starterName the name of the project starter to select
+     */
+    public void selectProjectStarter(String starterName) {
+        ComboBoxFixture comboBox = find(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']"));
+        comboBox.click();
+
+        // Select the item from the combo box
+        comboBox.selectItem(starterName);
     }
 
     public void setStartDevMode(boolean start) {

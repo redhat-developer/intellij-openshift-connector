@@ -14,6 +14,7 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
+import org.jboss.tools.intellij.openshift.test.ui.common.TerminalPanelFixture;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.jayway.jsonpath.internal.path.PathCompiler.fail;
@@ -53,17 +55,15 @@ public class AboutPublicTest extends AbstractBaseTest {
     public static void selectAboutAndGetClipboardContent() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
-        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,120,10);
-
-
+        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 120, 10);
         view.menuRightClickAndSelect(robot, 0, LabelConstants.ABOUT);
-        waitForComponentByXpath(robot, 120, 10, byXpath(JB_TERMINAL_PANEL));
 
+        TerminalPanelFixture terminalPanel = robot.find(TerminalPanelFixture.class, Duration.ofSeconds(10));
         sleep(2000);
 
         try {
-            aboutTerminalRightClickSelect(robot, byXpath(SELECT_ALL));
-            aboutTerminalRightClickSelect(robot, byXpath(COPY));
+            terminalPanel.rightClickSelect(robot, byXpath(SELECT_ALL));
+            terminalPanel.rightClickSelect(robot, byXpath(COPY));
         } catch (Exception e) {
             LOGGER.error("An error occurred while selecting and copying text from the terminal: {}", e.getMessage());
             fail("Test failed due to an error while selecting and copying text from the terminal");
@@ -94,15 +94,6 @@ public class AboutPublicTest extends AbstractBaseTest {
             LOGGER.error("Clipboard is empty or the content type is not supported.");
             fail("Clipboard is empty or the content type is not supported.");
         }
-    }
-
-    static public void aboutTerminalRightClickSelect(RemoteRobot robot, Locator xpath) {
-        Point linkPosition = new Point(20, 20);
-        ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath(JB_TERMINAL_PANEL));
-        terminalPanel.rightClick(linkPosition);
-        waitForComponentByXpath(robot, 20, 1, xpath);
-        robot.find(ComponentFixture.class, xpath)
-                .click();
     }
 
 }

@@ -13,7 +13,7 @@ import org.junit.platform.suite.api.Suite;
         LoginClusterTest.class,
         AboutClusterTest.class,
         ProjectClusterTest.class,
-        CreateComponentTest.class,
+        ComponentNodeTest.class,
         CreateServiceTest.class
 })
 @IncludeClassNamePatterns({"^.*Test$"})

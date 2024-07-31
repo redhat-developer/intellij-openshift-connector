@@ -37,6 +37,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
         LOGGER.info("createNewProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
+        openshiftView.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,30,5);
 
         String newProjectLabel = findLabel(openshiftView, LabelConstants.NEW_PROJECT, LabelConstants.NEW_NAMESPACE, 0);
         openshiftView.menuRightClickAndSelect(robot, 0, newProjectLabel);

@@ -186,7 +186,7 @@ dependencies {
             'org.awaitility:awaitility:4.2.1',
             'org.mock-server:mockserver-client-java:5.15.0',
             'org.mock-server:mockserver-netty:5.15.0',
-            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.4.0',
+            'com.redhat.devtools.intellij:intellij-common-ui-test-library:0.4.1',
             'org.junit.jupiter:junit-jupiter-engine:5.10.3',
             'org.junit.jupiter:junit-jupiter-api:5.10.3',
             'org.junit.jupiter:junit-jupiter:5.10.3',

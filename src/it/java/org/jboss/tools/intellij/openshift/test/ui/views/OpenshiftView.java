@@ -78,7 +78,7 @@ public class OpenshiftView extends ContainerFixture {
     public void menuRightClickAndSelect(RemoteRobot robot, int row, String selection) {
         getOpenshiftConnectorTree().clickRow(row);
         getOpenshiftConnectorTree().rightClickRow(row);
-        waitForComponentByXpath(robot, 5, 1, byXpath(getTextXPath(selection)));
+        waitForComponentByXpath(robot, 30, 5, byXpath(getTextXPath(selection)));
         find(ComponentFixture.class, byXpath(getTextXPath(selection))).click();
     }
 

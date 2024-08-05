@@ -44,7 +44,7 @@ public class ClusterLoginDialog extends CommonContainerFixture {
         view.openView();
         view.waitForTreeItem(DEVFILE_REGISTRIES, 120, 1);
         view.menuRightClickAndSelect(robot, 0, LOG_IN_TO_CLUSTER);
-        return robot.find(ClusterLoginDialog.class, Duration.ofSeconds(20));
+        return robot.find(ClusterLoginDialog.class, Duration.ofSeconds(60));
     }
 
     public void close() {

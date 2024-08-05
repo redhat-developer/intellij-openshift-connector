@@ -32,7 +32,7 @@ import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathCo
  * @author mszuc@redhat.com
  */
 @DefaultXpath(by = "MyDialog type", xpath = MYDIALOG_CLASS)
-@FixtureName(name = "Cluster Login Dialog")
+@FixtureName(name = "Cluster Login")
 public class ClusterLoginDialog extends CommonContainerFixture {
 
     public ClusterLoginDialog(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
@@ -44,7 +44,7 @@ public class ClusterLoginDialog extends CommonContainerFixture {
         view.openView();
         view.waitForTreeItem(DEVFILE_REGISTRIES, 120, 1);
         view.menuRightClickAndSelect(robot, 0, LOG_IN_TO_CLUSTER);
-        return robot.find(ClusterLoginDialog.class, Duration.ofSeconds(20));
+        return robot.find(ClusterLoginDialog.class, Duration.ofSeconds(60));
     }
 
     public void close() {

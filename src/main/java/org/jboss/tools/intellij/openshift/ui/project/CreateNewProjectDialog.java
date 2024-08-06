@@ -85,7 +85,7 @@ public class CreateNewProjectDialog extends BaseDialog {
   private class ActiveProjectValidator implements Supplier<ValidationInfo> {
 
     private final Pattern nameRegex = Pattern.compile(
-      "^[a-z0-9]+(?:-[a-z0-9]+){0,64}$");
+      "^[a-z0-9]([-a-z0-9]*[a-z0-9]){0,64}$");
 
     @Override
     public ValidationInfo get() {
@@ -101,13 +101,11 @@ public class CreateNewProjectDialog extends BaseDialog {
       if (StringUtil.isEmptyOrSpaces(newProject)) {
         validation = new ValidationInfo("Provide name", newProjectTextField).asWarning();
       } else if (newProject.length() > 63) {
-        validation = new ValidationInfo("Mustn't have > 63 characters", newProjectTextField).asWarning();
-      } else if (newProject.chars().allMatch(Character::isDigit)) {
-        validation = new ValidationInfo("Mustn't contain only numeric characters", newProjectTextField).asWarning();
+        validation = new ValidationInfo("Must be no more than 63 characters", newProjectTextField).asWarning();
       } else if (allProjects.contains(newProject)) {
         validation = new ValidationInfo("Already exists, choose new name", newProjectTextField).asWarning();
       } else if (!nameRegex.matcher(newProject).matches()) {
-        validation = new ValidationInfo("Must be alphanumeric and may contain -", newProjectTextField);
+        validation = new ValidationInfo("Must consist of lower case alphanumeric characters or '-'", newProjectTextField);
       }
       return validation;
     }

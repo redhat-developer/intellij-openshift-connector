@@ -45,7 +45,7 @@ public class OdoCliComponentTest extends OdoCliTest {
   public static Iterable<Object[]> data() {
     return Arrays.asList(new Object[][]{
       {ComponentFeature.DEV, ComponentFeature.DEV.getLabel()},
-      {ComponentFeature.DEV_ON_PODMAN, ComponentFeature.DEV_ON_PODMAN.getLabel()},
+      {ComponentFeature.DEV_ON_PODMAN, ComponentFeature.DEV_ON_PODMAN.getLabel()}
     });
   }
 
@@ -59,11 +59,11 @@ public class OdoCliComponentTest extends OdoCliTest {
 
   @After
   public void cleanUp() throws IOException {
-    if (!odo.discover(projectPath).isEmpty()) {
-      odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
-    }
     if (odo.isStarted(component, feature)) {
       odo.stop(projectPath, component, feature);
+    }
+    if (!odo.discover(projectPath).isEmpty()) {
+      odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
     }
     if (project.equals(odo.getCurrentNamespace())) {
       odo.deleteProject(project);
@@ -87,8 +87,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     descriptors = odo.discover(projectPath);
     assertNotNull(descriptors);
     assertEquals(1, descriptors.size());
-    //cleanup
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -99,8 +97,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     assertEquals(1, components.size());
     assertEquals(projectPath, components.get(0).getPath());
     assertEquals(component, components.get(0).getName());
-    //cleanup
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -139,7 +135,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     odo.deleteService(project, deployedService);
     deployedServices = odo.getServices(project);
     assertEquals(0, deployedServices.size());
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -152,7 +147,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     assertEquals(1, urls.size());
     //cleanup
     odo.stop(projectPath, component, feature);
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -169,7 +163,7 @@ public class OdoCliComponentTest extends OdoCliTest {
       try {
         odo.debug(projectPath, debugPort);
       } catch (IOException e) {
-        fail("Should not raise Exception");
+        fail("Should not raise Exception: " + e.getMessage());
       }
     });
     List<Component> components = odo.getComponents(project);
@@ -185,7 +179,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     assertTrue(features.isDev());
     //cleanup
     odo.stop(projectPath, component, feature);
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -194,8 +187,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     List<ComponentDescriptor> descriptors = odo.discover(projectPath);
     assertNotNull(descriptors);
     assertEquals(1, descriptors.size());
-    //cleanup
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
   @Test
@@ -221,7 +212,6 @@ public class OdoCliComponentTest extends OdoCliTest {
     assertTrue(features.isDev());
     //cleanup
     odo.stop(projectPath, component, feature);
-    odo.deleteComponent(project, projectPath, component, ComponentKind.DEVFILE);
   }
 
 }

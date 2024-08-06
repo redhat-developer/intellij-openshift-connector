@@ -1,0 +1,47 @@
+[versions]
+# libraries
+junit = "4.13.2"
+openshift-client = "6.12.0"
+devtools-common = "1.9.7-SNAPSHOT"
+keycloak = "24.0.5"
+jsonwebtoken = "0.12.6"
+retrofit2 = "2.11.0"
+mockito = "5.12.0"
+easytesting = "1.4"
+mockserver = "5.15.0"
+junit-platform = "1.10.3"
+junit-jupiter = "5.10.3"
+devtools-common-ui-test = "0.4.3-SNAPSHOT"
+awaitility = "4.2.2"
+annotations = "24.0.0"
+
+# plugins
+gradleIntelliJPlugin = "2.0.1"
+testlogger = "4.0.0"
+sonarqube = "5.1.0.4882"
+
+[libraries]
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+openshift-client = { group = "io.fabric8", name = "openshift-client", version.ref = "openshift-client" }
+devtools-common = { group = "com.redhat.devtools.intellij", name = "intellij-common", version.ref = "devtools-common" }
+keycloak = { group = "org.keycloak", name = "keycloak-installed-adapter", version.ref = "keycloak" }
+jjwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jsonwebtoken" }
+jjwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jsonwebtoken" }
+converter-jackson = { group = "com.squareup.retrofit2", name = "converter-jackson", version.ref = "retrofit2" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+easytesting = { group = "org.easytesting", name = "fest-assert", version.ref = "easytesting" }
+mockserver-client = { group = "org.mock-server", name = "mockserver-client-java", version.ref = "mockserver" }
+mockserver-netty = { group = "org.mock-server", name = "mockserver-netty", version.ref = "mockserver" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit-platform" }
+junit-platform-suite = { group = "org.junit.platform", name = "junit-platform-suite", version.ref = "junit-platform" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+devtools-common-ui-test = { group = "com.redhat.devtools.intellij", name = "intellij-common-ui-test-library", version.ref = "devtools-common-ui-test" }
+awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awaitility" }
+annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+
+[plugins]
+gradleIntelliJPlugin = { id = "org.jetbrains.intellij.platform", version.ref = "gradleIntelliJPlugin" }
+testLogger = { id = "com.adarshr.test-logger", version.ref = "testlogger" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }

@@ -14,8 +14,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.text.StringUtil;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jboss.tools.intellij.openshift.actions.ActionUtils;
 import org.jboss.tools.intellij.openshift.actions.NodeUtils;
@@ -141,10 +141,10 @@ public class CreateComponentAction extends OdoAction {
   private void computeTelemetry(CreateComponentModel model) {
     addProperty(TelemetryService.PROP_COMPONENT_HAS_LOCAL_DEVFILE, String.valueOf(model.isProjectHasDevfile()));
     addProperty(TelemetryService.PROP_COMPONENT_PUSH_AFTER_CREATE, String.valueOf(model.isDevModeAfterCreate()));
-    if (!model.isProjectHasDevfile() && StringUtils.isNotBlank(model.getSelectedComponentType().getName())) {
+    if (!model.isProjectHasDevfile() && !StringUtil.isEmptyOrSpaces(model.getSelectedComponentType().getName())) {
       addProperty(TelemetryService.PROP_COMPONENT_KIND, "devfile:" + model.getSelectedComponentType().getName());
     }
-    if (StringUtils.isNotBlank(model.getSelectedComponentStarter())) {
+    if (!StringUtil.isEmptyOrSpaces(model.getSelectedComponentStarter())) {
       addProperty(TelemetryService.PROP_COMPONENT_SELECTED_STARTER, model.getSelectedComponentStarter());
     }
   }

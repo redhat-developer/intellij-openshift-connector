@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        IJ: [ IU-2022.3, IU-2023.1, IU-2023.2, IU-2023.3, IU-2024.1 ]
+        IJ: [ 2022.3, 2023.1, 2023.2, 2023.3, 2024.1, 2024.2 ]
 
     steps:
     - name: Checkout Code
@@ -23,12 +23,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build -PideaVersion=${{ matrix.IJ }}
+      run: ./gradlew build -PplatformVersion=${{ matrix.IJ }}
     - name: Verify with Gradle
-      run: ./gradlew runPluginVerifier -PideaVersion=${{ matrix.IJ }}
+      run: ./gradlew verifyPlugin -PplatformVersion=${{ matrix.IJ }}
     - name: Upload report
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: ${{ matrix.IJ }}-verifier-report
         path: build/reports/pluginVerifier
+        if-no-files-found: ignore

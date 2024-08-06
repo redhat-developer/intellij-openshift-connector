@@ -19,7 +19,6 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
@@ -42,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -142,7 +142,7 @@ public class ApplicationRootNodeOdo implements OdoFacade {
     if (!StringUtil.isEmptyOrSpaces(starter)) {
       File tmpdir = fileOperations.createTempDir("odotmp");
       delegate.createComponent(componentType, registryName, component, tmpdir.getAbsolutePath(), devfile, starter);
-      File directory = fileOperations.copyTo(tmpdir, source);
+      File directory = fileOperations.copyTo(tmpdir, Path.of(source));
       fileOperations.refresh(directory);
     } else {
       delegate.createComponent(componentType, registryName, component, source, devfile, starter);
@@ -357,11 +357,10 @@ public class ApplicationRootNodeOdo implements OdoFacade {
       return FileUtil.createTempDirectory(prefix, null);
     }
 
-    public File copyTo(File source, String destination) throws IOException {
-      File destinationDir = new File(destination);
-      FileUtils.copyDirectory(source, destinationDir);
-      org.apache.commons.io.FileUtils.deleteQuietly(source);
-      return destinationDir;
+    public File copyTo(File source, Path destination) throws IOException {
+      FileUtil.copyDir(source, destination.toFile());
+      FileUtil.delete(source);
+      return destination.toFile();
     }
 
 

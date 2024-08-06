@@ -57,4 +57,13 @@ public class ChangeProjectDialog extends CommonContainerFixture {
             return false;
         }
     }
+
+    private boolean isDropdownMenuOpened() {
+        try {
+            this.find(ComponentFixture.class, byXpath(XPathConstants.HEAVY_WEIGHT_WINDOW));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 }

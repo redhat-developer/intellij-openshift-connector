@@ -60,10 +60,6 @@ public class TelemetrySender implements TelemetryHandler {
     telemetry.property(property, value);
   }
 
-  public void error(Exception exception) {
-    telemetry.error(exception);
-  }
-
   public void error(String message) {
     // anonymize cluster address and token
     telemetry.error(anonymizeToken(anonymizeClusterUrl(message)));

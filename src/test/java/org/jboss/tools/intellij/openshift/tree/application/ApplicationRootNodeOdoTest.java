@@ -59,7 +59,7 @@ public class ApplicationRootNodeOdoTest {
   public void before() throws IOException {
     this.odo = mock(OdoDelegate.class);
     this.rootNode = mock(ApplicationsRootNode.class);
-    this.fileOperations = mockFileOperations(tempDir, destinationDir);
+    this.fileOperations = mockFileOperations();
     OdoProcessHelper processHelper = mock(OdoProcessHelper.class);
     this.rootNodeOdo = new ApplicationRootNodeOdo(odo, false, processHelper, rootNode, fileOperations);
   }
@@ -193,12 +193,12 @@ public class ApplicationRootNodeOdoTest {
       .when(rootNode).getLocalComponents();
   }
 
-  private ApplicationRootNodeOdo.FileOperations mockFileOperations(File tempDir, File destinationDir) throws IOException {
-    ApplicationRootNodeOdo.FileOperations fileOperations = mock(ApplicationRootNodeOdo.FileOperations.class);
+  private ApplicationRootNodeOdo.FileOperations mockFileOperations() throws IOException {
+    ApplicationRootNodeOdo.FileOperations newFileOperations = mock(ApplicationRootNodeOdo.FileOperations.class);
     doReturn(tempDir)
-      .when(fileOperations).createTempDir(any());
+      .when(newFileOperations).createTempDir(any());
     doReturn(destinationDir)
-      .when(fileOperations).copyTo(any(), any());
-    return fileOperations;
+      .when(newFileOperations).copyTo(any(), any());
+    return newFileOperations;
   }
 }

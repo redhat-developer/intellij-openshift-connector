@@ -33,6 +33,7 @@ jobs:
           sleep 10
           ./gradlew publicIntegrationUITest --continue --no-daemon
       - name: Publish tests reports
+        if: always()
         uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}

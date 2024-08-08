@@ -40,10 +40,9 @@ public class DevOnPodmanComponentAction extends FeatureComponentAction {
     super.update(e);
     if (e.getPresentation().isVisible()) {
       Object node = adjust(getSelected(getTree(e)));
-      if (!(node instanceof ComponentNode)) {
+      if (!(node instanceof ComponentNode componentNode)) {
         return;
       }
-      ComponentNode componentNode = (ComponentNode) node;
       e.getPresentation().setEnabled(componentNode.getComponent().getInfo().isLocalPodmanPresent());
     }
   }

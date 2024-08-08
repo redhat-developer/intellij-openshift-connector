@@ -53,6 +53,7 @@ public class OdoCliServiceTest extends OdoCliTest {
     createProject(project);
     ServiceTemplate serviceTemplate = getServiceTemplate();
     OperatorCRD crd = getOperatorCRD(serviceTemplate);
+    assertNotNull(crd);
     createService(project, serviceTemplate, crd, service, projectPath);
   }
 }

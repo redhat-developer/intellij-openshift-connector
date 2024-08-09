@@ -1,4 +1,5 @@
-.odo/env
-.odo/odo-file-index.json
+.odo/
 main
 main.exe
+devfile.yaml
+.odo

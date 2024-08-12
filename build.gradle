@@ -169,7 +169,7 @@ tasks.register('copyKey', Copy) {
 
 dependencies {
     implementation(
-            'io.fabric8:openshift-client:6.12.0',
+            'io.fabric8:openshift-client:6.13.2',
             'org.apache.commons:commons-compress:1.26.2',
             'org.apache.commons:commons-exec:1.4.0',
             'com.redhat.devtools.intellij:intellij-common:1.9.6-SNAPSHOT',

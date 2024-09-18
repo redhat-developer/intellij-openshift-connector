@@ -20,9 +20,7 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
@@ -38,16 +36,6 @@ import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
-import org.apache.commons.io.FileUtils;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
-import org.jboss.tools.intellij.openshift.utils.Cli;
-import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
-import org.jboss.tools.intellij.openshift.utils.Serialization;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -60,10 +48,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.apache.commons.io.FileUtils;
+import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.utils.Cli;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
+import org.jboss.tools.intellij.openshift.utils.Serialization;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.fabric8.openshift.client.OpenShiftClient.BASE_API_GROUP;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
@@ -93,7 +92,7 @@ public class OdoCli extends Cli implements OdoDelegate {
   private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
   private String currentNamespace;
   private JSonParser swagger;
-  private final boolean isPodmanPresent;
+  private CompletableFuture<Boolean> isPodmanPresent;
 
   public OdoCli(com.intellij.openapi.project.Project project, String command) {
     this(project,
@@ -116,14 +115,16 @@ public class OdoCli extends Cli implements OdoDelegate {
     super(kubernetesClientFactory);
     this.command = command;
     this.project = project;
-    MessageBusConnection connection = bus.connect();
     this.openshiftClient = openshiftClientFactory.apply(client);
     this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
+    this.isPodmanPresent = processPodmanPresent(command);
+    initTelemetry(bus, telemetryReport);
+  }
+
+  private void initTelemetry(MessageBus bus, TelemetryReport telemetryReport) {
     telemetryReport.addTelemetryVars(envVars);
-    connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
-      telemetryReport.onTelemetryConfigurationChanged(this.envVars));
+    telemetryReport.subscribe(bus, envVars);
     telemetryReport.report(client);
-    isPodmanPresent = checkPodmanPresence();
   }
 
 
@@ -418,7 +419,7 @@ public class OdoCli extends Cli implements OdoDelegate {
 
   private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
     JSonParser parser = new JSonParser(Serialization.json().readTree(json));
-    return parser.parseDescribeComponentInfo(kind, isPodmanPresent);
+    return parser.parseDescribeComponentInfo(kind, isPodmanPresent());
   }
 
   /*
@@ -747,20 +748,33 @@ public class OdoCli extends Cli implements OdoDelegate {
       filter(type -> name.equals(type.getDevfileRegistry().getName())).toList();
   }
 
-  private boolean checkPodmanPresence() {
-    CompletableFuture<ExecHelper.ExecResult> result = new CompletableFuture<>();
+  private boolean isPodmanPresent() {
     try {
-      result.complete(ExecHelper.executeWithResult(command, false, new File(HOME_FOLDER), envVars, "version"));
-      return !result.get().getStdOut().contains("unable to fetch the podman client version");
+      if (isPodmanPresent == null) {
+        this.isPodmanPresent = processPodmanPresent(command);
+      }
+      return isPodmanPresent.get(2, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       LOGGER.warn(e.getLocalizedMessage(), e);
-    } catch (ExecutionException | IOException e) {
+    } catch (ExecutionException | TimeoutException e) {
       LOGGER.warn(e.getLocalizedMessage(), e);
     }
     return false;
   }
 
+  private @NotNull CompletableFuture<Boolean> processPodmanPresent(String command) {
+    return CompletableFuture
+      .supplyAsync(() -> {
+        try {
+          ExecHelper.ExecResult result = ExecHelper.executeWithResult(command, false, new File(HOME_FOLDER), envVars, "version");
+          return result.getStdOut().contains("unable to fetch the podman client version");
+        } catch (IOException e) {
+          LOGGER.warn(e.getLocalizedMessage(), e);
+          return false;
+        }
+      }, runnable -> ApplicationManager.getApplication().executeOnPooledThread(runnable));
+  }
 
   private static final class OpenShiftClientFactory implements Function<KubernetesClient, OpenShiftClient> {
     @Override

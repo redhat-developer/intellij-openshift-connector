@@ -14,6 +14,7 @@ import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -24,6 +25,13 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.model.Config;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
@@ -38,16 +46,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 public class ApplicationsRootNode
-  implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable {
+  implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable, DumbAware {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationsRootNode.class);
   private final Project project;
@@ -102,7 +102,8 @@ public class ApplicationsRootNode
   public CompletableFuture<ApplicationRootNodeOdo> getOdo() {
     return doGetOdo()
       .whenComplete((ApplicationRootNodeOdo odo, Throwable err) -> {
-        if (odo.isDownloaded()) {
+        if (odo != null
+          && odo.isDownloaded()) {
           structure.fireModified(this);
         }
       });

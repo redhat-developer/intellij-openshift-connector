@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.util.messages.MessageBus;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.ssl.IDEATrustManager;
@@ -22,13 +24,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.internal.SSLUtils;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
@@ -42,12 +37,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.X509TrustManager;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.IS_OPENSHIFT;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.KUBERNETES_VERSION;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.NAME_PREFIX_MISC;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.OPENSHIFT_VERSION;
-import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.instance;
 
 public class Cli {
@@ -97,17 +97,27 @@ public class Cli {
   public static final class TelemetryReport {
 
     public void report(KubernetesClient client) {
-      TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
-      try {
-        ClusterInfo info = ClusterHelper.getClusterInfo(client);
-        telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
-        telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
-        telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
-        asyncSend(telemetry);
-      } catch (RuntimeException e) {
-        // do not send telemetry when there is no context ( ie default kube URL as master URL )
-        asyncSend(telemetry.error(e));
-      }
+      ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        TelemetryMessageBuilder.ActionMessage telemetry = instance().getBuilder().action(NAME_PREFIX_MISC + "login");
+        try {
+          ClusterInfo info = ClusterHelper.getClusterInfo(client);
+          telemetry
+            .property(KUBERNETES_VERSION, info.getKubernetesVersion())
+            .property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()))
+            .property(OPENSHIFT_VERSION, info.getOpenshiftVersion())
+            .send();
+        } catch (RuntimeException e) {
+          // do not send telemetry when there is no context ( ie default kube URL as master URL )
+          telemetry.error(e).send();
+        }
+      });
+    }
+
+    public void subscribe(MessageBus bus, Map<String, String> envVars) {
+      bus.connect().subscribe(
+        TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
+        onTelemetryConfigurationChanged(envVars)
+      );
     }
 
     @NotNull

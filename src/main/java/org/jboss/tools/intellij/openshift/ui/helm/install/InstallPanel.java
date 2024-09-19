@@ -133,20 +133,20 @@ public class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     add(chartNameLabel, "gapleft 4, growx, pushx");
 
     this.statusIcon = new StatusIcon();
-    add(statusIcon.get(), "pushx, growx");
+    add(statusIcon.get(), "pushx, growx, wrap");
 
-    this.installButton = new JButton("Install");
-    installButton.addActionListener(this::onInstall);
-    add(installButton, "spany 2, pushx, alignx right, aligny center, wrap");
-
-    add(new JBLabel("Release name:"), "");
+    add(new JBLabel("Release name:"), "skip");
     this.releaseNameText = new JBTextField();
     this.releaseNameValidator = new ComponentValidator(parentDisposable)
       .withValidator(new ReleaseNameValidator(releaseNameText))
       .installOn(releaseNameText)
       .andRegisterOnDocumentListener(releaseNameText);
     releaseNameText.addKeyListener(onKeyPressed(installButton));
-    add(releaseNameText, "spanx 2, pushx, growx, wrap");
+    add(releaseNameText, "spanx 2, pushx, growx");
+
+    this.installButton = new JButton("Install");
+    installButton.addActionListener(this::onInstall);
+    add(installButton, "pushx, alignx right, aligny center, wrap");
 
     add(new JBLabel("Active " + (odo.isOpenShift() ? "project:" : "namespace:")), "skip, pushx");
     this.currentProjectLabel = new JBLabel();
@@ -156,10 +156,10 @@ public class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
     add(new JBLabel("Version:"), "skip");
     this.versionsComboBox = new ComboBox<>(versionsComboBoxModel);
     versionsComboBox.addItemListener(onVersionSelected());
-    add(versionsComboBox, "spanx 2, width 100:100:100, gap 4 0 0 0, wrap");
+    add(versionsComboBox, "wmax 100, wrap");
 
     this.valuesOrResultPanel = new ValuesOrResultPanel(parentDisposable, project);
-    add(valuesOrResultPanel, "skip, spanx, push, grow, gap 0 0 0 4, height 400:600, wrap");
+    add(valuesOrResultPanel, "spanx, push, grow, gap 0 0 0 4, height 400:600, wrap");
 
     setChart(chart);
     valuesOrResultPanel.setValuesListener(onValuesChanged());

@@ -15,17 +15,29 @@ import java.util.List;
 
 public class OdoCliRegistryTest extends OdoCliTest {
 
-    public void testCheckCreateRegistry() throws IOException {
-        String registryName = REGISTRY_PREFIX + random.nextInt();
-        try {
-            odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
-        } finally {
-            odo.deleteDevfileRegistry(registryName);
-        }
-    }
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
+  }
 
-    public void testCheckListRegistries() throws IOException {
-        List<DevfileRegistry> registries = odo.listDevfileRegistries();
-        assertFalse(registries.isEmpty());
+  @Override
+  protected void tearDown() throws Exception {
+    odo.deleteDevfileRegistry(REGISTRY_NAME);
+    super.tearDown();
+  }
+
+  public void testCheckCreateRegistry() throws IOException {
+    String registryName = REGISTRY_PREFIX + random.nextInt();
+    try {
+      odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
+    } finally {
+      odo.deleteDevfileRegistry(registryName);
     }
+  }
+
+  public void testCheckListRegistries() throws IOException {
+    List<DevfileRegistry> registries = odo.listDevfileRegistries();
+    assertFalse(registries.isEmpty());
+  }
 }

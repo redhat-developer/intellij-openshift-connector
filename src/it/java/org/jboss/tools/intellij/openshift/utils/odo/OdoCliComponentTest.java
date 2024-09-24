@@ -35,13 +35,13 @@ import static org.awaitility.Awaitility.with;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
-  protected static final String PROJECT_NAME = "go";
-  protected static final String COMPONENT_PATH = "src/it/projects/";
+  private static final String PROJECT_NAME = "go";
+  private static final String COMPONENT_PATH = "src/it/projects/";
   private final ComponentFeature feature;
   private String project;
   private String component;
   private String service;
-  private final String projectPath = new File(COMPONENT_PATH+PROJECT_NAME).getAbsolutePath();
+  private final String projectPath = new File(COMPONENT_PATH + PROJECT_NAME).getAbsolutePath();
 
   public OdoCliComponentTest(ComponentFeature feature, String label) {
     this.feature = feature;

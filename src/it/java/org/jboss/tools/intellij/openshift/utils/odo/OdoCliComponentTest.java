@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import com.intellij.util.io.ZipUtil;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -20,6 +24,7 @@ import org.junit.runners.Parameterized;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -30,12 +35,13 @@ import static org.awaitility.Awaitility.with;
 
 @RunWith(Parameterized.class)
 public class OdoCliComponentTest extends OdoCliTest {
-  private static final String COMPONENT_PATH = "src/it/projects/go";
+  protected static final String PROJECT_NAME = "go";
+  protected static final String COMPONENT_PATH = "src/it/projects/";
   private final ComponentFeature feature;
   private String project;
   private String component;
   private String service;
-  private final String projectPath = new File(COMPONENT_PATH).getAbsolutePath();
+  private final String projectPath = new File(COMPONENT_PATH+PROJECT_NAME).getAbsolutePath();
 
   public OdoCliComponentTest(ComponentFeature feature, String label) {
     this.feature = feature;
@@ -47,6 +53,18 @@ public class OdoCliComponentTest extends OdoCliTest {
       {ComponentFeature.DEV, ComponentFeature.DEV.getLabel()},
       {ComponentFeature.DEV_ON_PODMAN, ComponentFeature.DEV_ON_PODMAN.getLabel()}
     });
+  }
+
+  @BeforeClass
+  public static void initTestProject() throws IOException {
+    Path destDir = new File(COMPONENT_PATH).toPath();
+    Path srcFile = new File(COMPONENT_PATH + PROJECT_NAME + ".zip").toPath();
+    ZipUtil.extract(srcFile, destDir, null);
+  }
+
+  @AfterClass
+  public static void deleteTestProject() throws IOException {
+    FileUtils.deleteDirectory(new File(COMPONENT_PATH));
   }
 
   @Before
@@ -127,13 +145,16 @@ public class OdoCliComponentTest extends OdoCliTest {
     Binding binding = odo.link(projectPath, target);
     assertNotNull(binding);
     List<Binding> bindings = odo.listBindings(projectPath);
+    assertNotNull(bindings);
     assertEquals(1, bindings.size());
-    //cleanup
+    // cleanup
     odo.deleteBinding(projectPath, binding.getName());
     bindings = odo.listBindings(projectPath);
+    assertNotNull(bindings);
     assertEquals(0, bindings.size());
     odo.deleteService(project, deployedService);
     deployedServices = odo.getServices(project);
+    assertNotNull(deployedServices);
     assertEquals(0, deployedServices.size());
   }
 

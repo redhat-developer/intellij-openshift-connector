@@ -12,9 +12,7 @@ package org.jboss.tools.intellij.openshift.utils.oc;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jboss.tools.intellij.openshift.utils.Cli;
 import org.jetbrains.annotations.NotNull;
@@ -49,11 +47,13 @@ public class OcCli extends Cli implements Oc {
     Cli.TelemetryReport telemetryReport) {
     super(kubernetesClientFactory);
     this.command = command;
-    MessageBusConnection connection = bus.connect();
     this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
+    initTelemetry(telemetryReport, bus);
+  }
+
+  private void initTelemetry(TelemetryReport telemetryReport, MessageBus bus) {
     telemetryReport.addTelemetryVars(envVars);
-    connection.subscribe(TelemetryConfiguration.ConfigurationChangedListener.CONFIGURATION_CHANGED,
-      telemetryReport.onTelemetryConfigurationChanged(this.envVars));
+    telemetryReport.subscribe(bus, envVars);
     telemetryReport.report(client);
   }
 

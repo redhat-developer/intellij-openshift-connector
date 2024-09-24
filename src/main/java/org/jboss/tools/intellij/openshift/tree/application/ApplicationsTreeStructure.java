@@ -163,7 +163,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         }
       }
     } catch (Exception e) {
-      node = createErrorNode(element, e);
+      node = createCurrentNamespaceErrorNode(element, e);
       element.setLogged(false);
     }
     return node;
@@ -188,7 +188,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
     }
   }
 
-  private MessageNode<?> createErrorNode(ParentableNode<?> parent, Exception e) {
+  private MessageNode<?> createCurrentNamespaceErrorNode(ParentableNode<?> parent, Exception e) {
     if (e instanceof KubernetesClientException kce) {
       if (KubernetesClientExceptionUtils.isForbidden(kce)
         || KubernetesClientExceptionUtils.isUnauthorized(kce)) {
@@ -203,7 +203,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
         return new MessageNode<>(root, parent, CLUSTER_UNREACHABLE);
       }
     }
-    return new MessageNode<>(root, parent, "Could not get namespaces: " + ExceptionUtils.getMessage(e));
+    return new MessageNode<>(root, parent, "Could not get current namespace: " + ExceptionUtils.getMessage(e));
   }
 
   private List<BaseNode<?>> getComponents(NamespaceNode namespaceNode, OdoFacade odo) {

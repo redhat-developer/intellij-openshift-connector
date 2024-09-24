@@ -24,6 +24,7 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.concurrency.Invoker;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.common.tree.TreeHelper;
 import com.redhat.devtools.intellij.common.utils.IDEAContentFactory;
@@ -45,7 +46,11 @@ public class WindowToolFactory implements ToolWindowFactory {
     panel.setLayout(new BorderLayout());
     Content content = contentFactory.createContent(panel, "", false);
     ApplicationsTreeStructure structure = new ApplicationsTreeStructure(project, content);
-    StructureTreeModel<ApplicationsTreeStructure> model = new StructureTreeModel<>(structure, content);
+    StructureTreeModel<ApplicationsTreeStructure> model = new StructureTreeModel<>(
+      structure,
+      null,
+      Invoker.forBackgroundPoolWithoutReadAction(content),
+      content);
     content.setDisposer(structure);
     new MutableModelSynchronizer<>(model, structure, structure);
     Tree tree = new Tree(new AsyncTreeModel(model, content));

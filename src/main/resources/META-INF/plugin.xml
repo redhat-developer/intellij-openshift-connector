@@ -299,8 +299,6 @@
       <action class="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.CreateProjectAction" text="New Project"/>
       <action class="org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction" id="org.jboss.tools.intellij.openshift.actions.project.ChangeActiveProjectAction" text="Change Project"/>
       <separator/>
-      <action class="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" id="org.jboss.tools.intellij.openshift.actions.cluster.OpenConsoleAction" text="Open Console Dashboard"/>
-      <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" id="org.jboss.tools.intellij.openshift.actions.cluster.RefreshAction" text="Refresh"/>
       <separator/>
       <action id="org.jboss.tools.intellij.openshift.actions.OpenGettingStartedAction"

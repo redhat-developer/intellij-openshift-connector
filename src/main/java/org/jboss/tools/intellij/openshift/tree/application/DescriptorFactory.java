@@ -13,8 +13,10 @@ package org.jboss.tools.intellij.openshift.tree.application;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.util.IconUtil;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
-import org.jboss.tools.intellij.openshift.ui.SwingUtils;
+import java.util.function.Supplier;
+import javax.swing.Icon;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartIcons;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
@@ -22,9 +24,6 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.URL;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.Icon;
-import java.util.function.Supplier;
 
 public class DescriptorFactory {
 
@@ -161,7 +160,7 @@ public class DescriptorFactory {
         releaseNode,
         releaseNode::getName,
         () -> "Helm Release",
-        () -> SwingUtils.scaleIcon(ICON_WIDTH, ChartIcons.getIcon(releaseNode.getRelease())),
+        () -> IconUtil.resizeSquared(ChartIcons.getIcon(releaseNode.getRelease()), ICON_WIDTH),
         parentDescriptor);
     } else if (element instanceof HelmRepositoriesNode) {
       HelmRepositoriesNode helmRepositoriesNode = (HelmRepositoriesNode) element;
@@ -170,7 +169,7 @@ public class DescriptorFactory {
         helmRepositoriesNode,
         helmRepositoriesNode::getName,
         () -> "Repositories",
-        () -> SwingUtils.scaleIcon(ICON_WIDTH, ChartIcons.getHelmIcon()),
+        () -> IconUtil.resizeSquared(ChartIcons.getHelmIcon(), ICON_WIDTH),
         parentDescriptor);
     } else if (element instanceof HelmRepositoryNode) {
       HelmRepositoryNode helmRepositoryNode = (HelmRepositoryNode) element;

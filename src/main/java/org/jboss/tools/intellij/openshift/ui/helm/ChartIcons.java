@@ -22,9 +22,10 @@ import java.util.stream.Stream;
 public class ChartIcons {
 
   private static final Path BASE_PATH = Paths.get("images", "helm");
-  private static final String HELM_ICON = "helm.png";
+  private static final String HELM_ICON = "helm.svg";
 
   public static Icon getHelmIcon() {
+    // IC-2023.3: IconManager.getInstance().getIcon(BASE_PATH.resolve(HELM_ICON_SVG).toString(), ChartIcons.class.getClassLoader())
     return IconManager.getInstance().getIcon(BASE_PATH.resolve(HELM_ICON).toString(), ChartIcons.class);
   }
 
@@ -41,8 +42,9 @@ public class ChartIcons {
       .filter((IconExpression available) -> available.isMatching(name))
       .findFirst();
     return found
+      // IC-2023.3: IconManager.getInstance().getIcon(BASE_PATH.resolve(HELM_ICON_SVG).toString(), ChartIcons.class.getClassLoader())
       .map(iconExpression -> IconManager.getInstance().getIcon(iconExpression.filename, ChartIcons.class))
-      .orElseGet(ChartIcons::getHelmIcon);
+       .orElseGet(ChartIcons::getHelmIcon);
   }
 
   private enum IconExpression {

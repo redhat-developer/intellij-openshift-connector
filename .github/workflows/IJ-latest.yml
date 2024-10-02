@@ -23,7 +23,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build --continue -PideaVersion=IU-LATEST-EAP-SNAPSHOT
+        run: ./gradlew build --continue -PplatformVersion=LATEST-EAP-SNAPSHOT
       - uses: actions/upload-artifact@v4
         if: always()
         with:

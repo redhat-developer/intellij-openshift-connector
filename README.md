@@ -19,11 +19,10 @@ A JetBrains IntelliJ plugin for interacting with Red Hat OpenShift and Kubernete
 
 To run the instance of OpenShift cluster locally, developers can use the following:
 
-* OpenShift 4.x - [CodeReadyContainers](https://console.redhat.com/openshift/create/local)
+* OpenShift 4.x - [Red Hat OpenShift Local](https://console.redhat.com/openshift/create/local)
 * Kubernetes 1.x - [minikube](https://minikube.sigs.k8s.io/docs/start/)
-* ~~OpenShift 3.x~~ - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/)
 
-The extension also supports OpenShift running on Azure, AWS, and any others supported environments.
+The extension also supports the [Red Hat Developer Sandbox](https://developers.redhat.com/developer-sandbox), OpenShift running on Azure, AWS, and any others supported environments.
 
 ## New features
 

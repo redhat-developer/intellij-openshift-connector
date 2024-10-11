@@ -166,9 +166,14 @@ public class ApplicationsRootNode
     }
   }
 
-  @Override
-  public void moduleAdded(@NotNull Project project, @NotNull Module module) {
-    addContext(getOdo().getNow(null), ProjectUtils.getModuleRoot(module));
+  public void modulesAdded(@NotNull Project project, @NotNull List<? extends Module> modules) {
+    Odo odo = getOdo().getNow(null);
+    if (odo == null) {
+      return;
+    }
+    modules.forEach(module ->
+      addContext(odo, ProjectUtils.getModuleRoot(module))
+    );
   }
 
   @Override

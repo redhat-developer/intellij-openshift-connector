@@ -18,6 +18,7 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.messages.MessageBus;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -36,12 +37,20 @@ import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
+import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.utils.Cli;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
+import org.jboss.tools.intellij.openshift.utils.Serialization;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -469,8 +478,8 @@ public class OdoCli extends Cli implements OdoDelegate {
         } catch (IOException e) {
           LOGGER.warn(e.getLocalizedMessage(), e);
         }
-        Files.delete(new File(dir, "devfile.yaml").toPath());
-        FileUtils.deleteQuietly(new File(dir, PLUGIN_FOLDER));
+        FileUtil.delete(new File(dir, "devfile.yaml").toPath());
+        FileUtil.delete(new File(dir, PLUGIN_FOLDER).toPath());
       } else {
         args.add("--namespace");
         args.add(project);

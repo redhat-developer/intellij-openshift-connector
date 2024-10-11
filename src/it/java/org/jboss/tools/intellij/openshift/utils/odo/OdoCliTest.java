@@ -11,9 +11,9 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.openapi.ui.TestDialog;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
-import org.apache.commons.io.FileUtils;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOdo;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.with;
+import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.mockito.Mockito.mock;
 
 
@@ -101,9 +102,9 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   }
 
   protected void cleanLocalProjectDirectory(String projectPath) throws IOException {
-    FileUtils.deleteDirectory(new File(projectPath, ".odo"));
-    FileUtils.deleteDirectory(new File(projectPath, "kubernetes"));
-    FileUtils.deleteQuietly(new File(projectPath + "/devfile.yaml"));
+    FileUtil.delete(new File(projectPath, PLUGIN_FOLDER).toPath());
+    FileUtil.delete(new File(projectPath, "kubernetes").toPath());
+    FileUtil.delete(new File(projectPath + "/devfile.yaml").toPath());
   }
 
   protected OperatorCRD getOperatorCRD(ServiceTemplate serviceTemplate) {
@@ -116,8 +117,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     return odo.getServiceTemplates().stream().filter(s -> s.getName().equals(SERVICE_TEMPLATE + "." + (odo.isOpenShift() ? SERVICE_OPENSHIFT_VERSION : SERVICE_KUBE_VERSION))).findFirst().orElse(null);
   }
 
-  protected void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD crd, String service, String projectPath) throws IOException {
-    cleanLocalProjectDirectory(projectPath);
+  protected void createService(String project, ServiceTemplate serviceTemplate, OperatorCRD crd, String service) throws IOException {
     odo.createService(project, serviceTemplate, crd, service, null, false);
   }
 }

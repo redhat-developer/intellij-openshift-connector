@@ -19,6 +19,12 @@ public class OdoCliServiceTest extends OdoCliTest {
 
   private final String projectPath = new File("src/it/projects/springboot-rest").getAbsolutePath();
 
+  @Override
+  protected void tearDown() throws Exception {
+    cleanLocalProjectDirectory(projectPath);
+    super.tearDown();
+  }
+
   public void testCheckCreateService() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     String service = SERVICE_PREFIX + random.nextInt();
@@ -54,6 +60,6 @@ public class OdoCliServiceTest extends OdoCliTest {
     ServiceTemplate serviceTemplate = getServiceTemplate();
     OperatorCRD crd = getOperatorCRD(serviceTemplate);
     assertNotNull(crd);
-    createService(project, serviceTemplate, crd, service, projectPath);
+    createService(project, serviceTemplate, crd, service);
   }
 }

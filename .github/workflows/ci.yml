@@ -46,7 +46,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build --continue --no-daemon
+        run: ./gradlew build --continue
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -91,7 +91,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Play integration tests
-        run: ./gradlew integrationTest --continue --no-daemon
+        run: ./gradlew integrationTest --continue
       - uses: actions/upload-artifact@v4
         if: always()
         with:

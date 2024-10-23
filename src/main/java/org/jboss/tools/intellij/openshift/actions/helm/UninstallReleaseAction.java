@@ -14,20 +14,18 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.jboss.tools.intellij.openshift.actions.HelmAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.ChartReleaseNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProcessingNode;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.tree.TreePath;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
 import static org.jboss.tools.intellij.openshift.actions.NodeUtils.clearProcessing;
@@ -35,14 +33,14 @@ import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing
 
 public class UninstallReleaseAction extends HelmAction {
 
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent event, Object selected, @NotNull Helm helm) {
+    actionPerformedOnSelectedObjects(event, new Object[] { selected }, helm);
+  }
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected) {
-    Helm helm = getHelm(anActionEvent);
-    if (helm == null) {
-      return;
-    }
-    Project project = getEventProject(anActionEvent);
+  public void actionPerformedOnSelectedObjects(AnActionEvent event, Object[] selected, @NotNull Helm helm) {
+    Project project = getEventProject(event);
     List<ChartReleaseNode> releases = toChartReleaseNodes(selected);
     if (releases == null
       || releases.isEmpty()) {
@@ -80,7 +78,6 @@ public class UninstallReleaseAction extends HelmAction {
     }
 
     return Arrays.stream(selected)
-      .map(StructureTreeAction::getElement)
       .filter(ChartReleaseNode.class::isInstance)
       .map(ChartReleaseNode.class::cast)
       .collect(Collectors.toList());

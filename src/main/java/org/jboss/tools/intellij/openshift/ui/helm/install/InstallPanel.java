@@ -141,12 +141,12 @@ public class InstallPanel extends JBPanel<InstallPanel> implements ChartPanel {
       .withValidator(new ReleaseNameValidator(releaseNameText))
       .installOn(releaseNameText)
       .andRegisterOnDocumentListener(releaseNameText);
-    releaseNameText.addKeyListener(onKeyPressed(installButton));
     add(releaseNameText, "spanx 2, pushx, growx");
 
     this.installButton = new JButton("Install");
     installButton.addActionListener(this::onInstall);
     add(installButton, "pushx, alignx right, aligny center, wrap");
+    releaseNameText.addKeyListener(onKeyPressed(installButton));
 
     add(new JBLabel("Active " + (odo.isOpenShift() ? "project:" : "namespace:")), "skip, pushx");
     this.currentProjectLabel = new JBLabel();

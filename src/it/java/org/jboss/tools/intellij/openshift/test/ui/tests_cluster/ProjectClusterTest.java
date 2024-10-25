@@ -17,7 +17,11 @@ import org.jboss.tools.intellij.openshift.test.ui.dialogs.cluster_project.Create
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.cluster_project.DeleteProjectDialog;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +104,6 @@ public class ProjectClusterTest extends AbstractClusterTest {
     private void verifyProjectIsVisible(String projectName) {
         LOGGER.info("Verifying project creation for: " + projectName);
         OpenshiftView view = robot.find(OpenshiftView.class);
-        view.refreshTree(robot);
         sleep(3000);
         try{
             view.expandOpenshiftExceptDevfile();
@@ -114,7 +117,6 @@ public class ProjectClusterTest extends AbstractClusterTest {
     public static void verifyProjectHasItem(String projectName, String itemName) {
         LOGGER.info("Verifying project " + projectName + " has item: " + itemName);
         OpenshiftView view = robot.find(OpenshiftView.class);
-        view.refreshTree(robot);
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(2));
         ideStatusBar.waitUntilAllBgTasksFinish();
 
@@ -149,7 +151,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
     private static String findLabel(OpenshiftView openshiftView, String primaryLabel, String fallbackLabel, int row) {
         // Try to locate the primary label
         try {
-            if (openshiftView.hasMenuOption(robot, primaryLabel, row)) {
+            if (openshiftView.hasMenuOption(primaryLabel, row)) {
                 return primaryLabel;
             }
         } catch (Exception e) {

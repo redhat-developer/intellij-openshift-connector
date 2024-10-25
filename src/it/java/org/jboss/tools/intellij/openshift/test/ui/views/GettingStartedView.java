@@ -12,9 +12,13 @@ package org.jboss.tools.intellij.openshift.test.ui.views;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.fixtures.ContainerFixture;
+import com.intellij.remoterobot.fixtures.DefaultXpath;
+import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.utils.Keyboard;
-import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowRightToolbar;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -25,8 +29,11 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.GETTING_STARTED;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.GETTING_STARTED_BASELABEL;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.IDE_FRAME_IMPL;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.JEDITOR_PANE;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.TREE_CLASS;
 
 /**
  * @author Richard Kocian
@@ -43,18 +50,21 @@ public class GettingStartedView extends ContainerFixture {
 
     public void openView() {
         if (!isViewOpened()) {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.button(byXpath(getToolWindowButton(GETTING_STARTED)), Duration.ofSeconds(2)).click();
+            clickStripeButton();
             LOGGER.info("Getting Started view opened");
         }
     }
 
     public void closeView() {
         if (isViewOpened()) {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.button(byXpath(getToolWindowButton(GETTING_STARTED)), Duration.ofSeconds(2)).click();
+            clickStripeButton();
             LOGGER.info("Getting Started view closed");
         }
+    }
+
+    private void clickStripeButton() {
+        ToolWindowRightToolbar toolWindowRightToolbar = find(ToolWindowRightToolbar.class, Duration.ofSeconds(10));
+        toolWindowRightToolbar.clickStripeButton(GETTING_STARTED);
     }
 
     public void waitForTreeItem(String itemText, int duration, int interval) {
@@ -84,12 +94,12 @@ public class GettingStartedView extends ContainerFixture {
 
     private boolean isViewOpened() {
         try {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.find(ComponentFixture.class, byXpath(GETTING_STARTED_BASELABEL));
+            find(ComponentFixture.class, byXpath(GETTING_STARTED_BASELABEL), Duration.ofSeconds(5));
             LOGGER.info("Getting Started view: View is already opened");
             return true;
         } catch (Exception ignored) {
-        }
+            LOGGER.info("Getting Started view: View is not opened");
         return false;
     }
+}
 }

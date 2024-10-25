@@ -13,7 +13,6 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,14 +46,14 @@ public class HelmCliRepoTest extends HelmCliTest {
             helm.addRepo(name2, "https://charts.openshift.io/", null);
             List<String> helmRepositoryNames = helm.listRepos().stream()
               .map(HelmRepository::getName)
-              .collect(Collectors.toList());
+              .toList();
             assertThat(helmRepositoryNames).contains(name, name2);
             // when
             helm.removeRepos(name, name2);
             // then
             helmRepositoryNames = helm.listRepos().stream()
               .map(HelmRepository::getName)
-              .collect(Collectors.toList());
+              .toList();
             assertThat(helmRepositoryNames).doesNotContain(name, name2);
         } finally {
             silentlyRemoveRepos(name, name2);

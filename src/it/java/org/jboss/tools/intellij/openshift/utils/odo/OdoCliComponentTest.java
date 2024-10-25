@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import com.intellij.util.io.ZipUtil;
+import com.intellij.openapi.util.io.FileUtil;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -204,8 +205,9 @@ public class OdoCliComponentTest extends OdoCliTest {
 
   @Test
   public void checkCreateComponentStarter() throws IOException, ExecutionException, InterruptedException {
-    createComponent(project, component, "go-starter", projectPath);
-    List<ComponentDescriptor> descriptors = odo.discover(projectPath);
+    String starterPath = FileUtil.createTempDirectory("go-starter", "").getPath();
+    createComponent(project, component, "go-starter", starterPath);
+    List<ComponentDescriptor> descriptors = odo.discover(starterPath);
     assertNotNull(descriptors);
     assertEquals(1, descriptors.size());
   }

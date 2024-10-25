@@ -11,10 +11,8 @@
 package org.jboss.tools.intellij.openshift.test.ui;
 
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFrame;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
-import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import com.redhat.devtools.intellij.commonuitest.utils.project.CreateCloseUtils;
 import com.redhat.devtools.intellij.commonuitest.utils.screenshot.ScreenshotUtils;
 import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
@@ -36,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
-
 
 /**
  * @author Ondrej Dockal, odockal@redhat.com
@@ -108,20 +105,6 @@ public abstract class AbstractBaseTest {
 
             view.closeView();
         }
-    }
-
-    public RemoteRobot getRobotReference() {
-        return robot;
-    }
-
-    public boolean isStripeButtonAvailable(String label) {
-        try {
-            ToolWindowPane toolWindowPane = robot.find(ToolWindowPane.class);
-            toolWindowPane.stripeButton(label, false);
-        } catch (WaitForConditionTimeoutException e) {
-            return false;
-        }
-        return true;
     }
 
     protected static void sleep(long ms) {

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.intellij.openshift.test.ui.tests_cluster;
 
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
@@ -23,19 +33,20 @@ public class CreateComponentTest extends AbstractClusterTest {
     @Test
     @Order(1)
     public void openCloseCreateComponentDialogTest() {
+        LOGGER.info("openCloseCreateComponentDialogTest: Start");
         // Open the Create Component dialog
         CreateComponentDialog createComponentDialog = CreateComponentDialog.open(robot);
         assertNotNull(createComponentDialog);
 
         createComponentDialog.close();
-        assertThrowsExactly(WaitForConditionTimeoutException.class, () -> {
-            robot.find(CreateComponentDialog.class, Duration.ofSeconds(2));
-        });
+        assertThrowsExactly(WaitForConditionTimeoutException.class, () -> robot.find(CreateComponentDialog.class, Duration.ofSeconds(2)));
+        LOGGER.info("openCloseCreateComponentDialogTest: End");
     }
 
     @Test
     @Order(2)
     public void createGoRuntimeComponentTest() {
+        LOGGER.info("createGoRuntimeComponentTest: Start");
         String COMPONENT_NAME = "test-component";
 
         CreateComponentDialog createComponentDialog = CreateComponentDialog.open(robot);
@@ -48,5 +59,6 @@ public class CreateComponentTest extends AbstractClusterTest {
         robot.find(IdeStatusBar.class).waitUntilAllBgTasksFinish();
 
         ProjectClusterTest.verifyProjectHasItem("newtestproject", COMPONENT_NAME);
+        LOGGER.info("createGoRuntimeComponentTest: End");
     }
 }

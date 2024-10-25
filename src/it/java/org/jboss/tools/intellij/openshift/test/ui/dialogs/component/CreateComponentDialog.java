@@ -12,7 +12,13 @@ package org.jboss.tools.intellij.openshift.test.ui.dialogs.component;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.fixtures.CommonContainerFixture;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.fixtures.DefaultXpath;
+import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.JCheckboxFixture;
+import com.intellij.remoterobot.fixtures.JListFixture;
+import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
@@ -52,14 +58,6 @@ public class CreateComponentDialog extends CommonContainerFixture {
         JTextFieldFixture nameField = findAll(JTextFieldFixture.class, byXpath(XPathConstants.JTEXT_FIELD)).get(0);
         nameField.click();
         nameField.setText(name);
-    }
-
-    public void selectModule() {
-        find(ComponentFixture.class, byXpath("//div[@text='Select module']")).click();
-    }
-
-    public void selectFolder() {
-        find(ComponentFixture.class, byXpath("//div[@text='Select folder']")).click();
     }
 
     public void selectComponentType(String type, RemoteRobot remoteRobot) {
@@ -103,23 +101,8 @@ public class CreateComponentDialog extends CommonContainerFixture {
         }
     }
 
-    public void clickPrevious() {
-        find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_PREVIOUS)).click();
-    }
-
-    public void clickNext() {
-        find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_NEXT)).click();
-    }
-
     public void clickCreate() {
         find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_CREATE)).click();
     }
 
-    public void clickCancel() {
-        find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_CANCEL)).click();
-    }
-
-    public void clickHelp() {
-        find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_HELP)).click();
-    }
 }

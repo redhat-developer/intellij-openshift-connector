@@ -11,13 +11,18 @@
 package org.jboss.tools.intellij.openshift.test.ui.tests_public;
 
 import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.redhat.devtools.intellij.commonuitest.utils.constants.XPathDefinitions;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowLeftToolbar;
 import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +30,9 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.GETTING_STARTED;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.KUBERNETES;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.OPENSHIFT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -87,6 +93,7 @@ public class OpenshiftExtensionTest extends AbstractBaseTest {
                 "defaultNodeTest: End");
 
     }
+
     @Test
     @Order(4)
     public void openGettingStartedFromOpenshiftView() {
@@ -101,5 +108,15 @@ public class OpenshiftExtensionTest extends AbstractBaseTest {
 
         gettingStartedView.closeView();
         openshiftView.closeView();
+    }
+
+    private boolean isStripeButtonAvailable(String label) {
+        try {
+            ToolWindowLeftToolbar toolWindowLeftToolbar = robot.find(ToolWindowLeftToolbar.class, Duration.ofSeconds(10));
+            toolWindowLeftToolbar.stripeButton(OPENSHIFT);
+        } catch (WaitForConditionTimeoutException e) {
+            return false;
+        }
+        return true;
     }
 }

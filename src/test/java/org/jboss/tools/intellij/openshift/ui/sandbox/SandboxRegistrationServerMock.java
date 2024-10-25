@@ -24,7 +24,7 @@ public class SandboxRegistrationServerMock {
 
   private String currentSignupResponse;
 
-  private static final String initialSignupResponse = """
+  private static final String INITIAL_SIGNUP_RESPONSE = """
     {
                 "apiEndpoint": "https://api.crc.testing:6443",
                 "cheDashboardURL": "",
@@ -42,7 +42,7 @@ public class SandboxRegistrationServerMock {
                 "username": ""
             }""";
 
-  private static final String afterVerificationSignupResponse = """
+  private static final String AFTER_VERIFICATION_SIGNUP_RESPONSE = """
     {
                 "apiEndpoint": "https://api.crc.testing:6443",
                 "cheDashboardURL": "",
@@ -60,7 +60,7 @@ public class SandboxRegistrationServerMock {
                 "username": ""
             }""";
 
-  private static final String afterVerification1SignupResponse = """
+  private static final String AFTER_VERIFICATION1_SIGNUP_RESPONSE = """
     {
                 "apiEndpoint": "https://api.crc.testing:6443",
                 "cheDashboardURL": "",
@@ -78,7 +78,7 @@ public class SandboxRegistrationServerMock {
                 "username": ""
             }""";
 
-  private static final String afterVerification2SignupResponse = """
+  private static final String AFTER_VERIFICATION2_SIGNUP_RESPONSE = """
     {
                 "apiEndpoint": "https://api.crc.testing:6443",
                 "cheDashboardURL": "",
@@ -110,7 +110,7 @@ public class SandboxRegistrationServerMock {
           exchange.getResponseBody().close();
         }
       } else if (exchange.getRequestMethod().equals("POST")) {
-        currentSignupResponse = initialSignupResponse;
+        currentSignupResponse = INITIAL_SIGNUP_RESPONSE;
         exchange.sendResponseHeaders(200, 0);
         exchange.getResponseBody().close();
       }
@@ -121,11 +121,11 @@ public class SandboxRegistrationServerMock {
         exchange.sendResponseHeaders(204, 0);
         exchange.getResponseBody().close();
       } else if (exchange.getRequestMethod().equals("GET")) {
-        currentSignupResponse = afterVerificationSignupResponse;
+        currentSignupResponse = AFTER_VERIFICATION_SIGNUP_RESPONSE;
         SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
-          currentSignupResponse = afterVerification1SignupResponse;
+          currentSignupResponse = AFTER_VERIFICATION1_SIGNUP_RESPONSE;
           SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
-            currentSignupResponse = afterVerification2SignupResponse;
+            currentSignupResponse = AFTER_VERIFICATION2_SIGNUP_RESPONSE;
           }, 10, TimeUnit.SECONDS);
         }, 10, TimeUnit.SECONDS);
         exchange.sendResponseHeaders(200, 0);

@@ -63,15 +63,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.apache.commons.io.FileUtils;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
-import org.jboss.tools.intellij.openshift.utils.Cli;
-import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
-import org.jboss.tools.intellij.openshift.utils.Serialization;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static io.fabric8.openshift.client.OpenShiftClient.BASE_API_GROUP;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;

@@ -29,7 +29,7 @@ public class CreateServiceTest extends AbstractClusterTest {
 
     @Test
     @Order(1)
-    @Disabled
+    @Disabled("unstable")
     public void createServiceTest() {
         CreateNewServiceDialog createNewServiceDialog = CreateNewServiceDialog.open(robot);
         assertNotNull(createNewServiceDialog);

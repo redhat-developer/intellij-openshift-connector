@@ -22,8 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.redhat.devtools.intellij.commonuitest.utils.steps.SharedSteps.waitForComponentByXpath;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.DEVFILE_REGISTRIES;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.OK;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.OPEN_CONSOLE_DASHBOARD;
 
 /**
  * @author Martin Szuc

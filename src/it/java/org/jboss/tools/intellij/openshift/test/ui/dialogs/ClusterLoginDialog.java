@@ -12,9 +12,11 @@ package org.jboss.tools.intellij.openshift.test.ui.dialogs;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.*;
-import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
-import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
+import com.intellij.remoterobot.fixtures.CommonContainerFixture;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.fixtures.DefaultXpath;
+import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,8 +24,13 @@ import java.time.Duration;
 import java.util.List;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.CANCEL;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.DEVFILE_REGISTRIES;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.LOG_IN_TO_CLUSTER;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.BUTTON_PASTE_LOGIN_COMMAND;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.JPASSWORD_FIELD;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.JTEXT_FIELD;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.MYDIALOG_CLASS;
 
 
 /**
@@ -55,13 +62,6 @@ public class ClusterLoginDialog extends CommonContainerFixture {
         JTextFieldFixture urlField = findAll(JTextFieldFixture.class, byXpath(JTEXT_FIELD)).get(0);
         urlField.click();
         urlField.setText(clusterURL);
-    }
-
-    public void insertToken(String clusterToken) {
-        List<JTextFieldFixture> passwordFields = findAll(JTextFieldFixture.class, byXpath(JPASSWORD_FIELD));
-        JTextFieldFixture tokenField = passwordFields.get(0);
-        tokenField.click();
-        tokenField.setText(clusterToken);
     }
 
     public void insertUsername(String username) {

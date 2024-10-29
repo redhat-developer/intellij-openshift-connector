@@ -20,7 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -29,7 +30,10 @@ import java.io.IOException;
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.jayway.jsonpath.internal.path.PathCompiler.fail;
 import static com.redhat.devtools.intellij.commonuitest.utils.steps.SharedSteps.waitForComponentByXpath;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.COPY;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.HIDE_BUTTON;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.JB_TERMINAL_PANEL;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.SELECT_ALL;
 
 /**
  * @author Martin Szuc

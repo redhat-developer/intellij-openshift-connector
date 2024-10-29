@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.intellij.openshift.test.ui.dialogs.cluster_project;
 
 import com.intellij.remoterobot.RemoteRobot;
@@ -30,13 +40,21 @@ public class ChangeProjectDialog extends CommonContainerFixture {
         // Use RemoteRobot's Keyboard to type the project name
         Keyboard keyboard = new Keyboard(remoteRobot);
         keyboard.enterText(projectName);
+        if (isDropdownMenuOpened()) {
+            keyboard.enter();   // Hide the dropdown menu with suggestions
+        }
     }
 
     public void clickChange() {
         find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_CHANGE)).click();
     }
 
-    public void clickCancel() {
-        find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_CANCEL)).click();
+    private boolean isDropdownMenuOpened() {
+        try {
+            this.find(ComponentFixture.class, byXpath(XPathConstants.HEAVY_WEIGHT_WINDOW));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 }

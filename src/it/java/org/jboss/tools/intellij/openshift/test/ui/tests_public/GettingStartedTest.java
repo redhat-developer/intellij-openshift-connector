@@ -14,10 +14,15 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.BACK_START_A_COMPONENT_IN_DEVELOPMENT_MODE;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.LEAVE_FEEDBACK;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.NEXT_BROWSE_ALL_THE_DEVFILE_STACKS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

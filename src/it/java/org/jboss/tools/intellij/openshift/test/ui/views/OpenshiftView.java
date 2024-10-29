@@ -12,8 +12,12 @@ package org.jboss.tools.intellij.openshift.test.ui.views;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.*;
-import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.fixtures.ContainerFixture;
+import com.intellij.remoterobot.fixtures.DefaultXpath;
+import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowLeftToolbar;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +27,16 @@ import java.time.Duration;
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 import static com.redhat.devtools.intellij.commonuitest.utils.steps.SharedSteps.waitForComponentByXpath;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.DEVFILE_REGISTRIES;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.OPENSHIFT;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.REFRESH;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.IDE_FRAME_IMPL;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.OPENSHIFT_BASELABEL;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.TREE_CLASS;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.getTextXPath;
 
 /**
- *
  * @author Ihor Okhrimenko, Ondrej Dockal, Martin Szuc
- *
  */
 @DefaultXpath(by = "OpenshiftView type", xpath = IDE_FRAME_IMPL)
 @FixtureName(name = "Openshift View")
@@ -42,22 +49,21 @@ public class OpenshiftView extends ContainerFixture {
 
     public void openView() {
         if (!isViewOpened()) {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.button(byXpath(getToolWindowButton(OPENSHIFT)), Duration.ofSeconds(2)).click();
+            clickStripeButton();
             LOGGER.info("Openshift view opened");
         }
     }
 
     public void closeView() {
         if (isViewOpened()) {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.button(byXpath(getToolWindowButton(OPENSHIFT)), Duration.ofSeconds(2)).click();
+            clickStripeButton();
             LOGGER.info("Openshift view closed");
         }
     }
 
-    public void expandOpenshiftViewTree(String path) {
-        getOpenshiftConnectorTree().expand(path);
+    private void clickStripeButton() {
+        ToolWindowLeftToolbar toolWindowLeftToolbar = find(ToolWindowLeftToolbar.class, Duration.ofSeconds(10));
+        toolWindowLeftToolbar.clickStripeButton(OPENSHIFT);
     }
 
     public void expandOpenshiftExceptDevfile() {
@@ -88,8 +94,7 @@ public class OpenshiftView extends ContainerFixture {
 
     private boolean isViewOpened() {
         try {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.find(ComponentFixture.class, byXpath(OPENSHIFT_BASELABEL));
+            find(ComponentFixture.class, byXpath(OPENSHIFT_BASELABEL), Duration.ofSeconds(5));
             LOGGER.info("Openshift view: View is already opened");
             return true;
         } catch (Exception ignored) {
@@ -100,15 +105,15 @@ public class OpenshiftView extends ContainerFixture {
 
     /**
      * Checks if a menu option exists without clicking it.
-     * @param robot the RemoteRobot instance
+     *
      * @param selection the label of the menu option to check
      * @param row the row index to right-click
      * @return true if the menu option exists, false otherwise
      */
-    public boolean hasMenuOption(RemoteRobot robot, String selection, int row) {
+    public boolean hasMenuOption(String selection, int row) {
         try {
             getOpenshiftConnectorTree().rightClickRow(row);
-            return findAll(ComponentFixture.class, byXpath(getTextXPath(selection))).size() > 0;
+            return !findAll(ComponentFixture.class, byXpath(getTextXPath(selection))).isEmpty();
         } catch (Exception e) {
             return false;
         }

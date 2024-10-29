@@ -17,8 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
-import static com.jayway.jsonpath.internal.path.PathCompiler.fail;
-import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.*;
+import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.HIDE_BUTTON;
 
 /**
  * @author Martin Szuc

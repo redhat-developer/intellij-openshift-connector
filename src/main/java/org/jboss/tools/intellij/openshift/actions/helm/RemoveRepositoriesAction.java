@@ -19,13 +19,13 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.tree.TreePath;
 import org.jboss.tools.intellij.openshift.actions.HelmAction;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.tree.application.HelmRepositoryNode;
 import org.jboss.tools.intellij.openshift.tree.application.ProcessingNode;
 import org.jboss.tools.intellij.openshift.utils.helm.Helm;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static org.jboss.tools.intellij.openshift.actions.ActionUtils.runWithProgress;
@@ -35,12 +35,13 @@ import static org.jboss.tools.intellij.openshift.actions.NodeUtils.setProcessing
 public class RemoveRepositoriesAction extends HelmAction {
 
   @Override
-  public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected) {
-    Helm helm = getHelm(anActionEvent);
-    if (helm == null) {
-      return;
-    }
-    Project project = getEventProject(anActionEvent);
+  public void actionPerformedOnSelectedObject(AnActionEvent event, Object selected, @NotNull Helm helm) {
+    actionPerformedOnSelectedObjects(event, new Object[] { selected }, helm);
+  }
+
+  @Override
+  public void actionPerformedOnSelectedObjects(AnActionEvent event, Object[] selected, @NotNull Helm helm) {
+    Project project = getEventProject(event);
     List<HelmRepositoryNode> repositories = toHelmRepositoryNodes(selected);
     if (repositories == null
       || repositories.isEmpty()) {

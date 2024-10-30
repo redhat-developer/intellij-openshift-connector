@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
+        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
 
         // Bundled Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
@@ -104,7 +104,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
         }
         freeArgs = listOf(
             "-mute",
@@ -165,11 +165,6 @@ tasks {
         mainClass.set("org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock")
     }
 
-    register("copyKey", Copy::class.java) {
-        from("idea_license_token/idea.key")
-        into("build/idea-sandbox/config-uiTest")
-    }
-
 }
 
 sourceSets {
@@ -225,7 +220,6 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
 
 val integrationUITest by intellijPlatformTesting.testIde.registering {
     task {
-        dependsOn(tasks["copyKey"])
         systemProperty("com.redhat.devtools.intellij.telemetry.mode", "disabled")
         findProperty("tools.dl.path")?.let { systemProperty("tools.dl.path", it) }
         findProperty("testProjectLocation")?.let { systemProperty("testProjectLocation", it) }

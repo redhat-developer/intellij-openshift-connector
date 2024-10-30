@@ -65,7 +65,7 @@ public class OdoCliComponentTest extends OdoCliTest {
 
   @AfterClass
   public static void deleteTestProject() throws IOException {
-    FileUtils.deleteDirectory(new File(COMPONENT_PATH));
+    FileUtils.deleteDirectory(new File(COMPONENT_PATH + PROJECT_NAME));
   }
 
   @Before

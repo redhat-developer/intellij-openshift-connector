@@ -99,7 +99,8 @@ public class GettingStartedView extends ContainerFixture {
             return true;
         } catch (Exception ignored) {
             LOGGER.info("Getting Started view: View is not opened");
-        return false;
+            return false;
+        }
     }
-}
+
 }

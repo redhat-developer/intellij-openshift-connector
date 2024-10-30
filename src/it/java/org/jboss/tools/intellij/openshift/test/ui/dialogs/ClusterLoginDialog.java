@@ -103,5 +103,4 @@ public class ClusterLoginDialog extends CommonContainerFixture {
         find(ComponentFixture.class, byXpath(BUTTON_PASTE_LOGIN_COMMAND)).click();
     }
 
-
 }

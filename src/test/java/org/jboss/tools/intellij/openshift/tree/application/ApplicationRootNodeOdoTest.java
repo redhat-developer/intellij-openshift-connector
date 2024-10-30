@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.tree.application;
 
-import org.apache.commons.io.FileUtils;
+import com.intellij.openapi.util.io.FileUtil;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentDescriptor;
 import org.jboss.tools.intellij.openshift.utils.odo.ComponentFeatures;
@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +49,8 @@ public class ApplicationRootNodeOdoTest {
     new ComponentFeatures(),
     "path2",
     null);
-  private static final File tempDir = FileUtils.getTempDirectory();
-  private static final File destinationDir = FileUtils.getUserDirectory();
+  private File tempDir;
+  private final File destinationDir = new File(System.getProperty("user.home"));
   private OdoDelegate odo;
   private ApplicationsRootNode rootNode;
   private ApplicationRootNodeOdo rootNodeOdo;
@@ -57,6 +58,7 @@ public class ApplicationRootNodeOdoTest {
 
   @Before
   public void before() throws IOException {
+    tempDir = FileUtil.createTempDirectory("odo-test", "");
     this.odo = mock(OdoDelegate.class);
     this.rootNode = mock(ApplicationsRootNode.class);
     this.fileOperations = mockFileOperations();
@@ -96,7 +98,7 @@ public class ApplicationRootNodeOdoTest {
     // then
     verify(odo).createComponent(componentType, registryName, component, tempDir.getAbsolutePath(), devfile, starter);
     verify(fileOperations).createTempDir(any());
-    verify(fileOperations).copyTo(tempDir.getAbsoluteFile(), source);
+    verify(fileOperations).copyTo(tempDir, Path.of(source));
     verify(fileOperations).refresh(destinationDir);
   }
 

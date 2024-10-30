@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbAware;
@@ -88,13 +89,14 @@ public class ApplicationsRootNode
 
   private CompletableFuture<ApplicationRootNodeOdo> doGetOdo() {
     if (odoFuture == null) {
-      this.odoFuture = ToolFactory.getInstance()
-        .createOdo(project)
-        .thenApply(tool -> {
-          ApplicationRootNodeOdo odo = new ApplicationRootNodeOdo(tool.get(), tool.isDownloaded(), this, processHelper);
-          loadProjectModel(odo, project);
-          return odo;
-        });
+      this.odoFuture =
+        ReadAction.compute(() -> ToolFactory.getInstance()
+          .createOdo(project)
+          .thenApply(tool -> {
+            ApplicationRootNodeOdo odo = new ApplicationRootNodeOdo(tool.get(), tool.isDownloaded(), this, processHelper);
+            loadProjectModel(odo, project);
+            return odo;
+          }));
     }
     return odoFuture;
   }

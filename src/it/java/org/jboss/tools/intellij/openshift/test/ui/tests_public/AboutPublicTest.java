@@ -61,9 +61,9 @@ public class AboutPublicTest extends AbstractBaseTest {
 
 
         view.menuRightClickAndSelect(robot, 0, LabelConstants.ABOUT);
-        waitForComponentByXpath(robot, 120, 10, byXpath(JB_TERMINAL_PANEL));
+        //waitForComponentByXpath(robot, 120, 10, byXpath(JB_TERMINAL_PANEL));
 
-        sleep(2000);
+        //sleep(2000);
 
         try {
             aboutTerminalRightClickSelect(robot, byXpath(SELECT_ALL));

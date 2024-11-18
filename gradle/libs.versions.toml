@@ -11,7 +11,7 @@ easytesting = "1.4"
 mockserver = "5.15.0"
 junit-platform = "1.10.3"
 junit-jupiter = "5.10.3"
-devtools-common-ui-test = "0.4.3-SNAPSHOT"
+devtools-common-ui-test = "0.4.3"
 awaitility = "4.2.2"
 annotations = "24.0.0"
 

@@ -16,8 +16,8 @@ val devtoolsCommonForTests = "com.redhat.devtools.intellij:intellij-common:" + l
 
 // Set the JVM language level used to build the project.
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {

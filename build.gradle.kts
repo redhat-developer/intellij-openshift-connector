@@ -75,7 +75,7 @@ dependencies {
     testImplementation(libs.mockserver.netty)
 
     constraints {
-        implementation("io.undertow:undertow-core:2.3.15.Final") { // keycloak
+        implementation("io.undertow:undertow-core:2.3.17.Final") { // keycloak
             because("https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-6567186")
         }
         implementation("org.bouncycastle:bcprov-jdk18on:1.78.1") { // keycloak

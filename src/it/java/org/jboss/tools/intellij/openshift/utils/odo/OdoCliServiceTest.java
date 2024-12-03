@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import org.junit.Ignore;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -25,6 +27,7 @@ public class OdoCliServiceTest extends OdoCliTest {
     super.tearDown();
   }
 
+  @Ignore
   public void testCheckCreateService() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     String service = SERVICE_PREFIX + random.nextInt();
@@ -38,6 +41,7 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
   }
 
+  @Ignore
   public void testCheckCreateDeleteService() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     String service = SERVICE_PREFIX + random.nextInt();

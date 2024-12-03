@@ -57,7 +57,7 @@ public abstract class HelmAction extends TelemetryAction {
 
   protected Helm getHelm(AnActionEvent anActionEvent) {
     try {
-      return ActionUtils.getApplicationRootNode(anActionEvent).getHelm(true);
+      return ActionUtils.getApplicationRootNode(anActionEvent).getHelm();
     } catch (Exception e) {
       LOGGER.warn("Could not get helm: {}", e.getMessage(), e);
       return null;

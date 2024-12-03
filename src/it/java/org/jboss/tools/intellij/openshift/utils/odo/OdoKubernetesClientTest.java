@@ -27,10 +27,6 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.ProjectList;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectOperation;
-import org.jboss.tools.intellij.openshift.utils.Cli;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -40,7 +36,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import org.jboss.tools.intellij.openshift.utils.Cli;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -256,11 +254,10 @@ public class OdoKubernetesClientTest {
     MessageBus bus = mock(MessageBus.class);
     doReturn(connection)
       .when(bus).connect();
-    Supplier<KubernetesClient> kubernetesClientFactory = () -> kubernetesClient;
     Function<KubernetesClient, OpenShiftClient> openShiftClientFactory = client -> openShiftClient;
     Function<String, Map<String, String>> envVarFactory = url -> new HashMap<>();
     Cli.TelemetryReport telemetryReport = mock(Cli.TelemetryReport.class);
-    return new OdoCli(project, command, bus, kubernetesClientFactory, openShiftClientFactory, envVarFactory, telemetryReport);
+    return new OdoCli(command, project, kubernetesClient, bus, openShiftClientFactory, envVarFactory, telemetryReport);
   }
 
   private static <R extends HasMetadata> R mockResource(String name, Class<R> clazz) {

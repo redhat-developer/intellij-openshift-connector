@@ -25,15 +25,10 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import io.fabric8.kubernetes.api.model.Config;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jboss.tools.intellij.openshift.actions.NotificationUtils;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientFactory;
 import org.jboss.tools.intellij.openshift.utils.ProjectUtils;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
@@ -47,6 +42,15 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Future;
+
 public class ApplicationsRootNode
   implements ModuleListener, ConfigWatcher.Listener, ProcessingNode, StructureAwareNode, ParentableNode<ApplicationsRootNode>, Disposable, DumbAware {
 
@@ -59,14 +63,13 @@ public class ApplicationsRootNode
   private CompletableFuture<Tool<Helm>> helmFuture;
   private CompletableFuture<Tool<Oc>> ocFuture;
   private boolean logged;
-  private Config config;
+  private KubernetesClient client;
   private final OdoProcessHelper processHelper;
 
   public ApplicationsRootNode(Project project, ApplicationsTreeStructure structure, Disposable parent) {
     this.project = project;
     this.structure = structure;
     initConfigWatcher();
-    this.config = loadConfig();
     registerProjectListener(project);
     this.processHelper = new OdoProcessHelper();
     Disposer.register(parent, this);
@@ -91,7 +94,7 @@ public class ApplicationsRootNode
     if (odoFuture == null) {
       this.odoFuture =
         ReadAction.compute(() -> ToolFactory.getInstance()
-          .createOdo(project)
+          .createOdo(getClient(), project)
           .thenApply(tool -> {
             ApplicationRootNodeOdo odo = new ApplicationRootNodeOdo(tool.get(), tool.isDownloaded(), this, processHelper);
             loadProjectModel(odo, project);
@@ -111,23 +114,36 @@ public class ApplicationsRootNode
       });
   }
 
-  public void resetOdo() {
+  private void disposeClientAwareCLIs() {
+    safeCancel(odoFuture);
     this.odoFuture = null;
+    safeCancel(ocFuture);
+    this.ocFuture = null;
+  }
+
+  private void safeCancel(Future<?> future) {
+    if (future != null) {
+      try {
+        future.cancel(true);
+      } catch (CompletionException e) {
+        // swallowing intentionally
+      }
+    }
   }
 
   public CompletableFuture<ToolFactory.Tool<Oc>> getOcTool() {
     if (ocFuture == null) {
-      this.ocFuture = ToolFactory.getInstance().createOc(project);
+      this.ocFuture = ToolFactory.getInstance().createOc(getClient());
     }
     return ocFuture;
   }
 
-  public CompletableFuture<ToolFactory.Tool<Helm>> getHelmTool(boolean notify) {
+  private CompletableFuture<ToolFactory.Tool<Helm>> getHelmTool() {
     if (helmFuture == null) {
       this.helmFuture = ToolFactory.getInstance()
-        .createHelm(project)
+        .createHelm()
         .whenComplete((tool, err) -> {
-          if (notify && tool.isDownloaded()) {
+          if (tool.isDownloaded()) {
             structure.fireModified(this);
           }
         });
@@ -135,8 +151,8 @@ public class ApplicationsRootNode
     return helmFuture;
   }
 
-  public Helm getHelm(boolean notify) {
-    Tool<Helm> tool = getHelmTool(notify).getNow(null);
+  public Helm getHelm() {
+    Tool<Helm> tool = getHelmTool().getNow(null);
     if (tool == null) {
       return null;
     }
@@ -148,11 +164,7 @@ public class ApplicationsRootNode
   }
 
   protected void initConfigWatcher() {
-    ExecHelper.submit(new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this));
-  }
-
-  protected Config loadConfig() {
-    return ConfigHelper.safeLoadKubeConfig();
+    ExecHelper.submit(new ConfigWatcher(this));
   }
 
   public Map<String, ComponentDescriptor> getLocalComponents() {
@@ -247,15 +259,19 @@ public class ApplicationsRootNode
   }
 
   @Override
-  public void onUpdate(ConfigWatcher source, Config config) {
-    if (!ConfigHelper.areEqual(config, this.config)) {
-      this.config = config;
-      refresh();
+  public void onUpdate(Config updated, Exception error) {
+    if (error == null) {
+      Config current = getClient().getConfiguration();
+      if (ConfigHelper.areEqual(current, updated)) {
+        return;
+      }
     }
+    this.client = createClient(updated);
+    refresh();
   }
 
   public synchronized void refresh() {
-    resetOdo();
+    disposeClientAwareCLIs();
     doGetOdo().whenComplete((odo, err) ->
       structure.fireModified(ApplicationsRootNode.this)
     );
@@ -303,6 +319,18 @@ public class ApplicationsRootNode
 
   @Override
   public void dispose() {
-    resetOdo();
+    disposeClientAwareCLIs();
   }
+
+  protected KubernetesClient getClient() {
+    if (client == null) {
+      this.client = createClient(Config.autoConfigure(null));
+    }
+    return client;
+  }
+
+  protected KubernetesClient createClient(Config config) {
+    return new KubernetesClientFactory().apply(config);
+  }
+
 }

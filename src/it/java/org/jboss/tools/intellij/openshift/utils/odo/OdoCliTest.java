@@ -14,21 +14,22 @@ import com.intellij.openapi.ui.TestDialog;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.common.utils.MessagesHelper;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOdo;
-import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
-import org.jboss.tools.intellij.openshift.utils.OdoCluster;
-import org.jboss.tools.intellij.openshift.utils.ToolFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
+import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOdo;
+import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientFactory;
+import org.jboss.tools.intellij.openshift.utils.OdoCluster;
+import org.jboss.tools.intellij.openshift.utils.ToolFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import static org.awaitility.Awaitility.with;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
@@ -64,18 +65,14 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   protected static final String REGISTRY_PREFIX = "reg";
 
   private TestDialog previousTestDialog;
+  private KubernetesClient client;
 
   @Before
   public void init() throws Exception {
-    previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-    ToolFactory.getInstance().createOc(getProject()).whenComplete((ocTool, throwable) -> {
-      try {
-        OdoCluster.INSTANCE.login(ocTool.get());
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    });
-    odo = getOdo().get();
+    this.previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
+    this.client = new KubernetesClientFactory().create();
+    loginCluster();
+    this.odo = createOdo(client).get();
   }
 
   @After
@@ -83,15 +80,25 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     MessagesHelper.setTestDialog(previousTestDialog);
   }
 
-  private CompletableFuture<OdoFacade> getOdo() {
+  private void loginCluster() {
+    ToolFactory.getInstance().createOc(client).whenComplete((ocTool, throwable) -> {
+      try {
+        OdoCluster.INSTANCE.login(ocTool.get());
+      } catch (IOException e) {
+        throw new RuntimeException("Could not log into " + OdoCluster.CLUSTER_URL + " as user " + OdoCluster.CLUSTER_USER, e);
+      }
+    });
+  }
+
+  private CompletableFuture<OdoFacade> createOdo(KubernetesClient client) {
     return ToolFactory.getInstance()
-      .createOdo(getProject())
+      .createOdo(client, getProject())
       .thenApply(tool -> new ApplicationRootNodeOdo(tool.get(), false, rootNode, processHelper));
   }
 
   protected void createProject(String project) throws IOException, ExecutionException, InterruptedException {
     odo.createProject(project);
-    odo = getOdo().get();
+    odo = createOdo(client).get();
   }
 
   protected void createComponent(String project, String component, String starter, String projectPath) throws IOException, ExecutionException, InterruptedException {

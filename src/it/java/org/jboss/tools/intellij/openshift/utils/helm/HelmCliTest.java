@@ -11,6 +11,9 @@
 package org.jboss.tools.intellij.openshift.utils.helm;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import java.util.Random;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientFactory;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory.Tool;
@@ -18,30 +21,29 @@ import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
 
-import java.util.Random;
-
 public abstract class HelmCliTest extends BasePlatformTestCase {
 
   protected Helm helm;
-
+  private KubernetesClient client;
   private final String projectName = "prj-" + new Random().nextInt();
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    Tool<OdoDelegate> odoTool = ToolFactory.getInstance().createOdo(getProject()).get();
-    Tool<Oc> ocTool = ToolFactory.getInstance().createOc(getProject()).get();
+    this.client = new KubernetesClientFactory().create();
+    Tool<OdoDelegate> odoTool = ToolFactory.getInstance().createOdo(client, getProject()).get();
+    Tool<Oc> ocTool = ToolFactory.getInstance().createOc(client).get();
     Odo odo = odoTool.get();
     OdoCluster.INSTANCE.login(ocTool.get());
     odo.createProject(projectName);
-    Tool<Helm> helmTool = ToolFactory.getInstance().createHelm(getProject()).get();
+    Tool<Helm> helmTool = ToolFactory.getInstance().createHelm().get();
     this.helm = helmTool.get();
     Charts.addRepository(Charts.REPOSITORY_STABLE, helm);
   }
 
   @Override
   protected void tearDown() throws Exception {
-    Tool<OdoDelegate> tool = ToolFactory.getInstance().createOdo(getProject()).getNow(null);
+    Tool<OdoDelegate> tool = ToolFactory.getInstance().createOdo(client, getProject()).getNow(null);
     if (tool != null) {
       tool.get().deleteProject(projectName);
     }

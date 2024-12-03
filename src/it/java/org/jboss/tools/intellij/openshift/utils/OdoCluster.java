@@ -10,19 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils;
 
-import org.jboss.tools.intellij.openshift.utils.oc.Oc;
-
 import java.io.IOException;
+import org.jboss.tools.intellij.openshift.utils.oc.Oc;
 
 public class OdoCluster {
 
   public static final OdoCluster INSTANCE = new OdoCluster();
 
-  private static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
+  public static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
 
-  private static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
+  public static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
 
-  private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
+  public static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
 
   public void login(Oc oc) throws IOException {
     if (CLUSTER_URL != null && !oc.getMasterUrl().toString().startsWith(CLUSTER_URL)) {

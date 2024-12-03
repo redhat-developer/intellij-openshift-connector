@@ -1,7 +1,7 @@
 [versions]
 # libraries
 junit = "4.13.2"
-openshift-client = "6.12.0"
+openshift-client = "7.0.0"
 devtools-common = "1.9.7-SNAPSHOT"
 keycloak = "24.0.5"
 jsonwebtoken = "0.12.6"

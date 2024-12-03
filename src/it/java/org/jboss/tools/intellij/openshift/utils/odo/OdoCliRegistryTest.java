@@ -31,6 +31,9 @@ public class OdoCliRegistryTest extends OdoCliTest {
     String registryName = REGISTRY_PREFIX + random.nextInt();
     try {
       odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
+      List<DevfileRegistry> registries = odo.listDevfileRegistries();
+      assertFalse(registries.isEmpty());
+      assertEquals(1, registries.size());
     } finally {
       odo.deleteDevfileRegistry(registryName);
     }

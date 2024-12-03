@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.mockito.Mockito;
 
 import static org.awaitility.Awaitility.with;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
@@ -68,7 +69,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
   @Before
   public void init() throws Exception {
     previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
-    ToolFactory.getInstance().createOc(getProject()).whenComplete((ocTool, throwable) -> {
+    ToolFactory.getInstance().createOc(Mockito.mock()).whenComplete((ocTool, throwable) -> {
       try {
         OdoCluster.INSTANCE.login(ocTool.get());
       } catch (IOException e) {
@@ -85,7 +86,7 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
 
   private CompletableFuture<OdoFacade> getOdo() {
     return ToolFactory.getInstance()
-      .createOdo(getProject())
+      .createOdo(Mockito.mock(), getProject())
       .thenApply(tool -> new ApplicationRootNodeOdo(tool.get(), false, rootNode, processHelper));
   }
 

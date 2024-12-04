@@ -75,7 +75,7 @@ jobs:
           validate-wrappers: true
       - uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde #v1.10.0
         name: Start cluster
-      # service setup disabled along with service test
+      # service setup disabled along with service test because service binding operator is deprecated, and postgres service isn't available anymore
       #        - name: Setup cluster
       #        run: |
       #          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.26.0/install.sh | bash -s v0.26.0

@@ -10,35 +10,40 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.List;
 
 public class OdoCliRegistryTest extends OdoCliTest {
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void initTestEnv() throws IOException {
     odo.createDevfileRegistry(REGISTRY_NAME, REGISTRY_URL, null);
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void cleanupTestEnv() throws IOException {
     odo.deleteDevfileRegistry(REGISTRY_NAME);
-    super.tearDown();
   }
 
+  @Test
   public void testCheckCreateRegistry() throws IOException {
     String registryName = REGISTRY_PREFIX + random.nextInt();
     try {
-      odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
       List<DevfileRegistry> registries = odo.listDevfileRegistries();
       assertFalse(registries.isEmpty());
-      assertEquals(1, registries.size());
+      odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
+      assertEquals(registries.size() + 1, odo.listDevfileRegistries().size());
+      assertTrue(registries.stream().anyMatch(reg -> reg.getName().equals(registryName)));
     } finally {
       odo.deleteDevfileRegistry(registryName);
     }
   }
 
+  @Test
   public void testCheckListRegistries() throws IOException {
     List<DevfileRegistry> registries = odo.listDevfileRegistries();
     assertFalse(registries.isEmpty());

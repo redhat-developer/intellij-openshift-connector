@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils.odo;
 
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,7 +22,7 @@ import static org.awaitility.Awaitility.with;
 
 public class OdoCliCatalogTest extends OdoCliTest {
 
-  @Ignore
+  @Test
   public void testCheckGetComponentTypes() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     try {
@@ -33,7 +34,8 @@ public class OdoCliCatalogTest extends OdoCliTest {
     }
   }
 
-  @Ignore
+  @Test
+  @Ignore("Service operator is deprecated")
   public void testCheckGetServiceTemplates() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     try {
@@ -46,7 +48,8 @@ public class OdoCliCatalogTest extends OdoCliTest {
     }
   }
 
-  @Ignore
+  @Test
+  @Ignore("Service operator is deprecated")
   public void testCheckMultiPlansServiceTemplates() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     try {

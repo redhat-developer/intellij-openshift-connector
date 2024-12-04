@@ -15,7 +15,7 @@ import com.intellij.openapi.util.Pair;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.Assert.assertTrue;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class Charts {
 
@@ -26,7 +26,7 @@ public class Charts {
 
   public static Chart get(String name, Helm helm) throws Exception {
     Optional<Chart> found = helm.search(name).stream().findFirst();
-    assertTrue(found.isPresent());
+    assertThat(found.isPresent()).isTrue();
     return found.get();
   }
 

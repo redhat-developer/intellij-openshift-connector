@@ -37,7 +37,7 @@ public class OdoCliRegistryTest extends OdoCliTest {
       assertFalse(registries.isEmpty());
       odo.createDevfileRegistry(registryName, "https://registry.devfile.io", null);
       assertEquals(registries.size() + 1, odo.listDevfileRegistries().size());
-      assertTrue(registries.stream().anyMatch(reg -> reg.getName().equals(registryName)));
+      assertTrue(odo.listDevfileRegistries().stream().anyMatch(reg -> reg.getName().equals(registryName)));
     } finally {
       odo.deleteDevfileRegistry(registryName);
     }

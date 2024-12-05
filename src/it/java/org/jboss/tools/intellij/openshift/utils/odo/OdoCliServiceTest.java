@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.utils.odo;
 
+import org.junit.After;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -19,12 +23,13 @@ public class OdoCliServiceTest extends OdoCliTest {
 
   private final String projectPath = new File("src/it/projects/springboot-rest").getAbsolutePath();
 
-  @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void cleanupTestEnv() throws IOException {
     cleanLocalProjectDirectory(projectPath);
-    super.tearDown();
   }
 
+  @Test
+  @Ignore("Service operator is deprecated")
   public void testCheckCreateService() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     String service = SERVICE_PREFIX + random.nextInt();
@@ -38,6 +43,8 @@ public class OdoCliServiceTest extends OdoCliTest {
     }
   }
 
+  @Test
+  @Ignore("Service operator is deprecated")
   public void testCheckCreateDeleteService() throws IOException, ExecutionException, InterruptedException {
     String project = PROJECT_PREFIX + random.nextInt();
     String service = SERVICE_PREFIX + random.nextInt();

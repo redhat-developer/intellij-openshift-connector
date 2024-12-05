@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  pull-requests: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -75,19 +78,20 @@ jobs:
           validate-wrappers: true
       - uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde #v1.10.0
         name: Start cluster
-      - name: Setup cluster
-        run: |
-          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.26.0/install.sh | bash -s v0.26.0
-          kubectl create -f https://operatorhub.io/install/service-binding-operator.yaml
-          kubectl create -f https://operatorhub.io/install/stable/cloud-native-postgresql.yaml
-          nb=0
-          echo -n "Waiting for operator to show up "
-          while [ "$nb" != "2" ]
-          do
-            echo -n "."
-            sleep 1
-            nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
-          done
+      # service setup disabled along with service test because service binding operator is deprecated, and postgres service isn't available anymore
+      #        - name: Setup cluster
+      #        run: |
+      #          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.26.0/install.sh | bash -s v0.26.0
+      #          kubectl create -f https://operatorhub.io/install/service-binding-operator.yaml
+      #          kubectl create -f https://operatorhub.io/install/stable/cloud-native-postgresql.yaml
+      #          nb=0
+      #          echo -n "Waiting for operator to show up "
+      #          while [ "$nb" != "2" ]
+      #          do
+      #            echo -n "."
+      #            sleep 1
+      #            nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
+      #          done
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Play integration tests

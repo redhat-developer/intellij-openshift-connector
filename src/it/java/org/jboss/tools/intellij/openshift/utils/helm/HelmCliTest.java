@@ -45,6 +45,7 @@ public abstract class HelmCliTest extends BasePlatformTestCase {
     if (tool != null) {
       tool.get().deleteProject(projectName);
     }
+    Charts.removeRepository(Charts.REPOSITORY_STABLE, helm);
     super.tearDown();
   }
 

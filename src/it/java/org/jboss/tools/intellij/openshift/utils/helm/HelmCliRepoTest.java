@@ -14,8 +14,6 @@ package org.jboss.tools.intellij.openshift.utils.helm;
 import java.io.IOException;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class HelmCliRepoTest extends HelmCliTest {
 
     public void testListRepos_should_list_repo_that_was_added() throws IOException {
@@ -47,14 +45,16 @@ public class HelmCliRepoTest extends HelmCliTest {
             List<String> helmRepositoryNames = helm.listRepos().stream()
               .map(HelmRepository::getName)
               .toList();
-            assertThat(helmRepositoryNames).contains(name, name2);
+            assertTrue(helmRepositoryNames.contains(name));
+            assertTrue(helmRepositoryNames.contains(name2));
             // when
             helm.removeRepos(name, name2);
             // then
             helmRepositoryNames = helm.listRepos().stream()
               .map(HelmRepository::getName)
               .toList();
-            assertThat(helmRepositoryNames).doesNotContain(name, name2);
+            assertFalse(helmRepositoryNames.contains(name));
+            assertFalse(helmRepositoryNames.contains(name2));
         } finally {
             silentlyRemoveRepos(name, name2);
         }

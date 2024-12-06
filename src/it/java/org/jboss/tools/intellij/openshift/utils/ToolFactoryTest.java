@@ -18,23 +18,24 @@ import org.jboss.tools.intellij.openshift.utils.odo.Odo;
 import org.jboss.tools.intellij.openshift.utils.odo.OdoDelegate;
 
 import java.util.concurrent.ExecutionException;
+import org.mockito.Mockito;
 
 public class ToolFactoryTest extends BasePlatformTestCase {
 
   public void testGetOdo() throws ExecutionException, InterruptedException {
-    Tool<OdoDelegate> tool = ToolFactory.getInstance().createOdo(getProject()).get();
+    Tool<OdoDelegate> tool = ToolFactory.getInstance().createOdo(Mockito.mock(), getProject()).get();
     Odo odo = tool.get();
     assertNotNull(odo);
   }
 
   public void testGetHelm() throws ExecutionException, InterruptedException {
-    Tool<Helm> tool = ToolFactory.getInstance().createHelm(getProject()).get();
+    Tool<Helm> tool = ToolFactory.getInstance().createHelm().get();
     Helm helm = tool.get();
     assertNotNull(helm);
   }
 
   public void testGetOc() throws ExecutionException, InterruptedException {
-    Tool<Oc> tool = ToolFactory.getInstance().createOc(getProject()).get();
+    Tool<Oc> tool = ToolFactory.getInstance().createOc(Mockito.mock()).get();
     Oc oc = tool.get();
     assertNotNull(oc);
   }

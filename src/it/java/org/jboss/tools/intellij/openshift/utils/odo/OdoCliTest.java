@@ -18,6 +18,10 @@ import org.jboss.tools.intellij.openshift.tree.application.ApplicationRootNodeOd
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.utils.OdoCluster;
 import org.jboss.tools.intellij.openshift.utils.ToolFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +34,10 @@ import static org.awaitility.Awaitility.with;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 import static org.mockito.Mockito.mock;
 
-
+@RunWith(JUnit4.class)
 public abstract class OdoCliTest extends BasePlatformTestCase {
 
+  // disabled since there is no more service operator available, and service binding operator is deprecated. see https://github.com/redhat-developer/service-binding-operator#deprecation-notice
   // see https://operatorhub.io/operator/cloud-native-postgresql/ STABLE channel for versions
   public static final String SERVICE_TEMPLATE = "cloud-native-postgresql";
   public static final String SERVICE_KUBE_VERSION = "v1.16.2";
@@ -60,9 +65,8 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
 
   private TestDialog previousTestDialog;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void init() throws Exception {
     previousTestDialog = MessagesHelper.setTestDialog(TestDialog.OK);
     ToolFactory.getInstance().createOc(getProject()).whenComplete((ocTool, throwable) -> {
       try {
@@ -74,10 +78,9 @@ public abstract class OdoCliTest extends BasePlatformTestCase {
     odo = getOdo().get();
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void cleanup() {
     MessagesHelper.setTestDialog(previousTestDialog);
-    super.tearDown();
   }
 
   private CompletableFuture<OdoFacade> getOdo() {

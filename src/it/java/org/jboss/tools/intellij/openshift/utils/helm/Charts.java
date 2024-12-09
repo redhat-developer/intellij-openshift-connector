@@ -22,8 +22,7 @@ public class Charts {
   public static final String CHART_KUBEROS = "kuberos";
   public static final String CHART_SYSDIG = "sysdig";
 
-  public static final Pair<String, String> REPOSITORY_STABLE = new Pair("stable", "https://charts.helm.sh/stable");
-  public static final Pair<String, String> REPOSITORY_OPENSHIFT = new Pair("openshift", "https://charts.openshift.io/");
+  public static final Pair<String, String> REPOSITORY_STABLE = new Pair<>("stable", "https://charts.helm.sh/stable");
 
   public static Chart get(String name, Helm helm) throws Exception {
     Optional<Chart> found = helm.search(name).stream().findFirst();
@@ -33,6 +32,10 @@ public class Charts {
 
   public static void addRepository(Pair<String, String> pair, Helm helm) throws IOException {
     helm.addRepo(pair.first, pair.second, null);
+  }
+
+  public static void removeRepository(Pair<String, String> pair, Helm helm) throws IOException {
+    helm.removeRepos(pair.first);
   }
 
 }

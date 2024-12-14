@@ -170,7 +170,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
   }
 
   private Object[] createHelmRepositoriesChildren(HelmRepositoriesNode parent) {
-    Helm helm = root.getHelm(true);
+    Helm helm = root.getHelm();
     if (helm == null) {
       return new Object[]{new MessageNode<>(root, parent, "Could not list repositories: Helm binary missing.")};
     }
@@ -229,7 +229,7 @@ public class ApplicationsTreeStructure extends AbstractTreeStructure implements 
   }
 
   private List<BaseNode<?>> getHelmReleases(NamespaceNode namespaceNode) {
-    Helm helm = namespaceNode.getRoot().getHelm(true);
+    Helm helm = namespaceNode.getRoot().getHelm();
     if (helm == null) {
       return List.of(new MessageNode<>(root, namespaceNode, "Could not get chart releases"));
     }

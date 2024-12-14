@@ -12,110 +12,129 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import io.fabric8.kubernetes.api.model.AuthInfo;
-import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.Context;
-import io.fabric8.kubernetes.api.model.NamedAuthInfo;
 import io.fabric8.kubernetes.api.model.NamedContext;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
 
-    public void testShouldNotRefreshIfContextDoesntChange() {
+    private Config config = null;
+    private ApplicationsRootNode model = null;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        NamedContext ctx1 = createNamedContext( "yoda context",
+          "eponymous star system",
+          "dagobah",
+          "yoda");
+        NamedContext ctx2 = createNamedContext( "skywalker context",
+          "tatooine star system",
+          "tatooine",
+          "luke skywalker");
+        NamedContext ctx3 = createNamedContext( "obiwan context",
+          "stewjon star system",
+          "stewjon",
+          "obiwan");
+
+        this.config = createConfig("use the force", ctx2, Arrays.asList(ctx1, ctx2, ctx3));
+
+        KubernetesClient client = createKubernetesClient(config);
+        this.model = createApplicationsRootNode(getProject(), client);  // initial configuration
+    }
+
+    public void testShouldNotRefreshIfContextHasNoChanges() {
         // given
-        String user = "papa-smurf";
-        String cluster = "localhost";
-        String token = "token1";
-
-        Context ctx1 = createContext(user, cluster);
-        AuthInfo authInfo1 = createAuthInfo(token);
-        Config cfg1 = createConfig(ctx1, user, authInfo1);
-
-        ApplicationsRootNode model = createApplicationsRootNode(getProject(), cfg1);
-
-        Context ctx2 = createContext(user, cluster);
-        AuthInfo authInfo2 = createAuthInfo(token);
-        Config cfg2 = createConfig(ctx1, user, authInfo1);
+        Config clone = createConfig(config);
         // when
-        model.onUpdate(null, cfg2);
+        model.onUpdate(clone);
         // then
         verify(model, never()).refresh();
     }
 
-    public void testShouldRefreshIfContextUserChanges() {
+    public void testShouldRefreshIfCurrentContextHasDifferentName() {
         // given
-        Context context = createContext();
-        doReturn("papa-smurf","smurfette").when(context).getUser();
-        Config config = createConfig(context);
-        ApplicationsRootNode model = createApplicationsRootNode(getProject(), config);
+        Config differentUser = createConfig(config);
+        NamedContext currentContext = createNamedContext(differentUser.getCurrentContext());
+        when(currentContext.getName())
+          .thenReturn("yoda context");
+        when(differentUser.getCurrentContext())
+          .thenReturn(currentContext);
         // when
-        model.onUpdate(null, config);
+        model.onUpdate(differentUser);
         // then
         verify(model).refresh();
     }
 
-    public void testShouldRefreshIfContextClusterChanges() {
+    public void testShouldRefreshIfCurrentContextHasDifferentCluster() {
         // given
-        Context context = createContext();
-        doReturn("localhost","www.openshift.com")
-          .when(context).getCluster();
-        Config config = createConfig(context);
-        ApplicationsRootNode model = createApplicationsRootNode(getProject(), config);
+        Config differentCluster = createConfig(config);
+        NamedContext currentContext = createNamedContext(differentCluster.getCurrentContext());
+        when(currentContext.getContext().getCluster())
+          .thenReturn("eponymous star system");
+        when(differentCluster.getCurrentContext())
+          .thenReturn(currentContext);
         // when
-        model.onUpdate(null, config);
+        model.onUpdate(differentCluster);
         // then
         verify(model).refresh();
     }
 
-    public void testShouldRefreshIfContextUserTokenChanges() {
+    public void testShouldRefreshIfCurrentContextHasDifferentNamespace() {
         // given
-        String user = "papa-smurf";
-        String cluster = "localhost";
-
-        Context ctx1 = createContext(user, cluster);
-        AuthInfo authInfo1 = createAuthInfo("token1");
-        Config cfg1 = createConfig(ctx1, user, authInfo1);
-
-        ApplicationsRootNode model = createApplicationsRootNode(getProject(), cfg1);
-
-        Context ctx2 = createContext(user, cluster);
-        AuthInfo authInfo2 = createAuthInfo("token2");
-        Config cfg2 = createConfig(ctx2, user, authInfo2);
+        Config differentCluster = createConfig(config);
+        NamedContext currentContext = createNamedContext(differentCluster.getCurrentContext());
+        when(currentContext.getContext().getNamespace())
+          .thenReturn("dagobah");
+        when(differentCluster.getCurrentContext())
+          .thenReturn(currentContext);
         // when
-        model.onUpdate(null, cfg2);
+        model.onUpdate(differentCluster);
         // then
         verify(model).refresh();
     }
 
-    public void testShouldRefreshIfContextUserLogout() {
+    public void testShouldRefreshIfCurrentContextHasDifferentUser() {
         // given
-        String user = "papa-smurf";
-        String cluster = "localhost";
-
-        Context ctx1 = createContext(user, cluster);
-        AuthInfo authInfo1 = createAuthInfo("token1");
-        Config cfg1 = createConfig(ctx1, user, authInfo1);
-
-        ApplicationsRootNode model = createApplicationsRootNode(getProject(), cfg1);
-
-        Context ctx2 = createContext(user, cluster);
-        AuthInfo authInfo2 = createAuthInfo(null);
-        Config cfg2 = createConfig(ctx2, user, authInfo2);
+        Config differentUser = createConfig(config);
+        NamedContext currentContext = createNamedContext(differentUser.getCurrentContext());
+        when(currentContext.getContext().getUser())
+          .thenReturn("R2-D2");
+        when(differentUser.getCurrentContext())
+          .thenReturn(currentContext);
         // when
-        model.onUpdate(null, cfg2);
+        model.onUpdate(differentUser);
         // then
         verify(model).refresh();
     }
 
-    protected ApplicationsRootNode createApplicationsRootNode(Project project, Config config) {
+    public void testShouldRefreshIfCurrentContextHasDifferentToken() {
+        // given
+        Config differentToken = createConfig(config);
+        NamedContext currentContext = createNamedContext(differentToken.getCurrentContext());
+        when(differentToken.getAutoOAuthToken())
+          .thenReturn("use the laser blaster");
+        when(differentToken.getCurrentContext())
+          .thenReturn(currentContext);
+        // when
+        model.onUpdate(differentToken);
+        // then
+        verify(model).refresh();
+    }
+
+    protected ApplicationsRootNode createApplicationsRootNode(Project project, KubernetesClient client) {
         return spy(new ApplicationsRootNode(project, null, Disposer.newDisposable()) {
             @Override
             protected void initConfigWatcher() {
@@ -126,60 +145,63 @@ public class ApplicationTreeModelConfigUpdateTest extends BasePlatformTestCase {
             }
 
             @Override
-            protected Config loadConfig() {
-                return config;
+            public synchronized void refresh() {}
+
+            @Override
+            protected KubernetesClient getClient() {
+                return client;
             }
 
             @Override
-            public synchronized void refresh() {}
+            protected KubernetesClient createClient(Config config) {
+                return client;
+            }
         });
     }
 
-    private Config createConfig(Context context) {
-        return createConfig(context, null, null);
+    private Config createConfig(Config config) {
+        return createConfig(config.getAutoOAuthToken(), config.getCurrentContext(), config.getContexts());
     }
 
-    private Config createConfig(Context context, String user, AuthInfo authInfo) {
-        String contextName = "42";
+    private Config createConfig(String token, NamedContext current, List<NamedContext> contexts) {
         Config config = mock(Config.class);
-        doReturn(contextName).when(config).getCurrentContext();
-        NamedContext namedContext = createNamedContext(contextName, context);
-        doReturn(Arrays.asList(namedContext)).when(config).getContexts();
-
-        if (authInfo != null) {
-            NamedAuthInfo namedAuthInfo = mock(NamedAuthInfo.class);
-            doReturn(user).when(namedAuthInfo).getName();
-            doReturn(authInfo).when(namedAuthInfo).getUser();
-            doReturn(Arrays.asList(namedAuthInfo)).when(config).getUsers();
-        }
+        doReturn(token)
+            .when(config).getAutoOAuthToken();
+        doReturn(current)
+          .when(config).getCurrentContext();
+        doReturn(contexts)
+            .when(config).getContexts();
         return config;
     }
 
-    private NamedContext createNamedContext(String contextName, Context context) {
+    private NamedContext createNamedContext(NamedContext namedContext) {
+        Context context = namedContext.getContext();
+        return createNamedContext(namedContext.getName(), context.getCluster(), context.getNamespace(), context.getUser());
+    }
+
+    private NamedContext createNamedContext(String name, String cluster, String namespace, String user) {
+        Context context = mock(Context.class);
+        doReturn(cluster)
+          .when(context).getCluster();
+        doReturn(namespace)
+          .when(context).getNamespace();
+        doReturn(user)
+          .when(context).getUser();
+
         NamedContext namedContext = mock(NamedContext.class);
-        doReturn(contextName).when(namedContext).getName();
-        doReturn(context).when(namedContext).getContext();
+        doReturn(name)
+          .when(namedContext).getName();
+        doReturn(context)
+          .when(namedContext).getContext();
         return namedContext;
     }
 
-    private Context createContext() {
-        return createContext(null, null);
-    }
-
-    private Context createContext(String user, String cluster) {
-        Context context = mock(Context.class);
-        if (!StringUtil.isEmptyOrSpaces(user)) {
-            doReturn(user).when(context).getUser();
-        }
-        if (!StringUtil.isEmptyOrSpaces(cluster)) {
-            doReturn(cluster).when(context).getCluster();
-        }
-        return context;
-    }
-
-    private AuthInfo createAuthInfo(String token) {
-        AuthInfo authInfo = mock(AuthInfo.class);
-        doReturn(token).when(authInfo).getToken();
-        return authInfo;
+    private KubernetesClient createKubernetesClient(Config config) throws MalformedURLException {
+        KubernetesClient client = mock(KubernetesClient.class);
+        doReturn(new URL("https://starwars.com")) // avoid "invalid master url" exception
+            .when(client).getMasterUrl();
+        doReturn(config)
+          .when(client).getConfiguration();
+        return client;
     }
 }

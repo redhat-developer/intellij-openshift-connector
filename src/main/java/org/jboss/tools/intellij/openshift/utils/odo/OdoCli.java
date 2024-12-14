@@ -18,9 +18,11 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.messages.MessageBus;
+import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -37,15 +39,6 @@ import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
-import org.jboss.tools.intellij.openshift.KubernetesLabels;
-import org.jboss.tools.intellij.openshift.utils.Cli;
-import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
-import org.jboss.tools.intellij.openshift.utils.Serialization;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -62,9 +55,16 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import org.jboss.tools.intellij.openshift.KubernetesLabels;
+import org.jboss.tools.intellij.openshift.utils.Cli;
+import org.jboss.tools.intellij.openshift.utils.ClientAwareCli;
+import org.jboss.tools.intellij.openshift.utils.KubernetesClientExceptionUtils;
+import org.jboss.tools.intellij.openshift.utils.Serialization;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.fabric8.openshift.client.OpenShiftClient.BASE_API_GROUP;
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_CONFIG_NAMESPACE;
 import static org.jboss.tools.intellij.openshift.Constants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
@@ -74,7 +74,7 @@ import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_PUBLIC_C
 import static org.jboss.tools.intellij.openshift.Constants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.intellij.openshift.Constants.PLUGIN_FOLDER;
 
-public class OdoCli extends Cli implements OdoDelegate {
+public class OdoCli extends ClientAwareCli implements OdoDelegate {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OdoCli.class);
 
@@ -86,7 +86,6 @@ public class OdoCli extends Cli implements OdoDelegate {
   private static final String NAMESPACE_FIELD = "namespace";
   private static final String SPEC_FIELD = "spec";
   private final com.intellij.openapi.project.Project project;
-  private final String command;
   private final OpenShiftClient openshiftClient;
   private final Map<String, String> envVars;
   private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
@@ -94,26 +93,25 @@ public class OdoCli extends Cli implements OdoDelegate {
   private JSonParser swagger;
   private CompletableFuture<Boolean> isPodmanPresent;
 
-  public OdoCli(com.intellij.openapi.project.Project project, String command) {
-    this(project,
-      command,
+  public OdoCli(String command, Project project, KubernetesClient client) {
+    this(command,
+      project,
+      client,
       ApplicationManager.getApplication().getMessageBus(),
-      new Cli.KubernetesClientFactory(),
       new OpenShiftClientFactory(),
       new Cli.EnvVarFactory(),
       new Cli.TelemetryReport());
   }
 
   protected OdoCli(
-    com.intellij.openapi.project.Project project,
     String command,
+    Project project,
+    KubernetesClient client,
     MessageBus bus,
-    Supplier<KubernetesClient> kubernetesClientFactory,
     Function<KubernetesClient, OpenShiftClient> openshiftClientFactory,
     Function<String, Map<String, String>> envVarFactory,
     Cli.TelemetryReport telemetryReport) {
-    super(kubernetesClientFactory);
-    this.command = command;
+    super(command, client);
     this.project = project;
     this.openshiftClient = openshiftClientFactory.apply(client);
     this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
@@ -781,7 +779,7 @@ public class OdoCli extends Cli implements OdoDelegate {
     public OpenShiftClient apply(KubernetesClient client) {
       OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
       try {
-        if (osClient.hasApiGroup(BASE_API_GROUP, false)) {
+        if (ClusterHelper.isOpenShift(osClient)) {
           return osClient;
         } else {
           return null;

@@ -28,16 +28,17 @@ public abstract class OcAction extends TelemetryAction {
   @Override
   public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
     setTelemetrySender(new TelemetrySender(PREFIX_ACTION + getTelemetryActionName()));
-    ActionUtils.getApplicationRootNode(anActionEvent).getOcTool().whenComplete(
-      (ocTool, throwable) -> {
-        if (ocTool != null) {
-          Oc oc = ocTool.get();
-          if (oc != null) {
-            this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), oc);
+    ActionUtils.getApplicationRootNode(anActionEvent).getOcTool()
+      .whenComplete(
+        (ocTool, throwable) -> {
+          if (ocTool != null) {
+            Oc oc = ocTool.get();
+            if (oc != null) {
+              this.actionPerformedOnSelectedObject(anActionEvent, getElement(selected), oc);
+            }
           }
         }
-      }
-    );
+      );
   }
 
   public abstract void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Oc oc);

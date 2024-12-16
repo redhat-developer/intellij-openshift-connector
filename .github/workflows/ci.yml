@@ -76,7 +76,7 @@ jobs:
           add-job-summary: 'on-failure'
           add-job-summary-as-pr-comment: 'on-failure'
           validate-wrappers: true
-      - uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde #v1.10.0
+      - uses: helm/kind-action@ae94020eaf628e9b9b9f341a10cc0cdcf5c018fb #v1.11.0
         name: Start cluster
       # service setup disabled along with service test because service binding operator is deprecated, and postgres service isn't available anymore
       #        - name: Setup cluster

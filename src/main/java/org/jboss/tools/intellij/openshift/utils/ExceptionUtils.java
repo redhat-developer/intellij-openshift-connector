@@ -21,11 +21,13 @@ public class ExceptionUtils {
 
   private ExceptionUtils() {}
 
-  public static String getMessage(Exception e) {
+  public static String getMessage(Throwable e) {
     if (e instanceof CompletionException) {
       return getMessage((CompletionException) e);
-    } else {
+    } else if (e != null) {
       return e.getMessage();
+    } else {
+      return null;
     }
   }
 
@@ -39,5 +41,19 @@ public class ExceptionUtils {
     }
     return matcher.group(1);
   }
+
+  public static String getCauseOrExceptionMessage(Exception e) {
+    if (e == null) {
+      return null;
+    }
+    if (e.getCause() != null) {
+      var message = getMessage(e.getCause());
+      if (message != null) {
+        return message;
+      }
+    }
+    return getMessage(e);
+  }
+
 }
 

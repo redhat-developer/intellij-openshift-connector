@@ -320,6 +320,7 @@ public class ApplicationsRootNode
   @Override
   public void dispose() {
     disposeClientAwareCLIs();
+    client.close();
   }
 
   protected KubernetesClient getClient() {

@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 public class AccountModel implements IAccountModel {
 
-    private final ServersRepository repository = ApplicationManager.getApplication().getService(ServersRepository.class);
-
 	@Override
 	public IAuthorizationServer createAuthorizationServer(String id) {
         return new AuthorizationServer(id);
@@ -34,6 +32,7 @@ public class AccountModel implements IAccountModel {
 
 	@Override
 	public List<IAuthorizationServer> getAuthorizationServers() {
+		ServersRepository repository = ApplicationManager.getApplication().getService(ServersRepository.class);
 		List<IAuthorizationServer> servers = repository.getServers();
 		List<ServerExtensionPoint> registeredServers = ServerExtensionPoint.EP_NAME.getExtensionList();
 		List<IAuthorizationServer> nservers = registeredServers

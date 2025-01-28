@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.actions.project;
 
 import com.intellij.notification.Notification;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
@@ -148,4 +149,10 @@ public class CreateProjectAction extends LoggedInClusterAction {
   private boolean isRoot(Object node) {
     return node instanceof ApplicationsRootNode;
   }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
 }

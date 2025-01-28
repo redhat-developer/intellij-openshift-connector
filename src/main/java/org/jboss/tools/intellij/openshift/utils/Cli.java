@@ -14,35 +14,15 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.MessageBus;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
-import com.redhat.devtools.intellij.common.ssl.IDEATrustManager;
-import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
-import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import io.fabric8.kubernetes.client.http.HttpClient;
-import io.fabric8.kubernetes.client.internal.SSLUtils;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
-import javax.net.ssl.X509TrustManager;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.IS_OPENSHIFT;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.KUBERNETES_VERSION;
@@ -52,34 +32,10 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.inst
 
 public class Cli {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(Cli.class);
+  protected final String command;
 
-  protected final KubernetesClient client;
-
-  protected Cli(Supplier<KubernetesClient> kubernetesClientFactory) {
-    this.client = kubernetesClientFactory.get();
-  }
-
-  public static final class KubernetesClientFactory implements Supplier<KubernetesClient> {
-
-    @Override
-    public KubernetesClient get() {
-      String current = ConfigHelper.getCurrentContextName();
-      Config config = Config.autoConfigure(current);
-      return new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
-    }
-
-    private void setSslContext(HttpClient.Builder builder, Config config) {
-      try {
-        X509TrustManager externalTrustManager = new IDEATrustManager().configure(List.of(Arrays.stream(SSLUtils.trustManagers(config))
-          .filter(X509ExtendedTrustManager.class::isInstance)
-          .map(X509ExtendedTrustManager.class::cast).toArray(X509ExtendedTrustManager[]::new)));
-        builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
-      } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
-               UnrecoverableKeyException | InvalidKeySpecException e) {
-        LOGGER.error(e.getMessage(), e);
-      }
-    }
+  protected Cli(String command) {
+    this.command = command;
   }
 
   public static final class EnvVarFactory implements Function<String, Map<String, String>> {

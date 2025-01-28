@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jboss.tools.intellij.openshift.telemetry.TelemetryService;
+import org.jboss.tools.intellij.openshift.utils.Cli;
 import org.jboss.tools.intellij.openshift.utils.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +32,12 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessa
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.asyncSend;
 
-public class HelmCli implements Helm {
+public class HelmCli extends Cli implements Helm {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HelmCli.class);
 
-    private final String command;
-
     public HelmCli(String command) {
-        this.command = command;
+        super(command);
     }
 
     @Override

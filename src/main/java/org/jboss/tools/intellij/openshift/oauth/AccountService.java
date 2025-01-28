@@ -28,8 +28,6 @@ public class AccountService {
 
   private static final AccountService INSTANCE = new AccountService();
 
-  private final LoginProvider provider = LoginProvider.get();
-
   private IAccountModel model;
 
   private AccountService() {
@@ -109,7 +107,9 @@ public class AccountService {
     }
   }
 
+
   private String performLogin(IAuthorizationServer server, IAccount account, int tokenType, Object context) {
+    LoginProvider provider = LoginProvider.get();
     if (null != provider) {
       LoginResponse response = provider.login(server, context);
       if (null != response) {

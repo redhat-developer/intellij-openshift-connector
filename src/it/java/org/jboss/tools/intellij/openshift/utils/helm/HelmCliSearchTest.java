@@ -16,22 +16,22 @@ import java.util.List;
 
 public class HelmCliSearchTest extends HelmCliTest {
 
-    public void testSearch_should_list_all_charts() throws IOException {
-        // given openshift a repo was added to helm
-        // when
-        List<Chart> charts = helm.search();
-        // then
-      assertFalse(charts.isEmpty());
-    }
+  public void testSearch_should_list_all_charts() throws IOException {
+    // given openshift a repo was added to helm
+    // when
+    List<Chart> charts = helm.search();
+    // then
+    assertFalse(charts.isEmpty());
+  }
 
-    public void testSearch_should_list_kuberos() throws IOException {
-        // given openshift repo was added to helm
-        String id = Charts.CHART_KUBEROS;
-        // when
-        List<Chart> charts = helm.search(id);
-        // then
-        boolean found = charts.stream().anyMatch((Chart chart) -> chart.getName().contains(id));
-        assertTrue(found);
-    }
+  public void testSearch_should_list_kuberos() throws IOException {
+    // given openshift repo was added to helm
+    String id = Charts.CHART_KUBEROS;
+    // when
+    List<Chart> charts = helm.search(id);
+    // then
+    boolean found = charts.stream().anyMatch((Chart chart) -> chart.getName().contains(id));
+    assertTrue(found);
+  }
 
 }

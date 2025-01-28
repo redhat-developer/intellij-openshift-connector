@@ -14,49 +14,45 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.MessageBus;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.jboss.tools.intellij.openshift.utils.Cli;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import org.jboss.tools.intellij.openshift.utils.Cli;
+import org.jboss.tools.intellij.openshift.utils.ClientAwareCli;
+import org.jetbrains.annotations.NotNull;
 
 import static org.jboss.tools.intellij.openshift.Constants.HOME_FOLDER;
 
-public class OcCli extends Cli implements Oc {
+public class OcCli extends ClientAwareCli implements Oc {
 
-  private final String command;
   private final Map<String, String> envVars;
 
-  public OcCli(String command) {
+  public OcCli(String command, KubernetesClient client) {
     this(command,
+      client,
       ApplicationManager.getApplication().getMessageBus(),
-      new Cli.KubernetesClientFactory(),
       new Cli.EnvVarFactory(),
       new Cli.TelemetryReport());
   }
 
   public OcCli(
     String command,
+    KubernetesClient client,
     MessageBus bus,
-    Supplier<KubernetesClient> kubernetesClientFactory,
     Function<String, Map<String, String>> envVarFactory,
     Cli.TelemetryReport telemetryReport) {
-    super(kubernetesClientFactory);
-    this.command = command;
+    super(command, client);
     this.envVars = envVarFactory.apply(String.valueOf(client.getMasterUrl()));
     initTelemetry(telemetryReport, bus);
   }
 
-  private void initTelemetry(TelemetryReport telemetryReport, MessageBus bus) {
+  private void initTelemetry(Cli.TelemetryReport telemetryReport, MessageBus bus) {
     telemetryReport.addTelemetryVars(envVars);
     telemetryReport.subscribe(bus, envVars);
     telemetryReport.report(client);
   }
-
 
   private static void execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
     ExecHelper.executeWithResult(command, true, workingDirectory, envs, args);

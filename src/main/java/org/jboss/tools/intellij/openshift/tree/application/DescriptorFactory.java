@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import java.util.function.Supplier;
 import javax.swing.Icon;
 import org.jboss.tools.intellij.openshift.ui.helm.ChartIcons;
+import org.jboss.tools.intellij.openshift.utils.ExceptionUtils;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -65,7 +66,7 @@ public class DescriptorFactory {
               return masterUrl.toString();
             }
           } catch (Exception e) {
-            return "Error: " + e.getCause().getMessage();
+            return "Error: " + ExceptionUtils.getCauseOrExceptionMessage(e);
           }
         },
         null,

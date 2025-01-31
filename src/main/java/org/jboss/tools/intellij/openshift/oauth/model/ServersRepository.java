@@ -17,6 +17,8 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import org.jboss.tools.intellij.openshift.Constants;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -48,16 +50,29 @@ public final class ServersRepository implements PersistentStateComponent<Element
     }
 
     private Element account2Node(IAccount account) {
+        savePasswordSafe(account);
         Element node = new Element(ACCOUNT_TAG);
         node.setAttribute(ID_ATTRIBUTE, account.getId());
-        PasswordSafe.getInstance().set(getAttributes(account, ID_TOKEN_ATTRIBUTE), new Credentials(null, account.getIDToken()));
-        PasswordSafe.getInstance().set(getAttributes(account, ACCESS_TOKEN_ATTRIBUTE), new Credentials(null, account.getAccessToken()));
-        PasswordSafe.getInstance().set(getAttributes(account, REFRESH_TOKEN_ATTRIBUTE), new Credentials(null, account.getRefreshToken()));
         node.setAttribute(ACCESS_TOKEN_EXPIRES_IN_ATTRIBUTE, String.valueOf(account.getAccessTokenExpiryTime()));
         node.setAttribute(REFRESH_TOKEN_EXPIRES_IN_ATTRIBUTE, String.valueOf(account.getRefreshTokenExpiryTime()));
         node.setAttribute(LAST_REFRESHED_TIME_ATTRIBUTE, String.valueOf(account.getLastRefreshedTime()));
         return node;
     }
+
+    private void savePasswordSafe(IAccount account) {
+        var task = new Task.Modal(null, "Saving Tokens", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                var safe = PasswordSafe.getInstance();
+                safe.set(getAttributes(account, ID_TOKEN_ATTRIBUTE), new Credentials(null, account.getIDToken()));
+                safe.set(getAttributes(account, ACCESS_TOKEN_ATTRIBUTE), new Credentials(null, account.getAccessToken()));
+                safe.set(getAttributes(account, REFRESH_TOKEN_ATTRIBUTE), new Credentials(null, account.getRefreshToken()));
+            }
+        };
+
+        task.queue();
+    }
+
     private Element server2Node(IAuthorizationServer server) {
         Element node = new Element(SERVER_TAG);
         node.setAttribute(ID_ATTRIBUTE, server.getId());
@@ -83,9 +98,7 @@ public final class ServersRepository implements PersistentStateComponent<Element
             IAuthorizationServer server = new AuthorizationServer(serverNode.getAttributeValue(ID_ATTRIBUTE));
             for(Element accountNode : serverNode.getChildren(ACCOUNT_TAG)) {
                 IAccount account = new Account(accountNode.getAttributeValue(ID_ATTRIBUTE), server);
-                account.setIDToken(PasswordSafe.getInstance().getPassword(getAttributes(account, ID_TOKEN_ATTRIBUTE)));
-                account.setAccessToken(PasswordSafe.getInstance().getPassword(getAttributes(account, ACCESS_TOKEN_ATTRIBUTE)));
-                account.setRefreshToken(PasswordSafe.getInstance().getPassword(getAttributes(account, REFRESH_TOKEN_ATTRIBUTE)));
+                loadPasswordSafe(account);
                 account.setAccessTokenExpiryTime(Long.parseLong(accountNode.getAttributeValue(ACCESS_TOKEN_EXPIRES_IN_ATTRIBUTE)));
                 account.setRefreshTokenExpiryTime(Long.parseLong(accountNode.getAttributeValue(REFRESH_TOKEN_EXPIRES_IN_ATTRIBUTE)));
                 account.setLastRefreshedTime(Long.parseLong(accountNode.getAttributeValue(LAST_REFRESHED_TIME_ATTRIBUTE)));
@@ -93,6 +106,21 @@ public final class ServersRepository implements PersistentStateComponent<Element
             }
             servers.add(server);
         }
+    }
+
+    private void loadPasswordSafe(IAccount account) {
+        var task = new Task.Modal(null, "Loading Tokens", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                var safe = PasswordSafe.getInstance();
+                account.setIDToken(safe.getPassword(getAttributes(account, ID_TOKEN_ATTRIBUTE)));
+                account.setAccessToken(safe.getPassword(getAttributes(account, ACCESS_TOKEN_ATTRIBUTE)));
+                account.setRefreshToken(safe.getPassword(getAttributes(account, REFRESH_TOKEN_ATTRIBUTE)));
+            }
+        };
+
+        task.queue();
+
     }
 
     public List<IAuthorizationServer> getServers() {

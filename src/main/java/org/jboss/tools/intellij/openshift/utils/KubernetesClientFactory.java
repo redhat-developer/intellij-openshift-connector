@@ -46,6 +46,7 @@ public class KubernetesClientFactory implements Function<Config, KubernetesClien
 
   @Override
   public KubernetesClient apply(Config config) {
+    KubeconfigEnvValue.copyToSystem();
     return new KubernetesClientBuilder()
       .withConfig(config)
       .withHttpClientBuilderConsumer(builder -> setSslContext(builder, config))

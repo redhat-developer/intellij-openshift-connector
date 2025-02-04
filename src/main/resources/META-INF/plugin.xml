@@ -309,9 +309,9 @@
       <!-- component level -->
       <separator/>
       <group id="org.jboss.tools.intellij.openshift.actions.component.actions">
-        <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction"/>
-        <action class="org.jboss.tools.intellij.openshift.actions.component.DevOnPodmanComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevOnPodmanComponentAction"/>
-        <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction"/>
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevComponentAction" text="Dev on Cluster"/>
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DevOnPodmanComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DevOnPodmanComponentAction" text="Dev on Podman" />
+        <action class="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DeployComponentAction" text="Deploy on Cluster" />
       </group>
       <separator/>
       <action class="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" id="org.jboss.tools.intellij.openshift.actions.component.DescribeComponentAction" text="Describe"/>

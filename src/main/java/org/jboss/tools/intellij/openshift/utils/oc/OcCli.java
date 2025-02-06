@@ -13,10 +13,13 @@ package org.jboss.tools.intellij.openshift.utils.oc;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.MessageBus;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import org.jboss.tools.intellij.openshift.utils.Cli;
@@ -60,10 +63,30 @@ public class OcCli extends ClientAwareCli implements Oc {
 
   @Override
   public void login(String url, String userName, char[] password, char[] token) throws IOException {
+    var args = new ArrayList<String>();
+    args.add("login");
+    args.add(url);
+    args.add("--insecure-skip-tls-verify");
+    addKubeconfigParameter(args);
+    addLoginParameter(userName, password, token, args);
+    execute(new File(HOME_FOLDER), command, envVars, args.toArray(new String[0]));
+  }
+
+  private void addKubeconfigParameter(ArrayList<String> args) {
+    String kubeconfig = Config.getKubeconfigFilenames().stream()
+      .findFirst()
+      .orElse(null);
+    if (kubeconfig != null) {
+      args.add("--kubeconfig");
+      args.add(kubeconfig);
+    }
+  }
+
+  private static void addLoginParameter(String userName, char[] password, char[] token, ArrayList<String> args) {
     if (userName != null && !userName.isEmpty()) {
-      execute(new File(HOME_FOLDER), command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), "--insecure-skip-tls-verify");
+      args.addAll(Arrays.asList("-u", userName, "-p", String.valueOf(password)));
     } else {
-      execute(new File(HOME_FOLDER), command, envVars, "login", url, "--token", String.valueOf(token), "--insecure-skip-tls-verify");
+      args.addAll(Arrays.asList("--token", String.valueOf(token)));
     }
   }
 

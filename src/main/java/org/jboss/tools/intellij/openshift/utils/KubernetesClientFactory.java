@@ -11,6 +11,7 @@
 package org.jboss.tools.intellij.openshift.utils;
 
 import com.redhat.devtools.intellij.common.ssl.IDEATrustManager;
+import com.redhat.devtools.intellij.common.utils.KubeConfigEnvValue;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -46,6 +47,7 @@ public class KubernetesClientFactory implements Function<Config, KubernetesClien
 
   @Override
   public KubernetesClient apply(Config config) {
+    KubeConfigEnvValue.copyToSystem();
     return new KubernetesClientBuilder()
       .withConfig(config)
       .withHttpClientBuilderConsumer(builder -> setSslContext(builder, config))

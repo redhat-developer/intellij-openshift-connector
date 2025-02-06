@@ -2,7 +2,7 @@
 # libraries
 junit = "4.13.2"
 openshift-client = "7.1.0"
-devtools-common = "1.9.7"
+devtools-common = "1.9.8"
 keycloak = "24.0.5"
 jsonwebtoken = "0.12.6"
 retrofit2 = "2.11.0"

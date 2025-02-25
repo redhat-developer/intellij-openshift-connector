@@ -9,14 +9,14 @@ retrofit2 = "2.11.0"
 mockito = "5.12.0"
 easytesting = "1.4"
 mockserver = "5.15.0"
-junit-platform = "1.10.3"
-junit-jupiter = "5.10.3"
-devtools-common-ui-test = "0.4.3"
+junit-platform = "1.11.3"
+junit-jupiter = "5.11.3"
+devtools-common-ui-test = "0.4.4-SNAPSHOT"
 awaitility = "4.2.2"
 annotations = "24.0.0"
 
 # plugins
-gradleIntelliJPlugin = "2.0.1"
+gradleIntelliJPlugin = "2.2.1"
 sonarqube = "5.1.0.4882"
 
 [libraries]

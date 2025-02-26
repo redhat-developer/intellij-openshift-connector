@@ -3,6 +3,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.*
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats.MARKDOWN
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats.PLAIN
 
 plugins {
     id("idea")
@@ -34,7 +37,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
+        intellijIdeaCommunity(ideaVersion)
 
         // Bundled Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
@@ -46,8 +49,6 @@ dependencies {
         //plugins.set(listOf(file("/path/to/plugin/")))
 
         pluginVerifier()
-
-        instrumentationTools()
 
         testFramework(TestFrameworkType.Platform)
     }
@@ -68,7 +69,6 @@ dependencies {
     implementation(libs.jjwt.impl)
     implementation(libs.jjwt.jackson)
     implementation(libs.converter.jackson)
-    implementation(libs.annotations) // to build against platform <= 2023.2
 
     // for unit tests
     testImplementation(libs.junit)
@@ -106,8 +106,10 @@ intellijPlatform {
     }
 
     pluginVerification {
+        failureLevel = listOf(INVALID_PLUGIN, COMPATIBILITY_PROBLEMS, MISSING_DEPENDENCIES)
+        verificationReportsFormats = listOf(MARKDOWN, PLAIN)
         ides {
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
+            recommended()
         }
         freeArgs = listOf(
             "-mute",
@@ -194,18 +196,19 @@ tasks {
 sourceSets {
     create("it") {
         description = "integrationTest"
+        java.srcDir("src/it/java")
+        resources.srcDir("src/it/resources")
         compileClasspath += sourceSets.main.get().compileClasspath + sourceSets.test.get().compileClasspath
-        runtimeClasspath += output + compileClasspath
+        runtimeClasspath += output + compileClasspath + sourceSets.test.get().runtimeClasspath
     }
 }
 
-configurations.all {
-    exclude(group = "org.slf4j", module = "slf4j-api")
-    exclude(group = "bundledPlugin", module = "Docker") // suppress multiple SLF4J providers
+configurations {
+    runtimeClasspath {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+        exclude(group = "bundledPlugin", module = "Docker") // suppress multiple SLF4J providers
+    }
 }
-
-configurations["itRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
-configurations["itImplementation"].extendsFrom(configurations.testImplementation.get())
 
 val integrationTest by intellijPlatformTesting.testIde.registering {
     task {
@@ -222,24 +225,27 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
             showStandardStreams = false
         }
         jvmArgs("-Djava.awt.headless=true")
-        useJUnitPlatform {
-            includeEngines("junit-vintage")
-            excludeEngines("junit-jupiter")
-        }
+        useJUnitPlatform()
         shouldRunAfter(tasks["test"])
     }
 
     dependencies {
-        testRuntimeOnly(libs.junit.vintage.engine)
+        testRuntimeOnly(libs.junit.jupiter.engine)
         testImplementation(libs.junit.platform.launcher)
+        testImplementation(libs.junit.jupiter.api)
+        testImplementation(libs.devtools.common.ui.test)
+    }
+    /*dependencies {
+        testRuntimeOnly(libs.junit.vintage.engine)
+        testImplementation()
         testImplementation(libs.junit.platform.suite)
         testImplementation(libs.junit.jupiter)
-        testImplementation(libs.junit.jupiter.api)
-        testImplementation(libs.junit.jupiter.engine)
+        testImplementation()
+        testImplementation()
         testImplementation(devtoolsCommonForTests)
-        testImplementation(libs.devtools.common.ui.test)
+        testImplementation()
         testImplementation(libs.awaitility)
-    }
+    }*/
 }
 
 val integrationUITest by intellijPlatformTesting.testIde.registering {
@@ -267,10 +273,13 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
         shouldRunAfter(tasks["test"])
     }
 
-    plugins {
-        robotServerPlugin()
+    dependencies {
+        testRuntimeOnly(libs.junit.jupiter.engine)
+        testImplementation(libs.junit.platform.launcher)
+        testImplementation(libs.junit.jupiter.api)
+        testImplementation(libs.devtools.common.ui.test)
     }
-
+/*
     dependencies {
         testImplementation(libs.junit.platform.launcher)
         testImplementation(libs.junit.platform.suite)
@@ -281,6 +290,8 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
         testImplementation(libs.devtools.common.ui.test)
         testImplementation(libs.awaitility)
     }
+    */
+
 }
 
 // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html#runIdeForUiTests
@@ -293,7 +304,11 @@ val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
                 "-Djb.consents.confirmation.enabled=false",
             )
         }
+
+        systemProperty("robot-server.port", System.getProperty("robot-server.port"))
+        systemProperty("com.redhat.devtools.intellij.telemetry.mode", "disabled")
     }
+
     plugins {
         robotServerPlugin()
     }

@@ -231,21 +231,14 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
 
     dependencies {
         testRuntimeOnly(libs.junit.jupiter.engine)
-        testImplementation(libs.junit.platform.launcher)
         testImplementation(libs.junit.jupiter.api)
-        testImplementation(libs.devtools.common.ui.test)
-    }
-    /*dependencies {
-        testRuntimeOnly(libs.junit.vintage.engine)
-        testImplementation()
+        testImplementation(libs.junit.platform.launcher)
         testImplementation(libs.junit.platform.suite)
-        testImplementation(libs.junit.jupiter)
-        testImplementation()
-        testImplementation()
+        testImplementation(libs.devtools.common.ui.test)
         testImplementation(devtoolsCommonForTests)
-        testImplementation()
         testImplementation(libs.awaitility)
-    }*/
+    }
+
 }
 
 val integrationUITest by intellijPlatformTesting.testIde.registering {

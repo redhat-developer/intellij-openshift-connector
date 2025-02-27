@@ -123,16 +123,8 @@ tasks {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
 
-    fun supportsEnhancedClassRedefinition(): Boolean {
-        val platformVersion = findProperty("platformVersion").toString().toFloatOrNull()
-        return platformVersion != null
-                && platformVersion >= 2024.1
-    }
-
     runIde {
-        if (supportsEnhancedClassRedefinition()) {
-            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-XX:HotswapAgent=fatjar")
-        }
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-XX:HotswapAgent=fatjar")
         systemProperty("com.redhat.devtools.intellij.telemetry.mode", "debug")
         findProperty("tools.dl.path")?.let { systemProperty("tools.dl.path", it) }
         //systemProperty("jboss.sandbox.api.endpoint", "http://localhost:3000") // enable when running sandbox locally, see below
@@ -225,16 +217,10 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
             showStandardStreams = false
         }
         jvmArgs("-Djava.awt.headless=true")
-        useJUnitPlatform()
         shouldRunAfter(tasks["test"])
     }
 
     dependencies {
-        testRuntimeOnly(libs.junit.jupiter.engine)
-        testImplementation(libs.junit.jupiter.api)
-        testImplementation(libs.junit.platform.launcher)
-        testImplementation(libs.junit.platform.suite)
-        testImplementation(libs.devtools.common.ui.test)
         testImplementation(devtoolsCommonForTests)
         testImplementation(libs.awaitility)
     }
@@ -268,6 +254,7 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
 
     dependencies {
         testRuntimeOnly(libs.junit.jupiter.engine)
+        testImplementation(libs.junit.platform.suite)
         testImplementation(libs.junit.platform.launcher)
         testImplementation(libs.junit.jupiter.api)
         testImplementation(libs.devtools.common.ui.test)

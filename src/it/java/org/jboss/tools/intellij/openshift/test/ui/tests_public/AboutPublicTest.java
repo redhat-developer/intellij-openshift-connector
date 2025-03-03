@@ -28,12 +28,12 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
-import static com.jayway.jsonpath.internal.path.PathCompiler.fail;
 import static com.redhat.devtools.intellij.commonuitest.utils.steps.SharedSteps.waitForComponentByXpath;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.COPY;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.HIDE_BUTTON;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.JB_TERMINAL_PANEL;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.SELECT_ALL;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Martin Szuc

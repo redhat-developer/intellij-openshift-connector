@@ -37,3 +37,7 @@ jobs:
           name: verifier-reports
           path: build/reports/pluginVerifier
           if-no-files-found: ignore
+      - name: Clean up
+        run: |
+          ./gradlew clean
+        if: always()

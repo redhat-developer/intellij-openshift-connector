@@ -43,7 +43,7 @@ public class AboutPublicTest extends AbstractBaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AboutPublicTest.class);
 
     @Test
-    public void aboutLoggedOutTest() {
+    void aboutLoggedOutTest() {
         LOGGER.info("aboutLoggedOutTest: Start");
 
         selectAboutAndGetClipboardContent();
@@ -100,7 +100,7 @@ public class AboutPublicTest extends AbstractBaseTest {
         }
     }
 
-    static public void aboutTerminalRightClickSelect(RemoteRobot robot, Locator xpath) {
+    private static void aboutTerminalRightClickSelect(RemoteRobot robot, Locator xpath) {
         Point linkPosition = new Point(20, 20);
         ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath(JB_TERMINAL_PANEL));
         terminalPanel.rightClick(linkPosition);

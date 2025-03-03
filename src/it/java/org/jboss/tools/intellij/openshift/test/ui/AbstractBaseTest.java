@@ -79,7 +79,7 @@ public abstract class AbstractBaseTest {
         LOGGER.info("Starting logout process...");
         try {
             KubeConfigUtility.removeKubeConfig();
-            sleep(2000);
+
             currentClusterUrl = DEFAULT_CLUSTER_URL;
 
             OpenshiftView view = robot.find(OpenshiftView.class);
@@ -107,16 +107,6 @@ public abstract class AbstractBaseTest {
         }
     }
 
-    protected static void sleep(long ms) {
-        LOGGER.info("Putting thread into sleep for: {} ms", ms);
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            LOGGER.error("Sleep interrupted: {}", e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Captures a screenshot and saves it with the given comment.
      *
@@ -134,6 +124,7 @@ public abstract class AbstractBaseTest {
             LOGGER.error("Failed to capture screenshot: {}", e.getMessage(), e);
         }
     }
+
     private static class TestWatcherImpl implements TestWatcher {
         @Override
         public void testFailed(ExtensionContext context, Throwable cause) {

@@ -37,7 +37,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
 
     @Test
     @Order(1)
-    public void createNewProjectTest() {
+    void createNewProjectTest() {
         LOGGER.info("createNewProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
@@ -54,7 +54,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
 
     @Test
     @Order(2)
-    public void changeActiveProjectTest() {
+    void changeActiveProjectTest() {
         LOGGER.info("changeActiveProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
@@ -71,7 +71,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
 
     @Test
     @Order(3)
-    public void deleteProjectTest() {
+    void deleteProjectTest() {
         LOGGER.info("deleteProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
@@ -89,7 +89,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
     }
 
     @AfterAll
-    public static void afterAll() {
+    static void afterAll() {
         LOGGER.info("afterAll: Start");
         changeActiveProject(NEW_PROJECT_NAME);
         LOGGER.info("afterAll: End");
@@ -104,7 +104,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
     private void verifyProjectIsVisible(String projectName) {
         LOGGER.info("Verifying project creation for: " + projectName);
         OpenshiftView view = robot.find(OpenshiftView.class);
-        sleep(3000);
+        //sleep(3000, () -> view.isFocusOwner());
         try{
             view.expandOpenshiftExceptDevfile();
         }  catch (Exception e){

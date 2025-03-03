@@ -33,12 +33,12 @@ import org.junit.platform.suite.api.Suite;
 @IncludeClassNamePatterns({"^.*Test$"})
 public class ClusterTestsSuite {
     @BeforeAll
-    public static void setUp() {
+    static void setUp() {
         KubeConfigUtility.backupKubeConfig();
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         KubeConfigUtility.restoreKubeConfig();
     }
 }

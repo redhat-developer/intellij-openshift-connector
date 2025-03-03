@@ -29,6 +29,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectOperation;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,9 +55,9 @@ public class OdoKubernetesClientTest {
   private Odo odo;
 
   @Before
-  public void before() {
+  public void before() throws MalformedURLException {
     this.kubernetesClient = mock(KubernetesClient.class);
-    doReturn(URI.create("https://localhost"))
+    doReturn(URI.create("https://localhost").toURL())
       .when(kubernetesClient).getMasterUrl();
     this.openShiftClient = mock(OpenShiftClient.class);
     this.odo = createOdo(kubernetesClient, openShiftClient);

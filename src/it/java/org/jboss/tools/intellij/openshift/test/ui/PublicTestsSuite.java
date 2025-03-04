@@ -31,13 +31,13 @@ import org.junit.platform.suite.api.Suite;
 @IncludeClassNamePatterns({"^.*Test$"})
 public class PublicTestsSuite {
     @BeforeAll
-    public static void setUp() {
+    static void setUp() {
         KubeConfigUtility.backupKubeConfig();
         KubeConfigUtility.removeKubeConfig();
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         KubeConfigUtility.restoreKubeConfig();
     }
 }

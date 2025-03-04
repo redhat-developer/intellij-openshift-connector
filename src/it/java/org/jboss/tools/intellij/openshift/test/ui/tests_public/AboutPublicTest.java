@@ -26,14 +26,16 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
-import static com.jayway.jsonpath.internal.path.PathCompiler.fail;
 import static com.redhat.devtools.intellij.commonuitest.utils.steps.SharedSteps.waitForComponentByXpath;
+import static org.awaitility.Awaitility.await;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.COPY;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.HIDE_BUTTON;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.JB_TERMINAL_PANEL;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants.SELECT_ALL;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Martin Szuc
@@ -43,7 +45,7 @@ public class AboutPublicTest extends AbstractBaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AboutPublicTest.class);
 
     @Test
-    public void aboutLoggedOutTest() {
+    void aboutLoggedOutTest() {
         LOGGER.info("aboutLoggedOutTest: Start");
 
         selectAboutAndGetClipboardContent();
@@ -61,9 +63,9 @@ public class AboutPublicTest extends AbstractBaseTest {
 
 
         view.menuRightClickAndSelect(robot, 0, LabelConstants.ABOUT);
-        waitForComponentByXpath(robot, 120, 10, byXpath(JB_TERMINAL_PANEL));
-
-        sleep(2000);
+        await().atMost(Duration.ofMillis(2000)).until(() -> robot.findAll(ComponentFixture.class, byXpath(JB_TERMINAL_PANEL))
+            .stream()
+            .anyMatch(ComponentFixture::isShowing));
 
         try {
             aboutTerminalRightClickSelect(robot, byXpath(SELECT_ALL));
@@ -100,7 +102,7 @@ public class AboutPublicTest extends AbstractBaseTest {
         }
     }
 
-    static public void aboutTerminalRightClickSelect(RemoteRobot robot, Locator xpath) {
+    private static void aboutTerminalRightClickSelect(RemoteRobot robot, Locator xpath) {
         Point linkPosition = new Point(20, 20);
         ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath(JB_TERMINAL_PANEL));
         terminalPanel.rightClick(linkPosition);

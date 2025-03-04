@@ -26,6 +26,7 @@ import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathCo
 public class AboutClusterTest extends AbstractClusterTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AboutClusterTest.class);
 
+
     @Test
     public void aboutLoggedInTest() {
         LOGGER.info("aboutLoggedInTest: Start");

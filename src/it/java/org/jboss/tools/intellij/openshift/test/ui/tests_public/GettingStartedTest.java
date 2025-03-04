@@ -31,14 +31,14 @@ public class GettingStartedTest extends AbstractBaseTest {
 
     @Test
     @Order(1)
-    public void gettingStartedShowsOnStartup() {
+    void gettingStartedShowsOnStartup() {
         GettingStartedView view = robot.find(GettingStartedView.class);
         view.closeView();
     }
 
     @Test
     @Order(2)
-    public void gettingStartedContainsAllItems() {
+    void gettingStartedContainsAllItems() {
         GettingStartedView view = robot.find(GettingStartedView.class);
         view.openView();
 
@@ -54,7 +54,7 @@ public class GettingStartedTest extends AbstractBaseTest {
 
     @Test
     @Order(3)
-    public void gettingStartedBehaviour() {
+    void gettingStartedBehaviour() {
         GettingStartedView view = robot.find(GettingStartedView.class);
         view.openView();
 

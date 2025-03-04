@@ -38,7 +38,7 @@ public class IdeaRunner {
 	
 	public void startIDE(IntelliJVersion ideaVersion, int portNumber) {
 		if (!ideaIsStarted) {
-			System.out.println("Starting IDE, setting ideaIsStarted to true");
+			System.out.println("Starting " + ideaVersion + " IDE, setting ideaIsStarted to true");
 			robot = UITestRunner.runIde(ideaVersion, port);
 			port = portNumber;
 			System.out.println("IDEA port for remote robot: " + port);

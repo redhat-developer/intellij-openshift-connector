@@ -75,7 +75,7 @@ public abstract class AbstractClusterTest extends AbstractBaseTest {
                 LOGGER.error("Expanding Openshift tree failed!");
             }
         }
-        sleep(2000);
+        //sleep(2000);
         view.refreshTree(robot);
         ideStatusBar.waitUntilAllBgTasksFinish();
 

@@ -28,7 +28,7 @@ import java.nio.file.StandardCopyOption;
 public class KubeConfigUtility {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubeConfigUtility.class);
     private static final String USER_HOME = System.getProperty("user.home");
-    private static final Path CONFIG_FILE_PATH = getKubeConfigPath();
+    public static final Path CONFIG_FILE_PATH = getKubeConfigPath();
     private static final Path BACKUP_FILE_PATH = Paths.get(USER_HOME, ".kube", "config.bak");
 
     public static void removeKubeConfig() {
@@ -64,7 +64,7 @@ public class KubeConfigUtility {
 
 
     @NotNull
-    public static Path getKubeConfigPath() {
+    private static Path getKubeConfigPath() {
         Path configFilePath;
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {

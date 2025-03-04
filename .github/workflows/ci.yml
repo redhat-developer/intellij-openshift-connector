@@ -111,6 +111,7 @@ jobs:
       checks: write
       contents: read
       pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -148,24 +149,20 @@ jobs:
           CLUSTER_ALREADY_LOGGED_IN: 'true'
         run: xvfb-run --server-args="-screen 0 1920x1080x24" ./gradlew integrationUITest --continue --info
       - name: Publish tests reports
+        uses: actions/upload-artifact@v4
         if: always()
-        uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
-          check_name: Integration UI Tests with Local Kind Cluster Context Report
+          name: cluster-integration-ui-tests-reports
+          path: |
+            build/test-results/**/*.xml
+            build/jacoco/
       - name: Publish screenshots as artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cluster-integration-ui-tests screenshots
+          name: cluster-integration-ui-tests-screenshots
           path: ./build/screenshots$
-      - name: Save fails report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cluster-integration-ui-tests video
-          path: ./build/reports
+
 
   no-context-integration-ui-tests:
     name: Run Integration UI Tests with NO Context
@@ -175,6 +172,7 @@ jobs:
       checks: write
       contents: read
       pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -194,15 +192,16 @@ jobs:
       - name: Play integration UI tests
         run: xvfb-run --server-args="-screen 0 1920x1080x24" ./gradlew integrationUITest --continue
       - name: Publish tests reports
+        uses: actions/upload-artifact@v4
         if: always()
-        uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
-          check_name: Integration UI Tests with No Context Report
+          name: no-context-integration-ui-tests-reports
+          path: |
+            build/test-results/**/*.xml
+            build/jacoco/
       - name: Publish screenshots as artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: no-context-integration-ui-tests screenshots
+          name: no-context-integration-ui-tests-screenshots
           path: ./build/screenshots

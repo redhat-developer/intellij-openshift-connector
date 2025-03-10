@@ -259,18 +259,6 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
         testImplementation(libs.junit.jupiter.api)
         testImplementation(libs.devtools.common.ui.test)
     }
-/*
-    dependencies {
-        testImplementation(libs.junit.platform.launcher)
-        testImplementation(libs.junit.platform.suite)
-        testImplementation(libs.junit.jupiter)
-        testImplementation(libs.junit.jupiter.api)
-        testImplementation(libs.junit.jupiter.engine)
-        testImplementation(devtoolsCommonForTests)
-        testImplementation(libs.devtools.common.ui.test)
-        testImplementation(libs.awaitility)
-    }
-    */
 
 }
 

@@ -13,7 +13,6 @@ junit-platform = "1.11.3"
 junit-jupiter = "5.11.3"
 devtools-common-ui-test = "0.4.4-SNAPSHOT"
 awaitility = "4.2.2"
-annotations = "24.0.0"
 
 # plugins
 gradleIntelliJPlugin = "2.2.1"
@@ -33,13 +32,10 @@ mockserver-client = { group = "org.mock-server", name = "mockserver-client-java"
 mockserver-netty = { group = "org.mock-server", name = "mockserver-netty", version.ref = "mockserver" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit-platform" }
 junit-platform-suite = { group = "org.junit.platform", name = "junit-platform-suite", version.ref = "junit-platform" }
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
-junit-vintage-engine = { group = "org.junit.vintage", name = "junit-vintage-engine", version.ref = "junit-jupiter" }
 devtools-common-ui-test = { group = "com.redhat.devtools.intellij", name = "intellij-common-ui-test-library", version.ref = "devtools-common-ui-test" }
 awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awaitility" }
-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 
 [plugins]
 gradleIntelliJPlugin = { id = "org.jetbrains.intellij.platform", version.ref = "gradleIntelliJPlugin" }

@@ -13,7 +13,7 @@ junit-platform = "1.11.3"
 junit-jupiter = "5.11.3"
 devtools-common-ui-test = "0.4.4-SNAPSHOT"
 awaitility = "4.2.2"
-annotations = "24.0.0"
+annotations = "26.0.2"
 
 # plugins
 gradleIntelliJPlugin = "2.2.1"
